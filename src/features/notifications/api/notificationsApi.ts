@@ -2,6 +2,7 @@ import { apiRequest } from '@/shared/lib/api/client'
 import type { NotificationItem } from '@/features/notifications/types'
 
 const storageKey = 'trucycle.notifications'
+export const notificationsUpdatedEventName = 'trucycle-notifications-updated'
 const fallbackNotifications: NotificationItem[] = [
   {
     id: 'seed-notification-1',
@@ -49,6 +50,7 @@ function readStoredNotifications(): NotificationItem[] {
 
 function writeStoredNotifications(notifications: NotificationItem[]): void {
   window.localStorage.setItem(storageKey, JSON.stringify(notifications))
+  window.dispatchEvent(new Event(notificationsUpdatedEventName))
 }
 
 export async function fetchNotifications(): Promise<NotificationItem[]> {

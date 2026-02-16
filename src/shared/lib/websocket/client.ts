@@ -10,11 +10,13 @@ export class WebSocketClient {
   private reconnectAttempts = 0
   private reconnectTimeoutId: number | undefined
   private readonly messageListeners = new Set<MessageListener>()
+  private readonly url: string
+  private readonly options: WebSocketClientOptions
 
-  constructor(
-    private readonly url: string,
-    private readonly options: WebSocketClientOptions = {},
-  ) {}
+  constructor(url: string, options: WebSocketClientOptions = {}) {
+    this.url = url
+    this.options = options
+  }
 
   connect(): void {
     if (!this.url || this.socket) {
