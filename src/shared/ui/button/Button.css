@@ -19,19 +19,19 @@
 }
 
 .button-primary {
-  color: #ffffff;
-  background-color: #0f3e7f;
+  color: #121212;
+  background-color: #A4F5A6;
 }
 
 .button-primary:hover:not(:disabled) {
-  background-color: #0d356c;
+  background-color: #92e094;
 }
 
 .button-secondary {
-  color: #2a3550;
-  background-color: #dbe4f3;
+  color: #1a1a1a;
+  background-color: #f1f5f9;
 }
 
 .button-secondary:hover:not(:disabled) {
-  background-color: #ccd8eb;
+  background-color: #e2e8f0;
 }

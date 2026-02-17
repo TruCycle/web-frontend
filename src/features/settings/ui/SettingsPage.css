@@ -124,17 +124,24 @@
 .btn-update-profile {
     background-color: #A4F5A6;
     color: #121212;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    font-size: 0.95rem;
-    border-radius: 8px;
+    border: 3px solid rgba(164, 245, 166, 0.4);
+    outline: 3px solid rgba(164, 245, 166, 0.2);
+    outline-offset: 2px;
+    padding: 0.85rem 2rem;
+    font-weight: 700;
+    font-size: 1.05rem;
+    border-radius: 16px;
     cursor: pointer;
     width: fit-content;
-    margin-top: 1rem;
-    transition: background-color 0.2s;
+    margin-top: 1.5rem;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(164, 245, 166, 0.25);
 }
 
 .btn-update-profile:hover {
     background-color: #92e094;
+    border-color: rgba(146, 224, 148, 0.5);
+    outline-color: rgba(146, 224, 148, 0.3);
+    box-shadow: 0 4px 12px rgba(164, 245, 166, 0.35);
+    transform: translateY(-1px);
 }
