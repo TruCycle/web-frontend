@@ -67,75 +67,117 @@ const LISTINGS_DATA = [
 ];
 
 export default function YourListingsPage() {
+    const [listings, setListings] = useState<any[]>([]); // Start empty to show the empty state
     const [selectedItem, setSelectedItem] = useState<any | null>(null);
 
     const handleViewDetails = (item: any) => {
         setSelectedItem(item);
     };
 
+    const hasListings = listings.length > 0;
+
+    const loadMockData = () => {
+        setListings(LISTINGS_DATA);
+    };
+
     return (
         <div className="your-listings-wrapper">
             <h1 className="listings-title">Your Listings</h1>
 
-            <div className="listings-list">
-                {LISTINGS_DATA.map((item) => (
-                    <div key={item.id} className="listing-row">
-                        <div className="listing-content">
-                            <div className="listing-image-wrapper">
-                                <img src={item.image} alt={item.title} className="listing-image" />
-                            </div>
-                            <div className="listing-info">
-                                <div className="listing-header">
-                                    <h3 className="listing-item-title">{item.title}</h3>
-                                    <span className={`status-pill pill-${item.status.toLowerCase()}`}>
-                                        {item.status}
-                                    </span>
-                                </div>
-                                <div className="listing-meta-row">
-                                    <span className="listing-category">{item.category}</span>
-                                    <span className="meta-dot">•</span>
-                                    <span className="listing-condition">Condition: {item.condition}</span>
-                                    <span className="meta-dot">•</span>
-                                    <span className="listing-extra">{item.meta}</span>
-                                </div>
-                            </div>
+            {!hasListings ? (
+                <div className="empty-listings-card">
+                    <div className="empty-state-content">
+                        <div className="empty-icon-wrapper">
+                            <img src={ipadImg} alt="Empty" className="empty-placeholder-image" />
                         </div>
-
-                        <div className="listing-actions">
-                            {item.status === 'Active' ? (
-                                <>
-                                    <Button className="btn-view-grey">View</Button>
-                                    <Button className="btn-remove-red">Remove</Button>
-                                </>
-                            ) : (
-                                <Button
-                                    className="btn-view-details-grey"
-                                    onClick={() => handleViewDetails(item)}
-                                >
-                                    View Details
-                                </Button>
-                            )}
+                        <h2 className="empty-title">You haven't listed any items yet</h2>
+                        <p className="empty-message">
+                            Start your journey by listing items you no longer need.
+                            Your contributions help create a more sustainable future.
+                        </p>
+                        <div className="empty-actions">
+                            <Button className="btn-list-item-empty">
+                                List New Item
+                            </Button>
+                            <Button
+                                className="btn-load-demo"
+                                onClick={loadMockData}
+                            >
+                                Show Demo Data
+                            </Button>
                         </div>
                     </div>
-                ))}
-            </div>
-
-            <div className="pagination-nav">
-                <button className="pagination-btn prev-btn">
-                    <ChevronLeft size={18} />
-                    <span>Previous</span>
-                </button>
-                <div className="pagination-numbers">
-                    <button className="page-number active">1</button>
-                    <button className="page-number">2</button>
-                    <button className="page-number">3</button>
-                    <span className="pagination-ellipsis">...</span>
                 </div>
-                <button className="pagination-btn next-btn">
-                    <span>Next</span>
-                    <ChevronRight size={18} />
-                </button>
-            </div>
+            ) : (
+                <>
+                    <div className="listings-list">
+                        {listings.map((item) => (
+                            <div key={item.id} className="listing-row">
+                                <div className="listing-content">
+                                    <div className="listing-image-wrapper">
+                                        <img src={item.image} alt={item.title} className="listing-image" />
+                                    </div>
+                                    <div className="listing-info">
+                                        <div className="listing-header">
+                                            <h3 className="listing-item-title">{item.title}</h3>
+                                            <span className={`status-pill pill-${item.status.toLowerCase()}`}>
+                                                {item.status}
+                                            </span>
+                                        </div>
+                                        <div className="listing-meta-row">
+                                            <span className="listing-category">{item.category}</span>
+                                            <span className="meta-dot">•</span>
+                                            <span className="listing-condition">Condition: {item.condition}</span>
+                                            <span className="meta-dot">•</span>
+                                            <span className="listing-extra">{item.meta}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="listing-actions">
+                                    {item.status === 'Active' ? (
+                                        <>
+                                            <Button className="btn-view-grey">View</Button>
+                                            <Button className="btn-remove-red">Remove</Button>
+                                        </>
+                                    ) : (
+                                        <Button
+                                            className="btn-view-details-grey"
+                                            onClick={() => handleViewDetails(item)}
+                                        >
+                                            View Details
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="pagination-nav">
+                        <button className="pagination-btn prev-btn">
+                            <ChevronLeft size={18} />
+                            <span>Previous</span>
+                        </button>
+                        <div className="pagination-numbers">
+                            <button className="page-number active">1</button>
+                            <button className="page-number">2</button>
+                            <button className="page-number">3</button>
+                            <span className="pagination-ellipsis">...</span>
+                        </div>
+                        <button className="pagination-btn next-btn">
+                            <span>Next</span>
+                            <ChevronRight size={18} />
+                        </button>
+                    </div>
+
+                    <Button
+                        onClick={() => setListings([])}
+                        className="btn-reset-empty"
+                    >
+                        Reset to Empty
+                    </Button>
+                </>
+            )}
 
             <ItemDetailsDialog
                 isOpen={!!selectedItem}

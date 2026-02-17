@@ -4,7 +4,8 @@ import {
   Search,
   SlidersHorizontal,
   ChevronRight,
-  X
+  X,
+  Plus
 } from 'lucide-react';
 import { Button } from '@/shared/ui/button/Button';
 import collectedItemsIcon from '@/assets/icons/collected-items-icon.svg';
@@ -16,6 +17,7 @@ import plannerImg from '@/assets/images/book-planner.jpg';
 import bagShoeImg from '@/assets/images/bag-shoe.jpg';
 import candleImg from '@/assets/images/scented-candle.jpg';
 import { SuccessDialog } from '@/shared/ui/modal/SuccessDialog';
+import { useUserRole } from '@/shared/context/UserRoleContext';
 import './Dashboard.css';
 
 // Mock data for items
@@ -61,6 +63,7 @@ const CATEGORIES = [
 
 export default function Dashboard() {
   const location = useLocation();
+  const { isDonorMode } = useUserRole();
   const [activeCategory, setActiveCategory] = useState('All Items');
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -76,7 +79,13 @@ export default function Dashboard() {
     <div className="dashboard-content-wrapper">
       <div className="welcome-section">
         <h1 className="welcome-title">Welcome back, Pearl!</h1>
-        <p className="welcome-subtitle">Track your impact and manage your exchanges</p>
+        <p className="welcome-subtitle">Track your impact and manage your listings</p>
+        {isDonorMode && (
+          <button className="btn-list-item">
+            <Plus size={18} />
+            List New Item
+          </button>
+        )}
       </div>
 
       {showStats && (
@@ -87,7 +96,7 @@ export default function Dashboard() {
             </div>
             <div className="stat-info">
               <span className="stat-value">0</span>
-              <span className="stat-label">Items Collected</span>
+              <span className="stat-label">{isDonorMode ? 'Items Listed' : 'Items Collected'}</span>
             </div>
           </div>
 
@@ -123,115 +132,155 @@ export default function Dashboard() {
         </div>
       )}
 
-      <section className="browse-section">
-        <div className="section-header">
-          <h2 className="section-title">Browse Available Items</h2>
-          <button className="view-all-btn">
-            View All <ChevronRight size={16} />
-          </button>
-        </div>
+      {isDonorMode && showStats && (
+        <>
+          <section className="impact-section">
+            <div className="section-header">
+              <h2 className="section-title">Your Environmental Impact</h2>
+              <button className="more-options-btn">
+                <span>•••</span>
+              </button>
+            </div>
+            <div className="empty-state-card">
+              <div className="empty-state-icon">
+                <img src={rewardIcon} alt="" className="empty-icon-img" />
+              </div>
+              <p className="empty-state-text">Start listing items to see your environmental impact and CO₂ savings.</p>
+            </div>
+          </section>
 
-        <div className="search-filter-bar">
-          <div className="search-input-wrapper">
-            <Search className="search-icon" size={20} />
-            <input
-              type="text"
-              placeholder="Search by category, location or keyword"
-              className="search-input"
-            />
+          <section className="listings-section">
+            <div className="section-header">
+              <h2 className="section-title">Your Listings</h2>
+              <button className="view-all-btn">
+                View All <ChevronRight size={16} />
+              </button>
+            </div>
+            <div className="empty-state-card">
+              <div className="empty-state-icon">
+                <img src={ipadImg} alt="" className="empty-icon-img-placeholder" />
+              </div>
+              <p className="empty-state-text">Your listed items will be displayed here once you create them.</p>
+              <button className="btn-list-item-secondary">
+                <Plus size={18} />
+                List New Item
+              </button>
+            </div>
+          </section>
+        </>
+      )}
+
+      {!isDonorMode && (
+        <section className="browse-section">
+          <div className="section-header">
+            <h2 className="section-title">Browse Available Items</h2>
+            <button className="view-all-btn">
+              View All <ChevronRight size={16} />
+            </button>
           </div>
-          {!isFilterOpen ? (
-            <button className="filters-btn" onClick={() => setIsFilterOpen(true)}>
-              <SlidersHorizontal size={20} />
-              <span>Filters</span>
-            </button>
-          ) : (
-            <button className="clear-filters-btn" onClick={() => setIsFilterOpen(false)}>
-              <span>Clear Filters</span>
-              <X size={18} />
-            </button>
+
+          <div className="search-filter-bar">
+            <div className="search-input-wrapper">
+              <Search className="search-icon" size={20} />
+              <input
+                type="text"
+                placeholder="Search by category, location or keyword"
+                className="search-input"
+              />
+            </div>
+            {!isFilterOpen ? (
+              <button className="filters-btn" onClick={() => setIsFilterOpen(true)}>
+                <SlidersHorizontal size={20} />
+                <span>Filters</span>
+              </button>
+            ) : (
+              <button className="clear-filters-btn" onClick={() => setIsFilterOpen(false)}>
+                <span>Clear Filters</span>
+                <X size={18} />
+              </button>
+            )}
+          </div>
+
+          {isFilterOpen && (
+            <div className="filters-container">
+              <h3 className="filters-title">Filters</h3>
+              <div className="filters-grid">
+                <div className="filter-item">
+                  <label className="filter-label">Category</label>
+                  <div className="select-wrapper">
+                    <select className="filter-select">
+                      <option>All categories</option>
+                      <option>Gadgets</option>
+                      <option>Electronics</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="filter-item">
+                  <label className="filter-label">Condition</label>
+                  <div className="select-wrapper">
+                    <select className="filter-select">
+                      <option>All condition</option>
+                      <option>Like New</option>
+                      <option>Used</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="filter-item">
+                  <label className="filter-label">Location</label>
+                  <input
+                    type="text"
+                    className="filter-input"
+                    placeholder="Enter location or postal code"
+                  />
+                </div>
+              </div>
+            </div>
           )}
-        </div>
 
-        {isFilterOpen && (
-          <div className="filters-container">
-            <h3 className="filters-title">Filters</h3>
-            <div className="filters-grid">
-              <div className="filter-item">
-                <label className="filter-label">Category</label>
-                <div className="select-wrapper">
-                  <select className="filter-select">
-                    <option>All categories</option>
-                    <option>Gadgets</option>
-                    <option>Electronics</option>
-                  </select>
-                </div>
-              </div>
-              <div className="filter-item">
-                <label className="filter-label">Condition</label>
-                <div className="select-wrapper">
-                  <select className="filter-select">
-                    <option>All condition</option>
-                    <option>Like New</option>
-                    <option>Used</option>
-                  </select>
-                </div>
-              </div>
-              <div className="filter-item">
-                <label className="filter-label">Location</label>
-                <input
-                  type="text"
-                  className="filter-input"
-                  placeholder="Enter location or postal code"
-                />
-              </div>
-            </div>
+          <div className="categories-scroll">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                className={`category-item ${cat === activeCategory ? 'active' : ''}`}
+                onClick={() => setActiveCategory(cat)}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
-        )}
 
-        <div className="categories-scroll">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              className={`category-item ${cat === activeCategory ? 'active' : ''}`}
-              onClick={() => setActiveCategory(cat)}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        <div className="items-grid">
-          {AVAILABLE_ITEMS.map((item) => (
-            <div
-              key={item.id}
-              className="item-card"
-              onClick={() => console.log(`Item clicked: ${item.title}`)}
-            >
-              <div className="item-image-wrapper">
-                <img src={item.image} alt={item.title} className="item-image" />
-              </div>
-              <div className="item-details">
-                <h3 className="item-title">{item.title}</h3>
-                <div className="item-tags">
-                  <span className="tag tag-category">{item.category}</span>
-                  <span className="tag tag-condition">{item.condition}</span>
+          <div className="items-grid">
+            {AVAILABLE_ITEMS.map((item) => (
+              <div
+                key={item.id}
+                className="item-card"
+                onClick={() => console.log(`Item clicked: ${item.title}`)}
+              >
+                <div className="item-image-wrapper">
+                  <img src={item.image} alt={item.title} className="item-image" />
                 </div>
-                <p className="item-location">{item.location}</p>
-                <div className="item-actions">
-                  <Button
-                    className="btn-claim"
-                    onClick={handleRequestClaim}
-                  >
-                    Request a Claim
-                  </Button>
-                  <button className="btn-view">View Item</button>
+                <div className="item-details">
+                  <h3 className="item-title">{item.title}</h3>
+                  <div className="item-tags">
+                    <span className="tag tag-category">{item.category}</span>
+                    <span className="tag tag-condition">{item.condition}</span>
+                  </div>
+                  <p className="item-location">{item.location}</p>
+                  <div className="item-actions">
+                    <Button
+                      className="btn-claim"
+                      onClick={handleRequestClaim}
+                    >
+                      Request a Claim
+                    </Button>
+                    <button className="btn-view">View Item</button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       <SuccessDialog
         isOpen={isSuccessOpen}

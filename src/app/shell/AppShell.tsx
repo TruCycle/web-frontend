@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react'
+import { type ReactNode } from 'react'
 import { NavLink, type NavLinkRenderProps } from 'react-router-dom'
 import {
   FileText,
@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useNotifications } from '@/features/notifications/hooks/useNotifications'
 import logo from '@/assets/logo.svg'
+import { useUserRole } from '@/shared/context/UserRoleContext'
 import './AppShell.css'
 
 const DashboardIcon = ({ size = 20 }: { size?: number }) => (
@@ -39,11 +40,7 @@ function navLinkClassName({ isActive }: NavLinkRenderProps): string {
 
 export function AppShell({ children }: AppShellProps) {
   const { unreadCount } = useNotifications()
-  const [role, setRole] = useState<'collector' | 'donor'>('collector')
-
-  const handleRoleChange = (newRole: 'collector' | 'donor') => {
-    setRole(newRole)
-  }
+  const { role, setRole } = useUserRole()
 
   return (
     <div className="app-shell">
@@ -108,13 +105,13 @@ export function AppShell({ children }: AppShellProps) {
             <div className="role-toggle">
               <button
                 className={`role-btn ${role === 'collector' ? 'active' : ''}`}
-                onClick={() => handleRoleChange('collector')}
+                onClick={() => setRole('collector')}
               >
                 Collector
               </button>
               <button
                 className={`role-btn ${role === 'donor' ? 'active' : ''}`}
-                onClick={() => handleRoleChange('donor')}
+                onClick={() => setRole('donor')}
               >
                 Donor
               </button>

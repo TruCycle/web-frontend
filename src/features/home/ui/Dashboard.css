@@ -6,6 +6,11 @@
 /* Welcome Section */
 .welcome-section {
   margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .welcome-title {
@@ -19,6 +24,28 @@
 .welcome-subtitle {
   color: #64748b;
   font-size: 0.95rem;
+}
+
+.btn-list-item {
+  background-color: #A4F5A6;
+  color: #121212;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.btn-list-item:hover {
+  background-color: #92e094;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
 
 /* Stats Cards */
@@ -431,4 +458,90 @@
   .search-filter-bar {
     flex-direction: column;
   }
+}
+
+/* Donor Mode Empty State Cards */
+.empty-state-card {
+  background-color: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  padding: 3rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.empty-state-icon {
+  width: 64px;
+  height: 64px;
+  background-color: #f8fafc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.empty-icon-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.empty-icon-img-placeholder {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  opacity: 0.6;
+}
+
+.empty-state-text {
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  max-width: 320px;
+  margin: 0;
+}
+
+.btn-list-item-secondary {
+  background-color: #ffffff;
+  color: #1a1a1a;
+  border: 1.5px solid #e2e8f0;
+  padding: 0.65rem 1.5rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  transition: all 0.2s;
+}
+
+.btn-list-item-secondary:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.impact-section,
+.listings-section {
+  margin-bottom: 2.5rem;
+}
+
+.more-options-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.more-options-btn:hover {
+  color: #64748b;
 }
