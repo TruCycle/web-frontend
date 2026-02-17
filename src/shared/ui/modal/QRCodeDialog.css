@@ -139,13 +139,13 @@
 .btn-qr-collect {
     background-color: #A4F5A6 !important;
     border: none !important;
-    color: #166534 !important;
-    font-weight: 700 !important;
+    color: #121212 !important;
+    font-weight: 600 !important;
     padding: 0.75rem 2.5rem !important;
     /* Wider button */
     border-radius: 8px !important;
     cursor: pointer;
-    font-size: 0.95rem !important;
+    font-size: 1rem !important;
 }
 
 .btn-qr-cancel:hover {

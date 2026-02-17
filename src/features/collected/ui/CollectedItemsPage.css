@@ -56,7 +56,7 @@
 
 .btn-browse-empty {
     background-color: #A4F5A6 !important;
-    color: #166534 !important;
+    color: #121212 !important;
     font-weight: 600 !important;
     padding: 0.75rem 2rem !important;
     border-radius: 0.5rem !important;
@@ -169,12 +169,12 @@
 
 .btn-open-qr {
     background-color: #A4F5A6 !important;
-    color: #166534 !important;
+    color: #121212 !important;
     border: none !important;
     font-weight: 600 !important;
     padding: 0.75rem 1.5rem !important;
     border-radius: 8px !important;
-    font-size: 0.9rem !important;
+    font-size: 1rem !important;
     cursor: pointer;
 }
 
@@ -295,8 +295,8 @@
 
 .btn-banner-qr {
     background-color: #A4F5A6 !important;
-    color: #166534 !important;
-    font-weight: 700 !important;
+    color: #121212 !important;
+    font-weight: 600 !important;
     padding: 0.75rem 1.75rem !important;
     border-radius: 10px !important;
     border: none !important;

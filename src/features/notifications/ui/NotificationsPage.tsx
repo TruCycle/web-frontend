@@ -1,71 +1,77 @@
-import { useNotifications } from '@/features/notifications/hooks/useNotifications'
-import { Button } from '@/shared/ui/button/Button'
+import { Bell } from 'lucide-react';
+import './NotificationsPage.css';
 
-function formatDate(isoDate: string): string {
-  return new Date(isoDate).toLocaleString()
+interface NotificationItem {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  time: string;
+  isUnread: boolean;
+  hasAction?: boolean;
 }
 
-export default function NotificationsPage() {
-  const {
-    notifications,
-    unreadCount,
-    isLoading,
-    error,
-    markAsRead,
-    markAllAsRead,
-    reload,
-  } = useNotifications()
-
-  if (isLoading) {
-    return <p className="page-status">Loading notifications...</p>
+const NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: '1',
+    type: 'claimed',
+    title: 'Item Claimed',
+    description: 'John D. claimed your Desk Lamp. Generate QR code for drop-off.',
+    time: 'Just now',
+    isUnread: true,
+    hasAction: true
+  },
+  {
+    id: '2',
+    type: 'exchange',
+    title: 'Exchange Completed',
+    description: 'Kitchen Blender verified at Peckham Partner Shop. £10 reward added to your account.',
+    time: '1 day ago',
+    isUnread: false
+  },
+  {
+    id: '3',
+    type: 'listed',
+    title: 'Item Listed',
+    description: 'You listed Coffee Maker in Electronics category.',
+    time: '3 days ago',
+    isUnread: false
   }
+];
 
+export default function NotificationsPage() {
   return (
-    <section className="page-card">
-      <div className="row-between">
-        <div>
-          <h1>Notifications</h1>
-          <p>
-            Persisted local scaffold with read/unread controls and badge count.
-          </p>
-        </div>
-        <div className="inline-actions">
-          <Button onClick={markAllAsRead} variant="secondary">
-            Mark all as read
-          </Button>
-          <Button onClick={reload} variant="secondary">
-            Refresh
-          </Button>
-        </div>
-      </div>
+    <div className="notifications-page-card">
+      <h2 className="notifications-title notifications-header">Recent Notifications</h2>
 
-      {error ? <p className="page-status-error">{error}</p> : null}
+      <div className="notifications-list">
+        {NOTIFICATIONS.map((notification) => (
+          <div
+            key={notification.id}
+            className={`notification-item ${notification.isUnread ? 'active' : ''}`}
+          >
+            <div className="notification-icon-wrapper">
+              <Bell size={20} color="#64748b" />
+            </div>
 
-      {notifications.length === 0 ? (
-        <p className="page-status">No notifications yet.</p>
-      ) : (
-        <ul className="list-reset stack-gap-sm">
-          {notifications.map((notification) => (
-            <li className="surface-row" key={notification.id}>
-              <div className="row-between">
-                <p className="row-title">{notification.title}</p>
-                {!notification.isRead ? (
-                  <Button
-                    onClick={() => void markAsRead(notification.id)}
-                    variant="secondary"
-                  >
-                    Mark as read
-                  </Button>
-                ) : null}
+            <div className="notification-content">
+              <div className="notification-main-row">
+                <h3 className="notification-title">{notification.title}</h3>
+                <span className="notification-time">{notification.time}</span>
               </div>
-              <p className="row-body">{notification.description}</p>
-              <p className="row-meta">{formatDate(notification.createdAt)}</p>
-            </li>
-          ))}
-        </ul>
-      )}
+              <p className="notification-description">{notification.description}</p>
 
-      <p className="row-meta">Unread notifications: {unreadCount}</p>
-    </section>
-  )
+              {notification.hasAction && (
+                <div className="notification-action-area">
+                  <button className="btn-generate-qr">
+                    Generate QR Code
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
