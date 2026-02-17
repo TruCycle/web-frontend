@@ -6,9 +6,10 @@ interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
     children: React.ReactNode;
+    position?: 'center' | 'right';
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, position = 'center' }) => {
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
@@ -25,9 +26,12 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
 
     if (!isOpen) return null;
 
+    const overlayClass = `modal-overlay modal-${position}`;
+    const containerClass = `modal-container modal-container-${position}`;
+
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+        <div className={overlayClass} onClick={onClose}>
+            <div className={containerClass} onClick={(e) => e.stopPropagation()}>
                 <button className="modal-close-btn" onClick={onClose} aria-label="Close modal">
                     <X size={24} />
                 </button>

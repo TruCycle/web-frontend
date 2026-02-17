@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+import { lazy, Suspense } from 'react'
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { AppShell } from '@/app/shell/AppShell'
 
@@ -9,12 +9,15 @@ const NotificationsPage = lazy(
 const MessagingPage = lazy(() => import('@/features/messaging/ui/MessagingPage'))
 const Dashboard = lazy(() => import('@/features/home/ui/Dashboard'))
 const CollectedItemsPage = lazy(() => import('@/features/collected/ui/CollectedItemsPage'))
+const YourListingsPage = lazy(() => import('@/features/listings/ui/YourListingsPage'))
 const PlaceholderPage = lazy(() => import('@/shared/ui/placeholder/PlaceholderPage'))
 
 function ShellLayout() {
   return (
     <AppShell>
-      <Outlet />
+      <Suspense fallback={<p>Loading...</p>}>
+        <Outlet />
+      </Suspense>
     </AppShell>
   )
 }
@@ -29,6 +32,8 @@ export function AppRoutes() {
         <Route path="/messages" element={<MessagingPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/collected" element={<CollectedItemsPage />} />
+        <Route path="/listings" element={<YourListingsPage />} />
+        <Route path="/selected" element={<YourListingsPage />} />
         <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
         <Route path="/support" element={<PlaceholderPage title="Support & FAQs" />} />
       </Route>
