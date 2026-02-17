@@ -118,7 +118,29 @@ const CONVERSATIONS: Conversation[] = [
     lastMessage: 'Is the iPad still available?',
     time: '5 hours ago',
     active: false,
-    messages: []
+    messages: [
+      {
+        id: 'jc1',
+        sender: 'other',
+        text: 'Is the iPad still available?',
+        timestamp: '9:00 AM',
+        type: 'text'
+      },
+      {
+        id: 'jc2',
+        sender: 'user',
+        text: 'Yes, it is. Are you interested?',
+        timestamp: '9:05 AM',
+        type: 'text'
+      },
+      {
+        id: 'jc3',
+        sender: 'other',
+        text: 'Can you do £200?',
+        timestamp: '9:10 AM',
+        type: 'text'
+      }
+    ]
   },
   {
     id: '3',
@@ -127,7 +149,29 @@ const CONVERSATIONS: Conversation[] = [
     lastMessage: 'Great exchange!',
     time: '1 day ago',
     active: false,
-    messages: []
+    messages: [
+      {
+        id: 'er1',
+        sender: 'user',
+        text: 'Here is the bike.',
+        timestamp: 'Yesterday',
+        type: 'text'
+      },
+      {
+        id: 'er2',
+        sender: 'other',
+        text: 'Looks great! Thanks for the smooth exchange.',
+        timestamp: 'Yesterday',
+        type: 'text'
+      },
+      {
+        id: 'er3',
+        sender: 'user',
+        text: 'Enjoy!',
+        timestamp: 'Yesterday',
+        type: 'text'
+      }
+    ]
   },
   {
     id: '4',
@@ -136,7 +180,29 @@ const CONVERSATIONS: Conversation[] = [
     lastMessage: 'Can you deliver?',
     time: '3 days ago',
     active: false,
-    messages: []
+    messages: [
+      {
+        id: 'at1',
+        sender: 'other',
+        text: 'Hi, I saw your listing for the monitor.',
+        timestamp: '3 days ago',
+        type: 'text'
+      },
+      {
+        id: 'at2',
+        sender: 'other',
+        text: 'Can you deliver to East London?',
+        timestamp: '3 days ago',
+        type: 'text'
+      },
+      {
+        id: 'at3',
+        sender: 'user',
+        text: 'Sorry, pickup only.',
+        timestamp: '3 days ago',
+        type: 'text'
+      }
+    ]
   }
 ];
 

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Bell } from 'lucide-react';
 import './NotificationsPage.css';
 
@@ -40,6 +41,8 @@ const NOTIFICATIONS: NotificationItem[] = [
 ];
 
 export default function NotificationsPage() {
+  const [selectedId, setSelectedId] = useState<string>(NOTIFICATIONS[0].id);
+
   return (
     <div className="notifications-page-card">
       <h2 className="notifications-title notifications-header">Recent Notifications</h2>
@@ -48,7 +51,8 @@ export default function NotificationsPage() {
         {NOTIFICATIONS.map((notification) => (
           <div
             key={notification.id}
-            className={`notification-item ${notification.isUnread ? 'active' : ''}`}
+            className={`notification-item ${selectedId === notification.id ? 'active' : ''}`}
+            onClick={() => setSelectedId(notification.id)}
           >
             <div className="notification-icon-wrapper">
               <Bell size={20} color="#64748b" />
