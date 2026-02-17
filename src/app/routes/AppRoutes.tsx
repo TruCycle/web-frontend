@@ -10,6 +10,7 @@ const MessagingPage = lazy(() => import('@/features/messaging/ui/MessagingPage')
 const Dashboard = lazy(() => import('@/features/home/ui/Dashboard'))
 const CollectedItemsPage = lazy(() => import('@/features/collected/ui/CollectedItemsPage'))
 const YourListingsPage = lazy(() => import('@/features/listings/ui/YourListingsPage'))
+const SettingsPage = lazy(() => import('@/features/settings/ui/SettingsPage'))
 const PlaceholderPage = lazy(() => import('@/shared/ui/placeholder/PlaceholderPage'))
 
 function ShellLayout() {
@@ -34,7 +35,7 @@ export function AppRoutes() {
         <Route path="/collected" element={<CollectedItemsPage />} />
         <Route path="/listings" element={<YourListingsPage />} />
         <Route path="/selected" element={<YourListingsPage />} />
-        <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/support" element={<PlaceholderPage title="Support & FAQs" />} />
       </Route>
       <Route path="*" element={<Navigate replace to="/dashboard" />} />

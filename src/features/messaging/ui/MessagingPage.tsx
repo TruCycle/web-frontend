@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Paperclip, Smile, Send, MapPin, ExternalLink } from 'lucide-react';
+import { Search, Paperclip, Smile, Send, MapPin, Share2 } from 'lucide-react';
 import { Button } from '@/shared/ui/button/Button';
 import './MessagingPage.css';
 
@@ -297,16 +297,16 @@ export default function MessagingPage() {
                     <div className="message-content">
                       <div className="location-card">
                         <div className="location-map-placeholder">
-                          <MapPin size={24} color="#ffffff" />
+                          <MapPin size={32} color="#2d5016" strokeWidth={2.5} />
                         </div>
                         <div className="location-info">
                           <h4 className="location-name">{msg.location.name}</h4>
                           <p className="location-address">{msg.location.address}</p>
+                          <a href="#" className="btn-open-maps">
+                            <Share2 size={18} />
+                            Open in Maps
+                          </a>
                         </div>
-                        <a href="#" className="btn-open-maps">
-                          <ExternalLink size={14} />
-                          Open in Maps
-                        </a>
                       </div>
                       <span className="message-time">{msg.timestamp}</span>
                     </div>
