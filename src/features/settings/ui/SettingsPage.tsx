@@ -1,10 +1,14 @@
 
 import { useState } from 'react';
+import { Edit2 } from 'lucide-react';
 import { Button } from '@/shared/ui/button/Button';
 import './SettingsPage.css';
 
 export default function SettingsPage() {
     const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'notifications'>('profile');
+    const [is2FAEnabled, setIs2FAEnabled] = useState(false);
+    const [emailNotifications, setEmailNotifications] = useState(true);
+    const [inAppNotifications, setInAppNotifications] = useState(true);
 
     return (
         <div className="settings-content-wrapper">
@@ -93,15 +97,72 @@ export default function SettingsPage() {
                     </div>
                 )}
                 {activeTab === 'security' && (
-                    <div className="settings-form">
+                    <div className="security-content">
                         <h2 className="settings-section-title">Security</h2>
-                        <p className="settings-subtitle">Manage your password and security settings here.</p>
+
+                        <div className="security-section">
+                            <div className="security-item">
+                                <div className="security-item-content">
+                                    <h3 className="security-item-title">Password</h3>
+                                    <p className="security-item-description">Update your password</p>
+                                </div>
+                                <button className="security-edit-btn">
+                                    <Edit2 size={18} />
+                                </button>
+                            </div>
+
+                            <div className="security-item">
+                                <div className="security-item-content">
+                                    <h3 className="security-item-title">2FA</h3>
+                                    <p className="security-item-description">Enable or Disable two factor authentication</p>
+                                </div>
+                                <label className="toggle-switch">
+                                    <input
+                                        type="checkbox"
+                                        checked={is2FAEnabled}
+                                        onChange={(e) => setIs2FAEnabled(e.target.checked)}
+                                    />
+                                    <span className="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 )}
                 {activeTab === 'notifications' && (
-                    <div className="settings-form">
-                        <h2 className="settings-section-title">Notification Preferences</h2>
-                        <p className="settings-subtitle">Manage how we notify you.</p>
+                    <div className="security-content">
+                        <h2 className="settings-section-title">Notifications</h2>
+
+                        <div className="security-section">
+                            <div className="security-item">
+                                <div className="security-item-content">
+                                    <h3 className="security-item-title">Email Notifications</h3>
+                                    <p className="security-item-description">Receive email notifications when articles are generated</p>
+                                </div>
+                                <label className="toggle-switch">
+                                    <input
+                                        type="checkbox"
+                                        checked={emailNotifications}
+                                        onChange={(e) => setEmailNotifications(e.target.checked)}
+                                    />
+                                    <span className="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div className="security-item">
+                                <div className="security-item-content">
+                                    <h3 className="security-item-title">In-App Notifications</h3>
+                                    <p className="security-item-description">Receive notifications in the dashboard</p>
+                                </div>
+                                <label className="toggle-switch">
+                                    <input
+                                        type="checkbox"
+                                        checked={inAppNotifications}
+                                        onChange={(e) => setInAppNotifications(e.target.checked)}
+                                    />
+                                    <span className="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
