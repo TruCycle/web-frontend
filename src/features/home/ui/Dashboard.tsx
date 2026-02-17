@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Search,
   SlidersHorizontal,
@@ -8,6 +9,10 @@ import collectedItemsIcon from '@/assets/icons/collected-items-icon.svg';
 import exchangeIcon from '@/assets/icons/exchange-icon.svg';
 import sizeIcon from '@/assets/icons/size-icon.svg';
 import rewardIcon from '@/assets/icons/reward-icon.svg';
+import ipadImg from '@/assets/images/ipad.jpg';
+import plannerImg from '@/assets/images/book-planner.jpg';
+import bagShoeImg from '@/assets/images/bag-shoe.jpg';
+import candleImg from '@/assets/images/scented-candle.jpg';
 import './Dashboard.css';
 
 // Mock data for items
@@ -18,7 +23,7 @@ const AVAILABLE_ITEMS = [
     category: 'Gadget',
     condition: 'Like New',
     location: 'SW1A 1AA · 0.5 miles',
-    image: '/public/og-image.png',
+    image: ipadImg,
   },
   {
     id: '2',
@@ -26,7 +31,7 @@ const AVAILABLE_ITEMS = [
     category: 'Gadget',
     condition: 'Like New',
     location: 'SW1A 1AA · 0.5 miles',
-    image: '/public/og-image.png',
+    image: plannerImg,
   },
   {
     id: '3',
@@ -34,7 +39,7 @@ const AVAILABLE_ITEMS = [
     category: 'Gadget',
     condition: 'Like New',
     location: 'SW1A 1AA · 0.5 miles',
-    image: '/public/og-image.png',
+    image: bagShoeImg,
   },
   {
     id: '4',
@@ -42,7 +47,7 @@ const AVAILABLE_ITEMS = [
     category: 'Gadget',
     condition: 'Like New',
     location: 'SW1A 1AA · 0.5 miles',
-    image: '/public/og-image.png',
+    image: candleImg,
   }
 ];
 
@@ -52,6 +57,8 @@ const CATEGORIES = [
 ];
 
 export default function Dashboard() {
+  const [activeCategory, setActiveCategory] = useState('All Items');
+
   return (
     <div className="dashboard-content-wrapper">
       <div className="welcome-section">
@@ -125,10 +132,11 @@ export default function Dashboard() {
         </div>
 
         <div className="categories-scroll">
-          {CATEGORIES.map((cat, idx) => (
+          {CATEGORIES.map((cat) => (
             <button
               key={cat}
-              className={`category-item ${idx === 0 ? 'active' : ''}`}
+              className={`category-item ${cat === activeCategory ? 'active' : ''}`}
+              onClick={() => setActiveCategory(cat)}
             >
               {cat}
             </button>
@@ -137,7 +145,11 @@ export default function Dashboard() {
 
         <div className="items-grid">
           {AVAILABLE_ITEMS.map((item) => (
-            <div key={item.id} className="item-card">
+            <div
+              key={item.id}
+              className="item-card"
+              onClick={() => console.log(`Item clicked: ${item.title}`)}
+            >
               <div className="item-image-wrapper">
                 <img src={item.image} alt={item.title} className="item-image" />
               </div>

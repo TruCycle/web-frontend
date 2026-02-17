@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { type ReactNode, useState } from 'react'
 import { NavLink, type NavLinkRenderProps } from 'react-router-dom'
 import {
   FileText,
@@ -23,6 +23,11 @@ function navLinkClassName({ isActive }: NavLinkRenderProps): string {
 
 export function AppShell({ children }: AppShellProps) {
   const { unreadCount } = useNotifications()
+  const [role, setRole] = useState<'collector' | 'donor'>('collector')
+
+  const handleRoleChange = (newRole: 'collector' | 'donor') => {
+    setRole(newRole)
+  }
 
   return (
     <div className="app-shell">
@@ -79,8 +84,18 @@ export function AppShell({ children }: AppShellProps) {
 
         <div className="shell-sidebar-footer">
           <div className="role-toggle">
-            <button className="role-btn active">Collector</button>
-            <button className="role-btn">Donor</button>
+            <button
+              className={`role-btn ${role === 'collector' ? 'active' : ''}`}
+              onClick={() => handleRoleChange('collector')}
+            >
+              Collector
+            </button>
+            <button
+              className={`role-btn ${role === 'donor' ? 'active' : ''}`}
+              onClick={() => handleRoleChange('donor')}
+            >
+              Donor
+            </button>
           </div>
         </div>
       </aside>
