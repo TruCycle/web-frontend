@@ -158,32 +158,44 @@
 .header-right {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1rem;
+}
+
+.header-divider {
+  width: 1px;
+  height: 24px;
+  background-color: #cbd5e1;
+  margin: 0 0.25rem;
 }
 
 .icon-btn {
   background: none;
   border: none;
-  color: #64748b;
+  color: #172033;
   cursor: pointer;
   padding: 8px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0.8;
+}
+
+.icon-btn:hover {
+  opacity: 1;
 }
 
 .user-profile {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background-color: #22c55e;
+  background-color: #16a34a;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 
 .nav-icon-wrapper {

@@ -13,6 +13,7 @@ import ipadImg from '@/assets/images/ipad.jpg';
 import plannerImg from '@/assets/images/book-planner.jpg';
 import bagShoeImg from '@/assets/images/bag-shoe.jpg';
 import candleImg from '@/assets/images/scented-candle.jpg';
+import { SuccessDialog } from '@/shared/ui/modal/SuccessDialog';
 import './Dashboard.css';
 
 // Mock data for items
@@ -58,6 +59,12 @@ const CATEGORIES = [
 
 export default function Dashboard() {
   const [activeCategory, setActiveCategory] = useState('All Items');
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+
+  const handleRequestClaim = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsSuccessOpen(true);
+  };
 
   return (
     <div className="dashboard-content-wrapper">
@@ -161,7 +168,12 @@ export default function Dashboard() {
                 </div>
                 <p className="item-location">{item.location}</p>
                 <div className="item-actions">
-                  <Button className="btn-claim">Request a Claim</Button>
+                  <Button
+                    className="btn-claim"
+                    onClick={handleRequestClaim}
+                  >
+                    Request a Claim
+                  </Button>
                   <button className="btn-view">View Item</button>
                 </div>
               </div>
@@ -169,6 +181,11 @@ export default function Dashboard() {
           ))}
         </div>
       </section>
+
+      <SuccessDialog
+        isOpen={isSuccessOpen}
+        onClose={() => setIsSuccessOpen(false)}
+      />
     </div>
   );
 }
