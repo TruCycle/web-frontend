@@ -80,24 +80,24 @@ export function AppShell({ children }: AppShellProps) {
               <span>Support & FAQs</span>
             </NavLink>
           </div>
-        </nav>
 
-        <div className="shell-sidebar-footer">
-          <div className="role-toggle">
-            <button
-              className={`role-btn ${role === 'collector' ? 'active' : ''}`}
-              onClick={() => handleRoleChange('collector')}
-            >
-              Collector
-            </button>
-            <button
-              className={`role-btn ${role === 'donor' ? 'active' : ''}`}
-              onClick={() => handleRoleChange('donor')}
-            >
-              Donor
-            </button>
+          <div className="role-toggle-container">
+            <div className="role-toggle">
+              <button
+                className={`role-btn ${role === 'collector' ? 'active' : ''}`}
+                onClick={() => handleRoleChange('collector')}
+              >
+                Collector
+              </button>
+              <button
+                className={`role-btn ${role === 'donor' ? 'active' : ''}`}
+                onClick={() => handleRoleChange('donor')}
+              >
+                Donor
+              </button>
+            </div>
           </div>
-        </div>
+        </nav>
       </aside>
 
       <main className="shell-main-area">
