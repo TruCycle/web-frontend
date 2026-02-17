@@ -6,27 +6,27 @@
 }
 
 .success-image-wrapper {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .success-svg-img {
-    width: 100px;
+    width: 140px;
     height: auto;
 }
 
 .success-title {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
     color: #1f2937;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
 }
 
 .success-message {
-    font-size: 1rem;
+    font-size: 1.125rem;
     color: #6b7280;
-    line-height: 1.5;
-    max-width: 280px;
-    margin-bottom: 2rem;
+    line-height: 1.6;
+    max-width: 320px;
+    margin-bottom: 2.5rem;
 }
 
 .btn-browse-other {

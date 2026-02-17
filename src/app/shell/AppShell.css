@@ -1,24 +1,21 @@
 .app-shell {
   display: flex;
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: #F8FAFC;
   color: #172033;
-  padding: 1rem;
-  /* Add padding to prevent clipping and allow floating effect */
-  gap: 1rem;
 }
 
 /* Sidebar */
 .shell-sidebar {
   width: 250px;
   background-color: #232323;
-  border-radius: 1.5rem;
+  margin: 1rem 0 1rem 1rem;
+  border-radius: 25px;
   /* Rounded on all sides */
   display: flex;
   flex-direction: column;
   padding: 1.75rem 1rem;
   z-index: 10;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
 }
 
@@ -141,18 +138,22 @@
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  background-color: #ffffff;
-  border-radius: 1.5rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+  background-color: transparent;
+  height: 100vh;
 }
 
 .shell-top-header {
   height: 72px;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 0 2rem;
-  background-color: transparent;
+  padding: 0 1.5rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .header-right {
@@ -230,7 +231,7 @@
 
 .shell-content {
   flex: 1;
-  padding: 0 2rem 2rem;
+  padding: 1.5rem 2rem 2rem;
   overflow-y: auto;
 }
 

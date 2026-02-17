@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   Search,
   SlidersHorizontal,
-  ChevronRight
+  ChevronRight,
+  X
 } from 'lucide-react';
 import { Button } from '@/shared/ui/button/Button';
 import collectedItemsIcon from '@/assets/icons/collected-items-icon.svg';
@@ -58,8 +60,12 @@ const CATEGORIES = [
 ];
 
 export default function Dashboard() {
+  const location = useLocation();
   const [activeCategory, setActiveCategory] = useState('All Items');
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const showStats = location.pathname === '/dashboard';
 
   const handleRequestClaim = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -73,47 +79,49 @@ export default function Dashboard() {
         <p className="welcome-subtitle">Track your impact and manage your exchanges</p>
       </div>
 
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon-wrapper bg-green-soft">
-            <img src={collectedItemsIcon} alt="" aria-hidden className="stat-icon" width="24" height="24" />
+      {showStats && (
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-icon-wrapper bg-green-soft">
+              <img src={collectedItemsIcon} alt="" aria-hidden className="stat-icon" width="24" height="24" />
+            </div>
+            <div className="stat-info">
+              <span className="stat-value">0</span>
+              <span className="stat-label">Items Collected</span>
+            </div>
           </div>
-          <div className="stat-info">
-            <span className="stat-value">0</span>
-            <span className="stat-label">Items Collected</span>
-          </div>
-        </div>
 
-        <div className="stat-card">
-          <div className="stat-icon-wrapper bg-blue-soft">
-            <img src={exchangeIcon} alt="" aria-hidden className="stat-icon" width="24" height="24" />
+          <div className="stat-card">
+            <div className="stat-icon-wrapper bg-blue-soft">
+              <img src={exchangeIcon} alt="" aria-hidden className="stat-icon" width="24" height="24" />
+            </div>
+            <div className="stat-info">
+              <span className="stat-value">0</span>
+              <span className="stat-label">Exchanged</span>
+            </div>
           </div>
-          <div className="stat-info">
-            <span className="stat-value">0</span>
-            <span className="stat-label">Exchanged</span>
-          </div>
-        </div>
 
-        <div className="stat-card">
-          <div className="stat-icon-wrapper bg-leaf-soft">
-            <img src={sizeIcon} alt="" aria-hidden className="stat-icon" width="24" height="24" />
+          <div className="stat-card">
+            <div className="stat-icon-wrapper bg-leaf-soft">
+              <img src={sizeIcon} alt="" aria-hidden className="stat-icon" width="24" height="24" />
+            </div>
+            <div className="stat-info">
+              <span className="stat-value">0kg</span>
+              <span className="stat-label">CO₂ Saved</span>
+            </div>
           </div>
-          <div className="stat-info">
-            <span className="stat-value">0kg</span>
-            <span className="stat-label">CO₂ Saved</span>
-          </div>
-        </div>
 
-        <div className="stat-card">
-          <div className="stat-icon-wrapper bg-gold-soft">
-            <img src={rewardIcon} alt="" aria-hidden className="stat-icon" width="24" height="24" />
-          </div>
-          <div className="stat-info">
-            <span className="stat-value">£0</span>
-            <span className="stat-label">Rewards Earned</span>
+          <div className="stat-card">
+            <div className="stat-icon-wrapper bg-gold-soft">
+              <img src={rewardIcon} alt="" aria-hidden className="stat-icon" width="24" height="24" />
+            </div>
+            <div className="stat-info">
+              <span className="stat-value">£0</span>
+              <span className="stat-label">Rewards Earned</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <section className="browse-section">
         <div className="section-header">
@@ -132,11 +140,54 @@ export default function Dashboard() {
               className="search-input"
             />
           </div>
-          <button className="filters-btn">
-            <SlidersHorizontal size={20} />
-            <span>Filters</span>
-          </button>
+          {!isFilterOpen ? (
+            <button className="filters-btn" onClick={() => setIsFilterOpen(true)}>
+              <SlidersHorizontal size={20} />
+              <span>Filters</span>
+            </button>
+          ) : (
+            <button className="clear-filters-btn" onClick={() => setIsFilterOpen(false)}>
+              <span>Clear Filters</span>
+              <X size={18} />
+            </button>
+          )}
         </div>
+
+        {isFilterOpen && (
+          <div className="filters-container">
+            <h3 className="filters-title">Filters</h3>
+            <div className="filters-grid">
+              <div className="filter-item">
+                <label className="filter-label">Category</label>
+                <div className="select-wrapper">
+                  <select className="filter-select">
+                    <option>All categories</option>
+                    <option>Gadgets</option>
+                    <option>Electronics</option>
+                  </select>
+                </div>
+              </div>
+              <div className="filter-item">
+                <label className="filter-label">Condition</label>
+                <div className="select-wrapper">
+                  <select className="filter-select">
+                    <option>All condition</option>
+                    <option>Like New</option>
+                    <option>Used</option>
+                  </select>
+                </div>
+              </div>
+              <div className="filter-item">
+                <label className="filter-label">Location</label>
+                <input
+                  type="text"
+                  className="filter-input"
+                  placeholder="Enter location or postal code"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="categories-scroll">
           {CATEGORIES.map((cat) => (
