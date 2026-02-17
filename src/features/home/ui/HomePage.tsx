@@ -15,6 +15,9 @@ export default function HomePage() {
         <Link className="text-link" to="/notifications">
           Open notifications scaffold
         </Link>
+        <Link className="text-link" to="/dashboard">
+          Open dashboard
+        </Link>
       </div>
     </section>
   )

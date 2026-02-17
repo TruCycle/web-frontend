@@ -1,7 +1,16 @@
 import type { ReactNode } from 'react'
 import { NavLink, type NavLinkRenderProps } from 'react-router-dom'
+import {
+  FileText,
+  Users,
+  Settings,
+  HelpCircle
+} from 'lucide-react'
 import { useNotifications } from '@/features/notifications/hooks/useNotifications'
-import { NotificationBadge } from '@/features/notifications/ui/NotificationBadge'
+import logo from '@/assets/logo.svg'
+import bellIcon from '@/assets/icons/bell-icons.svg'
+import dashboardIcon from '@/assets/icons/dashboard.svg'
+import messageIcon from '@/assets/icons/message-icon.svg'
 import './AppShell.css'
 
 interface AppShellProps {
@@ -13,29 +22,83 @@ function navLinkClassName({ isActive }: NavLinkRenderProps): string {
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const { unreadCount, isLoading } = useNotifications()
+  const { unreadCount } = useNotifications()
 
   return (
     <div className="app-shell">
-      <header className="shell-header">
-        <div>
-          <p className="shell-title">TruCycle</p>
-          <p className="shell-subtitle">Feature-first frontend starter</p>
+      <aside className="shell-sidebar">
+        <div className="shell-logo-container">
+          <div className="shell-logo">
+            <div className="logo-icon">
+              <img src={logo} alt="TruCycle Logo" width="34" height="34" />
+            </div>
+            <span className="logo-text">TruCycle</span>
+          </div>
         </div>
-        <nav className="shell-nav" aria-label="Primary navigation">
-          <NavLink className={navLinkClassName} to="/">
-            Home
-          </NavLink>
-          <NavLink className={navLinkClassName} to="/messages">
-            Messages
-          </NavLink>
-          <NavLink className={navLinkClassName} to="/notifications">
-            Notifications
-            <NotificationBadge isLoading={isLoading} unreadCount={unreadCount} />
-          </NavLink>
+
+        <nav className="shell-sidebar-nav">
+          <div className="nav-group">
+            <NavLink className={navLinkClassName} to="/dashboard">
+              <img src={dashboardIcon} alt="" aria-hidden width="20" height="20" />
+              <span>Dashboard</span>
+            </NavLink>
+            <NavLink className={navLinkClassName} to="/">
+              <FileText size={20} />
+              <span>Browse Items</span>
+            </NavLink>
+            <NavLink className={navLinkClassName} to="/collected">
+              <Users size={20} />
+              <span>My Collected Items</span>
+            </NavLink>
+            <NavLink className={navLinkClassName} to="/messages">
+              <img src={messageIcon} alt="" aria-hidden width="20" height="20" />
+              <span>Messages</span>
+            </NavLink>
+          </div>
+
+          <div className="nav-divider" />
+
+          <div className="nav-group">
+            <NavLink className={navLinkClassName} to="/notifications">
+              <div className="nav-icon-wrapper">
+                <img src={bellIcon} alt="" aria-hidden width="20" height="20" />
+                {unreadCount > 0 && <span className="notification-dot" />}
+              </div>
+              <span>Notifications</span>
+            </NavLink>
+            <NavLink className={navLinkClassName} to="/settings">
+              <Settings size={20} />
+              <span>Settings</span>
+            </NavLink>
+            <NavLink className={navLinkClassName} to="/support">
+              <HelpCircle size={20} />
+              <span>Support & FAQs</span>
+            </NavLink>
+          </div>
         </nav>
-      </header>
-      <main className="shell-main">{children}</main>
+
+        <div className="shell-sidebar-footer">
+          <div className="role-toggle">
+            <button className="role-btn active">Collector</button>
+            <button className="role-btn">Donor</button>
+          </div>
+        </div>
+      </aside>
+
+      <main className="shell-main-area">
+        <header className="shell-top-header">
+          <div className="header-right">
+            <button className="icon-btn">
+              <img src={bellIcon} alt="" aria-hidden width="20" height="20" />
+              {unreadCount > 0 && <span className="notification-dot" />}
+            </button>
+            <div className="user-profile">
+              <span className="user-initial">P</span>
+            </div>
+          </div>
+        </header>
+        <div className="shell-content">{children}</div>
+      </main>
     </div>
   )
 }
