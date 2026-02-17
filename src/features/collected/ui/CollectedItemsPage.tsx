@@ -4,6 +4,8 @@ import { ChevronLeft, ChevronRight, CircleAlert } from 'lucide-react';
 import cautionIcon from '@/assets/icons/caution-icon.svg';
 import { Button } from '@/shared/ui/button/Button';
 import { ItemDetailsDialog } from '@/shared/ui/modal/ItemDetailsDialog';
+import { QRCodeDialog } from '@/shared/ui/modal/QRCodeDialog';
+import { CollectionSuccessDialog } from '@/shared/ui/modal/CollectionSuccessDialog';
 import './CollectedItemsPage.css';
 
 import bagShoeImg from '@/assets/images/bag-shoe.jpg';
@@ -41,10 +43,26 @@ const COLLECTED_ITEMS = [
     }
 ];
 
+// Mock item for the banner
+const BANNER_ITEM = {
+    id: 'banner-1',
+    title: 'iPhone 12Pro',
+    category: 'Gadget',
+    condition: 'Good',
+    donor: 'Sarah M.',
+    image: bagShoeImg, // Using placeholder
+    status: 'Approved',
+    location: 'Fixars Shop 50 Abbey Road',
+    hasQR: true
+};
+
 export default function CollectedItemsPage() {
     const navigate = useNavigate();
     const [items, setItems] = useState<any[]>([]); // Starts empty by default
     const [selectedItem, setSelectedItem] = useState<any | null>(null);
+    const [qrItem, setQrItem] = useState<any | null>(null);
+    const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+    const [collectedItemName, setCollectedItemName] = useState('');
 
     const hasItems = items.length > 0;
 
@@ -55,6 +73,20 @@ export default function CollectedItemsPage() {
 
     const handleViewDetails = (item: any) => {
         setSelectedItem(item);
+    };
+
+    const handleOpenQR = (item: any) => {
+        setQrItem(item);
+    };
+
+    const handleCollectSuccess = () => {
+        if (qrItem) {
+            setCollectedItemName(qrItem.title);
+        } else {
+            setCollectedItemName(BANNER_ITEM.title);
+        }
+        setQrItem(null); // Close QR Dialog
+        setShowSuccessDialog(true); // Open Success Dialog
     };
 
     return (
@@ -71,11 +103,16 @@ export default function CollectedItemsPage() {
                             <CircleAlert size={20} color="#15A119" strokeWidth={2} />
                         </div>
                         <div className="banner-text">
-                            <h4 className="banner-title">Item iPhone 12Pro Request Has Been Approved</h4>
+                            <h4 className="banner-title">Item {BANNER_ITEM.title} Request Has Been Approved</h4>
                             <p className="banner-desc">Open QR code when you get to pickup location to scan to collect</p>
                         </div>
                     </div>
-                    <Button className="btn-banner-qr">Open QR Code</Button>
+                    <Button
+                        className="btn-banner-qr"
+                        onClick={() => handleOpenQR(BANNER_ITEM)}
+                    >
+                        Open QR Code
+                    </Button>
                 </div>
             )}
 
@@ -143,7 +180,10 @@ export default function CollectedItemsPage() {
                                     View Details
                                 </Button>
                                 {item.hasQR && (
-                                    <Button className="btn-open-qr">
+                                    <Button
+                                        className="btn-open-qr"
+                                        onClick={() => handleOpenQR(item)}
+                                    >
                                         Open QR Code
                                     </Button>
                                 )}
@@ -179,6 +219,19 @@ export default function CollectedItemsPage() {
                 isOpen={!!selectedItem}
                 onClose={() => setSelectedItem(null)}
                 item={selectedItem}
+            />
+
+            <QRCodeDialog
+                isOpen={!!qrItem}
+                onClose={() => setQrItem(null)}
+                item={qrItem}
+                onCollect={handleCollectSuccess}
+            />
+
+            <CollectionSuccessDialog
+                isOpen={showSuccessDialog}
+                onClose={() => setShowSuccessDialog(false)}
+                itemName={collectedItemName}
             />
         </div>
     );
