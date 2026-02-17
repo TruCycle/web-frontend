@@ -27,8 +27,8 @@ Agents must follow these rules to keep the codebase fast, modular, and easy to m
 ```
 
 **Rule of thumb**
-- Product-specific code → `features/`
-- Reusable generic code → `shared/`
+- Product-specific code → `features/` 
+- Reusable generic code → `shared/` (e.g Buttons, Inputs, Forms, Checkboxes, etc.)
 - Route wiring only → `app/`
 
 ---
