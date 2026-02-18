@@ -1,0 +1,139 @@
+.notifications-page-card {
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+    max-width: 900px;
+    margin: 0 auto;
+    min-height: 80vh;
+}
+
+.notifications-header {
+    margin-bottom: 2rem;
+}
+
+.notifications-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 1.5rem;
+    gap: 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.notification-item:hover {
+    background-color: #f8fafc;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item.active {
+    background-color: #F0FDF4;
+    /* Light green background for unread/active */
+    border-radius: 12px;
+    border-bottom: none;
+    margin-bottom: 1rem;
+    /* Spacing after the active card */
+}
+
+/* Icon Styles */
+.notification-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid #f1f5f9;
+}
+
+.notification-item.active .notification-icon-wrapper {
+    background-color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.notification-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.notification-main-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.notification-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.notification-time {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    white-space: nowrap;
+    margin-left: 1rem;
+}
+
+.notification-description {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.5;
+    max-width: 90%;
+}
+
+.notification-action-area {
+    margin-top: 1rem;
+}
+
+.btn-generate-qr {
+    background-color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s;
+}
+
+.btn-generate-qr:hover {
+    background-color: #f8fafc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 640px) {
+    .notification-item {
+        flex-direction: column;
+        /* Stack on mobile if needed, though row usually fits */
+        /* keeping row for now as icon+text fits well */
+        flex-direction: row;
+    }
+}

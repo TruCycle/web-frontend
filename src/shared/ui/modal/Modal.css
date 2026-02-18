@@ -1,0 +1,122 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.15s ease-out;
+}
+
+/* Center Position (Default) */
+.modal-center {
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-container-center {
+    background: white;
+    border-radius: 1.5rem;
+    width: 90%;
+    max-width: 420px;
+    position: relative;
+    padding: 2rem 1.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: slideUp 0.3s ease-out;
+}
+
+/* Right Position (Sidebar/Drawer) */
+.modal-right {
+    justify-content: flex-end;
+    /* Align to the right */
+    align-items: stretch;
+    /* Full height */
+}
+
+.modal-container-right {
+    background: white;
+    border-radius: 1px 0 0 1px;
+    width: 100%;
+    max-width: 500px;
+    height: 100%;
+    position: relative;
+    padding: 2rem 1.5rem;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    animation: slideLeft 0.3s ease-out;
+    display: flex;
+    /* To manage internal scrolling if needed */
+    flex-direction: column;
+}
+
+/* Adjust close button for full height modal */
+.modal-container-right .modal-close-btn {
+    top: 1.5rem;
+    right: 1.5rem;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.modal-close-btn:hover {
+    background-color: #f1f5f9;
+    color: #1e293b;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    /* align-items: center; Remove this so content can span full width */
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    /* Enable scrolling for tall content within the modal */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideLeft {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
