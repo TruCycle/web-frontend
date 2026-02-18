@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Button } from '@/shared/ui/button/Button';
 import { ItemDetailsDialog } from '@/shared/ui/modal/ItemDetailsDialog';
 import './YourListingsPage.css';
@@ -45,29 +45,11 @@ const LISTINGS_DATA = [
         condition: 'Good',
         meta: '8.5kg CO₂ saved',
         image: plannerImg
-    },
-    {
-        id: '5',
-        title: 'Winter Coat - Size M',
-        status: 'Claimed',
-        category: 'Clothing',
-        condition: 'Like New',
-        meta: 'Claimed by John D.',
-        image: bagShoeImg
-    },
-    {
-        id: '6',
-        title: 'Kitchen Blender',
-        status: 'Collected',
-        category: 'Appliances',
-        condition: 'Good',
-        meta: '8.5kg CO₂ saved',
-        image: plannerImg
     }
 ];
 
 export default function YourListingsPage() {
-    const [listings, setListings] = useState<any[]>([]); // Start empty to show the empty state
+    const [listings, setListings] = useState<any[]>([]); // Defaulting to empty to show the premium empty state
     const [selectedItem, setSelectedItem] = useState<any | null>(null);
 
     const handleViewDetails = (item: any) => {
@@ -85,27 +67,27 @@ export default function YourListingsPage() {
             <h1 className="listings-title">Your Listings</h1>
 
             {!hasListings ? (
-                <div className="empty-listings-card">
-                    <div className="empty-state-content">
-                        <div className="empty-icon-wrapper">
-                            <img src={ipadImg} alt="Empty" className="empty-placeholder-image" />
+                <div className="empty-listings-master-card">
+                    <div className="listings-empty-state">
+                        <div className="empty-state-icon-circle">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#52C41A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                <line x1="12" y1="9" x2="12" y2="13" />
+                                <line x1="12" y1="17" x2="12.01" y2="17" />
+                            </svg>
                         </div>
-                        <h2 className="empty-title">You haven't listed any items yet</h2>
-                        <p className="empty-message">
-                            Start your journey by listing items you no longer need.
-                            Your contributions help create a more sustainable future.
+                        <p className="empty-state-message">
+                            Your listed items will be<br />displayed here
                         </p>
-                        <div className="empty-actions">
-                            <Button className="btn-list-item-empty">
-                                List New Item
-                            </Button>
-                            <Button
-                                className="btn-load-demo"
-                                onClick={loadMockData}
-                            >
-                                Show Demo Data
-                            </Button>
-                        </div>
+                        <button className="btn-list-item-premium">
+                            <Plus size={18} />
+                            List New Item
+                        </button>
+
+                        {/* Demo data trigger moved to a subtle link at bottom */}
+                        <button className="btn-load-demo-link" onClick={loadMockData}>
+                            Show Demo Data
+                        </button>
                     </div>
                 </div>
             ) : (
@@ -170,12 +152,14 @@ export default function YourListingsPage() {
                         </button>
                     </div>
 
-                    <Button
-                        onClick={() => setListings([])}
-                        className="btn-reset-empty"
-                    >
-                        Reset to Empty
-                    </Button>
+                    <div className="reset-empty-container">
+                        <button
+                            onClick={() => setListings([])}
+                            className="btn-reset-link"
+                        >
+                            Reset to Empty View
+                        </button>
+                    </div>
                 </>
             )}
 

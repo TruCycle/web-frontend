@@ -60,20 +60,28 @@ export function AppShell({ children }: AppShellProps) {
               <DashboardIcon />
               <span>Dashboard</span>
             </NavLink>
-            <NavLink className={navLinkClassName} to="/">
-              <FileText size={20} />
-              <span>Browse Items</span>
-            </NavLink>
             {role === 'collector' ? (
-              <NavLink className={navLinkClassName} to="/collected">
-                <Users size={20} />
-                <span>My Selected Items</span>
-              </NavLink>
+              <>
+                <NavLink className={navLinkClassName} to="/">
+                  <FileText size={20} />
+                  <span>Browse Items</span>
+                </NavLink>
+                <NavLink className={navLinkClassName} to="/collected">
+                  <Users size={20} />
+                  <span>My Selected Items</span>
+                </NavLink>
+              </>
             ) : (
-              <NavLink className={navLinkClassName} to="/listings">
-                <Users size={20} />
-                <span>My Listings</span>
-              </NavLink>
+              <>
+                <NavLink className={navLinkClassName} to="/listings">
+                  <FileText size={20} />
+                  <span>My Listed Items</span>
+                </NavLink>
+                <NavLink className={navLinkClassName} to="/partner-shops">
+                  <Users size={20} />
+                  <span>Partner Shops</span>
+                </NavLink>
+              </>
             )}
             <NavLink className={navLinkClassName} to="/messages">
               <MessageIcon />

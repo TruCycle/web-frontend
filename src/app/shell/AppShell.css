@@ -100,36 +100,60 @@
 }
 
 .role-toggle-container {
-  margin-top: 2rem;
-  padding: 0.5rem 0;
+  margin-top: auto;
+  padding: 1.5rem 0 0.5rem;
   display: flex;
   justify-content: center;
 }
 
 .role-toggle {
   display: flex;
-  background-color: #2a2a2a;
+  background-color: #1a1a1a;
   padding: 0.35rem;
-  border-radius: 0.75rem;
-  border: 1px solid #3a3a3a;
-  width: fit-content;
+  border-radius: 1rem;
+  border: 1.5px solid #2d2d2d;
+  width: 100%;
+  gap: 0.25rem;
 }
 
 .role-btn {
-  padding: 0.5rem 1rem;
+  flex: 1;
+  padding: 0.75rem 0.5rem;
   border: none;
   background: transparent;
-  color: #94a3b8;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-radius: 0.5rem;
+  color: #a1a1aa;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 0.75rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .role-btn.active {
-  background-color: #a5f59c;
-  color: #1a1a1a;
+  background-color: #A4F5A6;
+  color: #121212;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.notification-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.notification-dot::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background-color: #ff9c2d;
+  /* Orange as per image */
+  border-radius: 50%;
+  border: 1.5px solid #232323;
+  /* Border to match sidebar bg */
 }
 
 /* Main Area */
@@ -206,27 +230,12 @@
   justify-content: center;
 }
 
-.notification-dot {
-  position: absolute;
-  top: -3px;
-  right: -3px;
-  width: 10px;
-  height: 10px;
-  background-color: #ff3333;
-  /* More prominent red alert */
-  border-radius: 50%;
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 4px rgba(255, 51, 51, 0.5);
-}
-
-.shell-nav-link .notification-dot {
+.shell-nav-link-active .notification-dot::after {
   border-color: #333333;
-  /* Match active nav bg */
 }
 
-.shell-nav-link:not(.shell-nav-link-active) .notification-dot {
-  border-color: #1a1a1a;
-  /* Match sidebar bg */
+.header-right .notification-dot::after {
+  border-color: #ffffff;
 }
 
 .shell-content {

@@ -35,6 +35,7 @@ export function AppRoutes() {
         <Route path="/collected" element={<CollectedItemsPage />} />
         <Route path="/listings" element={<YourListingsPage />} />
         <Route path="/selected" element={<YourListingsPage />} />
+        <Route path="/partner-shops" element={<PlaceholderPage title="Partner Shops" />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/support" element={<PlaceholderPage title="Support & FAQs" />} />
       </Route>

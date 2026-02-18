@@ -92,8 +92,10 @@ export default function CollectedItemsPage() {
     return (
         <div className="collected-content-wrapper">
             <div className="welcome-section">
-                <h1 className="welcome-title">My Selected Items</h1>
-                <p className="welcome-subtitle">View and manage items you've successfully claimed</p>
+                <div className="welcome-text">
+                    <h1 className="welcome-title">My Selected Items</h1>
+                    <p className="welcome-subtitle">View and manage items you've successfully claimed</p>
+                </div>
             </div>
 
             {hasItems && (

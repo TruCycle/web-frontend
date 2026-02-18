@@ -7,10 +7,94 @@
 .listings-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #1a1a1a;
+    color: #121212;
     margin-bottom: 2rem;
 }
 
+/* New Premium Master Card for Empty State */
+.empty-listings-master-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    min-height: 520px;
+    display: flex;
+    flex-direction: column;
+}
+
+.listings-empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 3rem;
+    gap: 1.75rem;
+}
+
+.empty-state-icon-circle {
+    width: 64px;
+    height: 64px;
+    background-color: #f6ffed;
+    border-radius: 50%;
+    border: 1px solid #e1fbd0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.25rem;
+}
+
+.empty-state-message {
+    text-align: center;
+    color: #121212;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.btn-list-item-premium {
+    background-color: #A4F5A6;
+    color: #121212;
+    border: 3px solid rgba(164, 245, 166, 0.4);
+    outline: 3px solid rgba(164, 245, 166, 0.2);
+    outline-offset: 2px;
+    padding: 0.85rem 2.25rem;
+    font-weight: 700;
+    font-size: 1.05rem;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-top: 0.5rem;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(164, 245, 166, 0.25);
+}
+
+.btn-list-item-premium:hover {
+    background-color: #92e094;
+    border-color: rgba(146, 224, 148, 0.5);
+    outline-color: rgba(146, 224, 148, 0.3);
+    box-shadow: 0 4px 12px rgba(164, 245, 166, 0.35);
+    transform: translateY(-1px);
+}
+
+.btn-load-demo-link {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 0.875rem;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-top: 2rem;
+}
+
+.btn-load-demo-link:hover {
+    color: #64748b;
+}
+
+/* Listings List Display */
 .listings-list {
     display: flex;
     flex-direction: column;
@@ -25,6 +109,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    transition: all 0.2s;
+}
+
+.listing-row:hover {
+    border-color: #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .listing-content {
@@ -63,7 +153,7 @@
 .listing-item-title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #1a1a1a;
+    color: #121212;
     margin: 0;
 }
 
@@ -114,36 +204,36 @@
     background-color: #f1f5f9 !important;
     color: #1a1a1a !important;
     border: none !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     padding: 0.75rem 2rem !important;
-    border-radius: 8px !important;
+    border-radius: 10px !important;
 }
 
 .btn-remove-red {
-    background-color: #991b1b !important;
+    background-color: #ee4b5a !important;
     color: #ffffff !important;
     border: none !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     padding: 0.75rem 2rem !important;
-    border-radius: 8px !important;
+    border-radius: 10px !important;
 }
 
 .btn-view-details-grey {
     background-color: #f1f5f9 !important;
     color: #1a1a1a !important;
     border: none !important;
-    font-weight: 600 !important;
-    padding: 0.75rem 1.5rem !important;
-    border-radius: 8px !important;
+    font-weight: 700 !important;
+    padding: 0.75rem 2rem !important;
+    border-radius: 10px !important;
 }
 
-/* Pagination (reused and slightly adjusted) */
+/* Pagination */
 .pagination-nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-top: 3rem;
-    padding: 2rem 0;
+    padding-bottom: 2rem;
 }
 
 .pagination-btn {
@@ -181,13 +271,22 @@
 }
 
 .page-number.active {
-    background-color: #166534;
+    background-color: #15A119;
     color: #ffffff;
 }
 
-.pagination-ellipsis {
+.reset-empty-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.btn-reset-link {
+    background: none;
+    border: none;
     color: #94a3b8;
-    letter-spacing: 2px;
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 @media (max-width: 900px) {
@@ -201,93 +300,4 @@
         width: 100%;
         justify-content: flex-end;
     }
-}
-
-/* Empty State Styles */
-.empty-listings-card {
-    background-color: #ffffff;
-    border-radius: 20px;
-    border: 1px solid #f1f5f9;
-    padding: 5rem 2rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-}
-
-.empty-state-content {
-    max-width: 480px;
-}
-
-.empty-icon-wrapper {
-    width: 160px;
-    height: 160px;
-    margin: 0 auto 2.5rem;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.empty-placeholder-image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    opacity: 0.8;
-    filter: grayscale(0.2);
-}
-
-.empty-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin-bottom: 1rem;
-}
-
-.empty-message {
-    color: #64748b;
-    font-size: 1.1rem;
-    line-height: 1.6;
-    margin-bottom: 2.5rem;
-}
-
-.empty-actions {
-    display: flex;
-    gap: 1.25rem;
-    justify-content: center;
-}
-
-.btn-list-item-empty {
-    background-color: #15A119 !important;
-    color: #ffffff !important;
-    border: none !important;
-    padding: 0.85rem 2.5rem !important;
-    border-radius: 10px !important;
-    font-weight: 700 !important;
-    font-size: 1rem !important;
-}
-
-.btn-load-demo {
-    background-color: #f1f5f9 !important;
-    color: #475569 !important;
-    border: 1px solid #e2e8f0 !important;
-    padding: 0.85rem 2rem !important;
-    border-radius: 10px !important;
-    font-weight: 600 !important;
-}
-
-.btn-reset-empty {
-    margin-top: 3rem;
-    background: transparent !important;
-    border: none !important;
-    color: #94a3b8 !important;
-    text-decoration: underline !important;
-    font-size: 0.875rem !important;
-    font-weight: 500 !important;
-    padding: 0.5rem 1rem !important;
-    cursor: pointer;
-}
-
-.btn-reset-empty:hover {
-    color: #64748b !important;
 }

@@ -78,8 +78,10 @@ export default function Dashboard() {
   return (
     <div className="dashboard-content-wrapper">
       <div className="welcome-section">
-        <h1 className="welcome-title">Welcome back, Pearl!</h1>
-        <p className="welcome-subtitle">Track your impact and manage your listings</p>
+        <div className="welcome-text">
+          <h1 className="welcome-title">Welcome back, Pearl!</h1>
+          <p className="welcome-subtitle">Track your impact and manage your listings</p>
+        </div>
         {isDonorMode && (
           <button className="btn-list-item">
             <Plus size={18} />
@@ -95,7 +97,7 @@ export default function Dashboard() {
               <img src={collectedItemsIcon} alt="" aria-hidden className="stat-icon" width="24" height="24" />
             </div>
             <div className="stat-info">
-              <span className="stat-value">0</span>
+              <span className="stat-value">8</span>
               <span className="stat-label">{isDonorMode ? 'Items Listed' : 'Items Collected'}</span>
             </div>
           </div>
@@ -105,7 +107,7 @@ export default function Dashboard() {
               <img src={exchangeIcon} alt="" aria-hidden className="stat-icon" width="24" height="24" />
             </div>
             <div className="stat-info">
-              <span className="stat-value">0</span>
+              <span className="stat-value">5</span>
               <span className="stat-label">Exchanged</span>
             </div>
           </div>
@@ -115,7 +117,7 @@ export default function Dashboard() {
               <img src={sizeIcon} alt="" aria-hidden className="stat-icon" width="24" height="24" />
             </div>
             <div className="stat-info">
-              <span className="stat-value">0kg</span>
+              <span className="stat-value">47.5kg</span>
               <span className="stat-label">CO₂ Saved</span>
             </div>
           </div>
@@ -125,7 +127,7 @@ export default function Dashboard() {
               <img src={rewardIcon} alt="" aria-hidden className="stat-icon" width="24" height="24" />
             </div>
             <div className="stat-info">
-              <span className="stat-value">£0</span>
+              <span className="stat-value">£50</span>
               <span className="stat-label">Rewards Earned</span>
             </div>
           </div>
@@ -135,36 +137,131 @@ export default function Dashboard() {
       {isDonorMode && showStats && (
         <>
           <section className="impact-section">
-            <div className="section-header">
-              <h2 className="section-title">Your Environmental Impact</h2>
-              <button className="more-options-btn">
-                <span>•••</span>
-              </button>
-            </div>
-            <div className="empty-state-card">
-              <div className="empty-state-icon">
-                <img src={rewardIcon} alt="" className="empty-icon-img" />
+            <div className="impact-card">
+              <div className="impact-card-header">
+                <h2 className="impact-title">Your Environmental Impact</h2>
+                <button className="more-options-btn">•••</button>
               </div>
-              <p className="empty-state-text">Start listing items to see your environmental impact and CO₂ savings.</p>
+              <div className="impact-chart-container">
+                <div className="chart-y-axis">
+                  <span>100</span>
+                  <span>80</span>
+                  <span>60</span>
+                  <span>40</span>
+                  <span>20</span>
+                  <span>0</span>
+                </div>
+                <div className="chart-wrapper">
+                  <svg className="impact-svg" viewBox="0 0 800 200" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#15A119" stopOpacity="0.15" />
+                        <stop offset="100%" stopColor="#15A119" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M0,80 C100,120 150,50 200,80 C250,110 300,140 350,80 C400,20 500,150 600,80 C700,10 750,50 800,30 L800,200 L0,200 Z"
+                      fill="url(#chartGradient)"
+                    />
+                    <path
+                      d="M0,80 C100,120 150,50 200,80 C250,110 300,140 350,80 C400,20 500,150 600,80 C700,10 750,50 800,30"
+                      fill="none"
+                      stroke="#15A119"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                    <circle cx="200" cy="80" r="4" fill="#ffffff" stroke="#15A119" strokeWidth="2" />
+                    <circle cx="350" cy="80" r="4" fill="#ffffff" stroke="#15A119" strokeWidth="2" />
+                    <circle cx="600" cy="80" r="4" fill="#ffffff" stroke="#15A119" strokeWidth="2" />
+                  </svg>
+                  <div className="chart-x-axis">
+                    <span>Jan</span>
+                    <span>Feb</span>
+                    <span>Mar</span>
+                    <span>Apr</span>
+                    <span>May</span>
+                    <span>Jun</span>
+                    <span>Jul</span>
+                    <span>Aug</span>
+                    <span>Sep</span>
+                    <span>Oct</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
 
           <section className="listings-section">
-            <div className="section-header">
-              <h2 className="section-title">Your Listings</h2>
-              <button className="view-all-btn">
-                View All <ChevronRight size={16} />
-              </button>
-            </div>
-            <div className="empty-state-card">
-              <div className="empty-state-icon">
-                <img src={ipadImg} alt="" className="empty-icon-img-placeholder" />
+            <div className="listings-master-card">
+              <div className="listings-master-header">
+                <h2 className="listings-master-title">Your Listings</h2>
+                <button className="view-all-link-internal">
+                  View All <ChevronRight size={16} />
+                </button>
               </div>
-              <p className="empty-state-text">Your listed items will be displayed here once you create them.</p>
-              <button className="btn-list-item-secondary">
-                <Plus size={18} />
-                List New Item
-              </button>
+
+              <div className="listings-master-list">
+                {[
+                  {
+                    id: '1',
+                    title: 'iPhone 12Pro',
+                    status: 'Active',
+                    category: 'Gadget',
+                    condition: 'Good',
+                    meta: 'Waiting for collectors',
+                    image: ipadImg
+                  },
+                  {
+                    id: '2',
+                    title: 'Desk Lamp',
+                    status: 'Active',
+                    category: 'Electronics',
+                    condition: 'Good',
+                    meta: 'Waiting for collectors',
+                    image: candleImg
+                  },
+                  {
+                    id: '3',
+                    title: 'Winter Coat - Size M',
+                    status: 'Claimed',
+                    category: 'Clothing',
+                    condition: 'Like New',
+                    meta: 'Claimed by John D.',
+                    image: bagShoeImg
+                  }
+                ].map((item, index, array) => (
+                  <div key={item.id} className={`listing-master-row ${index === array.length - 1 ? 'last-row' : ''}`}>
+                    <div className="listing-row-left">
+                      <img src={item.image} alt={item.title} className="listing-row-img" />
+                      <div className="listing-row-info">
+                        <div className="listing-row-top">
+                          <h3 className="listing-row-name">{item.title}</h3>
+                          <span className={`listing-card-pill ${item.status.toLowerCase()}`}>
+                            {item.status}
+                          </span>
+                        </div>
+                        <div className="listing-card-metadata">
+                          <span>{item.category}</span>
+                          <span className="metadata-dot">·</span>
+                          <span>Condition: {item.condition}</span>
+                          <span className="metadata-dot">·</span>
+                          <span>{item.meta}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="listing-card-actions">
+                      {item.status === 'Active' ? (
+                        <>
+                          <button className="btn-action-view">View</button>
+                          <button className="btn-action-remove">Remove</button>
+                        </>
+                      ) : (
+                        <button className="btn-action-details">View Details</button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         </>
