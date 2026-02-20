@@ -1,6 +1,8 @@
 import { type ChangeEvent, type FormEvent, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import logoSrc from '@/assets/logo.svg'
+import { useUserRole } from '@/shared/context/UserRoleContext'
+import { OnboardingChoiceDialog } from './OnboardingChoiceDialog'
 import './SignupPage.css'
 
 interface SignupFormValues {
@@ -45,9 +47,22 @@ function PasswordEyeIcon() {
   )
 }
 
-export default function SignupPage() {
+interface SignupPageProps {
+  readonly showOnboarding?: boolean
+  readonly className?: string
+  readonly onSubmitSuccess?: () => void
+}
+
+export default function SignupPage({
+  showOnboarding = false,
+  className,
+  onSubmitSuccess,
+}: SignupPageProps) {
   const [formValues, setFormValues] = useState(initialFormValues)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false)
+  const { setRole } = useUserRole()
+  const navigate = useNavigate()
 
   function onInputChange(
     key: keyof SignupFormValues,
@@ -62,10 +77,20 @@ export default function SignupPage() {
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    onSubmitSuccess?.()
+    if (showOnboarding) {
+      setIsOnboardingOpen(true)
+      return
+    }
+    navigate('/welcome')
+  }
+
+  function handleOnboardingSelect(choice: 'collect' | 'donate') {
+    setRole(choice === 'collect' ? 'collector' : 'donor')
   }
 
   return (
-    <main className="signup-page">
+    <main className={`signup-page ${className ?? ''}`.trim()}>
       <div className="signup-layout">
         <aside className="signup-highlight-panel">
           <div className="signup-brand">
@@ -209,6 +234,14 @@ export default function SignupPage() {
           </p>
         </section>
       </div>
+
+      {showOnboarding && (
+        <OnboardingChoiceDialog
+          isOpen={isOnboardingOpen}
+          onClose={() => setIsOnboardingOpen(false)}
+          onSelect={handleOnboardingSelect}
+        />
+      )}
     </main>
   )
 }
