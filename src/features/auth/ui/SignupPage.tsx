@@ -203,7 +203,7 @@ export default function SignupPage() {
 
           <p className="signup-login-copy">
             Already have an account?{' '}
-            <Link className="signup-login-link" to="/">
+            <Link className="signup-login-link" to="/login">
               Log in
             </Link>
           </p>
