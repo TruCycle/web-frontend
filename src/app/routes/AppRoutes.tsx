@@ -3,6 +3,7 @@ import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { AppShell } from '@/app/shell/AppShell'
 
 const SignupPage = lazy(() => import('@/features/auth/ui/SignupPage'))
+const WelcomePage = lazy(() => import('@/features/auth/ui/WelcomePage'))
 const NotificationsPage = lazy(
   () => import('@/features/notifications/ui/NotificationsPage'),
 )
@@ -27,6 +28,7 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="/welcome" element={<WelcomePage />} />
       <Route element={<ShellLayout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/notifications" element={<NotificationsPage />} />
