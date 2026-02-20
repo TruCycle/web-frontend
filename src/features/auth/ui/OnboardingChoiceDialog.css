@@ -1,0 +1,188 @@
+.onboarding-modal.modal-container-center {
+  max-width: 560px;
+  padding: 2.5rem 2.25rem 2rem;
+}
+
+.onboarding-dialog {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.onboarding-icon-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.onboarding-icon-wrap::before,
+.onboarding-icon-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(59, 186, 108, 0.4) 0 6px, transparent 7px),
+    radial-gradient(circle at 80% 25%, rgba(59, 186, 108, 0.35) 0 5px, transparent 6px),
+    radial-gradient(circle at 15% 75%, rgba(59, 186, 108, 0.35) 0 5px, transparent 6px),
+    radial-gradient(circle at 85% 70%, rgba(59, 186, 108, 0.45) 0 6px, transparent 7px);
+  opacity: 0.7;
+  animation: confettiPulse 0.9s ease-out forwards;
+}
+
+.onboarding-icon-wrap::after {
+  animation-delay: 0.15s;
+}
+
+.onboarding-icon {
+  width: 48px;
+  height: 48px;
+  background: #f1fbf4;
+  border: 1px solid #cde8d3;
+  border-radius: 999px;
+  color: #2c9c58;
+  display: grid;
+  place-items: center;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 10px 20px -14px rgba(43, 153, 86, 0.5);
+}
+
+.onboarding-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.onboarding-subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.onboarding-options {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0 0.75rem;
+}
+
+.onboarding-option {
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 1rem;
+  padding: 1.2rem 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.onboarding-option:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5f5;
+  box-shadow: 0 16px 30px -24px rgba(15, 23, 42, 0.4);
+}
+
+.onboarding-option h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.onboarding-option p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.onboarding-option-recommended {
+  background: #eef9f1;
+  border-color: #cde8d3;
+}
+
+.onboarding-option-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #2c9c58;
+  background: #e3f7ea;
+  border: 1px solid #cde8d3;
+}
+
+.onboarding-option-icon.donate {
+  color: #22a3d2;
+  background: #e7f5fb;
+  border-color: #cfeaf6;
+}
+
+.onboarding-pill {
+  align-self: center;
+  margin-top: 0.25rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: #2c9c58;
+  background: #def4e6;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+
+.onboarding-link {
+  align-self: center;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #22a3d2;
+}
+
+.onboarding-footnote {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+@media (max-width: 640px) {
+  .onboarding-modal.modal-container-center {
+    padding: 2rem 1.5rem 1.5rem;
+  }
+
+  .onboarding-options {
+    grid-template-columns: 1fr;
+  }
+
+  .onboarding-dialog {
+    text-align: center;
+    align-items: center;
+  }
+}
+
+@keyframes confettiPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+  60% {
+    opacity: 0.85;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+}

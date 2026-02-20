@@ -1,18 +1,20 @@
 .signup-page {
   min-height: 100vh;
-  padding: 0.35rem;
-  background: #d9d9da;
+  padding: 1.25rem;
+  background: #2f2f2f;
 }
 
 .signup-layout {
   display: grid;
   grid-template-columns: minmax(320px, 1fr) minmax(420px, 1fr);
-  min-height: calc(100vh - 0.7rem);
-  max-width: 1140px;
+  min-height: calc(100vh - 2.5rem);
+  max-width: 1100px;
   margin: 0 auto;
-  border-radius: 1.2rem;
+  border-radius: 1.5rem;
   overflow: hidden;
-  background: #efeff0;
+  background: #ffffff;
+  border: 4px solid #ffffff;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
 }
 
 .signup-highlight-panel {
@@ -20,11 +22,11 @@
   flex-direction: column;
   justify-content: space-between;
   gap: 1.75rem;
-  padding: 2rem 2.15rem;
+  padding: 2.4rem 2.6rem;
   color: #e8f2e9;
   background:
-    radial-gradient(circle at 25% 20%, #2d313620 0%, transparent 42%),
-    linear-gradient(145deg, #1a1d21 0%, #121417 100%);
+    radial-gradient(circle at 20% 20%, rgba(66, 70, 76, 0.45) 0%, transparent 48%),
+    linear-gradient(145deg, #1b1b1b 0%, #121212 100%);
 }
 
 .signup-brand {
@@ -35,13 +37,13 @@
 }
 
 .signup-brand-logo {
-  width: 2.1rem;
-  height: 2.1rem;
+  width: 2.2rem;
+  height: 2.2rem;
   flex: 0 0 auto;
 }
 
 .signup-brand-name {
-  font-size: 1.8rem;
+  font-size: 1.55rem;
   font-weight: 700;
   color: #f3f8f4;
 }
@@ -52,7 +54,7 @@
 
 .signup-highlight-title {
   margin: 0;
-  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-size: clamp(2.1rem, 4vw, 3.1rem);
   line-height: 1.1;
   letter-spacing: -0.02em;
   color: #f4f4f4;
@@ -75,7 +77,7 @@
   align-items: center;
   gap: 0.55rem;
   color: #e8efe9;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .signup-check-icon {
@@ -89,10 +91,10 @@
 .signup-check-icon::after {
   content: '';
   position: absolute;
-  left: 0.2rem;
-  top: 0.14rem;
-  width: 0.42rem;
-  height: 0.22rem;
+  left: 4.31px;
+  top: 4.47px;
+  width: 11.37px;
+  height: 10.83px;
   border: 2px solid #8fdc99;
   border-top: 0;
   border-right: 0;
@@ -100,11 +102,11 @@
 }
 
 .signup-testimonial {
-  padding: 1.25rem 1.35rem;
-  border: 1px solid #8fdd98;
+  padding: 1.2rem 1.35rem;
+  border: 1px solid #7fca8f;
   border-radius: 1rem;
   background: linear-gradient(160deg, #ffffff1a 0%, #ffffff0f 100%);
-  box-shadow: 0 0 28px #8fde9924;
+  box-shadow: 0 0 26px rgba(143, 222, 153, 0.18);
 }
 
 .signup-testimonial-author {
@@ -141,7 +143,7 @@
 
 .signup-testimonial-quote {
   margin: 1rem 0;
-  font-size: 0.98rem;
+  font-size: 0.92rem;
   max-width: 30ch;
   color: #e8efe8;
 }
@@ -164,18 +166,20 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 3rem 4rem;
+  padding: 3rem 3.4rem;
+  background: #ffffff;
 }
 
 .signup-form-header h2 {
   margin: 0;
-  font-size: clamp(1.9rem, 2.4vw, 2.5rem);
+  font-size: clamp(1.7rem, 2.2vw, 2.2rem);
   color: #1d2431;
 }
 
 .signup-form-header p {
   margin: 0.55rem 0 0;
   color: #707886;
+  font-size: 0.92rem;
 }
 
 .signup-form {
@@ -192,17 +196,18 @@
 .signup-field span {
   font-weight: 600;
   color: #2d3543;
+  font-size: 0.9rem;
 }
 
 .signup-field input {
   width: 100%;
-  height: 3rem;
+  height: 2.8rem;
   border: 1px solid #d2d7df;
   border-radius: 0.55rem;
-  padding: 0 0.95rem;
+  padding: 0 0.85rem;
   font-size: 0.95rem;
   color: #172033;
-  background-color: #f4f6f8;
+  background-color: #f7f8f9;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -254,16 +259,16 @@
 .signup-policy {
   margin: 0.1rem 0 0;
   color: #586174;
-  font-size: 0.92rem;
+  font-size: 0.82rem;
 }
 
 .signup-submit {
-  height: 3.05rem;
+  height: 2.85rem;
   border: 0;
   border-radius: 0.55rem;
-  background: #95e69e;
+  background: #a4f5a6;
   color: #16301c;
-  font-size: 1.45rem;
+  font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
   transition: filter 0.2s ease, transform 0.2s ease;
@@ -283,6 +288,7 @@
   margin: 1.1rem 0 0;
   text-align: center;
   color: #738096;
+  font-size: 0.86rem;
 }
 
 .signup-login-link {
@@ -320,7 +326,7 @@
   }
 
   .signup-highlight-panel {
-    padding: 1.4rem 1.2rem;
+    padding: 1.5rem 1.25rem;
   }
 
   .signup-brand-name {
@@ -332,7 +338,7 @@
   }
 
   .signup-form-panel {
-    padding: 1.6rem 1.1rem 2rem;
+    padding: 1.7rem 1.2rem 2rem;
   }
 
   .signup-submit {
