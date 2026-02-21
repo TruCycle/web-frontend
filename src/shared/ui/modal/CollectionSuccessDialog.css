@@ -39,11 +39,11 @@
     background-color: #A4F5A6 !important;
     border: none !important;
     color: #121212 !important;
-    font-weight: 600 !important;
+    font-size: 14px !important;
+    font-weight: 590 !important;
     padding: 0.875rem 3rem !important;
     border-radius: 8px !important;
     cursor: pointer;
-    font-size: 1rem !important;
     width: 100%;
     max-width: 280px;
     transition: background-color 0.2s;

@@ -23,7 +23,7 @@
     font-size: 1.625rem;
     font-weight: 800;
     color: #0f172a;
-    margin: 0 0 0.35rem 0;
+    margin: 0 0 0.15rem 0;
     letter-spacing: -0.02em;
 }
 
@@ -86,11 +86,11 @@
 .btn-browse-empty {
     background-color: #A4F5A6 !important;
     color: #121212 !important;
-    font-weight: 600 !important;
+    font-weight: 590 !important;
     padding: 0.75rem 2rem !important;
     border-radius: 0.5rem !important;
     border: none !important;
-    font-size: 1rem !important;
+    font-size: 14px !important;
     cursor: pointer;
     transition: opacity 0.2s;
 }
@@ -200,10 +200,10 @@
     background-color: #A4F5A6 !important;
     color: #121212 !important;
     border: none !important;
-    font-weight: 600 !important;
+    font-weight: 590 !important;
     padding: 0.75rem 1.5rem !important;
     border-radius: 8px !important;
-    font-size: 1rem !important;
+    font-size: 14px !important;
     cursor: pointer;
 }
 
@@ -325,11 +325,11 @@
 .btn-banner-qr {
     background-color: #A4F5A6 !important;
     color: #121212 !important;
-    font-weight: 600 !important;
+    font-weight: 590 !important;
     padding: 0.75rem 1.75rem !important;
     border-radius: 10px !important;
     border: none !important;
-    font-size: 1rem !important;
+    font-size: 14px !important;
     cursor: pointer;
     white-space: nowrap;
 }

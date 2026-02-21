@@ -4,11 +4,57 @@
     padding: 1rem 0;
 }
 
-.listings-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #121212;
+/* Welcome Section */
+.welcome-section {
     margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.welcome-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.welcome-title {
+    font-size: 1.625rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.35rem;
+    letter-spacing: -0.02em;
+}
+
+.welcome-subtitle {
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.btn-list-item {
+    background-color: #A4F5A6;
+    color: #121212;
+    border: 3px solid rgba(164, 245, 166, 0.4);
+    outline: 3px solid rgba(164, 245, 166, 0.2);
+    outline-offset: 2px;
+    padding: 0.65rem 1.5rem;
+    font-size: 14px;
+    font-weight: 590;
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(164, 245, 166, 0.2);
+}
+
+.btn-list-item:hover {
+    background-color: #92e094;
+    border-color: rgba(146, 224, 148, 0.5);
+    outline-color: rgba(146, 224, 148, 0.3);
+    box-shadow: 0 4px 12px rgba(164, 245, 166, 0.3);
 }
 
 /* New Premium Master Card for Empty State */
@@ -60,8 +106,8 @@
     outline: 3px solid rgba(164, 245, 166, 0.2);
     outline-offset: 2px;
     padding: 0.85rem 2.25rem;
-    font-weight: 700;
-    font-size: 1.05rem;
+    font-size: 14px;
+    font-weight: 590;
     border-radius: 10px;
     cursor: pointer;
     display: flex;
