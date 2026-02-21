@@ -13,12 +13,12 @@ export default function WelcomePage() {
   const handleSelect = (choice: 'collect' | 'donate') => {
     setRole(choice === 'collect' ? 'collector' : 'donor')
     setIsOpen(false)
-    navigate('/dashboard')
+    navigate('/')
   }
 
   const handleClose = () => {
     setIsOpen(false)
-    navigate('/dashboard')
+    navigate('/')
   }
 
   return (

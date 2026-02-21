@@ -116,10 +116,12 @@ export default function SignupPage({
 
           <article className="signup-testimonial">
             <div className="signup-testimonial-author">
-              <span aria-hidden className="signup-avatar">
-                SL
-              </span>
-              <div>
+              <img
+                alt="Sophie, London"
+                className="signup-avatar"
+                src="/profile-picture.jpg"
+              />
+              <div className='author-info'>
                 <p className="signup-author-name">Sophie, London</p>
                 <p className="signup-author-role">Sustainable Living Enthusiast</p>
               </div>
@@ -129,7 +131,7 @@ export default function SignupPage({
               rewarding.
             </p>
             <div className="signup-testimonial-meta">
-              <span>Jan 2026</span>
+              <span className="signup-date">Jan 2026</span>
               <span className="signup-stars">*****</span>
             </div>
           </article>

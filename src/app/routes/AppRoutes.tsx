@@ -3,6 +3,13 @@ import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { AppShell } from '@/app/shell/AppShell'
 
 const SignupPage = lazy(() => import('@/features/auth/ui/SignupPage'))
+const PasswordResetRequestPage = lazy(
+  () => import('@/features/auth/ui/PasswordResetRequestPage'),
+)
+const PasswordResetOtpPage = lazy(
+  () => import('@/features/auth/ui/PasswordResetOtpPage'),
+)
+const PasswordResetPage = lazy(() => import('@/features/auth/ui/PasswordResetPage'))
 const WelcomePage = lazy(() => import('@/features/auth/ui/WelcomePage'))
 const NotificationsPage = lazy(
   () => import('@/features/notifications/ui/NotificationsPage'),
@@ -28,6 +35,9 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="/reset-password/request" element={<PasswordResetRequestPage />} />
+      <Route path="/reset-password/otp" element={<PasswordResetOtpPage />} />
+      <Route path="/reset-password" element={<PasswordResetPage />} />
       <Route path="/welcome" element={<WelcomePage />} />
       <Route element={<ShellLayout />}>
         <Route path="/" element={<Dashboard />} />

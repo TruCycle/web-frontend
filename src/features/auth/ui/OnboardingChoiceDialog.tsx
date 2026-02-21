@@ -1,4 +1,4 @@
-import { Check, HandHeart, Package } from 'lucide-react'
+import { Check, Gift, Package } from 'lucide-react'
 import { Modal } from '@/shared/ui/modal/Modal'
 import './OnboardingChoiceDialog.css'
 
@@ -26,6 +26,24 @@ export function OnboardingChoiceDialog({
     >
       <div className="onboarding-dialog">
         <div className="onboarding-icon-wrap" aria-hidden>
+          <div className="onboarding-confetti">
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
           <div className="onboarding-icon">
             <Check size={22} />
           </div>
@@ -56,7 +74,7 @@ export function OnboardingChoiceDialog({
             onClick={() => handleSelect('donate')}
           >
             <div className="onboarding-option-icon donate">
-              <HandHeart size={20} />
+              <Gift size={20} />
             </div>
             <h3>Donate an item</h3>
             <p>List items you no longer need and help others</p>
