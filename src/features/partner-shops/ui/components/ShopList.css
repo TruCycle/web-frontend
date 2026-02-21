@@ -2,10 +2,13 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    height: 100%;
+    width: 100%;
+    max-width: 660px;
+    height: 630px;
     padding: 1.5rem;
     background-color: white;
     border-radius: 10px;
+    opacity: 1;
 }
 
 .shop-list-instructions-wrapper {
@@ -13,14 +16,24 @@
     flex-direction: column;
     gap: 0.75rem;
     margin-bottom: -0.5rem;
+    position: relative;
+    width: calc(100% + 3rem);
+    margin-left: -1.5rem;
 }
 
 .shop-list-instructions {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     font-size: 18px;
+    font-style: normal;
     font-weight: 510;
+    line-height: 141%;
+    letter-spacing: 0%;
     color: #1f2937;
     margin: 0;
-    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 1.5rem;
 }
 
 .shop-list-divider {

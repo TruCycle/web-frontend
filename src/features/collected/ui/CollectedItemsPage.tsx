@@ -93,8 +93,8 @@ export default function CollectedItemsPage() {
         <div className="collected-content-wrapper">
             <div className="welcome-section">
                 <div className="welcome-text">
-                    <h1 className="welcome-title">My Selected Items</h1>
-                    <p className="welcome-subtitle">View and manage items you've successfully claimed</p>
+                    <h1 className="welcome-title">Welcome back, Pearl!</h1>
+                    <p className="welcome-subtitle">Track your impact and manage your claimed items</p>
                 </div>
             </div>
 

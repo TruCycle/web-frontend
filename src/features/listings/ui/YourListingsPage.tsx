@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Button } from '@/shared/ui/button/Button';
 import { ItemDetailsDialog } from '@/shared/ui/modal/ItemDetailsDialog';
+import { ListItemDialog } from '@/shared/ui/modal/ListItemDialog';
 import './YourListingsPage.css';
 
 import ipadImg from '@/assets/images/ipad.jpg';
@@ -51,6 +52,7 @@ const LISTINGS_DATA = [
 export default function YourListingsPage() {
     const [listings, setListings] = useState<any[]>([]); // Defaulting to empty to show the premium empty state
     const [selectedItem, setSelectedItem] = useState<any | null>(null);
+    const [isListItemDialogOpen, setIsListItemDialogOpen] = useState(false);
 
     const handleViewDetails = (item: any) => {
         setSelectedItem(item);
@@ -64,7 +66,16 @@ export default function YourListingsPage() {
 
     return (
         <div className="your-listings-wrapper">
-            <h1 className="listings-title">Your Listings</h1>
+            <div className="welcome-section">
+                <div className="welcome-text">
+                    <h1 className="welcome-title">Welcome back, Pearl!</h1>
+                    <p className="welcome-subtitle">Track your impact and manage your listings</p>
+                </div>
+                <button className="btn-list-item" onClick={() => setIsListItemDialogOpen(true)}>
+                    <Plus size={18} />
+                    List New Item
+                </button>
+            </div>
 
             {!hasListings ? (
                 <div className="empty-listings-master-card">
@@ -79,7 +90,7 @@ export default function YourListingsPage() {
                         <p className="empty-state-message">
                             Your listed items will be<br />displayed here
                         </p>
-                        <button className="btn-list-item-premium">
+                        <button className="btn-list-item-premium" onClick={() => setIsListItemDialogOpen(true)}>
                             <Plus size={18} />
                             List New Item
                         </button>
@@ -167,6 +178,11 @@ export default function YourListingsPage() {
                 isOpen={!!selectedItem}
                 onClose={() => setSelectedItem(null)}
                 item={selectedItem}
+            />
+
+            <ListItemDialog
+                isOpen={isListItemDialogOpen}
+                onClose={() => setIsListItemDialogOpen(false)}
             />
         </div>
     );

@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { Plus } from 'lucide-react';
 import { ShopList } from './components/ShopList';
 import { ShopDetails } from './components/ShopDetails';
+import { ListItemDialog } from '@/shared/ui/modal/ListItemDialog';
 import './PartnerShopsPage.css';
 
 export interface Shop {
@@ -60,6 +62,7 @@ const PARTNER_SHOPS: Shop[] = [
 export default function PartnerShopsPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedShopId, setSelectedShopId] = useState<string>(PARTNER_SHOPS[0].id);
+    const [isListItemDialogOpen, setIsListItemDialogOpen] = useState(false);
 
     const filteredShops = PARTNER_SHOPS.filter(shop =>
         shop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -71,9 +74,15 @@ export default function PartnerShopsPage() {
 
     return (
         <div className="partner-shops-page">
-            <div className="partner-shops-header">
-                <h1 className="welcome-title">Welcome back, Pearl!</h1>
-                <p className="welcome-subtitle">Track your impact and manage your listings</p>
+            <div className="welcome-section">
+                <div className="welcome-text">
+                    <h1 className="welcome-title">Welcome back, Pearl!</h1>
+                    <p className="welcome-subtitle">Track your impact and manage your listings</p>
+                </div>
+                <button className="btn-list-item" onClick={() => setIsListItemDialogOpen(true)}>
+                    <Plus size={18} />
+                    List New Item
+                </button>
             </div>
 
             <div className="partner-shops-content">
@@ -102,6 +111,10 @@ export default function PartnerShopsPage() {
                     ></iframe>
                 </div>
             </div>
+            <ListItemDialog
+                isOpen={isListItemDialogOpen}
+                onClose={() => setIsListItemDialogOpen(false)}
+            />
         </div>
     );
 }

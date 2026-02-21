@@ -2,10 +2,14 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    height: auto;
+    width: 100%;
+    max-width: 420px;
+    height: 630px;
     padding: 1.5rem;
     background-color: white;
     border-radius: 10px;
+    opacity: 1;
+    overflow-y: auto;
 }
 
 
@@ -98,6 +102,7 @@
     background-color: white !important;
     color: #2d5016 !important;
     border: 1px solid #e5e7eb !important;
+    white-space: nowrap !important;
 }
 
 .btn-plan-handoff {
@@ -106,6 +111,7 @@
     color: #121212 !important;
     font-size: 14px !important;
     font-weight: 590 !important;
+    white-space: nowrap !important;
 }
 
 .btn-plan-handoff:hover {

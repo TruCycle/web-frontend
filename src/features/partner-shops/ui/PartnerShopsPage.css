@@ -1,23 +1,67 @@
 .partner-shops-page {
-    padding: 2rem;
+    padding: 0 0 1rem 0;
+    margin-top: -0.75rem;
     max-width: 1200px;
-    margin: 0 auto;
+    margin-left: auto;
+    margin-right: auto;
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 0.5rem;
     height: 100%;
 }
 
-.partner-shops-header {
-    margin-bottom: 0.5rem;
+/* Welcome Section */
+.welcome-section {
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.welcome-text {
+    display: flex;
+    flex-direction: column;
 }
 
 .welcome-title {
     font-size: 1.625rem;
     font-weight: 800;
     color: #0f172a;
-    margin: 0 0 0.35rem 0;
+    margin: 0 0 0.15rem 0;
     letter-spacing: -0.02em;
+}
+
+.welcome-subtitle {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.btn-list-item {
+    background-color: #A4F5A6;
+    color: #121212;
+    border: 3px solid rgba(164, 245, 166, 0.4);
+    outline: 3px solid rgba(164, 245, 166, 0.2);
+    outline-offset: 2px;
+    padding: 0.65rem 1.5rem;
+    font-size: 14px;
+    font-weight: 590;
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(164, 245, 166, 0.2);
+}
+
+.btn-list-item:hover {
+    background-color: #92e094;
+    border-color: rgba(146, 224, 148, 0.5);
+    outline-color: rgba(146, 224, 148, 0.3);
+    box-shadow: 0 4px 12px rgba(164, 245, 166, 0.3);
 }
 
 .welcome-subtitle {
@@ -34,8 +78,8 @@
 }
 
 .shops-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    justify-content: center;
     gap: 2rem;
     min-height: 500px;
 }
@@ -47,9 +91,10 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .shops-container {
-        grid-template-columns: 1fr;
+        flex-direction: column;
+        align-items: center;
         height: auto;
     }
 }

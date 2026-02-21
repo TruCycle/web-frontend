@@ -14,7 +14,7 @@
   /* Rounded on all sides */
   display: flex;
   flex-direction: column;
-  padding: 1.75rem 1rem;
+  padding: 1.25rem 1rem;
   z-index: 10;
   flex-shrink: 0;
   position: sticky;
@@ -23,7 +23,7 @@
 }
 
 .shell-logo-container {
-  padding: 0.5rem 0.75rem 2.5rem;
+  padding: 0.5rem 0.75rem 1rem;
 }
 
 .shell-logo {
@@ -50,8 +50,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  overflow-y: auto;
-  overflow-x: hidden;
+  /* Remove scrollbar and overflow constraint to keep compact */
+  overflow: visible;
   scrollbar-width: none;
   /* Firefox */
 }
@@ -69,16 +69,15 @@
 
 .nav-divider {
   height: 1px;
-  background-color: #333;
-  margin: 1.5rem 0.5rem;
-  opacity: 0.5;
+  background-color: #64748B80;
+  margin: 1rem -1rem;
 }
 
 .shell-nav-link {
   display: flex;
   align-items: center;
   gap: 0.875rem;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem;
   color: #ffffff;
   opacity: 0.6;
   text-decoration: none;
@@ -113,7 +112,7 @@
 
 .role-toggle-container {
   margin-top: auto;
-  padding: 1.5rem 0 0.5rem;
+  padding: 0.75rem 0 0.5rem;
   display: flex;
   justify-content: center;
 }
@@ -124,17 +123,17 @@
   padding: 0.35rem;
   border-radius: 1rem;
   border: 1.5px solid #2d2d2d;
-  width: 100%;
+  width: fit-content;
   gap: 0.25rem;
 }
 
 .role-btn {
   flex: 1;
-  padding: 0.75rem 0.5rem;
+  padding: 0.5rem 0.75rem;
   border: none;
   background: transparent;
   color: #a1a1aa;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 700;
   border-radius: 0.75rem;
   cursor: pointer;
