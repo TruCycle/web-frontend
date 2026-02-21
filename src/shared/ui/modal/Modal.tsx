@@ -9,6 +9,7 @@ interface ModalProps {
     position?: 'center' | 'right';
     containerClassName?: string;
     contentClassName?: string;
+    hideCloseButton?: boolean;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -18,6 +19,7 @@ export const Modal: React.FC<ModalProps> = ({
     position = 'center',
     containerClassName,
     contentClassName,
+    hideCloseButton,
 }) => {
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
@@ -42,9 +44,11 @@ export const Modal: React.FC<ModalProps> = ({
     return (
         <div className={overlayClass} onClick={onClose}>
             <div className={containerClass} onClick={(e) => e.stopPropagation()}>
-                <button className="modal-close-btn" onClick={onClose} aria-label="Close modal">
-                    <X size={24} />
-                </button>
+                {!hideCloseButton && (
+                    <button className="modal-close-btn" onClick={onClose} aria-label="Close modal">
+                        <X size={24} />
+                    </button>
+                )}
                 <div className={contentClass}>
                     {children}
                 </div>

@@ -64,7 +64,8 @@ const CATEGORIES = [
 
 export default function Dashboard() {
   const location = useLocation();
-  const { isDonorMode } = useUserRole();
+  const { role } = useUserRole();
+  const isDonorMode = role === 'donor';
   const [activeCategory, setActiveCategory] = useState('All Items');
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [isListItemDialogOpen, setIsListItemDialogOpen] = useState(false);
