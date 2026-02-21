@@ -267,9 +267,9 @@
   border: 0;
   border-radius: 0.55rem;
   background: #a4f5a6;
-  color: #16301c;
-  font-size: 1rem;
-  font-weight: 700;
+  color: #121212;
+  font-size: 14px;
+  font-weight: 590;
   cursor: pointer;
   transition: filter 0.2s ease, transform 0.2s ease;
 }

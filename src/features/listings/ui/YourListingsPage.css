@@ -60,8 +60,8 @@
     outline: 3px solid rgba(164, 245, 166, 0.2);
     outline-offset: 2px;
     padding: 0.85rem 2.25rem;
-    font-weight: 700;
-    font-size: 1.05rem;
+    font-size: 14px;
+    font-weight: 590;
     border-radius: 10px;
     cursor: pointer;
     display: flex;
