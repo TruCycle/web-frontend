@@ -5,7 +5,7 @@ import './ItemDetailsDialog.css';
 interface ItemDetailsDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    item: any | null; // Using any for now to match CollectedItemsPage mock data
+    item: any | null;
 }
 
 export const ItemDetailsDialog: React.FC<ItemDetailsDialogProps> = ({ isOpen, onClose, item }) => {
@@ -19,7 +19,6 @@ export const ItemDetailsDialog: React.FC<ItemDetailsDialogProps> = ({ isOpen, on
                         <h2 className="details-title">{item.title}</h2>
                         <p className="details-subtitle">View and manage your item details</p>
                     </div>
-                    {/* Close button is handled by Modal component, but we can add a custom one if needed */}
                 </div>
 
                 <div className="details-image-container">

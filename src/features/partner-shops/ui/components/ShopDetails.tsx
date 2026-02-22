@@ -27,7 +27,7 @@ export function ShopDetails({ shop }: ShopDetailsProps) {
             </div>
 
             <div className="shop-detail-section">
-                <h4 className="detail-section-title">ACCEPTED ITEMS</h4>
+                <h4 className="detail-section-title accepted-items-title">ACCEPTED ITEMS</h4>
                 <div className="tags-container">
                     {shop.acceptedItems.map(item => (
                         <span key={item} className="tag-pill">

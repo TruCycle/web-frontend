@@ -1,3 +1,4 @@
+/* Restored right-side panel for Collected/Completed items */
 .item-details-dialog {
     padding: 1rem;
     max-width: 500px;
@@ -52,9 +53,10 @@
     background-color: #ffffff;
 }
 
-.status-pill-overlay.collected {
-    color: #166534;
-    border: 1px solid #166534;
+.status-pill-overlay.collected,
+.status-pill-overlay.completed {
+    color: #15A119;
+    border: 1px solid #15A119;
 }
 
 .status-pill-overlay.claimed {

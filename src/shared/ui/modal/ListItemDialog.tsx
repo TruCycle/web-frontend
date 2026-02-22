@@ -90,7 +90,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({ isOpen, onClose 
 
                         <div className="qr-code-section">
                             <div className="qr-code-container-compact">
-                                <QrCode size={80} color="#ffffff" strokeWidth={1.5} />
+                                <QrCode size={55} color="#ffffff" strokeWidth={1.5} />
                             </div>
                             <p className="qr-caption">
                                 Share this QR code with potential collectors or show it when dropping off at Fixars Shop
