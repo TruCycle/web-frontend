@@ -119,23 +119,26 @@
 
 .role-toggle {
   display: flex;
-  background-color: #1a1a1a;
-  padding: 10px;
-  border-radius: 1rem;
-  border: 1.5px solid #2d2d2d;
+  background-color: #2F382F;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid #A4F5A6;
   width: fit-content;
+  height: 50px;
+  align-items: center;
   gap: 0.25rem;
 }
 
 .role-btn {
   flex: 1;
-  padding: 10px;
+  height: 100%;
+  padding: 0 16px;
   border: none;
   background: transparent;
   color: #a1a1aa;
   font-size: 0.85rem;
   font-weight: 700;
-  border-radius: 0.75rem;
+  border-radius: 5px;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
