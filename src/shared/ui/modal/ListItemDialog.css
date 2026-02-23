@@ -10,7 +10,7 @@
 }
 
 .list-item-header {
-    padding: 5px;
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
     border-bottom: 1px solid #f1f5f9;
     display: flex;
     justify-content: space-between;
@@ -44,7 +44,7 @@
 .list-item-scroll-content {
     flex: 1;
     overflow-y: auto;
-    padding: 5px;
+    padding: 0 1.5rem 1rem 1.5rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -335,7 +335,7 @@
 }
 
 .success-view.compact-padding {
-    padding: 5px;
+    padding: 1.5rem;
 }
 
 .success-view.compact-padding .list-item-scroll-content {
@@ -546,7 +546,7 @@
 }
 
 .list-item-footer {
-    padding: 5px;
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
     border-top: 1px solid #f1f5f9;
     display: flex;
     justify-content: flex-end;
