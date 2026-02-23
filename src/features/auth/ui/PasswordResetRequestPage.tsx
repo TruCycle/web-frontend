@@ -20,6 +20,7 @@ const resetBenefits = [
 
 export default function PasswordResetRequestPage() {
   const [formValues, setFormValues] = useState(initialFormValues)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
 
   function onInputChange(event: ChangeEvent<HTMLInputElement>) {
@@ -29,6 +30,7 @@ export default function PasswordResetRequestPage() {
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setIsSubmitting(true)
     navigate('/reset-password/otp')
   }
 
@@ -100,8 +102,20 @@ export default function PasswordResetRequestPage() {
               />
             </label>
 
-            <Button className="reset-submit" type="submit">
-              Continue
+            <Button
+              className={`reset-submit ${isSubmitting ? 'is-loading' : ''}`}
+              type="submit"
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="reset-loading-spinner" aria-hidden />
+                  Sending code...
+                </>
+              ) : (
+                'Continue'
+              )}
             </Button>
           </form>
 

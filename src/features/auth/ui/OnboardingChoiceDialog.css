@@ -54,6 +54,55 @@
 .onboarding-confetti span:nth-child(16) { top: 60px; left: 40px; background: #f472b6; animation-delay: 600ms; }
 .onboarding-confetti span:nth-child(17) { top: 58px; right: 30px; background: #60a5fa; animation-delay: 640ms; }
 
+.onboarding-confetti-piece {
+  position: absolute;
+  top: -20%;
+  width: var(--confetti-size, 7px);
+  height: calc(var(--confetti-size, 7px) * 1.6);
+  background: var(--confetti-color, #3aa45e);
+  left: var(--confetti-left, 50%);
+  opacity: 0.95;
+  border-radius: 2px;
+  transform: rotate(var(--confetti-rotate, 0deg));
+  animation: onboarding-fall var(--confetti-duration, 2.1s) ease-in forwards;
+  animation-delay: var(--confetti-delay, 0ms);
+}
+
+.onboarding-confetti-piece:nth-child(3n) {
+  border-radius: 999px;
+}
+
+.onboarding-confetti-piece:nth-child(17) { --confetti-left: 6%; --confetti-size: 6px; --confetti-color: #2ea05f; --confetti-duration: 2.2s; --confetti-delay: 0ms; --confetti-rotate: 12deg; }
+.onboarding-confetti-piece:nth-child(18) { --confetti-left: 12%; --confetti-size: 7px; --confetti-color: #ffd166; --confetti-duration: 2.1s; --confetti-delay: 120ms; --confetti-rotate: 45deg; }
+.onboarding-confetti-piece:nth-child(19) { --confetti-left: 18%; --confetti-size: 5px; --confetti-color: #6ee7b7; --confetti-duration: 2.3s; --confetti-delay: 240ms; --confetti-rotate: 24deg; }
+.onboarding-confetti-piece:nth-child(20) { --confetti-left: 24%; --confetti-size: 9px; --confetti-color: #34d399; --confetti-duration: 2.2s; --confetti-delay: 60ms; --confetti-rotate: -28deg; }
+.onboarding-confetti-piece:nth-child(21) { --confetti-left: 30%; --confetti-size: 6px; --confetti-color: #60a5fa; --confetti-duration: 2.4s; --confetti-delay: 180ms; --confetti-rotate: 90deg; }
+.onboarding-confetti-piece:nth-child(22) { --confetti-left: 36%; --confetti-size: 8px; --confetti-color: #a7f3d0; --confetti-duration: 2.2s; --confetti-delay: 300ms; --confetti-rotate: -12deg; }
+.onboarding-confetti-piece:nth-child(23) { --confetti-left: 42%; --confetti-size: 7px; --confetti-color: #22c55e; --confetti-duration: 2.2s; --confetti-delay: 90ms; --confetti-rotate: 20deg; }
+.onboarding-confetti-piece:nth-child(24) { --confetti-left: 48%; --confetti-size: 6px; --confetti-color: #fca5a5; --confetti-duration: 2.5s; --confetti-delay: 220ms; --confetti-rotate: -8deg; }
+.onboarding-confetti-piece:nth-child(25) { --confetti-left: 54%; --confetti-size: 8px; --confetti-color: #86efac; --confetti-duration: 2.3s; --confetti-delay: 40ms; --confetti-rotate: 10deg; }
+.onboarding-confetti-piece:nth-child(26) { --confetti-left: 60%; --confetti-size: 7px; --confetti-color: #fbbf24; --confetti-duration: 2.1s; --confetti-delay: 160ms; --confetti-rotate: -22deg; }
+.onboarding-confetti-piece:nth-child(27) { --confetti-left: 66%; --confetti-size: 6px; --confetti-color: #4ade80; --confetti-duration: 2.4s; --confetti-delay: 260ms; --confetti-rotate: 90deg; }
+.onboarding-confetti-piece:nth-child(28) { --confetti-left: 72%; --confetti-size: 7px; --confetti-color: #93c5fd; --confetti-duration: 2.2s; --confetti-delay: 80ms; --confetti-rotate: -16deg; }
+.onboarding-confetti-piece:nth-child(29) { --confetti-left: 78%; --confetti-size: 5px; --confetti-color: #22c55e; --confetti-duration: 2.3s; --confetti-delay: 200ms; --confetti-rotate: 18deg; }
+.onboarding-confetti-piece:nth-child(30) { --confetti-left: 84%; --confetti-size: 9px; --confetti-color: #f59e0b; --confetti-duration: 2.2s; --confetti-delay: 20ms; --confetti-rotate: 45deg; }
+.onboarding-confetti-piece:nth-child(31) { --confetti-left: 90%; --confetti-size: 6px; --confetti-color: #86efac; --confetti-duration: 2.4s; --confetti-delay: 140ms; --confetti-rotate: 26deg; }
+.onboarding-confetti-piece:nth-child(32) { --confetti-left: 96%; --confetti-size: 7px; --confetti-color: #38bdf8; --confetti-duration: 2.1s; --confetti-delay: 300ms; --confetti-rotate: -14deg; }
+.onboarding-confetti-piece:nth-child(33) { --confetti-left: 4%; --confetti-size: 8px; --confetti-color: #22c55e; --confetti-duration: 2.5s; --confetti-delay: 110ms; --confetti-rotate: 14deg; }
+.onboarding-confetti-piece:nth-child(34) { --confetti-left: 20%; --confetti-size: 6px; --confetti-color: #fde68a; --confetti-duration: 2.2s; --confetti-delay: 260ms; --confetti-rotate: -24deg; }
+.onboarding-confetti-piece:nth-child(35) { --confetti-left: 38%; --confetti-size: 7px; --confetti-color: #f97316; --confetti-duration: 2.4s; --confetti-delay: 80ms; --confetti-rotate: 18deg; }
+.onboarding-confetti-piece:nth-child(36) { --confetti-left: 58%; --confetti-size: 5px; --confetti-color: #34d399; --confetti-duration: 2.3s; --confetti-delay: 210ms; --confetti-rotate: 45deg; }
+.onboarding-confetti-piece:nth-child(37) { --confetti-left: 74%; --confetti-size: 8px; --confetti-color: #60a5fa; --confetti-duration: 2.2s; --confetti-delay: 130ms; --confetti-rotate: 10deg; }
+.onboarding-confetti-piece:nth-child(38) { --confetti-left: 88%; --confetti-size: 6px; --confetti-color: #a7f3d0; --confetti-duration: 2.5s; --confetti-delay: 40ms; --confetti-rotate: 26deg; }
+.onboarding-confetti-piece:nth-child(39) { --confetti-left: 10%; --confetti-size: 7px; --confetti-color: #fca5a5; --confetti-duration: 2.1s; --confetti-delay: 180ms; --confetti-rotate: -16deg; }
+.onboarding-confetti-piece:nth-child(40) { --confetti-left: 46%; --confetti-size: 6px; --confetti-color: #86efac; --confetti-duration: 2.4s; --confetti-delay: 260ms; --confetti-rotate: 28deg; }
+.onboarding-confetti-piece:nth-child(41) { --confetti-left: 70%; --confetti-size: 7px; --confetti-color: #fbbf24; --confetti-duration: 2.2s; --confetti-delay: 90ms; --confetti-rotate: 90deg; }
+.onboarding-confetti-piece:nth-child(42) { --confetti-left: 82%; --confetti-size: 5px; --confetti-color: #4ade80; --confetti-duration: 2.3s; --confetti-delay: 200ms; --confetti-rotate: 20deg; }
+.onboarding-confetti-piece:nth-child(43) { --confetti-left: 28%; --confetti-size: 8px; --confetti-color: #93c5fd; --confetti-duration: 2.5s; --confetti-delay: 30ms; --confetti-rotate: -12deg; }
+.onboarding-confetti-piece:nth-child(44) { --confetti-left: 52%; --confetti-size: 6px; --confetti-color: #22c55e; --confetti-duration: 2.2s; --confetti-delay: 140ms; --confetti-rotate: 12deg; }
+.onboarding-confetti-piece:nth-child(45) { --confetti-left: 66%; --confetti-size: 7px; --confetti-color: #fde68a; --confetti-duration: 2.4s; --confetti-delay: 240ms; --confetti-rotate: -18deg; }
+.onboarding-confetti-piece:nth-child(46) { --confetti-left: 92%; --confetti-size: 6px; --confetti-color: #38bdf8; --confetti-duration: 2.3s; --confetti-delay: 70ms; --confetti-rotate: 22deg; }
+
 .onboarding-icon {
   width: 80px;
   height: 80px;
@@ -122,6 +171,15 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
+.onboarding-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.82;
+}
+
+.onboarding-option.is-loading {
+  cursor: wait;
+}
+
 .onboarding-option:hover {
   transform: translateY(-2px);
   box-shadow: 0 16px 30px -24px rgba(15, 23, 42, 0.4);
@@ -132,6 +190,9 @@
   font-size: 1rem;
   color: #0b0f14;
   font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .onboarding-option p {
@@ -211,6 +272,15 @@ left: 12px;
   border: 1px solid #d7dae0;
 }
 
+.onboarding-loading-spinner {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 999px;
+  border: 2px solid #c5d2cc;
+  border-top-color: #2ea05f;
+  animation: onboarding-spin 0.9s linear infinite;
+}
+
 .onboarding-footnote {
   margin: 0;
   font-size: 0.8rem;
@@ -255,5 +325,25 @@ vertical-align: middle;
   100% {
     opacity: 0.9;
     transform: translateY(-8px) scale(0.95);
+  }
+}
+
+@keyframes onboarding-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-15%) rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(120vh) translateX(18px) rotate(360deg);
+    opacity: 0.9;
+  }
+}
+
+@keyframes onboarding-spin {
+  to {
+    transform: rotate(360deg);
   }
 }

@@ -39,7 +39,7 @@ function navLinkClassName({ isActive }: NavLinkRenderProps): string {
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const { unreadCount } = useNotifications()
+  const { unreadCount, isLoading } = useNotifications()
   const { role, setRole } = useUserRole()
 
   return (
@@ -95,7 +95,9 @@ export function AppShell({ children }: AppShellProps) {
             <NavLink className={navLinkClassName} to="/notifications">
               <div className="nav-icon-wrapper">
                 <BellIcon />
-                {unreadCount > 0 && <span className="notification-dot" />}
+                {!isLoading && unreadCount > 0 && (
+                  <span className="notification-dot" />
+                )}
               </div>
               <span>Notifications</span>
             </NavLink>
@@ -133,7 +135,9 @@ export function AppShell({ children }: AppShellProps) {
           <div className="header-right">
             <button className="icon-btn">
               <BellIcon />
-              {unreadCount > 0 && <span className="notification-dot" />}
+              {!isLoading && unreadCount > 0 && (
+                <span className="notification-dot" />
+              )}
             </button>
             <div className="header-divider" />
             <div className="user-profile">

@@ -1,10 +1,9 @@
 .welcome-page {
- width: 1440px;
-height: 1024px;
-angle: 0 deg;
-opacity: 1;
-background: linear-gradient(180deg, #8fe29a 0%, #ffffff 100%);
-
+  width: 1440px;
+  height: 1024px;
+  angle: 0 deg;
+  opacity: 1;
+ 
 }
 
 .welcome-backdrop {
@@ -12,19 +11,12 @@ background: linear-gradient(180deg, #8fe29a 0%, #ffffff 100%);
   inset: 0;
   pointer-events: none;
   filter: blur(2.5px);
-  width: 700px;
-  height: 700px;
   angle: 0 deg;
   opacity: 1;
-
-
-
-
 }
 
 .welcome-blur {
   transform: scale(1.01);
-
 }
 
 @media (max-width: 800px) {

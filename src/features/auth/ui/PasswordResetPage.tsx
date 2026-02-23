@@ -43,6 +43,7 @@ export default function PasswordResetPage() {
   const [formValues, setFormValues] = useState(initialFormValues)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isConfirmVisible, setIsConfirmVisible] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
 
   function onInputChange(
@@ -58,6 +59,7 @@ export default function PasswordResetPage() {
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setIsSubmitting(true)
     navigate('/welcome')
   }
 
@@ -164,8 +166,20 @@ export default function PasswordResetPage() {
               </div>
             </label>
 
-            <button className="reset-submit" type="submit">
-              Set Password
+            <button
+              className={`reset-submit ${isSubmitting ? 'is-loading' : ''}`}
+              type="submit"
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="reset-loading-spinner" aria-hidden />
+                  Updating...
+                </>
+              ) : (
+                'Set Password'
+              )}
             </button>
           </form>
 

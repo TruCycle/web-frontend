@@ -16,6 +16,7 @@ export default function PasswordResetOtpPage() {
   const [otpValues, setOtpValues] = useState<string[]>(
     Array.from({ length: otpLength }, () => ''),
   )
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
 
   function onOtpChange(index: number, event: ChangeEvent<HTMLInputElement>) {
@@ -27,6 +28,7 @@ export default function PasswordResetOtpPage() {
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setIsSubmitting(true)
     navigate('/reset-password')
   }
 
@@ -107,8 +109,20 @@ export default function PasswordResetOtpPage() {
               Didn&apos;t receive code? Click <span>here</span> to resend
             </p>
 
-            <Button className="reset-submit" type="submit">
-              Continue
+            <Button
+              className={`reset-submit ${isSubmitting ? 'is-loading' : ''}`}
+              type="submit"
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="reset-loading-spinner" aria-hidden />
+                  Verifying...
+                </>
+              ) : (
+                'Continue'
+              )}
             </Button>
           </form>
 

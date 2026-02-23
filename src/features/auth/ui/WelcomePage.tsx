@@ -7,18 +7,27 @@ import './WelcomePage.css'
 
 export default function WelcomePage() {
   const [isOpen, setIsOpen] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [pendingChoice, setPendingChoice] = useState<
+    'collect' | 'donate' | null
+  >(null)
   const { setRole } = useUserRole()
   const navigate = useNavigate()
 
   const handleSelect = (choice: 'collect' | 'donate') => {
+    if (isSubmitting) {
+      return
+    }
+    setIsSubmitting(true)
+    setPendingChoice(choice)
     setRole(choice === 'collect' ? 'collector' : 'donor')
     setIsOpen(false)
-    navigate('/')
+    navigate('/login')
   }
 
   const handleClose = () => {
     setIsOpen(false)
-    navigate('/')
+    navigate('/login')
   }
 
   return (
@@ -31,6 +40,8 @@ export default function WelcomePage() {
         isOpen={isOpen}
         onClose={handleClose}
         onSelect={handleSelect}
+        isLoading={isSubmitting}
+        loadingChoice={pendingChoice}
       />
     </main>
   )

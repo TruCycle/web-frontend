@@ -167,9 +167,9 @@ export default function LoginPage() {
                 />
                 <span>Keep me logged in</span>
               </label>
-              <button className="login-forgot-password" type="button">
+              <Link className="login-forgot-password" to="/reset-password/request">
                 Forgot password?
-              </button>
+              </Link>
             </div>
 
             <button className="login-submit" type="submit">

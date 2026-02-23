@@ -1,81 +1,92 @@
-import { useState } from 'react';
-import { Bell } from 'lucide-react';
-import './NotificationsPage.css';
+import { useEffect, useMemo, useState } from 'react'
+import { Bell } from 'lucide-react'
+import { useNotifications } from '@/features/notifications/hooks/useNotifications'
+import { LoadingState } from '@/shared/ui/loading/LoadingState'
+import './NotificationsPage.css'
 
-interface NotificationItem {
-  id: string;
-  type: string;
-  title: string;
-  description: string;
-  time: string;
-  isUnread: boolean;
-  hasAction?: boolean;
+function formatNotificationTime(value: string): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return 'Just now'
+  }
+
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }
 
-const NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: '1',
-    type: 'claimed',
-    title: 'Item Claimed',
-    description: 'John D. claimed your Desk Lamp. Generate QR code for drop-off.',
-    time: 'Just now',
-    isUnread: true,
-    hasAction: true
-  },
-  {
-    id: '2',
-    type: 'exchange',
-    title: 'Exchange Completed',
-    description: 'Kitchen Blender verified at Peckham Partner Shop. £10 reward added to your account.',
-    time: '1 day ago',
-    isUnread: false
-  },
-  {
-    id: '3',
-    type: 'listed',
-    title: 'Item Listed',
-    description: 'You listed Coffee Maker in Electronics category.',
-    time: '3 days ago',
-    isUnread: false
-  }
-];
-
 export default function NotificationsPage() {
-  const [selectedId, setSelectedId] = useState<string>(NOTIFICATIONS[0].id);
+  const { notifications, isLoading, error, markAsRead } = useNotifications()
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!isLoading && notifications.length > 0 && !selectedId) {
+      setSelectedId(notifications[0].id)
+    }
+  }, [isLoading, notifications, selectedId])
+
+  const handleSelect = (notificationId: string) => {
+    setSelectedId(notificationId)
+    void markAsRead(notificationId)
+  }
+
+  const hasNotifications = notifications.length > 0
+  const emptyStateLabel = useMemo(
+    () => (isLoading ? '' : 'No notifications yet.'),
+    [isLoading],
+  )
 
   return (
     <div className="notifications-page-card">
-      <h2 className="notifications-title notifications-header">Recent Notifications</h2>
+      <h2 className="notifications-title notifications-header">
+        Recent Notifications
+      </h2>
 
       <div className="notifications-list">
-        {NOTIFICATIONS.map((notification) => (
-          <div
-            key={notification.id}
-            className={`notification-item ${selectedId === notification.id ? 'active' : ''}`}
-            onClick={() => setSelectedId(notification.id)}
-          >
-            <div className="notification-icon-wrapper">
-              <Bell size={20} color="#64748b" />
-            </div>
-
-            <div className="notification-content">
-              <div className="notification-main-row">
-                <h3 className="notification-title">{notification.title}</h3>
-                <span className="notification-time">{notification.time}</span>
-              </div>
-              <p className="notification-description">{notification.description}</p>
-
-              {notification.hasAction && (
-                <div className="notification-action-area">
-                  <button className="btn-generate-qr">
-                    Generate QR Code
-                  </button>
-                </div>
-              )}
-            </div>
+        {isLoading ? (
+          <div className="notifications-state">
+            <LoadingState label="Loading notifications" />
           </div>
-        ))}
+        ) : null}
+
+        {error ? <p className="notifications-error">{error}</p> : null}
+
+        {!isLoading && !hasNotifications ? (
+          <p className="notifications-empty">{emptyStateLabel}</p>
+        ) : null}
+
+        {!isLoading && hasNotifications
+          ? notifications.map((notification) => (
+              <div
+                key={notification.id}
+                className={`notification-item ${
+                  selectedId === notification.id ? 'active' : ''
+                } ${notification.isRead ? '' : 'unread'}`}
+                onClick={() => handleSelect(notification.id)}
+              >
+                <div className="notification-icon-wrapper">
+                  <Bell size={20} color="#64748b" />
+                </div>
+
+                <div className="notification-content">
+                  <div className="notification-main-row">
+                    <h3 className="notification-title">
+                      {notification.title}
+                    </h3>
+                    <span className="notification-time">
+                      {formatNotificationTime(notification.createdAt)}
+                    </span>
+                  </div>
+                  <p className="notification-description">
+                    {notification.description}
+                  </p>
+                </div>
+              </div>
+            ))
+          : null}
       </div>
     </div>
-  );
+  )
 }

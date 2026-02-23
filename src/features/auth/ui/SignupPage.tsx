@@ -61,6 +61,7 @@ export default function SignupPage({
   const [formValues, setFormValues] = useState(initialFormValues)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { setRole } = useUserRole()
   const navigate = useNavigate()
 
@@ -82,6 +83,7 @@ export default function SignupPage({
       setIsOnboardingOpen(true)
       return
     }
+    setIsSubmitting(true)
     navigate('/welcome')
   }
 
@@ -223,8 +225,20 @@ export default function SignupPage({
               Policy
             </p>
 
-            <button className="signup-submit" type="submit">
-              Sign Up
+            <button
+              className={`signup-submit ${isSubmitting ? 'is-loading' : ''}`}
+              type="submit"
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="signup-loading-spinner" aria-hidden />
+                  Creating account...
+                </>
+              ) : (
+                'Sign Up'
+              )}
             </button>
           </form>
 
