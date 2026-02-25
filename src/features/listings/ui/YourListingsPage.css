@@ -4,11 +4,57 @@
     padding: 1rem 0;
 }
 
-.listings-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #121212;
+/* Welcome Section */
+.welcome-section {
     margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.welcome-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.welcome-title {
+    font-size: 1.625rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.35rem;
+    letter-spacing: -0.02em;
+}
+
+.welcome-subtitle {
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.btn-list-item {
+    background-color: #A4F5A6;
+    color: #121212;
+    border: 3px solid rgba(164, 245, 166, 0.4);
+    outline: 3px solid rgba(164, 245, 166, 0.2);
+    outline-offset: 2px;
+    padding: 0.65rem 1.5rem;
+    font-size: 14px;
+    font-weight: 590;
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(164, 245, 166, 0.2);
+}
+
+.btn-list-item:hover {
+    background-color: #92e094;
+    border-color: rgba(146, 224, 148, 0.5);
+    outline-color: rgba(146, 224, 148, 0.3);
+    box-shadow: 0 4px 12px rgba(164, 245, 166, 0.3);
 }
 
 /* New Premium Master Card for Empty State */
@@ -60,8 +106,8 @@
     outline: 3px solid rgba(164, 245, 166, 0.2);
     outline-offset: 2px;
     padding: 0.85rem 2.25rem;
-    font-weight: 700;
-    font-size: 1.05rem;
+    font-size: 14px;
+    font-weight: 590;
     border-radius: 10px;
     cursor: pointer;
     display: flex;
@@ -94,27 +140,54 @@
     color: #64748b;
 }
 
-/* Listings List Display */
-.listings-list {
+/* Listings Container Card */
+.listings-container {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
 }
 
+.listings-container-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+/* Listings List Display */
+.listings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
 .listing-row {
     background-color: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #f1f5f9;
-    padding: 1.25rem 1.75rem;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 1.25rem 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
     transition: all 0.2s;
 }
 
+.listing-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.listing-row:first-child {
+    padding-top: 0;
+}
+
 .listing-row:hover {
-    border-color: #e2e8f0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    background-color: #fafafa;
 }
 
 .listing-content {
@@ -226,6 +299,27 @@
     padding: 0.75rem 2rem !important;
     border-radius: 10px !important;
 }
+
+.btn-open-qr {
+    background-color: #A4F5A6 !important;
+    color: #121212 !important;
+    border: none !important;
+    font-weight: 700 !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 10px !important;
+    white-space: nowrap !important;
+}
+
+.btn-open-qr:hover {
+    background-color: #92e094 !important;
+}
+
+.pill-completed {
+    background-color: #ffffff;
+    color: #15A119;
+    border: 1px solid #15A119;
+}
+
 
 /* Pagination */
 .pagination-nav {

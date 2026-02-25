@@ -17,6 +17,7 @@ import plannerImg from '@/assets/images/book-planner.jpg';
 import bagShoeImg from '@/assets/images/bag-shoe.jpg';
 import candleImg from '@/assets/images/scented-candle.jpg';
 import { SuccessDialog } from '@/shared/ui/modal/SuccessDialog';
+import { ListItemDialog } from '@/shared/ui/modal/ListItemDialog';
 import { useUserRole } from '@/shared/context/UserRoleContext';
 import './Dashboard.css';
 
@@ -63,9 +64,11 @@ const CATEGORIES = [
 
 export default function Dashboard() {
   const location = useLocation();
-  const { isDonorMode } = useUserRole();
+  const { role } = useUserRole();
+  const isDonorMode = role === 'donor';
   const [activeCategory, setActiveCategory] = useState('All Items');
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [isListItemDialogOpen, setIsListItemDialogOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const showStats = location.pathname === '/dashboard';
@@ -83,7 +86,7 @@ export default function Dashboard() {
           <p className="welcome-subtitle">Track your impact and manage your listings</p>
         </div>
         {isDonorMode && (
-          <button className="btn-list-item">
+          <button className="btn-list-item" onClick={() => setIsListItemDialogOpen(true)}>
             <Plus size={18} />
             List New Item
           </button>
@@ -382,6 +385,11 @@ export default function Dashboard() {
       <SuccessDialog
         isOpen={isSuccessOpen}
         onClose={() => setIsSuccessOpen(false)}
+      />
+
+      <ListItemDialog
+        isOpen={isListItemDialogOpen}
+        onClose={() => setIsListItemDialogOpen(false)}
       />
     </div>
   );

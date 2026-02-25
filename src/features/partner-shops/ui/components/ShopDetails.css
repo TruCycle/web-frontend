@@ -1,0 +1,126 @@
+.shop-details-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 420px;
+    height: 630px;
+    padding: 1.5rem;
+    background-color: white;
+    border-radius: 10px;
+    opacity: 1;
+    overflow-y: auto;
+}
+
+
+
+.shop-details-header {
+    margin-bottom: 0.5rem;
+}
+
+.shop-name-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.shop-postcode {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+
+.shop-detail-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.detail-section-title {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4b5563;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.accepted-items-title {
+    color: #121212;
+}
+
+.detail-section-text {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #1f2937;
+}
+
+.detail-section-subtext {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tag-pill {
+    background-color: #f0fdf4;
+    color: #15A119;
+    font-family: "SF Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 510;
+    font-size: 12px;
+    line-height: 100%;
+    letter-spacing: 0;
+    padding: 0.25rem 0.6rem;
+    border-radius: 16px;
+}
+
+.amenities-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.amenity-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #1f2937;
+    font-size: 0.95rem;
+}
+
+.amenity-icon {
+    color: #22c55e;
+}
+
+.shop-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.btn-get-direction {
+    flex: 1;
+    background-color: white !important;
+    color: #2d5016 !important;
+    border: 1px solid #e5e7eb !important;
+    white-space: nowrap !important;
+}
+
+.btn-plan-handoff {
+    flex: 1;
+    background-color: #A4F5A6 !important;
+    color: #121212 !important;
+    font-size: 14px !important;
+    font-weight: 590 !important;
+    white-space: nowrap !important;
+}
+
+.btn-plan-handoff:hover {
+    background-color: #92e094 !important;
+}

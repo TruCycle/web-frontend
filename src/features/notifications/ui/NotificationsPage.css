@@ -25,6 +25,24 @@
     gap: 0;
 }
 
+.notifications-state {
+    padding: 1.5rem;
+}
+
+.notifications-error {
+    padding: 0 1.5rem 1rem;
+    color: #b91c1c;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.notifications-empty {
+    padding: 1.5rem;
+    color: #64748b;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
 .notification-item {
     display: flex;
     align-items: flex-start;
@@ -50,6 +68,10 @@
     border-bottom: none;
     margin-bottom: 1rem;
     /* Spacing after the active card */
+}
+
+.notification-item.unread .notification-title {
+    color: #0f172a;
 }
 
 /* Icon Styles */

@@ -61,6 +61,7 @@ export default function SignupPage({
   const [formValues, setFormValues] = useState(initialFormValues)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { setRole } = useUserRole()
   const navigate = useNavigate()
 
@@ -82,6 +83,7 @@ export default function SignupPage({
       setIsOnboardingOpen(true)
       return
     }
+    setIsSubmitting(true)
     navigate('/welcome')
   }
 
@@ -116,10 +118,12 @@ export default function SignupPage({
 
           <article className="signup-testimonial">
             <div className="signup-testimonial-author">
-              <span aria-hidden className="signup-avatar">
-                SL
-              </span>
-              <div>
+              <img
+                alt="Sophie, London"
+                className="signup-avatar"
+                src="/profile-picture.jpg"
+              />
+              <div className='author-info'>
                 <p className="signup-author-name">Sophie, London</p>
                 <p className="signup-author-role">Sustainable Living Enthusiast</p>
               </div>
@@ -129,7 +133,7 @@ export default function SignupPage({
               rewarding.
             </p>
             <div className="signup-testimonial-meta">
-              <span>Jan 2026</span>
+              <span className="signup-date">Jan 2026</span>
               <span className="signup-stars">*****</span>
             </div>
           </article>
@@ -221,14 +225,26 @@ export default function SignupPage({
               Policy
             </p>
 
-            <button className="signup-submit" type="submit">
-              Sign Up
+            <button
+              className={`signup-submit ${isSubmitting ? 'is-loading' : ''}`}
+              type="submit"
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="signup-loading-spinner" aria-hidden />
+                  Creating account...
+                </>
+              ) : (
+                'Sign Up'
+              )}
             </button>
           </form>
 
           <p className="signup-login-copy">
             Already have an account?{' '}
-            <Link className="signup-login-link" to="/">
+            <Link className="signup-login-link" to="/login">
               Log in
             </Link>
           </p>

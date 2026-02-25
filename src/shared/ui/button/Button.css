@@ -21,6 +21,8 @@
 .button-primary {
   color: #121212;
   background-color: #A4F5A6;
+  font-size: 14px;
+  font-weight: 590;
 }
 
 .button-primary:hover:not(:disabled) {
