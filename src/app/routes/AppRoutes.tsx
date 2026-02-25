@@ -23,8 +23,8 @@ const Dashboard = lazy(() => import('@/features/home/ui/Dashboard'))
 const CollectedItemsPage = lazy(() => import('@/features/collected/ui/CollectedItemsPage'))
 const YourListingsPage = lazy(() => import('@/features/listings/ui/YourListingsPage'))
 const SettingsPage = lazy(() => import('@/features/settings/ui/SettingsPage'))
-const PlaceholderPage = lazy(() => import('@/shared/ui/placeholder/PlaceholderPage'))
 const PartnerShopsPage = lazy(() => import('@/features/partner-shops/ui/PartnerShopsPage'))
+const SupportFaqPage = lazy(() => import('@/features/support/ui/SupportFaqPage'))
 
 function ShellLayout() {
   return (
@@ -55,7 +55,8 @@ export function AppRoutes() {
         <Route path="/selected" element={<YourListingsPage />} />
         <Route path="/partner-shops" element={<PartnerShopsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/support" element={<PlaceholderPage title="Support & FAQs" />} />
+        <Route path="/support" element={<SupportFaqPage />} />
+        <Route path="/support/:viewRole" element={<SupportFaqPage />} />
       </Route>
       <Route path="*" element={<Navigate replace to="/dashboard" />} />
     </Routes>

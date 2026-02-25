@@ -2,20 +2,22 @@
   min-height: 100vh;
   padding: 0.35rem;
   background: #d9d9da;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .login-layout {
-  display: grid;
-  grid-template-columns: minmax(320px, 1fr) minmax(420px, 1fr);
+  display: flex;
+  width: 100%;
   min-height: calc(100vh - 0.7rem);
-  max-width: 1140px;
-  margin: 0 auto;
   border-radius: 1.2rem;
   overflow: hidden;
   background: #efeff0;
 }
 
 .login-highlight-panel {
+  flex: 1 1 55%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -161,6 +163,7 @@
 }
 
 .login-form-panel {
+  flex: 1 1 45%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -323,9 +326,13 @@
   text-decoration: underline;
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 900px) {
+  .login-page {
+    align-items: stretch;
+  }
+
   .login-layout {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     min-height: auto;
   }
 

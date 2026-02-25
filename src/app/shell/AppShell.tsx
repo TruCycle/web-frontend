@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react'
-import { NavLink, type NavLinkRenderProps } from 'react-router-dom'
+import { NavLink, type NavLinkRenderProps, useLocation, useNavigate } from 'react-router-dom'
 import {
   FileText,
   Users,
@@ -41,6 +41,16 @@ function navLinkClassName({ isActive }: NavLinkRenderProps): string {
 export function AppShell({ children }: AppShellProps) {
   const { unreadCount, isLoading } = useNotifications()
   const { role, setRole } = useUserRole()
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  function onRoleChange(nextRole: 'collector' | 'donor') {
+    setRole(nextRole)
+
+    if (location.pathname.startsWith('/support')) {
+      navigate(`/support/${nextRole}`)
+    }
+  }
 
   return (
     <div className="app-shell">
@@ -105,7 +115,7 @@ export function AppShell({ children }: AppShellProps) {
               <Settings size={20} />
               <span>Settings</span>
             </NavLink>
-            <NavLink className={navLinkClassName} to="/support">
+            <NavLink className={navLinkClassName} to={`/support/${role}`}>
               <HelpCircle size={20} />
               <span>Support & FAQs</span>
             </NavLink>
@@ -115,13 +125,13 @@ export function AppShell({ children }: AppShellProps) {
             <div className="role-toggle">
               <button
                 className={`role-btn ${role === 'collector' ? 'active' : ''}`}
-                onClick={() => setRole('collector')}
+                onClick={() => onRoleChange('collector')}
               >
                 Collector
               </button>
               <button
                 className={`role-btn ${role === 'donor' ? 'active' : ''}`}
-                onClick={() => setRole('donor')}
+                onClick={() => onRoleChange('donor')}
               >
                 Donor
               </button>

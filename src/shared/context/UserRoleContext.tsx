@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 
-type UserRole = 'collector' | 'donor';
+export type UserRole = 'collector' | 'donor';
 
 interface UserRoleContextType {
     role: UserRole;

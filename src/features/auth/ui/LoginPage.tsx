@@ -1,5 +1,5 @@
 import { type ChangeEvent, type FormEvent, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import logoSrc from '@/assets/logo.svg'
 import './LoginPage.css'
 
@@ -44,6 +44,7 @@ function PasswordEyeIcon() {
 export default function LoginPage() {
   const [formValues, setFormValues] = useState(initialFormValues)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const navigate = useNavigate()
 
   function onInputChange(
     key: keyof Pick<LoginFormValues, 'email' | 'password'>,
@@ -66,6 +67,14 @@ export default function LoginPage() {
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    const form = event.currentTarget
+
+    if (!form.checkValidity()) {
+      form.reportValidity()
+      return
+    }
+
+    navigate('/dashboard')
   }
 
   return (
