@@ -20,15 +20,16 @@ export function OnboardingChoiceDialog({
 }: OnboardingChoiceDialogProps) {
   const handleSelect = (choice: 'collect' | 'donate') => {
     onSelect(choice)
-    onClose()
   }
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
+      closeOnOverlayClick={false}
       overlayClassName="bg-[#22222299] backdrop-blur-[16px]"
       containerClassName="max-w-[700px]"
+      hideCloseButton
     >
       <div className="flex flex-col items-center gap-3 px-20 py-12 text-center">
         <div className="mb-2" aria-hidden>
@@ -49,7 +50,7 @@ export function OnboardingChoiceDialog({
         <div className="mt-4 grid w-full grid-cols-2 gap-4 max-sm:grid-cols-1">
           <button
             className={classNames(
-              'flex flex-col items-center gap-2 rounded-2xl bg-[#A4F5A61A] px-5 py-8 text-center transition hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-70',
+              'flex flex-col items-center gap-2 rounded-2xl border-2 border-transparent bg-[#A4F5A61A] px-5 py-8 text-center transition hover:border-[#15A119] focus-visible:border-[#15A119] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-70',
               isLoading && loadingChoice === 'collect' && 'cursor-wait',
             )}
             type="button"
@@ -79,7 +80,7 @@ export function OnboardingChoiceDialog({
 
           <button
             className={classNames(
-              'flex flex-col items-center gap-2 rounded-2xl bg-[#A4F5A61A] px-5 py-8 text-center transition hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-70',
+              'flex flex-col items-center gap-2 rounded-2xl border-2 border-transparent bg-[#A4F5A61A] px-5 py-8 text-center transition hover:border-[#15A119] focus-visible:border-[#15A119] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-70',
               isLoading && loadingChoice === 'donate' && 'cursor-wait',
             )}
             type="button"

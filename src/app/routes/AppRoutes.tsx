@@ -37,6 +37,7 @@ export function AppRoutes() {
       <Route path="/reset-password" element={<PasswordResetPage />} />
       <Route element={<ShellLayout />}>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/browse" element={<Dashboard />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/messages" element={<MessagingPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
@@ -48,7 +49,7 @@ export function AppRoutes() {
         <Route path="/support" element={<SupportFaqPage />} />
         <Route path="/support/:viewRole" element={<SupportFaqPage />} />
       </Route>
-      <Route path="*" element={<Navigate replace to="/dashboard" />} />
+      <Route path="*" element={<Navigate replace to="/" />} />
     </Routes>
   )
 }

@@ -121,7 +121,7 @@ export default function Dashboard() {
   const location = useLocation()
   const { role } = useUserRole()
   const isDonorMode = role === 'donor'
-  const showStats = location.pathname === '/dashboard'
+  const showStats = location.pathname === '/' || location.pathname === '/dashboard'
 
   const [activeCategory, setActiveCategory] = useState('All Items')
   const [isSuccessOpen, setIsSuccessOpen] = useState(false)

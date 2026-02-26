@@ -7,6 +7,7 @@ interface ModalProps {
     onClose: () => void;
     children: React.ReactNode;
     position?: 'center' | 'right';
+    closeOnOverlayClick?: boolean;
     overlayClassName?: string;
     containerClassName?: string;
     contentClassName?: string;
@@ -18,6 +19,7 @@ export const Modal: React.FC<ModalProps> = ({
     onClose,
     children,
     position = 'center',
+    closeOnOverlayClick = true,
     overlayClassName,
     containerClassName,
     contentClassName,
@@ -53,7 +55,7 @@ export const Modal: React.FC<ModalProps> = ({
     const contentClass = classNames('max-h-[90vh] overflow-y-auto', contentClassName);
 
     return (
-        <div className={overlayClass} onClick={onClose}>
+        <div className={overlayClass} onClick={closeOnOverlayClick ? onClose : undefined}>
             <div className={containerClass} onClick={(e) => e.stopPropagation()}>
                 {!hideCloseButton && (
                     <button

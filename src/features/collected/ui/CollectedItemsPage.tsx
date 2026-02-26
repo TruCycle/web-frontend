@@ -113,7 +113,7 @@ export default function CollectedItemsPage() {
                         Once you claim an item and it's approved by the donor, it will appear here.
                     </p>
                     <div className="mt-5 flex flex-wrap justify-center gap-3">
-                        <Button onClick={() => navigate('/')}>Browse Items</Button>
+                        <Button onClick={() => navigate('/browse')}>Browse Items</Button>
                         <Button variant="secondary" onClick={loadMockData}>Simulate Selection</Button>
                     </div>
                 </div>

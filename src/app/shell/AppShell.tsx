@@ -71,13 +71,13 @@ export function AppShell({ children }: AppShellProps) {
 
         <nav className="flex flex-1 flex-col gap-2 overflow-visible">
           <div className="flex flex-col gap-1">
-            <NavLink className={navLinkClassName} to="/dashboard">
+            <NavLink className={navLinkClassName} to="/">
               <DashboardIcon />
               <span>Dashboard</span>
             </NavLink>
             {role === 'collector' ? (
               <>
-                <NavLink className={navLinkClassName} to="/">
+                <NavLink className={navLinkClassName} to="/browse">
                   <FileText size={20} />
                   <span>Browse Items</span>
                 </NavLink>

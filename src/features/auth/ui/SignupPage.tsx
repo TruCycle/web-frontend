@@ -75,7 +75,7 @@ export default function SignupPage({
     setPendingChoice(choice)
     setRole(choice === 'collect' ? 'collector' : 'donor')
     setIsOnboardingOpen(false)
-    navigate('/login')
+    navigate('/')
   }
 
   function handleOnboardingClose() {
