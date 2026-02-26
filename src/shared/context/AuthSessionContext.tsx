@@ -75,21 +75,14 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
     }
 
     try {
-      const refreshedTokens = await refreshAuthTokens(refreshToken)
+      const refreshedSession = await refreshAuthTokens(refreshToken)
       storeSession({
-        tokens: refreshedTokens,
-        user: persistedUser,
+        tokens: refreshedSession.tokens,
+        user: refreshedSession.user,
         persistMode,
         keepRefreshToken: true,
       })
-
-      try {
-        const currentUser = await getCurrentUser()
-        storeUser(currentUser, persistMode)
-        setUser(currentUser)
-      } catch {
-        setUser(persistedUser)
-      }
+      setUser(refreshedSession.user)
 
       return true
     } catch {
@@ -156,9 +149,20 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
       return
     }
 
-    const refreshAtMs = accessTokenExpiry - Date.now() - refreshBeforeExpiryMs
+    const hasRefreshToken = Boolean(getStoredRefreshToken())
+    const ttlMs = accessTokenExpiry - Date.now()
+    const refreshLeadMs = hasRefreshToken
+      ? Math.min(refreshBeforeExpiryMs, Math.max(0, ttlMs - 30_000))
+      : 0
+    const timerDelayMs = ttlMs - refreshLeadMs
 
     const handleTokenWindow = async () => {
+      if (!hasRefreshToken) {
+        clearSession()
+        setUser(null)
+        return
+      }
+
       const didRefresh = await tryRefreshStoredSession()
       if (!didRefresh) {
         clearSession()
@@ -166,14 +170,14 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
       }
     }
 
-    if (refreshAtMs <= 0) {
+    if (timerDelayMs <= 0) {
       void handleTokenWindow()
       return
     }
 
     refreshTimerRef.current = window.setTimeout(() => {
       void handleTokenWindow()
-    }, refreshAtMs)
+    }, timerDelayMs)
 
     return () => {
       clearRefreshTimer()

@@ -131,19 +131,25 @@ interface RefreshData {
   }
 }
 
-export async function refreshAuthTokens(refreshToken: string): Promise<AuthTokens> {
+export async function refreshAuthTokens(
+  refreshToken: string,
+): Promise<{ user: AuthUser; tokens: AuthTokens }> {
   const response = await apiRequest<ApiEnvelope<RefreshData>, { refresh_token: string }>(
     '/auth/refresh',
     {
       method: 'POST',
       body: { refresh_token: refreshToken },
+      includeAuth: false,
     },
   )
 
   return {
-    accessToken: response.data.tokens.accessToken,
-    refreshToken: response.data.tokens.refreshToken ?? refreshToken,
-    accessTokenExpiry: response.data.tokens.accessTokenExpiry,
-    refreshTokenExpiry: response.data.tokens.refreshTokenExpiry,
+    user: normalizeUser(response.data.user),
+    tokens: {
+      accessToken: response.data.tokens.accessToken,
+      refreshToken: response.data.tokens.refreshToken ?? refreshToken,
+      accessTokenExpiry: response.data.tokens.accessTokenExpiry,
+      refreshTokenExpiry: response.data.tokens.refreshTokenExpiry,
+    },
   }
 }

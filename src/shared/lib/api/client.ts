@@ -9,14 +9,18 @@ interface RequestOptions<TBody> {
   readonly body?: TBody
   readonly headers?: Record<string, string>
   readonly signal?: AbortSignal
+  readonly includeAuth?: boolean
 }
 
-function buildHeaders(customHeaders?: Record<string, string>): HeadersInit {
+function buildHeaders(
+  customHeaders?: Record<string, string>,
+  includeAuth: boolean = true,
+): HeadersInit {
   const authToken = getStoredAccessToken()
 
   return {
     'Content-Type': 'application/json',
-    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    ...(includeAuth && authToken ? { Authorization: `Bearer ${authToken}` } : {}),
     ...customHeaders,
   }
 }
@@ -27,7 +31,7 @@ export async function apiRequest<TResponse, TBody = never>(
 ): Promise<TResponse> {
   const response = await fetch(`${env.apiBaseUrl}${path}`, {
     method: options.method ?? 'GET',
-    headers: buildHeaders(options.headers),
+    headers: buildHeaders(options.headers, options.includeAuth ?? true),
     body: options.body ? JSON.stringify(options.body) : undefined,
     signal: options.signal,
   })
