@@ -14,6 +14,23 @@ const fallbackNotifications: NotificationItem[] = [
   },
 ]
 
+interface ApiEnvelope<TData> {
+  readonly status: string
+  readonly message: string
+  readonly data: TData
+}
+
+interface ApiNotificationItem {
+  readonly id: string
+  readonly title?: string
+  readonly description?: string
+  readonly body?: string
+  readonly createdAt?: string
+  readonly created_at?: string
+  readonly isRead?: boolean
+  readonly read?: boolean
+}
+
 function isNotificationItem(value: unknown): value is NotificationItem {
   if (typeof value !== 'object' || value === null) {
     return false
@@ -53,11 +70,54 @@ function writeStoredNotifications(notifications: NotificationItem[]): void {
   window.dispatchEvent(new Event(notificationsUpdatedEventName))
 }
 
+function isApiNotificationItem(value: unknown): value is ApiNotificationItem {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+
+  const candidate = value as Partial<ApiNotificationItem>
+  return typeof candidate.id === 'string'
+}
+
+function mapApiNotification(value: ApiNotificationItem): NotificationItem {
+  return {
+    id: value.id,
+    title: value.title ?? 'Notification',
+    description: value.description ?? value.body ?? '',
+    createdAt: value.createdAt ?? value.created_at ?? new Date().toISOString(),
+    isRead: typeof value.isRead === 'boolean' ? value.isRead : Boolean(value.read),
+  }
+}
+
+function normalizeNotificationsPayload(payload: unknown): NotificationItem[] {
+  const maybeEnvelope = payload as Partial<ApiEnvelope<unknown>>
+  const collection = Array.isArray(payload)
+    ? payload
+    : Array.isArray(maybeEnvelope.data)
+      ? maybeEnvelope.data
+      : []
+
+  return collection
+    .filter(isApiNotificationItem)
+    .map(mapApiNotification)
+}
+
 export async function fetchNotifications(): Promise<NotificationItem[]> {
   try {
-    const response = await apiRequest<NotificationItem[]>('/notifications')
-    writeStoredNotifications(response)
-    return response
+    const response = await apiRequest<unknown>('/notifications')
+    const normalized = normalizeNotificationsPayload(response)
+    if (normalized.length > 0) {
+      writeStoredNotifications(normalized)
+      return normalized
+    }
+
+    const localNotifications = readStoredNotifications()
+    if (localNotifications.length > 0) {
+      return localNotifications
+    }
+
+    writeStoredNotifications(fallbackNotifications)
+    return fallbackNotifications
   } catch {
     const localNotifications = readStoredNotifications()
     if (localNotifications.length > 0) {

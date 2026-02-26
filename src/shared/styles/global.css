@@ -1,60 +1,12 @@
-:root {
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color: #172033;
-  background-color: #f6f8fb;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-button,
-input,
-select,
-textarea {
-  font-family: inherit;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-/* Adding SF Pro font to the project */
 @font-face {
   font-family: 'SF Pro';
   src: url('/fonts/SFPRODISPLAYREGULAR.OTF') format('opentype');
-  font-weight: normal;
+  font-weight: 400;
   font-style: normal;
-}
-
-@font-face {
-  font-family: 'SF Pro';
-  src: url('/fonts/SFPRODISPLAYBOLD.OTF') format('opentype');
-  font-weight: bold;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'SF Pro';
-  src: url('/fonts/SFPRODISPLAYBLACKITALIC.OTF') format('opentype');
-  font-weight: 900;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'SF Pro';
-  src: url('/fonts/SFPRODISPLAYHEAVYITALIC.OTF') format('opentype');
-  font-weight: 800;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'SF Pro';
-  src: url('/fonts/SFPRODISPLAYLIGHTITALIC.OTF') format('opentype');
-  font-weight: 300;
-  font-style: italic;
 }
 
 @font-face {
@@ -66,29 +18,38 @@ textarea {
 
 @font-face {
   font-family: 'SF Pro';
-  src: url('/fonts/SFPRODISPLAYSEMIBOLDITALIC.OTF') format('opentype');
-  font-weight: 600;
-  font-style: italic;
+  src: url('/fonts/SFPRODISPLAYBOLD.OTF') format('opentype');
+  font-weight: 700;
+  font-style: normal;
 }
 
-@font-face {
-  font-family: 'SF Pro';
-  src: url('/fonts/SFPRODISPLAYTHINITALIC.OTF') format('opentype');
-  font-weight: 100;
-  font-style: italic;
+:root {
+  --tc-scrollbar-thumb: #e2e8f0;
+  --tc-scrollbar-thumb-hover: #cbd5e1;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@font-face {
-  font-family: 'SF Pro';
-  src: url('/fonts/SFPRODISPLAYULTRALIGHTITALIC.OTF') format('opentype');
-  font-weight: 200;
-  font-style: italic;
+* {
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: var(--tc-scrollbar-thumb) transparent;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
 }
 
 body {
-  margin: 0;
-  min-width: 320px;
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  @apply m-0 min-w-[320px] bg-tc-app-canvas text-tc-app-text;
 }
 
 h1,
@@ -98,107 +59,6 @@ p {
   margin-top: 0;
 }
 
-.page-card {
-  padding: 1.25rem;
-  border: 1px solid #d6deea;
-  border-radius: 1rem;
-  background-color: #ffffff;
-  box-shadow: 0 8px 28px #22315412;
-}
-
-.page-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.text-link {
-  color: #0f3e7f;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.text-link:hover {
-  text-decoration: underline;
-}
-
-.page-status {
-  color: #4e5a70;
-}
-
-.page-status-error {
-  color: #a02133;
-}
-
-.list-reset {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.stack-gap-sm {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.surface-row {
-  padding: 0.9rem;
-  border: 1px solid #d6deea;
-  border-radius: 0.85rem;
-  background-color: #f9fbff;
-}
-
-.row-title {
-  margin: 0;
-  font-weight: 700;
-}
-
-.row-body {
-  margin: 0.45rem 0;
-  color: #31405a;
-}
-
-.row-meta {
-  margin: 0;
-  font-size: 0.8rem;
-  color: #5f6b81;
-}
-
-.row-between {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.inline-actions {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-}
-
-.notification-badge {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  min-width: 1.35rem;
-  height: 1.35rem;
-  padding: 0 0.35rem;
-  border-radius: 999px;
-  background-color: #b6233a;
-  color: #ffffff;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-@media (max-width: 640px) {
-  .row-between {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -207,20 +67,69 @@ p {
 ::-webkit-scrollbar-track {
   background: transparent;
   margin-block: 80px;
-  /* Significantly shortened to become a small floating bar in the middle */
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #E2E8F0;
+  background: var(--tc-scrollbar-thumb);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #CBD5E1;
+  background: var(--tc-scrollbar-thumb-hover);
 }
 
-/* For Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #E2E8F0 transparent;
+@keyframes tcLogoFlipFloat {
+  0% {
+    transform: rotateX(0deg);
+  }
+  100% {
+    transform: rotateX(360deg);
+  }
+}
+
+.tc-loading-logo-stage {
+  perspective: 900px;
+}
+
+.tc-loading-logo-flipper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: tcLogoFlipFloat 0.9s linear infinite;
+  will-change: transform;
+}
+
+.tc-loading-logo-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  backface-visibility: hidden;
+}
+
+.tc-loading-logo-face--back {
+  transform: rotateX(180deg);
+}
+
+@keyframes tcShimmer {
+  0% {
+    background-position: -220% 0;
+  }
+  100% {
+    background-position: 220% 0;
+  }
+}
+
+.tc-shimmer-block {
+  background-image: linear-gradient(
+    90deg,
+    rgba(148, 163, 184, 0.2) 0%,
+    rgba(226, 232, 240, 0.65) 50%,
+    rgba(148, 163, 184, 0.2) 100%
+  );
+  background-size: 220% 100%;
+  animation: tcShimmer 1.2s linear infinite;
 }

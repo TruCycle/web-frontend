@@ -2,7 +2,6 @@ import React from 'react';
 import { Modal } from './Modal';
 import { Button } from '../button/Button';
 import successIcon from '@/assets/images/success.svg';
-import './CollectionSuccessDialog.css';
 
 interface CollectionSuccessDialogProps {
     isOpen: boolean;
@@ -17,19 +16,19 @@ export const CollectionSuccessDialog: React.FC<CollectionSuccessDialogProps> = (
 }) => {
     return (
         <Modal isOpen={isOpen} onClose={onClose} position="center">
-            <div className="success-dialog-content">
-                <div className="success-icon-wrapper">
-                    <img src={successIcon} alt="Success" className="success-dialog-icon" />
+            <div className="flex flex-col items-center gap-4 p-6 text-center">
+                <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-lime-50">
+                    <img src={successIcon} alt="Success" className="h-16 w-16" />
                 </div>
 
-                <h2 className="success-dialog-title">Congratulations!</h2>
+                <h2 className="text-2xl font-bold text-slate-900">Congratulations!</h2>
 
-                <p className="success-dialog-message">
+                <p className="text-sm leading-6 text-slate-600">
                     You have successfully collected <br />
                     the {itemName} item
                 </p>
 
-                <Button className="btn-leave-review" onClick={onClose}>
+                <Button className="w-full max-w-[220px]" onClick={onClose}>
                     Leave a Review
                 </Button>
             </div>

@@ -1,9 +1,23 @@
 import { type ChangeEvent, type FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import logoSrc from '@/assets/logo.svg'
-import { useUserRole } from '@/shared/context/UserRoleContext'
-import { OnboardingChoiceDialog } from './OnboardingChoiceDialog'
-import './SignupPage.css'
+import { useAuthSession } from '@/shared/context/useAuthSession'
+import { ApiError } from '@/shared/types/network'
+import { useToast } from '@/shared/ui/toast/useToast'
+import { classNames } from '@/shared/utils/classNames'
+import { useUserRole } from '@/shared/context/useUserRole'
+import { OnboardingChoiceDialog } from './components/OnboardingChoiceDialog'
+import { PasswordVisibilityIcon } from './components/PasswordVisibilityIcon'
+import {
+  AuthPageFrame,
+  authFieldClassName,
+  authFooterCopyClassName,
+  authFooterLinkClassName,
+  authInputClassName,
+  authLabelClassName,
+  authLoadingSpinnerClassName,
+  authPasswordToggleClassName,
+  authPrimaryButtonClassName,
+} from './components/AuthPageFrame'
 
 interface SignupFormValues {
   readonly fullName: string
@@ -21,47 +35,25 @@ const initialFormValues: SignupFormValues = {
   referralCode: '',
 }
 
-const signupBenefits = [
-  'Free forever',
-  'No hidden fees',
-  'GBP10 reward for your first exchange',
-]
-
-function PasswordEyeIcon() {
-  return (
-    <svg
-      aria-hidden
-      className="signup-password-icon"
-      fill="none"
-      height="18"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="1.6"
-      viewBox="0 0 24 24"
-      width="18"
-    >
-      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  )
-}
-
 interface SignupPageProps {
-  readonly showOnboarding?: boolean
   readonly className?: string
   readonly onSubmitSuccess?: () => void
 }
 
 export default function SignupPage({
-  showOnboarding = false,
   className,
   onSubmitSuccess,
 }: SignupPageProps) {
   const [formValues, setFormValues] = useState(initialFormValues)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [isRegistering, setIsRegistering] = useState(false)
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isChoosingRole, setIsChoosingRole] = useState(false)
+  const [pendingChoice, setPendingChoice] = useState<'collect' | 'donate' | null>(
+    null,
+  )
+  const { register, login } = useAuthSession()
+  const { success, error } = useToast()
   const { setRole } = useUserRole()
   const navigate = useNavigate()
 
@@ -76,188 +68,220 @@ export default function SignupPage({
     }))
   }
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    onSubmitSuccess?.()
-    if (showOnboarding) {
-      setIsOnboardingOpen(true)
-      return
+  function splitFullName(fullName: string): { firstName: string; lastName: string } | null {
+    const trimmedName = fullName.trim()
+    const parts = trimmedName.split(/\s+/).filter(Boolean)
+
+    if (parts.length < 2) {
+      return null
     }
-    setIsSubmitting(true)
-    navigate('/welcome')
+
+    return {
+      firstName: parts[0],
+      lastName: parts.slice(1).join(' '),
+    }
   }
 
-  function handleOnboardingSelect(choice: 'collect' | 'donate') {
-    setRole(choice === 'collect' ? 'collector' : 'donor')
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (isRegistering) {
+      return
+    }
+
+    const splitName = splitFullName(formValues.fullName)
+    if (!splitName) {
+      error('Invalid full name', 'Enter first and last name to continue.')
+      return
+    }
+
+    setIsRegistering(true)
+    try {
+      await register({
+        firstName: splitName.firstName,
+        lastName: splitName.lastName,
+        email: formValues.email.trim(),
+        password: formValues.password,
+      })
+      onSubmitSuccess?.()
+      setIsOnboardingOpen(true)
+      success('Account created', 'Choose how you want to start on TruCycle.')
+    } catch (caughtError) {
+      const message =
+        caughtError instanceof ApiError
+          ? caughtError.message
+          : 'Unable to create account right now. Please try again.'
+      error('Sign up failed', message)
+    } finally {
+      setIsRegistering(false)
+    }
+  }
+
+  async function handleOnboardingSelect(choice: 'collect' | 'donate') {
+    if (isChoosingRole) {
+      return
+    }
+
+    setIsChoosingRole(true)
+    setPendingChoice(choice)
+    try {
+      setRole(choice === 'collect' ? 'collector' : 'donor')
+      await login(
+        {
+          email: formValues.email.trim(),
+          password: formValues.password,
+        },
+        { rememberSession: true },
+      )
+      setIsOnboardingOpen(false)
+      navigate('/')
+    } catch (caughtError) {
+      const message =
+        caughtError instanceof ApiError
+          ? caughtError.message
+          : 'Unable to login after signup. Please login manually.'
+      error('Could not continue', message)
+      setIsChoosingRole(false)
+      setPendingChoice(null)
+    }
+  }
+
+  function handleOnboardingClose() {
+    if (isChoosingRole) {
+      return
+    }
+    setIsOnboardingOpen(false)
+    navigate('/login')
   }
 
   return (
-    <main className={`signup-page ${className ?? ''}`.trim()}>
-      <div className="signup-layout">
-        <aside className="signup-highlight-panel">
-          <div className="signup-brand">
-            <img alt="" aria-hidden className="signup-brand-logo" src={logoSrc} />
-            <span className="signup-brand-name">TruCycle</span>
-          </div>
-
-          <section className="signup-highlight-copy">
-            <h1 className="signup-highlight-title">
-              Join London&apos;s
-              <br />
-              <span>circular economy.</span>
-            </h1>
-            <ul className="signup-benefits">
-              {signupBenefits.map((benefit) => (
-                <li key={benefit}>
-                  <span aria-hidden className="signup-check-icon" />
-                  {benefit}
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <article className="signup-testimonial">
-            <div className="signup-testimonial-author">
-              <img
-                alt="Sophie, London"
-                className="signup-avatar"
-                src="/profile-picture.jpg"
-              />
-              <div className='author-info'>
-                <p className="signup-author-name">Sophie, London</p>
-                <p className="signup-author-role">Sustainable Living Enthusiast</p>
-              </div>
-            </div>
-            <p className="signup-testimonial-quote">
-              TruCycle makes donating my unused items easy, secure, and
-              rewarding.
-            </p>
-            <div className="signup-testimonial-meta">
-              <span className="signup-date">Jan 2026</span>
-              <span className="signup-stars">*****</span>
-            </div>
-          </article>
-        </aside>
-
-        <section className="signup-form-panel">
-          <div className="signup-form-header">
-            <h2>Welcome to TruCycle</h2>
-            <p>Create your free account to start making an impact</p>
-          </div>
-
-          <form className="signup-form" onSubmit={onSubmit}>
-            <label className="signup-field">
-              <span>Full Name</span>
-              <input
-                autoComplete="name"
-                name="fullName"
-                onChange={(event) => onInputChange('fullName', event)}
-                placeholder="Enter your full name"
-                required
-                type="text"
-                value={formValues.fullName}
-              />
-            </label>
-
-            <label className="signup-field">
-              <span>Email Address</span>
-              <input
-                autoComplete="email"
-                name="email"
-                onChange={(event) => onInputChange('email', event)}
-                placeholder="Enter your email address"
-                required
-                type="email"
-                value={formValues.email}
-              />
-            </label>
-
-            <label className="signup-field">
-              <span>Password</span>
-              <div className="signup-password-wrap">
-                <input
-                  autoComplete="new-password"
-                  minLength={8}
-                  name="password"
-                  onChange={(event) => onInputChange('password', event)}
-                  placeholder="8 characters min"
-                  required
-                  type={isPasswordVisible ? 'text' : 'password'}
-                  value={formValues.password}
-                />
-                <button
-                  aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
-                  className="signup-password-toggle"
-                  onClick={() => setIsPasswordVisible((current) => !current)}
-                  type="button"
-                >
-                  <PasswordEyeIcon />
-                </button>
-              </div>
-            </label>
-
-            <label className="signup-field">
-              <span>Postcode</span>
-              <input
-                autoComplete="postal-code"
-                name="postcode"
-                onChange={(event) => onInputChange('postcode', event)}
-                placeholder="SW1A 1AA"
-                required
-                type="text"
-                value={formValues.postcode}
-              />
-            </label>
-
-            <label className="signup-field">
-              <span>Referral Code (optional)</span>
-              <input
-                name="referralCode"
-                onChange={(event) => onInputChange('referralCode', event)}
-                placeholder="Enter code for bonus rewards"
-                type="text"
-                value={formValues.referralCode}
-              />
-            </label>
-
-            <p className="signup-policy">
-              By continuing, you agree to our Terms of Service and Privacy
-              Policy
-            </p>
-
-            <button
-              className={`signup-submit ${isSubmitting ? 'is-loading' : ''}`}
-              type="submit"
-              disabled={isSubmitting}
-              aria-busy={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="signup-loading-spinner" aria-hidden />
-                  Creating account...
-                </>
-              ) : (
-                'Sign Up'
-              )}
-            </button>
-          </form>
-
-          <p className="signup-login-copy">
+    <>
+      <AuthPageFrame
+        className={className}
+        formTitle="Welcome to TruCycle"
+        formDescription="Create your free account to start making an impact"
+        showcase={{
+          avatarSrc: '/profile-picture.jpg',
+          quote:
+            'TruCycle makes donating my unused items easy, secure, and rewarding.',
+        }}
+        footer={
+          <p className={authFooterCopyClassName}>
             Already have an account?{' '}
-            <Link className="signup-login-link" to="/login">
+            <Link className={authFooterLinkClassName} to="/login">
               Log in
             </Link>
           </p>
-        </section>
-      </div>
+        }
+      >
+        <form className="mt-8 grid gap-4" onSubmit={onSubmit}>
+          <label className={authFieldClassName}>
+            <span className={authLabelClassName}>Full Name</span>
+            <input
+              autoComplete="name"
+              className={authInputClassName}
+              name="fullName"
+              onChange={(event) => onInputChange('fullName', event)}
+              placeholder="Enter your full name"
+              required
+              type="text"
+              value={formValues.fullName}
+            />
+          </label>
 
-      {showOnboarding && (
-        <OnboardingChoiceDialog
-          isOpen={isOnboardingOpen}
-          onClose={() => setIsOnboardingOpen(false)}
-          onSelect={handleOnboardingSelect}
-        />
-      )}
-    </main>
+          <label className={authFieldClassName}>
+            <span className={authLabelClassName}>Email Address</span>
+            <input
+              autoComplete="email"
+              className={authInputClassName}
+              name="email"
+              onChange={(event) => onInputChange('email', event)}
+              placeholder="Enter your email address"
+              required
+              type="email"
+              value={formValues.email}
+            />
+          </label>
+
+          <label className={authFieldClassName}>
+            <span className={authLabelClassName}>Password</span>
+            <div className="relative">
+              <input
+                autoComplete="new-password"
+                className={classNames(authInputClassName, 'pr-11')}
+                minLength={8}
+                name="password"
+                onChange={(event) => onInputChange('password', event)}
+                placeholder="8 characters min"
+                required
+                type={isPasswordVisible ? 'text' : 'password'}
+                value={formValues.password}
+              />
+              <button
+                aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
+                className={authPasswordToggleClassName}
+                onClick={() => setIsPasswordVisible((current) => !current)}
+                type="button"
+              >
+                <PasswordVisibilityIcon isVisible={isPasswordVisible} />
+              </button>
+            </div>
+          </label>
+
+          <label className={authFieldClassName}>
+            <span className={authLabelClassName}>Postcode</span>
+            <input
+              autoComplete="postal-code"
+              className={authInputClassName}
+              name="postcode"
+              onChange={(event) => onInputChange('postcode', event)}
+              placeholder="SW1A 1AA"
+              required
+              type="text"
+              value={formValues.postcode}
+            />
+          </label>
+
+          <label className={authFieldClassName}>
+            <span className={authLabelClassName}>Referral Code (optional)</span>
+            <input
+              className={authInputClassName}
+              name="referralCode"
+              onChange={(event) => onInputChange('referralCode', event)}
+              placeholder="Enter code for bonus rewards"
+              type="text"
+              value={formValues.referralCode}
+            />
+          </label>
+
+          <p className="text-sm text-tc-auth-row">
+            By continuing, you agree to our Terms of Service and Privacy Policy
+          </p>
+
+          <button
+            className={classNames(authPrimaryButtonClassName, isRegistering && 'opacity-80')}
+            type="submit"
+            disabled={isRegistering}
+            aria-busy={isRegistering}
+          >
+            {isRegistering ? (
+              <>
+                <span className={authLoadingSpinnerClassName} aria-hidden />
+                Creating account...
+              </>
+            ) : (
+              'Sign Up'
+            )}
+          </button>
+        </form>
+      </AuthPageFrame>
+
+      <OnboardingChoiceDialog
+        isOpen={isOnboardingOpen}
+        onClose={handleOnboardingClose}
+        onSelect={handleOnboardingSelect}
+        isLoading={isChoosingRole}
+        loadingChoice={pendingChoice}
+      />
+    </>
   )
 }

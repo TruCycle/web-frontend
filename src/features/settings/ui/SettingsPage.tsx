@@ -1,170 +1,146 @@
-
 import { useState } from 'react';
 import { Edit2 } from 'lucide-react';
 import { Button } from '@/shared/ui/button/Button';
-import './SettingsPage.css';
+import { classNames } from '@/shared/utils/classNames';
+
+type TabKey = 'profile' | 'security' | 'notifications';
+
+function Toggle({
+    checked,
+    onChange,
+}: {
+    checked: boolean;
+    onChange: (next: boolean) => void;
+}) {
+    return (
+        <button
+            type="button"
+            onClick={() => onChange(!checked)}
+            className={classNames(
+                'relative inline-flex h-7 w-12 items-center rounded-full transition',
+                checked ? 'bg-lime-400' : 'bg-slate-300',
+            )}
+            aria-pressed={checked}
+        >
+            <span
+                className={classNames(
+                    'inline-block h-5 w-5 transform rounded-full bg-white shadow transition',
+                    checked ? 'translate-x-6' : 'translate-x-1',
+                )}
+            />
+        </button>
+    );
+}
 
 export default function SettingsPage() {
-    const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'notifications'>('profile');
+    const [activeTab, setActiveTab] = useState<TabKey>('profile');
     const [is2FAEnabled, setIs2FAEnabled] = useState(false);
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [inAppNotifications, setInAppNotifications] = useState(true);
 
     return (
-        <div className="settings-content-wrapper">
-            <div className="settings-header-section">
-                <h1 className="settings-welcome-title">Welcome back, Pearl!</h1>
-                <p className="settings-subtitle">Track your impact and manage your listings</p>
+        <div className="mx-auto w-full max-w-4xl space-y-5">
+            <div>
+                <h1 className="text-3xl font-bold text-slate-900">Welcome back, Pearl!</h1>
+                <p className="text-slate-500">Track your impact and manage your listings</p>
             </div>
 
-            {/* Tabs */}
-            <div className="settings-tabs">
-                <button
-                    className={`settings-tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('profile')}
-                >
-                    Profile
-                </button>
-                <button
-                    className={`settings-tab-btn ${activeTab === 'security' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('security')}
-                >
-                    Security
-                </button>
-                <button
-                    className={`settings-tab-btn ${activeTab === 'notifications' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('notifications')}
-                >
-                    Notifications
-                </button>
+            <div className="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-white p-2">
+                {(['profile', 'security', 'notifications'] as const).map((tab) => (
+                    <button
+                        key={tab}
+                        className={classNames(
+                            'rounded-lg px-4 py-2 text-sm font-medium capitalize transition',
+                            activeTab === tab
+                                ? 'bg-lime-100 text-slate-900 ring-1 ring-lime-200'
+                                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800',
+                        )}
+                        onClick={() => setActiveTab(tab)}
+                    >
+                        {tab}
+                    </button>
+                ))}
             </div>
 
-            {/* Tab Content */}
-            <div className="settings-card">
-                {activeTab === 'profile' && (
-                    <div className="settings-form">
-                        <h2 className="settings-section-title">Your Profile</h2>
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                {activeTab === 'profile' ? (
+                    <div className="space-y-4">
+                        <h2 className="text-xl font-semibold text-slate-900">Your Profile</h2>
 
-                        <div className="form-group">
-                            <label className="form-label" htmlFor="fullName">Full Name</label>
-                            <input
-                                className="form-input"
-                                type="text"
-                                id="fullName"
-                                defaultValue="Pearl O"
-                            />
+                        <label className="block space-y-1">
+                            <span className="text-sm font-medium text-slate-700">Full Name</span>
+                            <input className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100" type="text" defaultValue="Pearl O" />
+                        </label>
+
+                        <label className="block space-y-1">
+                            <span className="text-sm font-medium text-slate-700">Username (optional)</span>
+                            <input className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100" type="text" placeholder="Enter your username" />
+                        </label>
+
+                        <label className="block space-y-1">
+                            <span className="text-sm font-medium text-slate-700">Email</span>
+                            <input className="h-11 w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-3 text-sm text-slate-500" type="email" defaultValue="sarah.j@example.com" disabled />
+                        </label>
+
+                        <label className="block space-y-1">
+                            <span className="text-sm font-medium text-slate-700">Postcode</span>
+                            <input className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100" type="text" defaultValue="SW1A 1AA" />
+                        </label>
+
+                        <div className="space-y-1">
+                            <span className="text-sm font-medium text-slate-700">Member Since</span>
+                            <p className="text-sm text-slate-500">January 2026</p>
                         </div>
 
-                        <div className="form-group">
-                            <label className="form-label" htmlFor="username">Username (optional)</label>
-                            <input
-                                className="form-input"
-                                type="text"
-                                id="username"
-                                placeholder="Enter your username"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label" htmlFor="email">Email</label>
-                            <input
-                                className="form-input disabled"
-                                type="email"
-                                id="email"
-                                defaultValue="sarah.j@example.com"
-                                disabled
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label" htmlFor="postcode">Postcode</label>
-                            <input
-                                className="form-input"
-                                type="text"
-                                id="postcode"
-                                defaultValue="SW1A 1AA"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Member Since</label>
-                            <p className="member-since-text">January 2026</p>
-                        </div>
-
-                        <Button className="btn-update-profile">
-                            Update Profile
-                        </Button>
+                        <Button className="mt-2">Update Profile</Button>
                     </div>
-                )}
-                {activeTab === 'security' && (
-                    <div className="security-content">
-                        <h2 className="settings-section-title">Security</h2>
+                ) : null}
 
-                        <div className="security-section">
-                            <div className="security-item">
-                                <div className="security-item-content">
-                                    <h3 className="security-item-title">Password</h3>
-                                    <p className="security-item-description">Update your password</p>
-                                </div>
-                                <button className="security-edit-btn">
-                                    <Edit2 size={18} />
-                                </button>
-                            </div>
+                {activeTab === 'security' ? (
+                    <div className="space-y-4">
+                        <h2 className="text-xl font-semibold text-slate-900">Security</h2>
 
-                            <div className="security-item">
-                                <div className="security-item-content">
-                                    <h3 className="security-item-title">2FA</h3>
-                                    <p className="security-item-description">Enable or Disable two factor authentication</p>
-                                </div>
-                                <label className="toggle-switch">
-                                    <input
-                                        type="checkbox"
-                                        checked={is2FAEnabled}
-                                        onChange={(e) => setIs2FAEnabled(e.target.checked)}
-                                    />
-                                    <span className="toggle-slider"></span>
-                                </label>
+                        <div className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
+                            <div>
+                                <h3 className="font-medium text-slate-900">Password</h3>
+                                <p className="text-sm text-slate-500">Update your password</p>
                             </div>
+                            <button className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-700">
+                                <Edit2 size={18} />
+                            </button>
+                        </div>
+
+                        <div className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
+                            <div>
+                                <h3 className="font-medium text-slate-900">2FA</h3>
+                                <p className="text-sm text-slate-500">Enable or disable two-factor authentication</p>
+                            </div>
+                            <Toggle checked={is2FAEnabled} onChange={setIs2FAEnabled} />
                         </div>
                     </div>
-                )}
-                {activeTab === 'notifications' && (
-                    <div className="security-content">
-                        <h2 className="settings-section-title">Notifications</h2>
+                ) : null}
 
-                        <div className="security-section">
-                            <div className="security-item">
-                                <div className="security-item-content">
-                                    <h3 className="security-item-title">Email Notifications</h3>
-                                    <p className="security-item-description">Receive email notifications when articles are generated</p>
-                                </div>
-                                <label className="toggle-switch">
-                                    <input
-                                        type="checkbox"
-                                        checked={emailNotifications}
-                                        onChange={(e) => setEmailNotifications(e.target.checked)}
-                                    />
-                                    <span className="toggle-slider"></span>
-                                </label>
-                            </div>
+                {activeTab === 'notifications' ? (
+                    <div className="space-y-4">
+                        <h2 className="text-xl font-semibold text-slate-900">Notifications</h2>
 
-                            <div className="security-item">
-                                <div className="security-item-content">
-                                    <h3 className="security-item-title">In-App Notifications</h3>
-                                    <p className="security-item-description">Receive notifications in the dashboard</p>
-                                </div>
-                                <label className="toggle-switch">
-                                    <input
-                                        type="checkbox"
-                                        checked={inAppNotifications}
-                                        onChange={(e) => setInAppNotifications(e.target.checked)}
-                                    />
-                                    <span className="toggle-slider"></span>
-                                </label>
+                        <div className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
+                            <div>
+                                <h3 className="font-medium text-slate-900">Email Notifications</h3>
+                                <p className="text-sm text-slate-500">Receive email notifications when updates happen</p>
                             </div>
+                            <Toggle checked={emailNotifications} onChange={setEmailNotifications} />
+                        </div>
+
+                        <div className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
+                            <div>
+                                <h3 className="font-medium text-slate-900">In-App Notifications</h3>
+                                <p className="text-sm text-slate-500">Receive notifications in the dashboard</p>
+                            </div>
+                            <Toggle checked={inAppNotifications} onChange={setInAppNotifications} />
                         </div>
                     </div>
-                )}
+                ) : null}
             </div>
         </div>
     );

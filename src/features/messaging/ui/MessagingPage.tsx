@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Search, Paperclip, Smile, Send, MapPin, Share2 } from 'lucide-react';
 import { Button } from '@/shared/ui/button/Button';
-import './MessagingPage.css';
+import { classNames } from '@/shared/utils/classNames';
 
-// Interface for Message
 interface Message {
   id: string;
   sender: 'user' | 'other' | 'system';
@@ -16,7 +15,6 @@ interface Message {
   };
 }
 
-// Interface for Conversation
 interface Conversation {
   id: string;
   name: string;
@@ -32,84 +30,27 @@ const CONVERSATIONS: Conversation[] = [
     id: '1',
     name: 'Sarah Michelle',
     initials: 'SM',
-    lastMessage: 'Thanks for the laptop. Works Perfectly!',
+    lastMessage: 'Thanks for the laptop. Works perfectly!',
     time: '2 hours',
     active: true,
     messages: [
-      {
-        id: 'm1',
-        sender: 'other',
-        text: 'Hi! Is the laptop still available?',
-        timestamp: '2:30 PM',
-        type: 'text'
-      },
-      {
-        id: 'm2',
-        sender: 'user',
-        text: "Yes, it is! It's in excellent condition, barely used.",
-        timestamp: '2:35 PM',
-        type: 'text'
-      },
-      {
-        id: 's1',
-        sender: 'system',
-        text: 'Item claimed by Sarah Mitchell - Hand-off Iocation: Fixars Shop, 50 Abbey Rd, Abbey, Barking',
-        timestamp: '',
-        type: 'system'
-      },
-      {
-        id: 'm3',
-        sender: 'other',
-        text: 'Great! When can we arrange pickup?',
-        timestamp: '2:40 PM',
-        type: 'text'
-      },
-      {
-        id: 'm4',
-        sender: 'user',
-        text: "I'm free this weekend. Are you available Saturday afternoon?",
-        timestamp: '2:42 PM',
-        type: 'text'
-      },
-      {
-        id: 'm5',
-        sender: 'user',
-        text: 'Let me share the exact location of the drop-off point',
-        timestamp: '2:43 PM',
-        type: 'text'
-      },
+      { id: 'm1', sender: 'other', text: 'Hi! Is the laptop still available?', timestamp: '2:30 PM', type: 'text' },
+      { id: 'm2', sender: 'user', text: "Yes, it is! It's in excellent condition, barely used.", timestamp: '2:35 PM', type: 'text' },
+      { id: 's1', sender: 'system', text: 'Item claimed by Sarah Mitchell - Hand-off location: Fixars Shop, 50 Abbey Rd, Barking', timestamp: '', type: 'system' },
+      { id: 'm3', sender: 'other', text: 'Great! When can we arrange pickup?', timestamp: '2:40 PM', type: 'text' },
+      { id: 'm4', sender: 'user', text: "I'm free this weekend. Are you available Saturday afternoon?", timestamp: '2:42 PM', type: 'text' },
+      { id: 'm5', sender: 'user', text: 'Let me share the exact location of the drop-off point', timestamp: '2:43 PM', type: 'text' },
       {
         id: 'm6',
         sender: 'user',
         timestamp: '2:44 PM',
         type: 'location',
-        location: {
-          name: 'Fixars Shop',
-          address: '50 Abbey Rd, Abbey, Barking, IG11 0WR'
-        }
+        location: { name: 'Fixars Shop', address: '50 Abbey Rd, Abbey, Barking, IG11 0WR' },
       },
-      {
-        id: 'm7',
-        sender: 'other',
-        text: 'Perfect! Saturday works for me. See you then!',
-        timestamp: '2:45 PM',
-        type: 'text'
-      },
-      {
-        id: 's2',
-        sender: 'system',
-        text: 'Item collected and exchanged successfully',
-        timestamp: '',
-        type: 'system'
-      },
-      {
-        id: 'm8',
-        sender: 'other',
-        text: 'Thanks for the laptop! Works perfectly',
-        timestamp: '11:20 AM',
-        type: 'text'
-      }
-    ]
+      { id: 'm7', sender: 'other', text: 'Perfect! Saturday works for me. See you then!', timestamp: '2:45 PM', type: 'text' },
+      { id: 's2', sender: 'system', text: 'Item collected and exchanged successfully', timestamp: '', type: 'system' },
+      { id: 'm8', sender: 'other', text: 'Thanks for the laptop! Works perfectly', timestamp: '11:20 AM', type: 'text' },
+    ],
   },
   {
     id: '2',
@@ -119,28 +60,10 @@ const CONVERSATIONS: Conversation[] = [
     time: '5 hours ago',
     active: false,
     messages: [
-      {
-        id: 'jc1',
-        sender: 'other',
-        text: 'Is the iPad still available?',
-        timestamp: '9:00 AM',
-        type: 'text'
-      },
-      {
-        id: 'jc2',
-        sender: 'user',
-        text: 'Yes, it is. Are you interested?',
-        timestamp: '9:05 AM',
-        type: 'text'
-      },
-      {
-        id: 'jc3',
-        sender: 'other',
-        text: 'Can you do £200?',
-        timestamp: '9:10 AM',
-        type: 'text'
-      }
-    ]
+      { id: 'jc1', sender: 'other', text: 'Is the iPad still available?', timestamp: '9:00 AM', type: 'text' },
+      { id: 'jc2', sender: 'user', text: 'Yes, it is. Are you interested?', timestamp: '9:05 AM', type: 'text' },
+      { id: 'jc3', sender: 'other', text: 'Can you do GBP200?', timestamp: '9:10 AM', type: 'text' },
+    ],
   },
   {
     id: '3',
@@ -150,207 +73,178 @@ const CONVERSATIONS: Conversation[] = [
     time: '1 day ago',
     active: false,
     messages: [
-      {
-        id: 'er1',
-        sender: 'user',
-        text: 'Here is the bike.',
-        timestamp: 'Yesterday',
-        type: 'text'
-      },
-      {
-        id: 'er2',
-        sender: 'other',
-        text: 'Looks great! Thanks for the smooth exchange.',
-        timestamp: 'Yesterday',
-        type: 'text'
-      },
-      {
-        id: 'er3',
-        sender: 'user',
-        text: 'Enjoy!',
-        timestamp: 'Yesterday',
-        type: 'text'
-      }
-    ]
+      { id: 'er1', sender: 'user', text: 'Here is the bike.', timestamp: 'Yesterday', type: 'text' },
+      { id: 'er2', sender: 'other', text: 'Looks great! Thanks for the smooth exchange.', timestamp: 'Yesterday', type: 'text' },
+      { id: 'er3', sender: 'user', text: 'Enjoy!', timestamp: 'Yesterday', type: 'text' },
+    ],
   },
-  {
-    id: '4',
-    name: 'Alex Thompson',
-    initials: 'AT',
-    lastMessage: 'Can you deliver?',
-    time: '3 days ago',
-    active: false,
-    messages: [
-      {
-        id: 'at1',
-        sender: 'other',
-        text: 'Hi, I saw your listing for the monitor.',
-        timestamp: '3 days ago',
-        type: 'text'
-      },
-      {
-        id: 'at2',
-        sender: 'other',
-        text: 'Can you deliver to East London?',
-        timestamp: '3 days ago',
-        type: 'text'
-      },
-      {
-        id: 'at3',
-        sender: 'user',
-        text: 'Sorry, pickup only.',
-        timestamp: '3 days ago',
-        type: 'text'
-      }
-    ]
-  }
 ];
+
+function avatarClass(initials: string): string {
+  if (initials === 'SM') return 'bg-lime-100 text-lime-800';
+  if (initials === 'JC') return 'bg-sky-100 text-sky-800';
+  if (initials === 'ER') return 'bg-amber-100 text-amber-800';
+  return 'bg-slate-100 text-slate-700';
+}
 
 export default function MessagingPage() {
   const [activeConversationId, setActiveConversationId] = useState<string>('1');
   const [inputValue, setInputValue] = useState('');
 
-  const activeConversation = CONVERSATIONS.find(c => c.id === activeConversationId) || CONVERSATIONS[0];
+  const activeConversation =
+    CONVERSATIONS.find((conversation) => conversation.id === activeConversationId) ||
+    CONVERSATIONS[0];
 
   const handleSendMessage = () => {
     if (!inputValue.trim()) return;
-    // In a real app, this would add the message to the state/backend
-    console.log('Sending:', inputValue);
     setInputValue('');
   };
 
   return (
-    <div className="messaging-page-wrapper">
-      <div className="messaging-header">
-        <h1 className="messaging-welcome">Welcome back, Pearl!</h1>
-        <p className="messaging-subtitle">Track your impact and manage your exchanges</p>
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-3xl font-bold text-slate-900">Welcome back, Pearl!</h1>
+        <p className="text-slate-500">Track your impact and manage your exchanges</p>
       </div>
 
-      <div className="messaging-layout">
-        {/* Sidebar */}
-        <div className="conversations-sidebar">
-          <div className="conversations-header">
-            <h2 className="conversations-title">Conversations</h2>
-            <div className="search-wrapper">
-              <Search className="search-icon" size={18} />
+      <div className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm xl:grid-cols-[320px_1fr]">
+        <div className="rounded-xl border border-slate-200 bg-white">
+          <div className="border-b border-slate-200 p-3">
+            <h2 className="text-lg font-semibold text-slate-900">Conversations</h2>
+            <div className="relative mt-2">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input
                 type="text"
-                className="search-input"
+                className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
                 placeholder="Search conversations"
               />
             </div>
           </div>
-          <div className="conversation-list">
-            {CONVERSATIONS.map(conv => (
-              <div
-                key={conv.id}
-                className={`conversation-item ${activeConversationId === conv.id ? 'active' : ''}`}
-                onClick={() => setActiveConversationId(conv.id)}
+
+          <div className="max-h-[620px] overflow-y-auto p-2">
+            {CONVERSATIONS.map((conversation) => (
+              <button
+                key={conversation.id}
+                className={classNames(
+                  'mb-2 flex w-full items-start gap-3 rounded-xl p-3 text-left transition',
+                  activeConversationId === conversation.id
+                    ? 'bg-lime-50 ring-1 ring-lime-200'
+                    : 'hover:bg-slate-50',
+                )}
+                onClick={() => setActiveConversationId(conversation.id)}
               >
-                <div className={`avatar ${conv.initials.toLowerCase()}`}>
-                  {conv.initials}
-                </div>
-                <div className="conv-info">
-                  <div className="conv-header">
-                    <span className="conv-name">{conv.name}</span>
-                    {activeConversationId !== conv.id && (
-                      <span className="conv-time">{conv.time}</span>
-                    )}
-                  </div>
-                  <p className="conv-msg-preview">{conv.lastMessage}</p>
-                  {activeConversationId === conv.id && (
-                    <span className="conv-time" style={{ fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>
-                      {conv.time}
-                    </span>
-                  )}
-                </div>
-              </div>
+                <span className={classNames('inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold', avatarClass(conversation.initials))}>
+                  {conversation.initials}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-start justify-between gap-2">
+                    <span className="truncate text-sm font-semibold text-slate-900">{conversation.name}</span>
+                    <span className="text-xs text-slate-400">{conversation.time}</span>
+                  </span>
+                  <span className="mt-1 block truncate text-sm text-slate-500">{conversation.lastMessage}</span>
+                </span>
+              </button>
             ))}
           </div>
         </div>
 
-        {/* Chat Area */}
-        <div className="chat-area">
-          <div className="chat-header">
-            <div className={`avatar ${activeConversation.initials.toLowerCase()}`} style={{ width: '36px', height: '36px', fontSize: '0.85rem' }}>
+        <div className="flex min-h-[620px] flex-col rounded-xl border border-slate-200">
+          <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-3">
+            <span className={classNames('inline-flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold', avatarClass(activeConversation.initials))}>
               {activeConversation.initials}
-            </div>
-            <span className="chat-header-name">{activeConversation.name}</span>
+            </span>
+            <span className="font-semibold text-slate-900">{activeConversation.name}</span>
           </div>
 
-          <div className="chat-messages">
-            {activeConversation.messages.map((msg) => {
-              if (msg.type === 'system') {
+          <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50 p-4">
+            {activeConversation.messages.map((message) => {
+              if (message.type === 'system') {
                 return (
-                  <div key={msg.id} className="system-message">
-                    {msg.text}
+                  <div key={message.id} className="mx-auto max-w-[70ch] rounded-lg bg-slate-100 px-3 py-2 text-center text-xs text-slate-500">
+                    {message.text}
                   </div>
                 );
               }
 
-              if (msg.type === 'location' && msg.location) {
+              if (message.type === 'location' && message.location) {
                 return (
-                  <div key={msg.id} className={`message-group ${msg.sender === 'user' ? 'sent' : 'received'}`}>
-                    {msg.sender !== 'user' && (
-                      <div className="message-avatar">{activeConversation.initials}</div>
+                  <div
+                    key={message.id}
+                    className={classNames(
+                      'flex',
+                      message.sender === 'user' ? 'justify-end' : 'justify-start',
                     )}
-                    <div className="message-content">
-                      <div className="location-card">
-                        <div className="location-map-placeholder">
-                          <MapPin size={32} color="#2d5016" strokeWidth={2.5} />
-                        </div>
-                        <div className="location-info">
-                          <h4 className="location-name">{msg.location.name}</h4>
-                          <p className="location-address">{msg.location.address}</p>
-                          <a href="#" className="btn-open-maps">
-                            <Share2 size={18} />
-                            Open in Maps
-                          </a>
-                        </div>
+                  >
+                    <div className="max-w-[360px] rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                      <div className="mb-2 flex h-28 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+                        <MapPin size={32} strokeWidth={2.5} />
                       </div>
-                      <span className="message-time">{msg.timestamp}</span>
+                      <h4 className="font-semibold text-slate-900">{message.location.name}</h4>
+                      <p className="text-sm text-slate-500">{message.location.address}</p>
+                      <button className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-tc-auth-link hover:underline">
+                        <Share2 size={16} />
+                        Open in Maps
+                      </button>
+                      <div className="mt-2 text-right text-[11px] text-slate-400">{message.timestamp}</div>
                     </div>
                   </div>
                 );
               }
 
               return (
-                <div key={msg.id} className={`message-group ${msg.sender === 'user' ? 'sent' : 'received'}`}>
-                  {msg.sender !== 'user' && (
-                    <div className="message-avatar">
-                      {activeConversation.initials}
-                    </div>
+                <div
+                  key={message.id}
+                  className={classNames(
+                    'flex',
+                    message.sender === 'user' ? 'justify-end' : 'justify-start',
                   )}
-                  <div>
-                    <div className="message-bubble">
-                      {msg.text}
+                >
+                  <div
+                    className={classNames(
+                      'max-w-[360px] rounded-xl px-3 py-2 text-sm',
+                      message.sender === 'user'
+                        ? 'bg-lime-500 text-white'
+                        : 'border border-slate-200 bg-white text-slate-800',
+                    )}
+                  >
+                    {message.text}
+                    <div
+                      className={classNames(
+                        'mt-1 text-right text-[11px]',
+                        message.sender === 'user' ? 'text-white/80' : 'text-slate-400',
+                      )}
+                    >
+                      {message.timestamp}
                     </div>
-                    <span className="message-time">{msg.timestamp}</span>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          <div className="chat-input-area">
-            <button className="input-btn-icon">
+          <div className="flex items-center gap-2 border-t border-slate-200 bg-white p-3">
+            <button className="inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100">
               <Paperclip size={20} />
             </button>
-            <div className="input-container">
+            <div className="flex flex-1 items-center rounded-xl border border-slate-200 bg-slate-50 px-3">
               <input
                 type="text"
-                className="chat-text-input"
-                placeholder="Type your message ..."
+                className="h-11 w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+                placeholder="Type your message..."
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                onChange={(event) => setInputValue(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    handleSendMessage();
+                  }
+                }}
               />
-              <button className="input-btn-icon" style={{ padding: 0 }}>
-                <Smile size={20} />
+              <button className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100">
+                <Smile size={18} />
               </button>
             </div>
-            <Button className="btn-send" onClick={handleSendMessage}>
-              <Send size={18} color="#ffffff" />
+            <Button className="h-11 w-11 rounded-xl p-0" onClick={handleSendMessage}>
+              <Send className="text-white" size={18} />
             </Button>
           </div>
         </div>

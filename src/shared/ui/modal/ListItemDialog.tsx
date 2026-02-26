@@ -1,18 +1,41 @@
-import React, { useState } from 'react';
-import { X, Upload, ChevronDown, Search, Plus, Clock, MapPin, QrCode } from 'lucide-react';
-import { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import {
+    X,
+    Upload,
+    ChevronDown,
+    Search,
+    Plus,
+    Clock,
+    MapPin,
+    QrCode,
+} from 'lucide-react';
 import { Modal } from './Modal';
 import { Button } from '../button/Button';
-import './ListItemDialog.css';
 import successIcon from '@/assets/images/success.svg';
+import { classNames } from '@/shared/utils/classNames';
 
 interface ListItemDialogProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
-const CATEGORIES = ['Laptops', 'Smartphones', 'Accessories', 'Tablets', 'Monitors', 'Other Electronics'];
-const CONDITIONS = ['Like New', 'Gently Used', 'Minor Defects', 'Broken/For Parts'];
+const CATEGORIES = [
+    'Laptops',
+    'Smartphones',
+    'Accessories',
+    'Tablets',
+    'Monitors',
+    'Other Electronics',
+];
+const CONDITIONS = [
+    'Like New',
+    'Gently Used',
+    'Minor Defects',
+    'Broken/For Parts',
+];
+
+const inputClassName =
+    'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-lime-400 focus:ring-4 focus:ring-lime-100';
 
 export const ListItemDialog: React.FC<ListItemDialogProps> = ({ isOpen, onClose }) => {
     const [locationType, setLocationType] = useState<'address' | 'shop'>('shop');
@@ -28,7 +51,6 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({ isOpen, onClose 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleListAction = () => {
-        // Simulate successful listing
         setIsSuccess(true);
     };
 
@@ -37,289 +59,319 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({ isOpen, onClose 
         onClose();
     };
 
-    const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
+    const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
         if (!files) return;
 
-        const newPhotos = Array.from(files).map(file => URL.createObjectURL(file));
-        setPhotos(prev => {
-            const combined = [...prev, ...newPhotos];
-            return combined.slice(0, 4);
-        });
+        const newPhotos = Array.from(files).map((file) => URL.createObjectURL(file));
+        setPhotos((prev) => [...prev, ...newPhotos].slice(0, 4));
 
-        // Reset input value to allow uploading the same file again if removed
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
     };
 
     const removePhoto = (index: number) => {
-        setPhotos(prev => prev.filter((_, i) => i !== index));
-    };
-
-    const triggerFileInput = () => {
-        fileInputRef.current?.click();
+        setPhotos((prev) => prev.filter((_, i) => i !== index));
     };
 
     if (isSuccess) {
         return (
-            <Modal isOpen={isOpen} onClose={handleClose} hideCloseButton>
-                <div className="list-item-dialog success-view compact-padding">
-                    <header className="list-item-header border-none">
-                        <div className="celebration-icon-container">
-                            <img src={successIcon} alt="Success" className="success-icon-svg" />
+            <Modal isOpen={isOpen} onClose={handleClose} hideCloseButton containerClassName="max-w-[520px]">
+                <div className="relative flex flex-col gap-4 p-6">
+                    <button
+                        className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100"
+                        onClick={handleClose}
+                    >
+                        <X size={20} />
+                    </button>
+
+                    <div className="flex justify-center">
+                        <img src={successIcon} alt="Success" className="h-[70px] w-[70px]" />
+                    </div>
+
+                    <div className="text-center">
+                        <h2 className="text-xl font-bold text-slate-900">Congratulations!</h2>
+                        <p className="mt-1 text-sm text-slate-500">Your listing is live</p>
+                    </div>
+
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                        <h4 className="text-sm font-semibold text-slate-900">{itemName || 'iPhone 12Pro'}</h4>
+                        <p className="mt-2 text-xs text-slate-600">
+                            Category: <span className="font-semibold text-slate-800">{selectedCategory || 'Gadget'}</span>
+                        </p>
+                        <p className="text-xs text-slate-600">
+                            Condition: <span className="font-semibold text-slate-800">{selectedCondition || 'Like New'}</span>
+                        </p>
+                    </div>
+
+                    <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-center">
+                        <div className="mx-auto mb-2 inline-flex h-24 w-24 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-300 to-emerald-500">
+                            <QrCode size={52} className="text-white" strokeWidth={1.5} />
                         </div>
-                        <button className="btn-close-x absolute-top-right" onClick={handleClose}>
-                            <X size={20} color="#64748B" />
-                        </button>
-                    </header>
+                        <p className="text-xs text-slate-600">
+                            Share this QR code with potential collectors or show it when dropping off at Fixars Shop
+                        </p>
+                    </div>
 
-                    <div className="list-item-scroll-content text-center py-0">
-                        <h2 className="success-title">Congratulations!</h2>
-                        <p className="success-subtitle">Your listing is live</p>
-
-                        <div className="listing-summary-card">
-                            <div className="summary-item">
-                                <h4 className="summary-title">{itemName || 'iPhone 12Pro'}</h4>
-                                <div className="summary-details">
-                                    <span className="summary-label">Category: <span className="summary-value">{selectedCategory || 'Gadget'}</span></span>
-                                    <span className="summary-label">Condition: <span className="summary-value">{selectedCondition || 'Like New'}</span></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="qr-code-section">
-                            <div className="qr-code-container-compact">
-                                <QrCode size={55} color="#ffffff" strokeWidth={1.5} />
-                            </div>
-                            <p className="qr-caption">
-                                Share this QR code with potential collectors or show it when dropping off at Fixars Shop
-                            </p>
-                        </div>
-
-                        <div className="pickup-location-card">
-                            <div className="location-icon-wrapper">
-                                <MapPin size={18} color="#15A119" />
-                            </div>
-                            <div className="location-info">
-                                <h4 className="location-name">Pickup Location</h4>
-                                <p className="location-address">Fixars Shop</p>
-                                <p className="location-address">50 Abbey Road, Abbey Rd, Barking</p>
-                            </div>
-                        </div>
-
-                        <div className="expiry-warning-card">
-                            <div className="warning-icon-wrapper">
-                                <Clock size={18} color="#EA580C" />
-                            </div>
-                            <div className="warning-info">
-                                <h4 className="warning-title">Expires in 71h</h4>
-                                <p className="warning-text">Listing expires if not claimed within 3 days.</p>
+                    <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-3">
+                        <div className="flex items-start gap-2">
+                            <MapPin size={18} className="mt-0.5 text-emerald-700" />
+                            <div>
+                                <h4 className="text-sm font-semibold text-slate-900">Pickup Location</h4>
+                                <p className="text-xs text-slate-600">Fixars Shop</p>
+                                <p className="text-xs text-slate-600">50 Abbey Road, Abbey Rd, Barking</p>
                             </div>
                         </div>
                     </div>
 
-                    <footer className="list-item-footer footer-success">
+                    <div className="rounded-xl border border-orange-100 bg-orange-50 p-3">
+                        <div className="flex items-start gap-2">
+                            <Clock size={18} className="mt-0.5 text-orange-600" />
+                            <div>
+                                <h4 className="text-sm font-semibold text-slate-900">Expires in 71h</h4>
+                                <p className="text-xs text-slate-600">Listing expires if not claimed within 3 days.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
                         <Button variant="secondary" onClick={handleClose}>Done</Button>
-                        <Button variant="primary">Save QR Code</Button>
-                    </footer>
+                        <Button>Save QR Code</Button>
+                    </div>
                 </div>
             </Modal>
         );
     }
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} hideCloseButton>
-            <div className="list-item-dialog">
-                <header className="list-item-header">
+        <Modal isOpen={isOpen} onClose={handleClose} hideCloseButton containerClassName="max-w-[560px]">
+            <div className="flex max-h-[90vh] flex-col">
+                <header className="flex items-start justify-between border-b border-slate-100 px-6 pb-4 pt-6">
                     <div>
-                        <h2 className="list-item-title">List an Item</h2>
-                        <p className="list-item-subtitle">Share items you no longer need with your community</p>
+                        <h2 className="text-lg font-bold text-slate-900">List an Item</h2>
+                        <p className="text-sm text-slate-500">Share items you no longer need with your community</p>
                     </div>
-                    <button className="btn-close-x" onClick={handleClose}>
-                        <X size={20} color="#64748B" />
+                    <button className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100" onClick={handleClose}>
+                        <X size={20} />
                     </button>
                 </header>
 
-                <div className="list-item-scroll-content">
-                    {/* Photos Section */}
-                    <div className="form-group">
-                        <label className="field-label">Photos</label>
+                <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-slate-700">Photos</label>
                         <input
                             type="file"
                             ref={fileInputRef}
                             onChange={handlePhotoUpload}
                             multiple
                             accept="image/*"
-                            style={{ display: 'none' }}
+                            className="hidden"
                         />
-                        <div className="photo-upload-grid">
+                        <div className="flex flex-wrap gap-3">
                             {photos.map((photo, index) => (
-                                <div key={index} className="photo-preview-box">
-                                    <img src={photo} alt={`Upload ${index + 1}`} className="photo-preview-img" />
+                                <div key={index} className="relative h-20 w-20 overflow-hidden rounded-xl border border-slate-200">
+                                    <img src={photo} alt={`Upload ${index + 1}`} className="h-full w-full object-cover" />
                                     <button
-                                        className="btn-remove-photo"
+                                        className="absolute right-1 top-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-white text-rose-500 shadow-sm"
                                         onClick={() => removePhoto(index)}
                                         title="Remove photo"
                                     >
-                                        <X size={14} color="#EF4444" />
+                                        <X size={12} />
                                     </button>
                                 </div>
                             ))}
-                            {photos.length < 4 && (
-                                <div className="photo-upload-box" onClick={triggerFileInput}>
-                                    <Upload size={24} color="#94A3B8" />
-                                    <span className="upload-text">Add photo</span>
-                                </div>
-                            )}
+                            {photos.length < 4 ? (
+                                <button
+                                    className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-slate-300 text-slate-500 transition hover:border-lime-300 hover:text-slate-700"
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    <Upload size={20} />
+                                    <span className="text-[11px] font-medium">Add photo</span>
+                                </button>
+                            ) : null}
                         </div>
-                        <p className="field-help-text">You can upload up to 4 photos. First photo will be the cover image.</p>
+                        <p className="text-xs text-slate-400">You can upload up to 4 photos. First photo will be the cover image.</p>
                     </div>
 
-                    {/* Item Name */}
-                    <div className="form-group">
-                        <label className="field-label">Item Name</label>
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-slate-700">Item Name</label>
                         <input
                             type="text"
-                            className="field-input"
+                            className={inputClassName}
                             placeholder="e.g., iPhone 12Pro - 128GB"
                             value={itemName}
                             onChange={(e) => setItemName(e.target.value)}
                         />
                     </div>
 
-                    {/* Category */}
-                    <div className="form-group">
-                        <label className="field-label">Category</label>
-                        <div className="custom-select-wrapper">
-                            <div
-                                className={`custom-select ${isCategoryOpen ? 'open' : ''}`}
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-slate-700">Category</label>
+                        <div className="relative">
+                            <button
+                                className={classNames(
+                                    inputClassName,
+                                    'flex items-center justify-between text-left',
+                                    isCategoryOpen && 'border-lime-400 ring-4 ring-lime-100',
+                                )}
                                 onClick={() => {
-                                    setIsCategoryOpen(!isCategoryOpen);
+                                    setIsCategoryOpen((prev) => !prev);
                                     setIsConditionOpen(false);
                                 }}
                             >
-                                <span className={selectedCategory ? 'select-value' : 'select-placeholder'}>
+                                <span className={selectedCategory ? 'text-slate-800' : 'text-slate-400'}>
                                     {selectedCategory || 'Select'}
                                 </span>
-                                <ChevronDown size={18} color="#64748B" className={isCategoryOpen ? 'rotate-180' : ''} />
-                            </div>
-                            {isCategoryOpen && (
-                                <div className="select-dropdown">
-                                    {CATEGORIES.map(cat => (
-                                        <div
+                                <ChevronDown
+                                    size={18}
+                                    className={classNames('text-slate-500 transition', isCategoryOpen && 'rotate-180')}
+                                />
+                            </button>
+                            {isCategoryOpen ? (
+                                <div className="absolute z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg">
+                                    {CATEGORIES.map((cat) => (
+                                        <button
                                             key={cat}
-                                            className={`select-item ${selectedCategory === cat ? 'active' : ''}`}
+                                            className={classNames(
+                                                'w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50',
+                                                selectedCategory === cat && 'bg-lime-50 font-semibold text-lime-700',
+                                            )}
                                             onClick={() => {
                                                 setSelectedCategory(cat);
                                                 setIsCategoryOpen(false);
                                             }}
                                         >
                                             {cat}
-                                        </div>
+                                        </button>
                                     ))}
                                 </div>
-                            )}
+                            ) : null}
                         </div>
                     </div>
 
-                    {/* Condition */}
-                    <div className="form-group">
-                        <label className="field-label">Condition</label>
-                        <div className="custom-select-wrapper">
-                            <div
-                                className={`custom-select ${isConditionOpen ? 'open' : ''}`}
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-slate-700">Condition</label>
+                        <div className="relative">
+                            <button
+                                className={classNames(
+                                    inputClassName,
+                                    'flex items-center justify-between text-left',
+                                    isConditionOpen && 'border-lime-400 ring-4 ring-lime-100',
+                                )}
                                 onClick={() => {
-                                    setIsConditionOpen(!isConditionOpen);
+                                    setIsConditionOpen((prev) => !prev);
                                     setIsCategoryOpen(false);
                                 }}
                             >
-                                <span className={selectedCondition ? 'select-value' : 'select-placeholder'}>
+                                <span className={selectedCondition ? 'text-slate-800' : 'text-slate-400'}>
                                     {selectedCondition || 'Select'}
                                 </span>
-                                <ChevronDown size={18} color="#64748B" className={isConditionOpen ? 'rotate-180' : ''} />
-                            </div>
-                            {isConditionOpen && (
-                                <div className="select-dropdown">
-                                    {CONDITIONS.map(cond => (
-                                        <div
+                                <ChevronDown
+                                    size={18}
+                                    className={classNames('text-slate-500 transition', isConditionOpen && 'rotate-180')}
+                                />
+                            </button>
+                            {isConditionOpen ? (
+                                <div className="absolute z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg">
+                                    {CONDITIONS.map((cond) => (
+                                        <button
                                             key={cond}
-                                            className={`select-item ${selectedCondition === cond ? 'active' : ''}`}
+                                            className={classNames(
+                                                'w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50',
+                                                selectedCondition === cond && 'bg-lime-50 font-semibold text-lime-700',
+                                            )}
                                             onClick={() => {
                                                 setSelectedCondition(cond);
                                                 setIsConditionOpen(false);
                                             }}
                                         >
                                             {cond}
-                                        </div>
+                                        </button>
                                     ))}
                                 </div>
-                            )}
+                            ) : null}
                         </div>
                     </div>
 
-                    {/* Description */}
-                    <div className="form-group">
-                        <label className="field-label">Description (optional)</label>
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-slate-700">Description (optional)</label>
                         <textarea
-                            className="field-textarea"
+                            className="min-h-24 w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
                             placeholder="Describe the items condition, any accessories included, etc..."
                             value={itemDescription}
                             onChange={(e) => setItemDescription(e.target.value)}
                         />
                     </div>
 
-                    {/* Pickup Location Type */}
-                    <div className="form-group">
-                        <label className="field-label">Pickup Location Type</label>
-                        <div className="location-toggle">
-                            <div
-                                className={`location-option ${locationType === 'address' ? 'active' : ''}`}
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-slate-700">Pickup Location Type</label>
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                className={classNames(
+                                    'flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold',
+                                    locationType === 'address'
+                                        ? 'border-lime-500 bg-lime-500 text-white'
+                                        : 'border-slate-200 bg-white text-slate-700',
+                                )}
                                 onClick={() => setLocationType('address')}
                             >
                                 <span>My Address</span>
-                                <span className="badge-small white">Exchange</span>
-                            </div>
-                            <div
-                                className={`location-option ${locationType === 'shop' ? 'active' : ''}`}
+                                <span className={classNames(
+                                    'rounded-full px-2 py-0.5 text-[11px] font-semibold',
+                                    locationType === 'address' ? 'bg-white text-slate-900' : 'bg-slate-100 text-slate-600',
+                                )}>
+                                    Exchange
+                                </span>
+                            </button>
+                            <button
+                                className={classNames(
+                                    'flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold',
+                                    locationType === 'shop'
+                                        ? 'border-lime-500 bg-lime-500 text-white'
+                                        : 'border-slate-200 bg-white text-slate-700',
+                                )}
                                 onClick={() => setLocationType('shop')}
                             >
                                 <span>Partner Shop</span>
-                                <span className="badge-small">Donor</span>
-                            </div>
+                                <span className={classNames(
+                                    'rounded-full px-2 py-0.5 text-[11px] font-semibold',
+                                    locationType === 'shop' ? 'bg-white text-slate-900' : 'bg-slate-100 text-slate-600',
+                                )}>
+                                    Donor
+                                </span>
+                            </button>
                         </div>
-                        <p className="field-help-text">Collector will pick up from a partner shop. Select one below.</p>
+                        <p className="text-xs text-slate-400">Collector will pick up from a partner shop. Select one below.</p>
                     </div>
 
-                    {/* Partner Drop-off Shop */}
-                    <div className="form-group">
-                        <label className="field-label">Partner Drop-off Shop</label>
-                        <div className="search-field-wrapper">
-                            <Search className="search-icon-form" size={18} color="#94A3B8" />
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-slate-700">Partner Drop-off Shop</label>
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                             <input
                                 type="text"
-                                className="field-input search-padding"
+                                className={classNames(inputClassName, 'pl-10')}
                                 placeholder="Fixars Shop"
                             />
                         </div>
-                        <p className="field-help-text">Search and select a partner shop where the collector can pick up your item</p>
+                        <p className="text-xs text-slate-400">Search and select a partner shop where the collector can pick up your item</p>
                     </div>
 
-                    {/* Environmental Impact Card */}
-                    <div className="impact-card-dialog">
-                        <h3 className="impact-card-title">Environmental Impact</h3>
-                        <p className="impact-card-text">
-                            By listing this item, you're helping reduce electronic waste and saving approximately <span className="impact-highlight">12kg of CO₂</span> from entering the atmosphere.
+                    <div className="rounded-xl border border-lime-200 bg-lime-50 p-4">
+                        <h3 className="text-sm font-bold text-slate-900">Environmental Impact</h3>
+                        <p className="mt-1 text-sm text-slate-600">
+                            By listing this item, you're helping reduce electronic waste and saving approximately{' '}
+                            <span className="font-extrabold text-lime-700">12kg of CO2</span> from entering the atmosphere.
                         </p>
                     </div>
                 </div>
 
-                <footer className="list-item-footer">
-                    <button className="btn-cancel-dialog" onClick={handleClose}>Cancel</button>
-                    <button className="btn-list-action" onClick={handleListAction}>
+                <footer className="flex justify-end gap-3 border-t border-slate-100 px-6 pb-6 pt-4">
+                    <Button variant="secondary" onClick={handleClose}>Cancel</Button>
+                    <Button onClick={handleListAction}>
                         <Plus size={18} />
                         List Item
-                    </button>
+                    </Button>
                 </footer>
             </div>
         </Modal>
