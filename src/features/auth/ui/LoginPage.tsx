@@ -1,6 +1,7 @@
 import { type ChangeEvent, type FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { classNames } from '@/shared/utils/classNames'
+import { AuthCheckbox } from './components/AuthCheckbox'
 import { PasswordVisibilityIcon } from './components/PasswordVisibilityIcon'
 import {
   AuthPageFrame,
@@ -121,16 +122,13 @@ export default function LoginPage() {
         </label>
 
         <div className="flex items-center justify-between gap-4 max-sm:flex-wrap">
-          <label className={classNames('inline-flex items-center gap-[0.45rem]', authInlineMetaClassName)}>
-            <input
-              checked={formValues.keepLoggedIn}
-              className="m-0"
-              name="keepLoggedIn"
-              onChange={onKeepLoggedInChange}
-              type="checkbox"
-            />
-            <span>Keep me logged in</span>
-          </label>
+          <AuthCheckbox
+            checked={formValues.keepLoggedIn}
+            className={authInlineMetaClassName}
+            label="Keep me logged in"
+            name="keepLoggedIn"
+            onChange={onKeepLoggedInChange}
+          />
           <Link
             className={classNames('bg-transparent p-0 hover:underline', authInlineMetaClassName)}
             to="/reset-password"

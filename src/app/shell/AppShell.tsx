@@ -1,11 +1,14 @@
-import { type ReactNode } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { classNames } from '@/shared/utils/classNames'
 import { NavLink, type NavLinkRenderProps, useLocation, useNavigate } from 'react-router-dom'
 import {
   FileText,
   Users,
   Settings,
-  HelpCircle
+  HelpCircle,
+  ChevronDown,
+  User,
+  LogOut,
 } from 'lucide-react'
 import { useNotifications } from '@/features/notifications/hooks/useNotifications'
 import logo from '@/assets/logo.svg'
@@ -48,6 +51,8 @@ export function AppShell({ children }: AppShellProps) {
   const { role, setRole } = useUserRole()
   const location = useLocation()
   const navigate = useNavigate()
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
+  const profileMenuRef = useRef<HTMLDivElement | null>(null)
 
   function onRoleChange(nextRole: 'collector' | 'donor') {
     setRole(nextRole)
@@ -56,6 +61,32 @@ export function AppShell({ children }: AppShellProps) {
       navigate(`/support/${nextRole}`)
     }
   }
+
+  useEffect(() => {
+    function handleOutsideClick(event: MouseEvent) {
+      if (!profileMenuRef.current) {
+        return
+      }
+
+      if (!profileMenuRef.current.contains(event.target as Node)) {
+        setIsProfileMenuOpen(false)
+      }
+    }
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsProfileMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [])
 
   return (
     <div className="flex min-h-screen bg-tc-app-canvas text-tc-app-text max-md:flex-col max-md:p-2">
@@ -167,7 +198,7 @@ export function AppShell({ children }: AppShellProps) {
       </aside>
 
       <main className="flex h-screen flex-1 flex-col overflow-x-hidden bg-transparent max-md:h-auto max-md:rounded-2xl">
-        <header className="sticky top-0 z-[100] flex h-[72px] w-full items-center justify-end border-b border-tc-header-border bg-white px-6">
+        <header className="sticky top-0 z-[100] flex h-[72px] w-full items-center justify-end border-b border-tc-header-border bg-[#FFFFFF] px-6 shadow-none">
           <div className="flex items-center gap-4">
             <button className="relative flex items-center justify-center p-2 text-tc-app-text opacity-80 transition hover:opacity-100">
               <BellIcon />
@@ -176,8 +207,52 @@ export function AppShell({ children }: AppShellProps) {
               )}
             </button>
             <div className="mx-1 h-6 w-px bg-tc-header-divider" />
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-tc-header-avatar text-[0.85rem] font-bold text-white">
-              <span>P</span>
+            <div className="relative" ref={profileMenuRef}>
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-full px-1 py-1 text-tc-app-text transition hover:bg-slate-100"
+                onClick={() => setIsProfileMenuOpen((current) => !current)}
+                aria-haspopup="menu"
+                aria-expanded={isProfileMenuOpen}
+                aria-label="Open profile menu"
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-tc-header-avatar text-[0.85rem] font-bold text-white">
+                  P
+                </span>
+                <ChevronDown size={16} className="text-slate-500" />
+              </button>
+
+              {isProfileMenuOpen ? (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-[calc(100%+0.5rem)] z-[110] min-w-[180px] rounded-xl border border-slate-200 bg-white p-1 shadow-lg"
+                >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100"
+                    onClick={() => {
+                      setIsProfileMenuOpen(false)
+                      navigate('/settings')
+                    }}
+                  >
+                    <User size={16} />
+                    Profile
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-rose-600 hover:bg-rose-50"
+                    onClick={() => {
+                      setIsProfileMenuOpen(false)
+                      navigate('/login')
+                    }}
+                  >
+                    <LogOut size={16} />
+                    Log out
+                  </button>
+                </div>
+              ) : null}
             </div>
           </div>
         </header>
