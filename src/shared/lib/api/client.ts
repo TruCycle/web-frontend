@@ -1,4 +1,5 @@
 import { env } from '@/shared/lib/config/env'
+import { getStoredAccessToken } from '@/shared/lib/auth/session'
 import { ApiError } from '@/shared/types/network'
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -11,7 +12,7 @@ interface RequestOptions<TBody> {
 }
 
 function buildHeaders(customHeaders?: Record<string, string>): HeadersInit {
-  const authToken = window.localStorage.getItem('auth_token')
+  const authToken = getStoredAccessToken()
 
   return {
     'Content-Type': 'application/json',

@@ -152,6 +152,57 @@
         ]
       }
     },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "summary": "Refresh access and refresh tokens",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Refresh token payload",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token refresh success with a new access and refresh token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "status": "success",
+                    "message": "Tokens refreshed successfully.",
+                    "data": {
+                      "user": {
+                        "id": "3f2f8c2e-6b1a-4c8e-9a61-22f924e0f6f1",
+                        "email": "jane@example.com",
+                        "firstName": "Jane",
+                        "lastName": "Doe",
+                        "status": "active"
+                      },
+                      "tokens": {
+                        "accessToken": "eyJhbGciOi...new-access",
+                        "refreshToken": "eyJhbGciOi...new-refresh",
+                        "accessTokenExpiry": "2025-10-31T12:00:00.000Z",
+                        "refreshTokenExpiry": "2025-11-30T12:00:00.000Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/auth/resend-verification": {
       "post": {
         "operationId": "AuthController_resendVerification",
@@ -3861,6 +3912,19 @@
         "required": [
           "email",
           "password"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "description": "Refresh token (JWT)"
+          }
+        },
+        "required": [
+          "refresh_token"
         ]
       },
       "ResendVerificationDto": {

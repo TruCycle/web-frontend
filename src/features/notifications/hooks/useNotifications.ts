@@ -3,7 +3,6 @@ import {
   fetchNotifications,
   markAllNotificationsAsRead,
   markNotificationAsRead,
-  notificationsUpdatedEventName,
 } from '@/features/notifications/api/notificationsApi'
 import type { NotificationItem } from '@/features/notifications/types'
 
@@ -27,23 +26,6 @@ export function useNotifications() {
 
   useEffect(() => {
     void loadNotifications()
-  }, [loadNotifications])
-
-  useEffect(() => {
-    const refreshNotifications = () => {
-      void loadNotifications()
-    }
-
-    window.addEventListener(notificationsUpdatedEventName, refreshNotifications)
-    window.addEventListener('storage', refreshNotifications)
-
-    return () => {
-      window.removeEventListener(
-        notificationsUpdatedEventName,
-        refreshNotifications,
-      )
-      window.removeEventListener('storage', refreshNotifications)
-    }
   }, [loadNotifications])
 
   const markAsRead = useCallback(

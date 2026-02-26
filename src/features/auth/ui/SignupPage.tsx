@@ -1,5 +1,8 @@
 import { type ChangeEvent, type FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useAuthSession } from '@/shared/context/useAuthSession'
+import { ApiError } from '@/shared/types/network'
+import { useToast } from '@/shared/ui/toast/useToast'
 import { classNames } from '@/shared/utils/classNames'
 import { useUserRole } from '@/shared/context/useUserRole'
 import { OnboardingChoiceDialog } from './components/OnboardingChoiceDialog'
@@ -11,6 +14,7 @@ import {
   authFooterLinkClassName,
   authInputClassName,
   authLabelClassName,
+  authLoadingSpinnerClassName,
   authPasswordToggleClassName,
   authPrimaryButtonClassName,
 } from './components/AuthPageFrame'
@@ -42,11 +46,14 @@ export default function SignupPage({
 }: SignupPageProps) {
   const [formValues, setFormValues] = useState(initialFormValues)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [isRegistering, setIsRegistering] = useState(false)
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false)
   const [isChoosingRole, setIsChoosingRole] = useState(false)
   const [pendingChoice, setPendingChoice] = useState<'collect' | 'donate' | null>(
     null,
   )
+  const { register, login } = useAuthSession()
+  const { success, error } = useToast()
   const { setRole } = useUserRole()
   const navigate = useNavigate()
 
@@ -61,21 +68,81 @@ export default function SignupPage({
     }))
   }
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    onSubmitSuccess?.()
-    setIsOnboardingOpen(true)
+  function splitFullName(fullName: string): { firstName: string; lastName: string } | null {
+    const trimmedName = fullName.trim()
+    const parts = trimmedName.split(/\s+/).filter(Boolean)
+
+    if (parts.length < 2) {
+      return null
+    }
+
+    return {
+      firstName: parts[0],
+      lastName: parts.slice(1).join(' '),
+    }
   }
 
-  function handleOnboardingSelect(choice: 'collect' | 'donate') {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (isRegistering) {
+      return
+    }
+
+    const splitName = splitFullName(formValues.fullName)
+    if (!splitName) {
+      error('Invalid full name', 'Enter first and last name to continue.')
+      return
+    }
+
+    setIsRegistering(true)
+    try {
+      await register({
+        firstName: splitName.firstName,
+        lastName: splitName.lastName,
+        email: formValues.email.trim(),
+        password: formValues.password,
+      })
+      onSubmitSuccess?.()
+      setIsOnboardingOpen(true)
+      success('Account created', 'Choose how you want to start on TruCycle.')
+    } catch (caughtError) {
+      const message =
+        caughtError instanceof ApiError
+          ? caughtError.message
+          : 'Unable to create account right now. Please try again.'
+      error('Sign up failed', message)
+    } finally {
+      setIsRegistering(false)
+    }
+  }
+
+  async function handleOnboardingSelect(choice: 'collect' | 'donate') {
     if (isChoosingRole) {
       return
     }
+
     setIsChoosingRole(true)
     setPendingChoice(choice)
-    setRole(choice === 'collect' ? 'collector' : 'donor')
-    setIsOnboardingOpen(false)
-    navigate('/')
+    try {
+      setRole(choice === 'collect' ? 'collector' : 'donor')
+      await login(
+        {
+          email: formValues.email.trim(),
+          password: formValues.password,
+        },
+        { rememberSession: true },
+      )
+      setIsOnboardingOpen(false)
+      navigate('/')
+    } catch (caughtError) {
+      const message =
+        caughtError instanceof ApiError
+          ? caughtError.message
+          : 'Unable to login after signup. Please login manually.'
+      error('Could not continue', message)
+      setIsChoosingRole(false)
+      setPendingChoice(null)
+    }
   }
 
   function handleOnboardingClose() {
@@ -190,8 +257,20 @@ export default function SignupPage({
             By continuing, you agree to our Terms of Service and Privacy Policy
           </p>
 
-          <button className={authPrimaryButtonClassName} type="submit">
-            Sign Up
+          <button
+            className={classNames(authPrimaryButtonClassName, isRegistering && 'opacity-80')}
+            type="submit"
+            disabled={isRegistering}
+            aria-busy={isRegistering}
+          >
+            {isRegistering ? (
+              <>
+                <span className={authLoadingSpinnerClassName} aria-hidden />
+                Creating account...
+              </>
+            ) : (
+              'Sign Up'
+            )}
           </button>
         </form>
       </AuthPageFrame>

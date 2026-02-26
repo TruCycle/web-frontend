@@ -8,6 +8,8 @@ import {
   useState,
 } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuthSession } from '@/shared/context/useAuthSession'
+import { ApiError } from '@/shared/types/network'
 import { classNames } from '@/shared/utils/classNames'
 import { useToast } from '@/shared/ui/toast/useToast'
 import { PasswordVisibilityIcon } from './components/PasswordVisibilityIcon'
@@ -48,6 +50,7 @@ export default function PasswordResetPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const otpInputRefs = useRef<Array<HTMLInputElement | null>>([])
   const navigateTimeoutRef = useRef<number | null>(null)
+  const { requestPasswordReset, resetPassword } = useAuthSession()
   const { success, info, error } = useToast()
   const navigate = useNavigate()
 
@@ -180,10 +183,24 @@ export default function PasswordResetPage() {
     }
   }
 
-  function onResendCode() {
-    setOtpValues(initialOtpValues)
-    focusOtpInput(0)
-    success('Code resent', 'A fresh OTP has been sent to your email.')
+  async function onResendCode() {
+    if (!email.trim()) {
+      error('Missing email', 'Enter your email before requesting another code.')
+      return
+    }
+
+    try {
+      await requestPasswordReset(email.trim())
+      setOtpValues(initialOtpValues)
+      focusOtpInput(0)
+      success('Code resent', 'A fresh OTP has been sent to your email.')
+    } catch (caughtError) {
+      const message =
+        caughtError instanceof ApiError
+          ? caughtError.message
+          : 'Could not resend code right now. Please try again.'
+      error('Resend failed', message)
+    }
   }
 
   function onPasswordInputChange(
@@ -197,12 +214,24 @@ export default function PasswordResetPage() {
     }))
   }
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     if (resetStep === 'request') {
-      setResetStep('otp')
-      success('Code sent', 'Check your inbox for the 6-digit verification code.')
+      setIsSubmitting(true)
+      try {
+        await requestPasswordReset(email.trim())
+        setResetStep('otp')
+        success('Code sent', 'Check your inbox for the 6-digit verification code.')
+      } catch (caughtError) {
+        const message =
+          caughtError instanceof ApiError
+            ? caughtError.message
+            : 'Could not send reset code right now. Please try again.'
+        error('Request failed', message)
+      } finally {
+        setIsSubmitting(false)
+      }
       return
     }
 
@@ -223,13 +252,27 @@ export default function PasswordResetPage() {
     }
 
     setIsSubmitting(true)
-    success('Password updated', 'Redirecting you now...')
-    if (navigateTimeoutRef.current !== null) {
-      window.clearTimeout(navigateTimeoutRef.current)
+    try {
+      const resetToken = otpValues.join('')
+      await resetPassword({
+        token: resetToken,
+        newPassword: passwordValues.password,
+      })
+      success('Password updated', 'Redirecting you now...')
+      if (navigateTimeoutRef.current !== null) {
+        window.clearTimeout(navigateTimeoutRef.current)
+      }
+      navigateTimeoutRef.current = window.setTimeout(() => {
+        navigate('/login')
+      }, 450)
+    } catch (caughtError) {
+      const message =
+        caughtError instanceof ApiError
+          ? caughtError.message
+          : 'Could not reset password right now. Please try again.'
+      error('Reset failed', message)
+      setIsSubmitting(false)
     }
-    navigateTimeoutRef.current = window.setTimeout(() => {
-      navigate('/login')
-    }, 450)
   }
 
   const formTitle =
@@ -383,7 +426,7 @@ export default function PasswordResetPage() {
           {isSubmitting ? (
             <>
               <span className={authLoadingSpinnerClassName} aria-hidden />
-              Updating...
+              {resetStep === 'request' ? 'Sending code...' : 'Updating...'}
             </>
           ) : (
             resetStep === 'password' ? 'Set Password' : 'Continue'

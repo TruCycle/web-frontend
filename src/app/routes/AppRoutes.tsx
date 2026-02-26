@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { AppShell } from '@/app/shell/AppShell'
+import { useAuthSession } from '@/shared/context/useAuthSession'
 import { LoadingState } from '@/shared/ui/loading/LoadingState'
 
 const SignupPage = lazy(() => import('@/features/auth/ui/SignupPage'))
@@ -29,25 +30,42 @@ function ShellLayout() {
   )
 }
 
+function ProtectedShellRoute() {
+  const { isAuthenticated, isBootstrapping } = useAuthSession()
+  const location = useLocation()
+
+  if (isBootstrapping) {
+    return <LoadingState variant="page" label="Checking session" />
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate replace to="/login" state={{ from: location }} />
+  }
+
+  return <Outlet />
+}
+
 export function AppRoutes() {
   return (
     <Routes>
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/reset-password" element={<PasswordResetPage />} />
-      <Route element={<ShellLayout />}>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/browse" element={<Dashboard />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="/messages" element={<MessagingPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/collected" element={<CollectedItemsPage />} />
-        <Route path="/listings" element={<YourListingsPage />} />
-        <Route path="/selected" element={<YourListingsPage />} />
-        <Route path="/partner-shops" element={<PartnerShopsPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/support" element={<SupportFaqPage />} />
-        <Route path="/support/:viewRole" element={<SupportFaqPage />} />
+      <Route element={<ProtectedShellRoute />}>
+        <Route element={<ShellLayout />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/browse" element={<Dashboard />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/messages" element={<MessagingPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/collected" element={<CollectedItemsPage />} />
+          <Route path="/listings" element={<YourListingsPage />} />
+          <Route path="/selected" element={<YourListingsPage />} />
+          <Route path="/partner-shops" element={<PartnerShopsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/support" element={<SupportFaqPage />} />
+          <Route path="/support/:viewRole" element={<SupportFaqPage />} />
+        </Route>
       </Route>
       <Route path="*" element={<Navigate replace to="/" />} />
     </Routes>

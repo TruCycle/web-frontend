@@ -1,5 +1,8 @@
 import { type ChangeEvent, type FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useAuthSession } from '@/shared/context/useAuthSession'
+import { ApiError } from '@/shared/types/network'
+import { useToast } from '@/shared/ui/toast/useToast'
 import { classNames } from '@/shared/utils/classNames'
 import { AuthCheckbox } from './components/AuthCheckbox'
 import { PasswordVisibilityIcon } from './components/PasswordVisibilityIcon'
@@ -11,6 +14,7 @@ import {
   authInlineMetaClassName,
   authInputClassName,
   authLabelClassName,
+  authLoadingSpinnerClassName,
   authPasswordToggleClassName,
   authPrimaryButtonClassName,
 } from './components/AuthPageFrame'
@@ -30,7 +34,10 @@ const initialFormValues: LoginFormValues = {
 export default function LoginPage() {
   const [formValues, setFormValues] = useState(initialFormValues)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
+  const { login } = useAuthSession()
+  const { success, error } = useToast()
 
   function onInputChange(
     key: keyof Pick<LoginFormValues, 'email' | 'password'>,
@@ -51,7 +58,7 @@ export default function LoginPage() {
     }))
   }
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const form = event.currentTarget
 
@@ -60,7 +67,26 @@ export default function LoginPage() {
       return
     }
 
-    navigate('/')
+    setIsSubmitting(true)
+    try {
+      await login(
+        {
+          email: formValues.email.trim(),
+          password: formValues.password,
+        },
+        { rememberSession: formValues.keepLoggedIn },
+      )
+      success('Login successful', 'Welcome back to TruCycle.')
+      navigate('/')
+    } catch (caughtError) {
+      const message =
+        caughtError instanceof ApiError
+          ? caughtError.message
+          : 'Unable to login right now. Please try again.'
+      error('Login failed', message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -137,8 +163,20 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <button className={authPrimaryButtonClassName} type="submit">
-          Log in
+        <button
+          className={classNames(authPrimaryButtonClassName, isSubmitting && 'opacity-80')}
+          type="submit"
+          disabled={isSubmitting}
+          aria-busy={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <span className={authLoadingSpinnerClassName} aria-hidden />
+              Logging in...
+            </>
+          ) : (
+            'Log in'
+          )}
         </button>
       </form>
     </AuthPageFrame>
