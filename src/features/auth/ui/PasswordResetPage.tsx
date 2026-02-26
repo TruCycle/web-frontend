@@ -1,57 +1,197 @@
-import { type ChangeEvent, type FormEvent, useState } from 'react'
+import {
+  type ClipboardEvent,
+  type ChangeEvent,
+  type FormEvent,
+  type KeyboardEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { useNavigate } from 'react-router-dom'
-import logoSrc from '@/assets/logo.svg'
-import './PasswordResetPage.css'
+import { classNames } from '@/shared/utils/classNames'
+import { useToast } from '@/shared/ui/toast/useToast'
+import { PasswordVisibilityIcon } from './components/PasswordVisibilityIcon'
+import {
+  AuthPageFrame,
+  authFieldClassName,
+  authInlineMetaClassName,
+  authInputClassName,
+  authLabelClassName,
+  authLoadingSpinnerClassName,
+  authPasswordToggleClassName,
+  authPrimaryButtonClassName,
+} from './components/AuthPageFrame'
 
-interface ResetFormValues {
+interface ResetPasswordValues {
   readonly password: string
   readonly confirmPassword: string
 }
 
-const initialFormValues: ResetFormValues = {
+const otpLength = 6
+
+type ResetStep = 'request' | 'otp' | 'password'
+
+const initialOtpValues = Array.from({ length: otpLength }, () => '')
+
+const initialResetPasswordValues: ResetPasswordValues = {
   password: '',
   confirmPassword: '',
 }
 
-const resetBenefits = [
-  'Free forever',
-  'No hidden fees',
-  'GBP10 reward for your first exchange',
-]
-
-function PasswordEyeIcon() {
-  return (
-    <svg
-      aria-hidden
-      className="reset-password-icon"
-      fill="none"
-      height="18"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="1.6"
-      viewBox="0 0 24 24"
-      width="18"
-    >
-      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  )
-}
-
 export default function PasswordResetPage() {
-  const [formValues, setFormValues] = useState(initialFormValues)
+  const [email, setEmail] = useState('')
+  const [otpValues, setOtpValues] = useState<string[]>(initialOtpValues)
+  const [passwordValues, setPasswordValues] = useState(initialResetPasswordValues)
+  const [resetStep, setResetStep] = useState<ResetStep>('request')
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isConfirmVisible, setIsConfirmVisible] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const otpInputRefs = useRef<Array<HTMLInputElement | null>>([])
+  const navigateTimeoutRef = useRef<number | null>(null)
+  const { success, info, error } = useToast()
   const navigate = useNavigate()
 
-  function onInputChange(
-    key: keyof ResetFormValues,
+  useEffect(() => {
+    return () => {
+      if (navigateTimeoutRef.current !== null) {
+        window.clearTimeout(navigateTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    setIsSubmitting(false)
+    if (resetStep !== 'otp') {
+      return
+    }
+
+    const focusTimeoutId = window.setTimeout(() => {
+      focusOtpInput(0)
+    }, 0)
+
+    return () => {
+      window.clearTimeout(focusTimeoutId)
+    }
+  }, [resetStep])
+
+  function focusOtpInput(index: number) {
+    const inputElement = otpInputRefs.current[index]
+    if (!inputElement) {
+      return
+    }
+    inputElement.focus()
+    inputElement.select()
+  }
+
+  function onEmailInputChange(event: ChangeEvent<HTMLInputElement>) {
+    setEmail(event.currentTarget.value)
+  }
+
+  function onOtpChange(index: number, event: ChangeEvent<HTMLInputElement>) {
+    const incomingDigits = event.currentTarget.value.replace(/\D/g, '')
+
+    if (!incomingDigits) {
+      const nextValues = [...otpValues]
+      nextValues[index] = ''
+      setOtpValues(nextValues)
+      return
+    }
+
+    const nextValues = [...otpValues]
+    let lastUpdatedIndex = index
+    for (
+      let offset = 0;
+      offset < incomingDigits.length && index + offset < otpLength;
+      offset += 1
+    ) {
+      nextValues[index + offset] = incomingDigits[offset]
+      lastUpdatedIndex = index + offset
+    }
+    setOtpValues(nextValues)
+
+    if (lastUpdatedIndex < otpLength - 1) {
+      focusOtpInput(lastUpdatedIndex + 1)
+    } else {
+      focusOtpInput(lastUpdatedIndex)
+    }
+
+    const wasComplete = otpValues.every((digit) => digit.length === 1)
+    const isNowComplete = nextValues.every((digit) => digit.length === 1)
+    if (!wasComplete && isNowComplete) {
+      info('Code completed', 'OTP filled. Press Continue to verify.')
+    }
+  }
+
+  function onOtpKeyDown(index: number, event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Backspace') {
+      if (otpValues[index]) {
+        const nextValues = [...otpValues]
+        nextValues[index] = ''
+        setOtpValues(nextValues)
+        return
+      }
+
+      if (index > 0) {
+        event.preventDefault()
+        const nextValues = [...otpValues]
+        nextValues[index - 1] = ''
+        setOtpValues(nextValues)
+        focusOtpInput(index - 1)
+      }
+      return
+    }
+
+    if (event.key === 'ArrowLeft' && index > 0) {
+      event.preventDefault()
+      focusOtpInput(index - 1)
+      return
+    }
+
+    if (event.key === 'ArrowRight' && index < otpLength - 1) {
+      event.preventDefault()
+      focusOtpInput(index + 1)
+    }
+  }
+
+  function onOtpPaste(index: number, event: ClipboardEvent<HTMLInputElement>) {
+    event.preventDefault()
+    const pastedDigits = event.clipboardData
+      .getData('text')
+      .replace(/\D/g, '')
+      .slice(0, otpLength - index)
+
+    if (!pastedDigits) {
+      return
+    }
+
+    const nextValues = [...otpValues]
+    for (let offset = 0; offset < pastedDigits.length; offset += 1) {
+      nextValues[index + offset] = pastedDigits[offset]
+    }
+    setOtpValues(nextValues)
+
+    const lastUpdatedIndex = Math.min(index + pastedDigits.length - 1, otpLength - 1)
+    focusOtpInput(lastUpdatedIndex)
+
+    const wasComplete = otpValues.every((digit) => digit.length === 1)
+    const isNowComplete = nextValues.every((digit) => digit.length === 1)
+    if (!wasComplete && isNowComplete) {
+      info('Code completed', 'OTP filled. Press Continue to verify.')
+    }
+  }
+
+  function onResendCode() {
+    setOtpValues(initialOtpValues)
+    focusOtpInput(0)
+    success('Code resent', 'A fresh OTP has been sent to your email.')
+  }
+
+  function onPasswordInputChange(
+    key: keyof ResetPasswordValues,
     event: ChangeEvent<HTMLInputElement>,
   ) {
     const nextValue = event.currentTarget.value
-    setFormValues((currentValues) => ({
+    setPasswordValues((currentValues) => ({
       ...currentValues,
       [key]: nextValue,
     }))
@@ -59,135 +199,209 @@ export default function PasswordResetPage() {
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    if (resetStep === 'request') {
+      setResetStep('otp')
+      success('Code sent', 'Check your inbox for the 6-digit verification code.')
+      return
+    }
+
+    if (resetStep === 'otp') {
+      const isOtpComplete = otpValues.every((digit) => digit.length === 1)
+      if (!isOtpComplete) {
+        error('Code incomplete', 'Enter all 6 digits before continuing.')
+        return
+      }
+      setResetStep('password')
+      success('Code verified', 'Now create your new password.')
+      return
+    }
+
+    if (passwordValues.password !== passwordValues.confirmPassword) {
+      error('Password mismatch', 'Password and confirmation must match.')
+      return
+    }
+
     setIsSubmitting(true)
-    navigate('/welcome')
+    success('Password updated', 'Redirecting you now...')
+    if (navigateTimeoutRef.current !== null) {
+      window.clearTimeout(navigateTimeoutRef.current)
+    }
+    navigateTimeoutRef.current = window.setTimeout(() => {
+      navigate('/login')
+    }, 450)
+  }
+
+  const formTitle =
+    resetStep === 'password' ? 'Create Your New Password' : 'Reset Your Password'
+  const formDescription =
+    resetStep === 'request'
+      ? 'Enter your registered email to proceed'
+      : resetStep === 'otp'
+        ? 'Enter the code sent to your mail to continue.'
+        : 'Set your new password'
+
+  function renderStepContent() {
+    if (resetStep === 'request') {
+      return (
+        <label className={authFieldClassName}>
+          <span className={authLabelClassName}>Email Address</span>
+          <input
+            autoComplete="email"
+            className={authInputClassName}
+            name="email"
+            onChange={onEmailInputChange}
+            placeholder="Enter your email address"
+            required
+            type="email"
+            value={email}
+          />
+        </label>
+      )
+    }
+
+    if (resetStep === 'otp') {
+      return (
+        <>
+          <label className={authFieldClassName}>
+            <span className={authLabelClassName}>OTP Code</span>
+            <div className="grid w-fit grid-cols-6 gap-4">
+              {otpValues.map((value, index) => (
+                <input
+                  key={`otp-${index + 1}`}
+                  ref={(element) => {
+                    otpInputRefs.current[index] = element
+                  }}
+                  aria-label={`OTP digit ${index + 1}`}
+                  className="h-16 w-16 sm:h-20 sm:w-20 rounded-[8px] border border-tc-auth-inputBorder text-center text-lg font-semibold text-tc-app-text outline-none transition focus:border-tc-auth-inputFocus focus:ring-4 focus:ring-tc-auth-inputFocusRing"
+                  inputMode="numeric"
+                  maxLength={1}
+                  onChange={(event) => onOtpChange(index, event)}
+                  onFocus={(event) => event.currentTarget.select()}
+                  onKeyDown={(event) => onOtpKeyDown(index, event)}
+                  onPaste={(event) => onOtpPaste(index, event)}
+                  pattern="[0-9]*"
+                  required
+                  type="text"
+                  value={value}
+                />
+              ))}
+            </div>
+          </label>
+
+          <p className="text-sm text-tc-auth-row">
+            Didn&apos;t receive code? Click{' '}
+            <button
+              className={classNames(
+                'font-semibold text-tc-auth-link underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tc-auth-inputFocus',
+              )}
+              onClick={onResendCode}
+              type="button"
+            >
+              here
+            </button>{' '}
+            to resend
+          </p>
+        </>
+      )
+    }
+
+    return (
+      <>
+        <label className={authFieldClassName}>
+          <span className={authLabelClassName}>Password</span>
+          <div className="relative">
+            <input
+              autoComplete="new-password"
+              className={classNames(authInputClassName, 'pr-11')}
+              minLength={8}
+              name="password"
+              onChange={(event) => onPasswordInputChange('password', event)}
+              placeholder="8 characters min"
+              required
+              type={isPasswordVisible ? 'text' : 'password'}
+              value={passwordValues.password}
+            />
+            <button
+              aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
+              className={authPasswordToggleClassName}
+              onClick={() => setIsPasswordVisible((current) => !current)}
+              type="button"
+            >
+              <PasswordVisibilityIcon isVisible={isPasswordVisible} />
+            </button>
+          </div>
+        </label>
+
+        <label className={authFieldClassName}>
+          <span className={authLabelClassName}>Confirm Password</span>
+          <div className="relative">
+            <input
+              autoComplete="new-password"
+              className={classNames(authInputClassName, 'pr-11')}
+              minLength={8}
+              name="confirmPassword"
+              onChange={(event) => onPasswordInputChange('confirmPassword', event)}
+              placeholder="8 characters min"
+              required
+              type={isConfirmVisible ? 'text' : 'password'}
+              value={passwordValues.confirmPassword}
+            />
+            <button
+              aria-label={isConfirmVisible ? 'Hide password' : 'Show password'}
+              className={authPasswordToggleClassName}
+              onClick={() => setIsConfirmVisible((current) => !current)}
+              type="button"
+            >
+              <PasswordVisibilityIcon isVisible={isConfirmVisible} />
+            </button>
+          </div>
+        </label>
+      </>
+    )
   }
 
   return (
-    <main className="reset-page">
-      <div className="reset-layout">
-        <aside className="reset-highlight-panel">
-          <div className="reset-brand">
-            <img alt="" aria-hidden className="reset-brand-logo" src={logoSrc} />
-            <span className="reset-brand-name">TruCycle</span>
-          </div>
+    <AuthPageFrame
+      formTitle={formTitle}
+      formDescription={formDescription}
+      showcase={{
+        avatarSrc: '/profile-picture.jpg',
+        quote:
+          'TruCycle makes donating my unused items easy, secure, and rewarding!',
+      }}
+    >
+      <form className="mt-8 grid gap-4" onSubmit={onSubmit}>
+        {renderStepContent()}
 
-          <section className="reset-highlight-copy">
-            <h1 className="reset-highlight-title">
-              Join London&apos;s
-              <br />
-              <span>circular economy.</span>
-            </h1>
-            <ul className="reset-benefits">
-              {resetBenefits.map((benefit) => (
-                <li key={benefit}>
-                  <span aria-hidden className="reset-check-icon" />
-                  {benefit}
-                </li>
-              ))}
-            </ul>
-          </section>
+        <button
+          className={classNames(authPrimaryButtonClassName, isSubmitting && 'opacity-80')}
+          type="submit"
+          disabled={isSubmitting}
+          aria-busy={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <span className={authLoadingSpinnerClassName} aria-hidden />
+              Updating...
+            </>
+          ) : (
+            resetStep === 'password' ? 'Set Password' : 'Continue'
+          )}
+        </button>
+      </form>
 
-          <article className="reset-testimonial">
-            <div className="reset-testimonial-author">
-              <img
-                alt="Sophie, London"
-                className="reset-avatar"
-                src="/profile-picture.jpg"
-              />
-              <div>
-                <p className="reset-author-name">Sophie, London</p>
-                <p className="reset-author-role">Sustainable Living Enthusiast</p>
-              </div>
-            </div>
-            <p className="reset-testimonial-quote">
-              TruCycle makes donating my unused items easy, secure, and
-              rewarding!
-            </p>
-            <div className="reset-testimonial-meta">
-              <span className="reset-date">Jan 2026</span>
-              <span className="reset-stars">*****</span>
-            </div>
-          </article>
-        </aside>
-
-        <section className="reset-form-panel">
-          <div className="reset-form-header">
-            <h2>Create Your New Password</h2>
-            <p>Set your new password</p>
-          </div>
-
-          <form className="reset-form" onSubmit={onSubmit}>
-            <label className="reset-field">
-              <span>Password</span>
-              <div className="reset-password-wrap">
-                <input
-                  autoComplete="new-password"
-                  minLength={8}
-                  name="password"
-                  onChange={(event) => onInputChange('password', event)}
-                  placeholder="8 characters min"
-                  required
-                  type={isPasswordVisible ? 'text' : 'password'}
-                  value={formValues.password}
-                />
-                <button
-                  aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
-                  className="reset-password-toggle"
-                  onClick={() => setIsPasswordVisible((current) => !current)}
-                  type="button"
-                >
-                  <PasswordEyeIcon />
-                </button>
-              </div>
-            </label>
-
-            <label className="reset-field">
-              <span>Confirm Password</span>
-              <div className="reset-password-wrap">
-                <input
-                  autoComplete="new-password"
-                  minLength={8}
-                  name="confirmPassword"
-                  onChange={(event) => onInputChange('confirmPassword', event)}
-                  placeholder="8 characters min"
-                  required
-                  type={isConfirmVisible ? 'text' : 'password'}
-                  value={formValues.confirmPassword}
-                />
-                <button
-                  aria-label={isConfirmVisible ? 'Hide password' : 'Show password'}
-                  className="reset-password-toggle"
-                  onClick={() => setIsConfirmVisible((current) => !current)}
-                  type="button"
-                >
-                  <PasswordEyeIcon />
-                </button>
-              </div>
-            </label>
-
-            <button
-              className={`reset-submit ${isSubmitting ? 'is-loading' : ''}`}
-              type="submit"
-              disabled={isSubmitting}
-              aria-busy={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="reset-loading-spinner" aria-hidden />
-                  Updating...
-                </>
-              ) : (
-                'Set Password'
-              )}
-            </button>
-          </form>
-
-          <p className="reset-support">
-            Need help? <span>Contact Support</span>
-          </p>
-        </section>
-      </div>
-    </main>
+      <p
+        className={classNames(
+          'mt-4 text-center text-tc-auth-muted',
+          authInlineMetaClassName,
+        )}
+      >
+        Need help?{' '}
+        <span className={classNames('font-semibold text-tc-auth-link')}>
+          Contact Support
+        </span>
+      </p>
+    </AuthPageFrame>
   )
 }

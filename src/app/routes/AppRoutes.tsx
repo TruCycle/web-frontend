@@ -5,13 +5,6 @@ import { LoadingState } from '@/shared/ui/loading/LoadingState'
 
 const SignupPage = lazy(() => import('@/features/auth/ui/SignupPage'))
 const LoginPage = lazy(() => import('@/features/auth/ui/LoginPage'))
-const WelcomePage = lazy(() => import('@/features/auth/ui/WelcomePage'))
-const PasswordResetRequestPage = lazy(
-  () => import('@/features/auth/ui/PasswordResetRequestPage'),
-)
-const PasswordResetOtpPage = lazy(
-  () => import('@/features/auth/ui/PasswordResetOtpPage'),
-)
 const PasswordResetPage = lazy(
   () => import('@/features/auth/ui/PasswordResetPage'),
 )
@@ -41,9 +34,6 @@ export function AppRoutes() {
     <Routes>
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/welcome" element={<WelcomePage />} />
-      <Route path="/reset-password/request" element={<PasswordResetRequestPage />} />
-      <Route path="/reset-password/otp" element={<PasswordResetOtpPage />} />
       <Route path="/reset-password" element={<PasswordResetPage />} />
       <Route element={<ShellLayout />}>
         <Route path="/" element={<Dashboard />} />

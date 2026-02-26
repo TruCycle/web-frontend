@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react'
+import { classNames } from '@/shared/utils/classNames'
 import { NavLink, type NavLinkRenderProps, useLocation, useNavigate } from 'react-router-dom'
 import {
   FileText,
@@ -8,8 +9,7 @@ import {
 } from 'lucide-react'
 import { useNotifications } from '@/features/notifications/hooks/useNotifications'
 import logo from '@/assets/logo.svg'
-import { useUserRole } from '@/shared/context/UserRoleContext'
-import './AppShell.css'
+import { useUserRole } from '@/shared/context/useUserRole'
 
 const DashboardIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -35,7 +35,12 @@ interface AppShellProps {
 }
 
 function navLinkClassName({ isActive }: NavLinkRenderProps): string {
-  return isActive ? 'shell-nav-link shell-nav-link-active' : 'shell-nav-link'
+  return classNames(
+    'group flex items-center gap-3.5 rounded-lg px-4 py-2 text-[0.9rem] font-medium text-white transition [&>svg]:text-white',
+    isActive
+      ? 'bg-tc-shell-active text-white opacity-100 [&>span]:font-semibold [&>svg]:text-tc-shell-accent'
+      : 'opacity-60 hover:opacity-100',
+  )
 }
 
 export function AppShell({ children }: AppShellProps) {
@@ -53,19 +58,19 @@ export function AppShell({ children }: AppShellProps) {
   }
 
   return (
-    <div className="app-shell">
-      <aside className="shell-sidebar">
-        <div className="shell-logo-container">
-          <div className="shell-logo">
-            <div className="logo-icon">
+    <div className="flex min-h-screen bg-tc-app-canvas text-tc-app-text max-md:flex-col max-md:p-2">
+      <aside className="sticky top-4 z-10 my-4 ml-4 mr-0 flex h-[calc(100vh-2rem)] w-[250px] shrink-0 flex-col rounded-[25px] bg-tc-shell-bg px-4 py-5 max-[1024px]:w-[220px] max-md:relative max-md:top-auto max-md:m-0 max-md:mb-2 max-md:h-auto max-md:w-full">
+        <div className="px-3 pb-4 pt-2">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center">
               <img src={logo} alt="TruCycle Logo" width="34" height="34" />
             </div>
-            <span className="logo-text">TruCycle</span>
+            <span className="text-2xl font-bold tracking-[-0.01em] text-white">TruCycle</span>
           </div>
         </div>
 
-        <nav className="shell-sidebar-nav">
-          <div className="nav-group">
+        <nav className="flex flex-1 flex-col gap-2 overflow-visible">
+          <div className="flex flex-col gap-1">
             <NavLink className={navLinkClassName} to="/dashboard">
               <DashboardIcon />
               <span>Dashboard</span>
@@ -99,17 +104,28 @@ export function AppShell({ children }: AppShellProps) {
             </NavLink>
           </div>
 
-          <div className="nav-divider" />
+          <div className="-mx-4 my-4 h-px bg-tc-shell-divider" />
 
-          <div className="nav-group">
+          <div className="flex flex-col gap-1">
             <NavLink className={navLinkClassName} to="/notifications">
-              <div className="nav-icon-wrapper">
-                <BellIcon />
-                {!isLoading && unreadCount > 0 && (
-                  <span className="notification-dot" />
-                )}
-              </div>
-              <span>Notifications</span>
+              {({ isActive }) => (
+                <>
+                  <div className="relative flex items-center justify-center">
+                    <BellIcon />
+                    {!isLoading && unreadCount > 0 && (
+                      <span
+                        className={classNames(
+                          'absolute -right-1.5 top-0 inline-block h-2 w-2 rounded-full border-[1.5px] bg-tc-shell-notify',
+                          isActive
+                            ? 'border-tc-shell-active'
+                            : 'border-tc-shell-bg',
+                        )}
+                      />
+                    )}
+                  </div>
+                  <span>Notifications</span>
+                </>
+              )}
             </NavLink>
             <NavLink className={navLinkClassName} to="/settings">
               <Settings size={20} />
@@ -121,16 +137,26 @@ export function AppShell({ children }: AppShellProps) {
             </NavLink>
           </div>
 
-          <div className="role-toggle-container">
-            <div className="role-toggle">
+          <div className="mt-auto flex justify-center pb-2 pt-3">
+            <div className="flex h-[50px] w-fit items-center gap-1 rounded-[10px] border border-tc-shell-accent bg-tc-shell-toggle p-1">
               <button
-                className={`role-btn ${role === 'collector' ? 'active' : ''}`}
+                className={classNames(
+                  'h-full flex-1 rounded-[5px] px-4 text-[0.85rem] font-bold transition',
+                  role === 'collector'
+                    ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
+                    : 'bg-transparent text-tc-shell-roleText',
+                )}
                 onClick={() => onRoleChange('collector')}
               >
                 Collector
               </button>
               <button
-                className={`role-btn ${role === 'donor' ? 'active' : ''}`}
+                className={classNames(
+                  'h-full flex-1 rounded-[5px] px-4 text-[0.85rem] font-bold transition',
+                  role === 'donor'
+                    ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
+                    : 'bg-transparent text-tc-shell-roleText',
+                )}
                 onClick={() => onRoleChange('donor')}
               >
                 Donor
@@ -140,22 +166,22 @@ export function AppShell({ children }: AppShellProps) {
         </nav>
       </aside>
 
-      <main className="shell-main-area">
-        <header className="shell-top-header">
-          <div className="header-right">
-            <button className="icon-btn">
+      <main className="flex h-screen flex-1 flex-col overflow-x-hidden bg-transparent max-md:h-auto max-md:rounded-2xl">
+        <header className="sticky top-0 z-[100] flex h-[72px] w-full items-center justify-end border-b border-tc-header-border bg-white px-6">
+          <div className="flex items-center gap-4">
+            <button className="relative flex items-center justify-center p-2 text-tc-app-text opacity-80 transition hover:opacity-100">
               <BellIcon />
               {!isLoading && unreadCount > 0 && (
-                <span className="notification-dot" />
+                <span className="absolute right-[3px] top-[6px] inline-block h-2 w-2 rounded-full border-[1.5px] border-white bg-tc-shell-notify" />
               )}
             </button>
-            <div className="header-divider" />
-            <div className="user-profile">
-              <span className="user-initial">P</span>
+            <div className="mx-1 h-6 w-px bg-tc-header-divider" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-tc-header-avatar text-[0.85rem] font-bold text-white">
+              <span>P</span>
             </div>
           </div>
         </header>
-        <div className="shell-content">{children}</div>
+        <div className="flex-1 overflow-y-auto px-8 pb-8 pt-6 max-md:px-4 max-md:pb-6">{children}</div>
       </main>
     </div>
   )

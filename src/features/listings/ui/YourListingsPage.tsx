@@ -4,14 +4,24 @@ import { Button } from '@/shared/ui/button/Button';
 import { ItemDetailsDialog } from '@/shared/ui/modal/ItemDetailsDialog';
 import { ActiveListingDialog } from '@/shared/ui/modal/ActiveListingDialog';
 import { ListItemDialog } from '@/shared/ui/modal/ListItemDialog';
-import './YourListingsPage.css';
-
 import ipadImg from '@/assets/images/ipad.jpg';
 import candleImg from '@/assets/images/scented-candle.jpg';
 import bagShoeImg from '@/assets/images/bag-shoe.jpg';
 import plannerImg from '@/assets/images/book-planner.jpg';
 
-const LISTINGS_DATA = [
+type ListingStatus = 'Active' | 'Claimed' | 'Completed';
+
+interface ListingItem {
+    id: string;
+    title: string;
+    status: ListingStatus;
+    category: string;
+    condition: string;
+    meta: string;
+    image: string;
+}
+
+const LISTINGS_DATA: ListingItem[] = [
     {
         id: '1',
         title: 'iPhone 12Pro',
@@ -19,7 +29,7 @@ const LISTINGS_DATA = [
         category: 'Gadget',
         condition: 'Good',
         meta: 'Waiting for collectors',
-        image: ipadImg
+        image: ipadImg,
     },
     {
         id: '2',
@@ -28,7 +38,7 @@ const LISTINGS_DATA = [
         category: 'Electronics',
         condition: 'Good',
         meta: 'Waiting for collectors',
-        image: candleImg
+        image: candleImg,
     },
     {
         id: '3',
@@ -37,7 +47,7 @@ const LISTINGS_DATA = [
         category: 'Clothing',
         condition: 'Like New',
         meta: 'Claimed by John D.',
-        image: bagShoeImg
+        image: bagShoeImg,
     },
     {
         id: '4',
@@ -45,174 +55,130 @@ const LISTINGS_DATA = [
         status: 'Completed',
         category: 'Appliances',
         condition: 'Good',
-        meta: '8.5kg CO₂ saved',
-        image: plannerImg
+        meta: '8.5kg CO2 saved',
+        image: plannerImg,
     },
-    {
-        id: '5',
-        title: 'Winter Coat - Size M',
-        status: 'Claimed',
-        category: 'Clothing',
-        condition: 'Like New',
-        meta: 'Claimed by John D.',
-        image: bagShoeImg
-    },
-    {
-        id: '6',
-        title: 'Kitchen Blender',
-        status: 'Completed',
-        category: 'Appliances',
-        condition: 'Good',
-        meta: '8.5kg CO₂ saved',
-        image: plannerImg
-    }
 ];
 
 export default function YourListingsPage() {
-    const [listings, setListings] = useState<any[]>([]);
-    const [selectedItem, setSelectedItem] = useState<any | null>(null);       // for side panel (Collected/Claimed)
-    const [selectedActiveItem, setSelectedActiveItem] = useState<any | null>(null); // for centre modal (Active)
+    const [listings, setListings] = useState<ListingItem[]>([]);
+    const [selectedItem, setSelectedItem] = useState<ListingItem | null>(null);
+    const [selectedActiveItem, setSelectedActiveItem] = useState<ListingItem | null>(null);
     const [isListItemDialogOpen, setIsListItemDialogOpen] = useState(false);
-
-    const handleViewDetails = (item: any) => {
-        setSelectedItem(item);
-    };
-
-    const handleViewActive = (item: any) => {
-        setSelectedActiveItem(item);
-    };
 
     const hasListings = listings.length > 0;
 
-    const loadMockData = () => {
-        setListings(LISTINGS_DATA);
+    const statusClass = (status: ListingStatus): string => {
+        if (status === 'Active') return 'bg-lime-100 text-lime-700';
+        if (status === 'Claimed') return 'bg-amber-100 text-amber-700';
+        return 'bg-sky-100 text-sky-700';
     };
 
     return (
-        <div className="your-listings-wrapper">
-            <div className="welcome-section">
-                <div className="welcome-text">
-                    <h1 className="welcome-title">Welcome back, Pearl!</h1>
-                    <p className="welcome-subtitle">Track your impact and manage your listings</p>
+        <div className="space-y-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h1 className="text-3xl font-bold text-slate-900">Welcome back, Pearl!</h1>
+                    <p className="text-slate-500">Track your impact and manage your listings</p>
                 </div>
-                <button className="btn-list-item" onClick={() => setIsListItemDialogOpen(true)}>
+                <Button className="inline-flex items-center gap-2" onClick={() => setIsListItemDialogOpen(true)}>
                     <Plus size={18} />
                     List New Item
-                </button>
+                </Button>
             </div>
 
             {!hasListings ? (
-                <div className="empty-listings-master-card">
-                    <div className="listings-empty-state">
-                        <div className="empty-state-icon-circle">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#52C41A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                                <line x1="12" y1="9" x2="12" y2="13" />
-                                <line x1="12" y1="17" x2="12.01" y2="17" />
-                            </svg>
-                        </div>
-                        <p className="empty-state-message">
-                            Your listed items will be<br />displayed here
-                        </p>
-                        <button className="btn-list-item-premium" onClick={() => setIsListItemDialogOpen(true)}>
+                <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+                    <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-lime-100 text-lime-700">
+                        <Plus size={24} />
+                    </div>
+                    <p className="mt-4 text-lg font-semibold text-slate-900">Your listed items will be displayed here</p>
+                    <div className="mt-5 flex flex-wrap justify-center gap-3">
+                        <Button className="inline-flex items-center gap-2" onClick={() => setIsListItemDialogOpen(true)}>
                             <Plus size={18} />
                             List New Item
-                        </button>
-
-                        {/* Demo data trigger moved to a subtle link at bottom */}
-                        <button className="btn-load-demo-link" onClick={loadMockData}>
+                        </Button>
+                        <Button variant="secondary" onClick={() => setListings(LISTINGS_DATA)}>
                             Show Demo Data
-                        </button>
+                        </Button>
                     </div>
                 </div>
             ) : (
-                <>
-                    <div className="listings-container">
-                        <h2 className="listings-container-title">Your Listings</h2>
-                        <div className="listings-list">
-                            {listings.map((item) => (
-                                <div key={item.id} className="listing-row">
-                                    <div className="listing-content">
-                                        <div className="listing-image-wrapper">
-                                            <img src={item.image} alt={item.title} className="listing-image" />
-                                        </div>
-                                        <div className="listing-info">
-                                            <div className="listing-header">
-                                                <h3 className="listing-item-title">{item.title}</h3>
-                                                <span className={`status-pill pill-${item.status.toLowerCase()}`}>
-                                                    {item.status}
-                                                </span>
-                                            </div>
-                                            <div className="listing-meta-row">
-                                                <span className="listing-category">{item.category}</span>
-                                                <span className="meta-dot">•</span>
-                                                <span className="listing-condition">Condition: {item.condition}</span>
-                                                <span className="meta-dot">•</span>
-                                                <span className="listing-extra">{item.meta}</span>
-                                            </div>
-                                        </div>
+                <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <h2 className="text-xl font-bold text-slate-900">Your Listings</h2>
+                    {listings.map((item) => (
+                        <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-3">
+                            <div className="flex items-center gap-3">
+                                <img src={item.image} alt={item.title} className="h-16 w-16 rounded-lg object-cover" />
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="font-semibold text-slate-900">{item.title}</h3>
+                                        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusClass(item.status)}`}>
+                                            {item.status}
+                                        </span>
                                     </div>
-
-                                    <div className="listing-actions">
-                                        {item.status === 'Active' ? (
-                                            <>
-                                                <Button className="btn-view-grey" onClick={() => handleViewActive(item)}>View</Button>
-                                                <Button className="btn-remove-red">Remove</Button>
-                                            </>
-                                        ) : item.status === 'Claimed' ? (
-                                            <Button className="btn-open-qr">
-                                                Open QR Code
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                className="btn-view-details-grey"
-                                                onClick={() => handleViewDetails(item)}
-                                            >
-                                                View Details
-                                            </Button>
-                                        )}
-                                    </div>
+                                    <p className="text-sm text-slate-500">
+                                        {item.category} • Condition: {item.condition} • {item.meta}
+                                    </p>
                                 </div>
-                            ))}
-                        </div>
-
-                        <div className="pagination-nav">
-                            <button className="pagination-btn prev-btn">
-                                <ChevronLeft size={18} />
-                                <span>Previous</span>
-                            </button>
-                            <div className="pagination-numbers">
-                                <button className="page-number active">1</button>
-                                <button className="page-number">2</button>
-                                <button className="page-number">3</button>
-                                <span className="pagination-ellipsis">...</span>
                             </div>
-                            <button className="pagination-btn next-btn">
-                                <span>Next</span>
-                                <ChevronRight size={18} />
-                            </button>
-                        </div>
 
-                        <div className="reset-empty-container">
-                            <button
-                                onClick={() => setListings([])}
-                                className="btn-reset-link"
-                            >
-                                Reset to Empty View
-                            </button>
+                            <div className="flex flex-wrap gap-2">
+                                {item.status === 'Active' ? (
+                                    <>
+                                        <Button variant="secondary" onClick={() => setSelectedActiveItem(item)}>
+                                            View
+                                        </Button>
+                                        <Button variant="secondary" className="text-rose-600 ring-rose-200 hover:bg-rose-50 hover:text-rose-700">
+                                            Remove
+                                        </Button>
+                                    </>
+                                ) : item.status === 'Claimed' ? (
+                                    <Button>Open QR Code</Button>
+                                ) : (
+                                    <Button variant="secondary" onClick={() => setSelectedItem(item)}>
+                                        View Details
+                                    </Button>
+                                )}
+                            </div>
                         </div>
+                    ))}
+
+                    <div className="flex items-center justify-between pt-2">
+                        <button className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">
+                            <ChevronLeft size={16} />
+                            Previous
+                        </button>
+                        <div className="flex items-center gap-1">
+                            <span className="rounded-md bg-lime-100 px-3 py-1 text-sm font-semibold text-slate-800">1</span>
+                            <span className="rounded-md px-3 py-1 text-sm text-slate-500">2</span>
+                            <span className="rounded-md px-3 py-1 text-sm text-slate-500">3</span>
+                        </div>
+                        <button className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">
+                            Next
+                            <ChevronRight size={16} />
+                        </button>
                     </div>
-                </>
+
+                    <div className="pt-1 text-center">
+                        <button
+                            onClick={() => setListings([])}
+                            className="text-sm text-slate-500 hover:text-slate-700 hover:underline"
+                        >
+                            Reset to Empty View
+                        </button>
+                    </div>
+                </div>
             )}
 
             <ItemDetailsDialog
-                isOpen={!!selectedItem}
+                isOpen={Boolean(selectedItem)}
                 onClose={() => setSelectedItem(null)}
                 item={selectedItem}
             />
 
             <ActiveListingDialog
-                isOpen={!!selectedActiveItem}
+                isOpen={Boolean(selectedActiveItem)}
                 onClose={() => setSelectedActiveItem(null)}
                 item={selectedActiveItem}
             />

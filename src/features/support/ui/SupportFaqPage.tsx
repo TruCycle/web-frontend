@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, Mail, MessageCircle, Phone, Search } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useUserRole, type UserRole } from '@/shared/context/UserRoleContext'
-import './SupportFaqPage.css'
+import { useUserRole, type UserRole } from '@/shared/context/useUserRole'
+import { classNames } from '@/shared/utils/classNames'
 
 interface FaqItem {
   readonly id: string
@@ -19,6 +19,12 @@ interface FaqSection {
 interface SupportContent {
   readonly defaultSection: string
   readonly sections: readonly FaqSection[]
+}
+
+interface ExpansionState {
+  readonly role: UserRole
+  readonly sectionId: string
+  readonly faqId: string | null
 }
 
 const supportContentByRole: Record<UserRole, SupportContent> = {
@@ -137,10 +143,11 @@ export default function SupportFaqPage() {
   const { viewRole } = useParams<{ readonly viewRole?: string }>()
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
-  const [expandedSectionId, setExpandedSectionId] = useState(
-    supportContentByRole[role].defaultSection,
-  )
-  const [expandedFaqId, setExpandedFaqId] = useState<string | null>(null)
+  const [expansionState, setExpansionState] = useState<ExpansionState>(() => ({
+    role,
+    sectionId: supportContentByRole[role].defaultSection,
+    faqId: null,
+  }))
 
   useEffect(() => {
     if (!viewRole || !validRoles.includes(viewRole as UserRole)) {
@@ -153,10 +160,15 @@ export default function SupportFaqPage() {
     }
   }, [navigate, role, viewRole])
 
-  useEffect(() => {
-    setExpandedSectionId(supportContentByRole[role].defaultSection)
-    setExpandedFaqId(null)
-  }, [role])
+  const expandedSectionId =
+    expansionState.role === role
+      ? expansionState.sectionId
+      : supportContentByRole[role].defaultSection
+
+  const expandedFaqId =
+    expansionState.role === role
+      ? expansionState.faqId
+      : null
 
   const filteredSections = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase()
@@ -189,19 +201,27 @@ export default function SupportFaqPage() {
   }, [role, searchQuery])
 
   return (
-    <div className="support-content-wrapper">
-      <header className="support-header">
-        <h1 className="support-title">Welcome back, Pearl!</h1>
-        <p className="support-subtitle">Track your impact and manage your listings</p>
+    <div className="mx-auto max-w-[1120px]">
+      <header className="mb-[1.1rem]">
+        <h1 className="m-0 text-[2.1rem] font-extrabold leading-[1.1] tracking-[-0.02em] text-slate-900 max-[1024px]:text-[1.8rem] max-md:text-[1.5rem]">
+          Welcome back, Pearl!
+        </h1>
+        <p className="mt-[0.45rem] text-base text-slate-500 max-md:text-[0.92rem]">
+          Track your impact and manage your listings
+        </p>
       </header>
 
-      <section className="support-card">
-        <h2 className="support-section-title">Frequently Asked Questions</h2>
+      <section className="rounded-2xl border border-slate-200 bg-slate-100 p-[1.4rem] max-md:rounded-xl max-md:p-4">
+        <h2 className="m-0 text-[1.05rem] font-bold text-slate-900">Frequently Asked Questions</h2>
 
-        <label className="support-search" htmlFor="support-faq-search">
-          <Search aria-hidden size={16} />
+        <label
+          className="mt-4 flex h-11 items-center gap-[0.55rem] rounded-lg border border-slate-200 bg-white px-3 text-slate-400"
+          htmlFor="support-faq-search"
+        >
+          <Search aria-hidden size={16} className="shrink-0" />
           <input
             id="support-faq-search"
+            className="h-full w-full border-0 bg-transparent text-[0.92rem] text-slate-700 outline-none placeholder:text-slate-400"
             onChange={(event) => setSearchQuery(event.currentTarget.value)}
             placeholder="Search FAQ..."
             type="search"
@@ -209,41 +229,81 @@ export default function SupportFaqPage() {
           />
         </label>
 
-        <div className="support-accordion-list">
+        <div className="mt-4 grid gap-3">
           {filteredSections.map((section) => {
             const isOpen = expandedSectionId === section.id
 
             return (
-              <article className="support-accordion-item" key={section.id}>
+              <article className="overflow-hidden rounded-xl border border-slate-200 bg-white" key={section.id}>
                 <button
-                  className="support-accordion-trigger"
+                  className="flex w-full items-center justify-between gap-3 border-0 bg-transparent px-[1.1rem] py-[0.95rem] text-left text-[0.99rem] font-bold text-slate-900 max-md:px-4 max-md:py-[0.85rem] max-md:text-[0.94rem]"
                   onClick={() =>
-                    setExpandedSectionId((current) => (current === section.id ? '' : section.id))
+                    setExpansionState((current) => {
+                      const currentSectionId =
+                        current.role === role
+                          ? current.sectionId
+                          : supportContentByRole[role].defaultSection
+
+                      return {
+                        role,
+                        sectionId: currentSectionId === section.id ? '' : section.id,
+                        faqId: null,
+                      }
+                    })
                   }
                   type="button"
                 >
                   <span>{section.title}</span>
-                  <ChevronDown aria-hidden className={isOpen ? 'open' : ''} size={16} />
+                  <ChevronDown
+                    aria-hidden
+                    className={classNames(
+                      'shrink-0 text-slate-400 transition',
+                      isOpen && 'rotate-180',
+                    )}
+                    size={16}
+                  />
                 </button>
 
                 {isOpen && section.faqs.length > 0 && (
-                  <ul className="support-faq-list">
+                  <ul className="m-0 list-none px-[1.1rem] pb-3 max-md:px-4 max-md:pb-[0.65rem]">
                     {section.faqs.map((faq) => {
                       const isFaqOpen = expandedFaqId === faq.id
 
                       return (
                         <li key={faq.id}>
                           <button
-                            className="support-faq-question"
+                            className="flex w-full items-center justify-between gap-3 border-0 bg-transparent py-[0.6rem] text-left text-[0.92rem] text-slate-700 max-md:py-[0.52rem] max-md:text-[0.89rem]"
                             onClick={() =>
-                              setExpandedFaqId((current) => (current === faq.id ? null : faq.id))
+                              setExpansionState((current) => {
+                                const currentFaqId =
+                                  current.role === role
+                                    ? current.faqId
+                                    : null
+
+                                return {
+                                  role,
+                                  sectionId: expandedSectionId,
+                                  faqId: currentFaqId === faq.id ? null : faq.id,
+                                }
+                              })
                             }
                             type="button"
                           >
                             <span>{faq.question}</span>
-                            <ChevronDown aria-hidden className={isFaqOpen ? 'open' : ''} size={14} />
+                            <ChevronDown
+                              aria-hidden
+                              className={classNames(
+                                'shrink-0 text-slate-400 transition',
+                                isFaqOpen && 'rotate-180',
+                              )}
+                              size={14}
+                            />
                           </button>
-                          {isFaqOpen && <p className="support-faq-answer">{faq.answer}</p>}
+                          {isFaqOpen && (
+                            <p className="mb-2 pr-2 text-[0.9rem] leading-[1.5] text-slate-500">
+                              {faq.answer}
+                            </p>
+                          )}
                         </li>
                       )
                     })}
@@ -254,32 +314,32 @@ export default function SupportFaqPage() {
           })}
         </div>
 
-        <section className="support-contact-card">
-          <h3>Other ways to reach us</h3>
-          <div className="support-contact-grid">
-            <article className="support-contact-item">
-              <p className="support-contact-title">
-                <Mail aria-hidden size={14} />
+        <section className="mt-[1.1rem] rounded-xl border border-slate-200 bg-white p-[1.1rem] max-md:p-4">
+          <h3 className="m-0 text-[0.95rem] font-bold text-slate-900">Other ways to reach us</h3>
+          <div className="mt-3 grid grid-cols-3 gap-4 max-[1024px]:grid-cols-2 max-md:grid-cols-1 max-md:gap-[0.9rem]">
+            <article>
+              <p className="mb-[0.45rem] inline-flex items-center gap-1.5 text-[0.86rem] font-bold text-slate-900">
+                <Mail aria-hidden size={14} className="shrink-0" />
                 Email
               </p>
-              <p>support@trucycle.com</p>
-              <p>Response time: 24 hours</p>
+              <p className="m-0 text-[0.86rem] leading-[1.45] text-slate-600">support@trucycle.com</p>
+              <p className="mt-1 text-[0.86rem] leading-[1.45] text-slate-600">Response time: 24 hours</p>
             </article>
-            <article className="support-contact-item">
-              <p className="support-contact-title">
-                <Phone aria-hidden size={14} />
+            <article>
+              <p className="mb-[0.45rem] inline-flex items-center gap-1.5 text-[0.86rem] font-bold text-slate-900">
+                <Phone aria-hidden size={14} className="shrink-0" />
                 Phone
               </p>
-              <p>+44 (0)20 1234 5678</p>
-              <p>Mon-Fri 9am-6pm GMT</p>
+              <p className="m-0 text-[0.86rem] leading-[1.45] text-slate-600">+44 (0)20 1234 5678</p>
+              <p className="mt-1 text-[0.86rem] leading-[1.45] text-slate-600">Mon-Fri 9am-6pm GMT</p>
             </article>
-            <article className="support-contact-item">
-              <p className="support-contact-title">
-                <MessageCircle aria-hidden size={14} />
+            <article>
+              <p className="mb-[0.45rem] inline-flex items-center gap-1.5 text-[0.86rem] font-bold text-slate-900">
+                <MessageCircle aria-hidden size={14} className="shrink-0" />
                 Live Chat
               </p>
-              <p>Available during business hours</p>
-              <p>Mon-Fri 9am-6pm GMT</p>
+              <p className="m-0 text-[0.86rem] leading-[1.45] text-slate-600">Available during business hours</p>
+              <p className="mt-1 text-[0.86rem] leading-[1.45] text-slate-600">Mon-Fri 9am-6pm GMT</p>
             </article>
           </div>
         </section>

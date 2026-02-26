@@ -11,5 +11,9 @@ export function NotificationBadge({
     return null
   }
 
-  return <span className="notification-badge">{unreadCount}</span>
+  return (
+    <span className="inline-flex h-[1.35rem] min-w-[1.35rem] items-center justify-center rounded-full bg-red-700 px-[0.35rem] text-xs font-bold text-white">
+      {unreadCount}
+    </span>
+  )
 }

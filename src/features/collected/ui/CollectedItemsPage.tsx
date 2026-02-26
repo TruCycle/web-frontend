@@ -6,14 +6,21 @@ import { Button } from '@/shared/ui/button/Button';
 import { ItemDetailsDialog } from '@/shared/ui/modal/ItemDetailsDialog';
 import { QRCodeDialog } from '@/shared/ui/modal/QRCodeDialog';
 import { CollectionSuccessDialog } from '@/shared/ui/modal/CollectionSuccessDialog';
-import './CollectedItemsPage.css';
-
 import bagShoeImg from '@/assets/images/bag-shoe.jpg';
 import plannerImg from '@/assets/images/book-planner.jpg';
 import candleImg from '@/assets/images/scented-candle.jpg';
 
-// Mock data items matching your reference image
-const COLLECTED_ITEMS = [
+interface CollectedItem {
+    id: string;
+    title: string;
+    category: string;
+    donor: string;
+    image: string;
+    status: 'Collected' | 'Claimed';
+    hasQR: boolean;
+}
+
+const COLLECTED_ITEMS: CollectedItem[] = [
     {
         id: '1',
         title: 'Vintage Chair',
@@ -21,7 +28,7 @@ const COLLECTED_ITEMS = [
         donor: 'Michael T.',
         image: bagShoeImg,
         status: 'Collected',
-        hasQR: false
+        hasQR: false,
     },
     {
         id: '2',
@@ -30,7 +37,7 @@ const COLLECTED_ITEMS = [
         donor: 'Emma R.',
         image: plannerImg,
         status: 'Collected',
-        hasQR: false
+        hasQR: false,
     },
     {
         id: '3',
@@ -39,192 +46,135 @@ const COLLECTED_ITEMS = [
         donor: 'John P.',
         image: candleImg,
         status: 'Claimed',
-        hasQR: true
-    }
+        hasQR: true,
+    },
 ];
 
-// Mock item for the banner
-const BANNER_ITEM = {
+const BANNER_ITEM: CollectedItem & { location: string } = {
     id: 'banner-1',
     title: 'iPhone 12Pro',
     category: 'Gadget',
-    condition: 'Good',
     donor: 'Sarah M.',
-    image: bagShoeImg, // Using placeholder
-    status: 'Approved',
+    image: bagShoeImg,
+    status: 'Claimed',
     location: 'Fixars Shop 50 Abbey Road',
-    hasQR: true
+    hasQR: true,
 };
 
 export default function CollectedItemsPage() {
     const navigate = useNavigate();
-    const [items, setItems] = useState<any[]>([]); // Starts empty by default
-    const [selectedItem, setSelectedItem] = useState<any | null>(null);
-    const [qrItem, setQrItem] = useState<any | null>(null);
+    const [items, setItems] = useState<CollectedItem[]>([]);
+    const [selectedItem, setSelectedItem] = useState<CollectedItem | null>(null);
+    const [qrItem, setQrItem] = useState<CollectedItem | null>(null);
     const [showSuccessDialog, setShowSuccessDialog] = useState(false);
     const [collectedItemName, setCollectedItemName] = useState('');
 
     const hasItems = items.length > 0;
 
-    // Trigger to simulate "selecting" or loading items
     const loadMockData = () => {
         setItems(COLLECTED_ITEMS);
     };
 
-    const handleViewDetails = (item: any) => {
-        setSelectedItem(item);
-    };
-
-    const handleOpenQR = (item: any) => {
-        setQrItem(item);
-    };
-
     const handleCollectSuccess = () => {
-        if (qrItem) {
-            setCollectedItemName(qrItem.title);
-        } else {
-            setCollectedItemName(BANNER_ITEM.title);
-        }
-        setQrItem(null); // Close QR Dialog
-        setShowSuccessDialog(true); // Open Success Dialog
+        setCollectedItemName(qrItem ? qrItem.title : BANNER_ITEM.title);
+        setQrItem(null);
+        setShowSuccessDialog(true);
     };
 
     return (
-        <div className="collected-content-wrapper">
-            <div className="welcome-section">
-                <div className="welcome-text">
-                    <h1 className="welcome-title">Welcome back, Pearl!</h1>
-                    <p className="welcome-subtitle">Track your impact and manage your claimed items</p>
-                </div>
+        <div className="space-y-5">
+            <div>
+                <h1 className="text-3xl font-bold text-slate-900">Welcome back, Pearl!</h1>
+                <p className="text-slate-500">Track your impact and manage your claimed items</p>
             </div>
 
-            {hasItems && (
-                <div className="approval-banner">
-                    <div className="banner-left">
-                        <div className="banner-icon-wrapper">
-                            <CircleAlert size={20} color="#15A119" strokeWidth={2} />
+            {hasItems ? (
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-lime-200 bg-lime-50 p-4">
+                    <div className="flex items-start gap-3">
+                        <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-lime-700">
+                            <CircleAlert size={20} strokeWidth={2} />
                         </div>
-                        <div className="banner-text">
-                            <h4 className="banner-title">Item {BANNER_ITEM.title} Request Has Been Approved</h4>
-                            <p className="banner-desc">Open QR code when you get to pickup location to scan to collect</p>
+                        <div>
+                            <h4 className="font-semibold text-slate-900">Item {BANNER_ITEM.title} request has been approved</h4>
+                            <p className="text-sm text-slate-600">Open QR code when you get to pickup location to scan to collect</p>
                         </div>
                     </div>
-                    <Button
-                        className="btn-banner-qr"
-                        onClick={() => handleOpenQR(BANNER_ITEM)}
-                    >
-                        Open QR Code
-                    </Button>
+                    <Button onClick={() => setQrItem(BANNER_ITEM)}>Open QR Code</Button>
                 </div>
-            )}
+            ) : null}
 
             {!hasItems ? (
-                <div className="empty-collected-card">
-                    <div className="empty-state-content">
-                        <div className="empty-icon-wrapper">
-                            <img src={cautionIcon} alt="Caution" className="caution-svg-icon" />
-                        </div>
-                        <h2 className="empty-title">No items collected yet</h2>
-                        <p className="empty-message">
-                            Once you claim an item and it's approved by the donor, it will appear here.
-                        </p>
-                        <div className="empty-actions">
-                            <Button
-                                className="btn-browse-empty"
-                                onClick={() => navigate('/')}
-                            >
-                                Browse Items
-                            </Button>
-                            <Button
-                                className="btn-load-demo"
-                                onClick={loadMockData}
-                                style={{
-                                    backgroundColor: '#ffffff',
-                                    color: '#1a1a1a',
-                                    border: '1px solid #e2e8f0',
-                                    marginLeft: '1rem',
-                                    padding: '0.75rem 1.5rem',
-                                    borderRadius: '8px',
-                                    fontWeight: '600',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                Simulate Selection
-                            </Button>
-                        </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+                    <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-lime-100">
+                        <img src={cautionIcon} alt="Caution" className="h-7 w-7" />
+                    </div>
+                    <h2 className="mt-4 text-xl font-bold text-slate-900">No items collected yet</h2>
+                    <p className="mx-auto mt-2 max-w-[45ch] text-sm text-slate-500">
+                        Once you claim an item and it's approved by the donor, it will appear here.
+                    </p>
+                    <div className="mt-5 flex flex-wrap justify-center gap-3">
+                        <Button onClick={() => navigate('/')}>Browse Items</Button>
+                        <Button variant="secondary" onClick={loadMockData}>Simulate Selection</Button>
                     </div>
                 </div>
             ) : (
-                <div className="collected-list">
+                <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                     {items.map((item) => (
-                        <div key={item.id} className="item-list-row">
-                            <div className="item-list-content">
-                                <div className="item-list-image-container">
-                                    <img src={item.image} alt={item.title} className="item-list-image" />
-                                </div>
-                                <div className="item-list-info">
-                                    <div className="item-list-header">
-                                        <h3 className="item-list-title">{item.title}</h3>
-                                        <span className={`status-pill ${item.status.toLowerCase()}`}>
+                        <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-3">
+                            <div className="flex items-center gap-3">
+                                <img src={item.image} alt={item.title} className="h-16 w-16 rounded-lg object-cover" />
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="font-semibold text-slate-900">{item.title}</h3>
+                                        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${item.status === 'Claimed' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
                                             {item.status}
                                         </span>
                                     </div>
-                                    <p className="item-list-meta">
-                                        {item.category}  •  From {item.donor}
-                                    </p>
+                                    <p className="text-sm text-slate-500">{item.category} • From {item.donor}</p>
                                 </div>
                             </div>
-                            <div className="item-list-actions">
-                                <Button
-                                    className="btn-view-details-outline"
-                                    onClick={() => handleViewDetails(item)}
-                                >
+                            <div className="flex flex-wrap gap-2">
+                                <Button variant="secondary" onClick={() => setSelectedItem(item)}>
                                     View Details
                                 </Button>
-                                {item.hasQR && (
-                                    <Button
-                                        className="btn-open-qr"
-                                        onClick={() => handleOpenQR(item)}
-                                    >
-                                        Open QR Code
-                                    </Button>
-                                )}
+                                {item.hasQR ? (
+                                    <Button onClick={() => setQrItem(item)}>Open QR Code</Button>
+                                ) : null}
                             </div>
                         </div>
                     ))}
 
-                    <div className="pagination-nav">
-                        <button className="pagination-btn prev-btn">
-                            <ChevronLeft size={18} />
-                            <span>Previous</span>
+                    <div className="flex items-center justify-between pt-2">
+                        <button className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">
+                            <ChevronLeft size={16} />
+                            Previous
                         </button>
-                        <div className="pagination-numbers">
-                            <button className="page-number active">1</button>
-                            <span className="pagination-ellipsis">...</span>
-                        </div>
-                        <button className="pagination-btn next-btn">
-                            <span>Next</span>
-                            <ChevronRight size={18} />
+                        <span className="rounded-md bg-lime-100 px-3 py-1 text-sm font-semibold text-slate-800">1</span>
+                        <button className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">
+                            Next
+                            <ChevronRight size={16} />
                         </button>
                     </div>
 
-                    <Button
-                        onClick={() => setItems([])}
-                        style={{ marginTop: '2rem', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '0.85rem' }}
-                    >
-                        Reset to Empty
-                    </Button>
+                    <div className="pt-1 text-center">
+                        <button
+                            onClick={() => setItems([])}
+                            className="text-sm text-slate-500 hover:text-slate-700 hover:underline"
+                        >
+                            Reset to Empty
+                        </button>
+                    </div>
                 </div>
             )}
 
             <ItemDetailsDialog
-                isOpen={!!selectedItem}
+                isOpen={Boolean(selectedItem)}
                 onClose={() => setSelectedItem(null)}
                 item={selectedItem}
             />
 
             <QRCodeDialog
-                isOpen={!!qrItem}
+                isOpen={Boolean(qrItem)}
                 onClose={() => setQrItem(null)}
                 item={qrItem}
                 onCollect={handleCollectSuccess}

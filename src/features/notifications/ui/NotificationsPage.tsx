@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Bell } from 'lucide-react'
 import { useNotifications } from '@/features/notifications/hooks/useNotifications'
 import { LoadingState } from '@/shared/ui/loading/LoadingState'
-import './NotificationsPage.css'
 
 function formatNotificationTime(value: string): string {
   const date = new Date(value)
@@ -20,12 +19,7 @@ function formatNotificationTime(value: string): string {
 export default function NotificationsPage() {
   const { notifications, isLoading, error, markAsRead } = useNotifications()
   const [selectedId, setSelectedId] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!isLoading && notifications.length > 0 && !selectedId) {
-      setSelectedId(notifications[0].id)
-    }
-  }, [isLoading, notifications, selectedId])
+  const activeId = selectedId ?? notifications[0]?.id ?? null
 
   const handleSelect = (notificationId: string) => {
     setSelectedId(notificationId)
@@ -39,49 +33,51 @@ export default function NotificationsPage() {
   )
 
   return (
-    <div className="notifications-page-card">
-      <h2 className="notifications-title notifications-header">
-        Recent Notifications
-      </h2>
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 className="mb-4 text-xl font-bold text-slate-900">Recent Notifications</h2>
 
-      <div className="notifications-list">
+      <div className="space-y-3">
         {isLoading ? (
-          <div className="notifications-state">
+          <div>
             <LoadingState label="Loading notifications" />
           </div>
         ) : null}
 
-        {error ? <p className="notifications-error">{error}</p> : null}
+        {error ? <p className="text-sm text-rose-600">{error}</p> : null}
 
         {!isLoading && !hasNotifications ? (
-          <p className="notifications-empty">{emptyStateLabel}</p>
+          <p className="text-sm text-slate-500">{emptyStateLabel}</p>
         ) : null}
 
         {!isLoading && hasNotifications
           ? notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`notification-item ${
-                  selectedId === notification.id ? 'active' : ''
-                } ${notification.isRead ? '' : 'unread'}`}
+                className={`cursor-pointer rounded-xl border p-3 transition ${
+                  activeId === notification.id
+                    ? 'border-lime-300 bg-lime-50'
+                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                }`}
                 onClick={() => handleSelect(notification.id)}
               >
-                <div className="notification-icon-wrapper">
-                  <Bell size={20} color="#64748b" />
-                </div>
-
-                <div className="notification-content">
-                  <div className="notification-main-row">
-                    <h3 className="notification-title">
-                      {notification.title}
-                    </h3>
-                    <span className="notification-time">
-                      {formatNotificationTime(notification.createdAt)}
-                    </span>
+                <div className="flex items-start gap-3">
+                  <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                    <Bell size={18} />
                   </div>
-                  <p className="notification-description">
-                    {notification.description}
-                  </p>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className={`text-sm ${notification.isRead ? 'font-medium text-slate-800' : 'font-semibold text-slate-900'}`}>
+                        {notification.title}
+                      </h3>
+                      <span className="shrink-0 text-xs text-slate-400">
+                        {formatNotificationTime(notification.createdAt)}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm text-slate-600">
+                      {notification.description}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))
