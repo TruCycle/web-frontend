@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Bell } from 'lucide-react'
 import { useNotifications } from '@/features/notifications/hooks/useNotifications'
 import { LoadingState } from '@/shared/ui/loading/LoadingState'
+import { Button } from '@/shared/ui/button/Button'
 
 function formatNotificationTime(value: string): string {
   const date = new Date(value)
@@ -17,7 +18,8 @@ function formatNotificationTime(value: string): string {
 }
 
 export default function NotificationsPage() {
-  const { notifications, isLoading, error, markAsRead } = useNotifications()
+  const { notifications, isLoading, error, markAsRead, markAllAsRead, unreadCount } =
+    useNotifications()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const activeId = selectedId ?? notifications[0]?.id ?? null
 
@@ -34,7 +36,18 @@ export default function NotificationsPage() {
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="mb-4 text-xl font-bold text-slate-900">Recent Notifications</h2>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="text-xl font-bold text-slate-900">Recent Notifications</h2>
+        <Button
+          disabled={isLoading || unreadCount === 0}
+          variant="secondary"
+          onClick={() => {
+            void markAllAsRead()
+          }}
+        >
+          Mark all as read
+        </Button>
+      </div>
 
       <div className="space-y-3">
         {isLoading ? (
@@ -74,9 +87,7 @@ export default function NotificationsPage() {
                         {formatNotificationTime(notification.createdAt)}
                       </span>
                     </div>
-                    <p className="mt-1 text-sm text-slate-600">
-                      {notification.description}
-                    </p>
+                    <p className="mt-1 text-sm text-slate-600">{notification.body}</p>
                   </div>
                 </div>
               </div>

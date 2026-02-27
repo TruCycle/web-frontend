@@ -1,6 +1,6 @@
 import { Search } from 'lucide-react';
 import { classNames } from '@/shared/utils/classNames';
-import type { Shop } from '../PartnerShopsPage';
+import type { Shop } from '@/features/partner-shops/types';
 
 interface ShopListProps {
     shops: Shop[];
