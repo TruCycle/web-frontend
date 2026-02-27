@@ -1,5 +1,4 @@
 import {
-  createContext,
   useCallback,
   useEffect,
   useMemo,
@@ -8,15 +7,7 @@ import {
   type ReactNode,
 } from 'react'
 import { classNames } from '@/shared/utils/classNames'
-
-export type ToastTone = 'success' | 'info' | 'error'
-
-export interface ShowToastOptions {
-  readonly title: string
-  readonly message: string
-  readonly tone?: ToastTone
-  readonly durationMs?: number
-}
+import { ToastContext, type ShowToastOptions, type ToastTone } from './context'
 
 interface ToastItem {
   readonly id: number
@@ -30,8 +21,6 @@ interface ToastContextValue {
   dismissToast: (id: number) => void
   clearToasts: () => void
 }
-
-export const ToastContext = createContext<ToastContextValue | undefined>(undefined)
 
 const maxVisibleToasts = 3
 const defaultDurationMs = 3400
@@ -112,11 +101,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
+    const timeoutById = timeoutByIdRef.current
     return () => {
-      timeoutByIdRef.current.forEach((timeoutId) => {
+      timeoutById.forEach((timeoutId) => {
         window.clearTimeout(timeoutId)
       })
-      timeoutByIdRef.current.clear()
+      timeoutById.clear()
     }
   }, [])
 

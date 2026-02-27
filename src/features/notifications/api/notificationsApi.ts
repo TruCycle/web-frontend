@@ -1,165 +1,73 @@
 import { apiRequest } from '@/shared/lib/api/client'
+import { unwrapApiData } from '@/shared/lib/api/envelope'
+import { clampLimit } from '@/shared/lib/api/query'
 import type { NotificationItem } from '@/features/notifications/types'
 
-const storageKey = 'trucycle.notifications'
-export const notificationsUpdatedEventName = 'trucycle-notifications-updated'
-const fallbackNotifications: NotificationItem[] = [
-  {
-    id: 'seed-notification-1',
-    title: 'Welcome to TruCycle',
-    description:
-      'This notification is local fallback data until backend endpoints are connected.',
-    createdAt: '2026-02-16T00:00:00.000Z',
-    isRead: false,
-  },
-]
-
-interface ApiEnvelope<TData> {
-  readonly status: string
-  readonly message: string
-  readonly data: TData
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === 'object' && value !== null
+    ? (value as Record<string, unknown>)
+    : null
 }
 
-interface ApiNotificationItem {
-  readonly id: string
-  readonly title?: string
-  readonly description?: string
-  readonly body?: string
-  readonly createdAt?: string
-  readonly created_at?: string
-  readonly isRead?: boolean
-  readonly read?: boolean
+function readString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value : null
 }
 
-function isNotificationItem(value: unknown): value is NotificationItem {
-  if (typeof value !== 'object' || value === null) {
-    return false
+function mapNotification(value: unknown): NotificationItem | null {
+  const item = asRecord(value)
+  const id = readString(item?.id)
+  const title = readString(item?.title)
+  if (!item || !id || !title) {
+    return null
   }
 
-  const candidate = value as Partial<NotificationItem>
+  const rawData = item.data
+  const parsedData =
+    rawData && typeof rawData === 'object' && !Array.isArray(rawData)
+      ? (rawData as Record<string, unknown>)
+      : null
 
-  return (
-    typeof candidate.id === 'string' &&
-    typeof candidate.title === 'string' &&
-    typeof candidate.description === 'string' &&
-    typeof candidate.createdAt === 'string' &&
-    typeof candidate.isRead === 'boolean'
-  )
-}
-
-function readStoredNotifications(): NotificationItem[] {
-  const storedValue = window.localStorage.getItem(storageKey)
-  if (!storedValue) {
-    return []
-  }
-
-  try {
-    const parsed = JSON.parse(storedValue) as unknown
-    if (!Array.isArray(parsed)) {
-      return []
-    }
-
-    return parsed.filter(isNotificationItem)
-  } catch {
-    return []
-  }
-}
-
-function writeStoredNotifications(notifications: NotificationItem[]): void {
-  window.localStorage.setItem(storageKey, JSON.stringify(notifications))
-  window.dispatchEvent(new Event(notificationsUpdatedEventName))
-}
-
-function isApiNotificationItem(value: unknown): value is ApiNotificationItem {
-  if (typeof value !== 'object' || value === null) {
-    return false
-  }
-
-  const candidate = value as Partial<ApiNotificationItem>
-  return typeof candidate.id === 'string'
-}
-
-function mapApiNotification(value: ApiNotificationItem): NotificationItem {
   return {
-    id: value.id,
-    title: value.title ?? 'Notification',
-    description: value.description ?? value.body ?? '',
-    createdAt: value.createdAt ?? value.created_at ?? new Date().toISOString(),
-    isRead: typeof value.isRead === 'boolean' ? value.isRead : Boolean(value.read),
+    id,
+    type: readString(item.type) ?? 'general',
+    title,
+    body: readString(item.body) ?? '',
+    data: parsedData,
+    createdAt: readString(item.createdAt) ?? new Date().toISOString(),
+    readAt: readString(item.readAt),
+    isRead: Boolean(item.read),
   }
 }
 
-function normalizeNotificationsPayload(payload: unknown): NotificationItem[] {
-  const maybeEnvelope = payload as Partial<ApiEnvelope<unknown>>
-  const collection = Array.isArray(payload)
-    ? payload
-    : Array.isArray(maybeEnvelope.data)
-      ? maybeEnvelope.data
-      : []
-
-  return collection
-    .filter(isApiNotificationItem)
-    .map(mapApiNotification)
-}
-
-export async function fetchNotifications(): Promise<NotificationItem[]> {
-  try {
-    const response = await apiRequest<unknown>('/notifications')
-    const normalized = normalizeNotificationsPayload(response)
-    if (normalized.length > 0) {
-      writeStoredNotifications(normalized)
-      return normalized
-    }
-
-    const localNotifications = readStoredNotifications()
-    if (localNotifications.length > 0) {
-      return localNotifications
-    }
-
-    writeStoredNotifications(fallbackNotifications)
-    return fallbackNotifications
-  } catch {
-    const localNotifications = readStoredNotifications()
-    if (localNotifications.length > 0) {
-      return localNotifications
-    }
-
-    writeStoredNotifications(fallbackNotifications)
-    return fallbackNotifications
+export async function fetchNotifications(params?: {
+  readonly unreadOnly?: boolean
+  readonly limit?: number
+}): Promise<NotificationItem[]> {
+  const query = new URLSearchParams()
+  if (params?.limit) {
+    query.set('limit', String(clampLimit(params.limit)))
   }
-}
+  if (params?.unreadOnly) {
+    query.set('unread', 'true')
+  }
 
-export async function markNotificationAsRead(notificationId: string): Promise<void> {
-  const currentNotifications = readStoredNotifications()
-  const nextNotifications = currentNotifications.map((notification) =>
-    notification.id === notificationId
-      ? { ...notification, isRead: true }
-      : notification,
+  const response = await apiRequest<unknown>(
+    `/notifications${query.size > 0 ? `?${query.toString()}` : ''}`,
   )
-  writeStoredNotifications(nextNotifications)
-
-  try {
-    await apiRequest<void>(`/notifications/${notificationId}/read`, {
-      method: 'POST',
-    })
-  } catch {
-    // Local optimistic update is enough for scaffold mode.
+  const data = unwrapApiData<unknown>(response)
+  if (!Array.isArray(data)) {
+    return []
   }
+
+  return data
+    .map((entry) => mapNotification(entry))
+    .filter((entry): entry is NotificationItem => entry !== null)
 }
 
-export async function markAllNotificationsAsRead(): Promise<void> {
-  const currentNotifications = readStoredNotifications()
-  const nextNotifications = currentNotifications.map((notification) => ({
-    ...notification,
-    isRead: true,
-  }))
-  writeStoredNotifications(nextNotifications)
-
-  try {
-    await apiRequest<void>('/notifications/read-all', {
-      method: 'POST',
-    })
-  } catch {
-    // Local optimistic update is enough for scaffold mode.
-  }
+export async function fetchUnreadNotificationsCount(): Promise<number> {
+  const response = await apiRequest<unknown>('/notifications/unread-count')
+  const payload = unwrapApiData<unknown>(response)
+  const data = asRecord(payload)
+  const count = data?.count
+  return typeof count === 'number' && Number.isFinite(count) ? count : 0
 }

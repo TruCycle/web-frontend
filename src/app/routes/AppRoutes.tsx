@@ -60,7 +60,7 @@ export function AppRoutes() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/collected" element={<CollectedItemsPage />} />
           <Route path="/listings" element={<YourListingsPage />} />
-          <Route path="/selected" element={<YourListingsPage />} />
+          <Route path="/selected" element={<CollectedItemsPage />} />
           <Route path="/partner-shops" element={<PartnerShopsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/support" element={<SupportFaqPage />} />

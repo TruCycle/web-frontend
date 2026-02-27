@@ -3,7 +3,7 @@ import { Modal } from './Modal';
 
 interface ItemDetails {
     title: string;
-    image: string;
+    image?: string;
     status: string;
     category: string;
     condition?: string;
@@ -36,7 +36,13 @@ export const ItemDetailsDialog: React.FC<ItemDetailsDialogProps> = ({ isOpen, on
                 </div>
 
                 <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
-                    <img src={item.image} alt={item.title} className="h-56 w-full object-cover" />
+                    {item.image ? (
+                        <img src={item.image} alt={item.title} className="h-56 w-full object-cover" />
+                    ) : (
+                        <div className="flex h-56 w-full items-center justify-center text-sm text-slate-500">
+                            No image available
+                        </div>
+                    )}
                     <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-semibold ${statusClass}`}>
                         {item.status}
                     </span>

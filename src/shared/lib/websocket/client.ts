@@ -1,95 +1,112 @@
-type MessageListener = (payload: string) => void
+import { io, type Socket } from 'socket.io-client'
+import { getStoredAccessToken } from '@/shared/lib/auth/session'
+import { env } from '@/shared/lib/config/env'
 
-interface WebSocketClientOptions {
+type EventMap = Record<string, (...args: never[]) => void>
+
+interface SocketClientOptions {
+  readonly namespace: '/messages' | '/notifications'
   readonly reconnectDelayMs?: number
   readonly maxReconnectAttempts?: number
 }
 
-export class WebSocketClient {
-  private socket: WebSocket | null = null
-  private reconnectAttempts = 0
-  private reconnectTimeoutId: number | undefined
-  private readonly messageListeners = new Set<MessageListener>()
-  private readonly url: string
-  private readonly options: WebSocketClientOptions
+function resolveSocketBaseUrl(): string | undefined {
+  const wsBase = env.websocketUrl.trim()
+  if (wsBase) {
+    return wsBase.replace(/\/$/, '')
+  }
 
-  constructor(url: string, options: WebSocketClientOptions = {}) {
-    this.url = url
+  const apiBase = env.apiBaseUrl.trim()
+  if (!apiBase || apiBase.startsWith('/')) {
+    return undefined
+  }
+
+  try {
+    const parsedUrl = new URL(apiBase)
+    if (parsedUrl.pathname === '/api') {
+      parsedUrl.pathname = ''
+    } else if (parsedUrl.pathname.endsWith('/api')) {
+      parsedUrl.pathname = parsedUrl.pathname.slice(0, -4)
+    }
+    return parsedUrl.toString().replace(/\/$/, '')
+  } catch {
+    return undefined
+  }
+}
+
+export class WebSocketClient<
+  TServerEvents extends EventMap = EventMap,
+  TClientEvents extends EventMap = EventMap,
+> {
+  private socket: Socket<TServerEvents, TClientEvents> | null = null
+  private readonly options: SocketClientOptions
+
+  constructor(options: SocketClientOptions) {
     this.options = options
   }
 
   connect(): void {
-    if (!this.url || this.socket) {
+    if (this.socket) {
       return
     }
 
-    this.socket = new WebSocket(this.url)
-    this.socket.addEventListener('open', this.handleOpen)
-    this.socket.addEventListener('message', this.handleMessage)
-    this.socket.addEventListener('close', this.handleClose)
-    this.socket.addEventListener('error', this.handleError)
+    const token = getStoredAccessToken()
+    if (!token) {
+      return
+    }
+
+    const baseUrl = resolveSocketBaseUrl()
+    this.socket = io(`${baseUrl ?? ''}${this.options.namespace}`, {
+      auth: { token },
+      transports: ['websocket', 'polling'],
+      tryAllTransports: true,
+      autoConnect: false,
+      reconnection: true,
+      reconnectionDelay: this.options.reconnectDelayMs ?? 1500,
+      reconnectionAttempts: this.options.maxReconnectAttempts ?? 8,
+    })
+
+    this.socket.connect()
   }
 
   disconnect(): void {
-    this.clearReconnectTimeout()
-
     if (!this.socket) {
       return
     }
 
-    this.socket.removeEventListener('open', this.handleOpen)
-    this.socket.removeEventListener('message', this.handleMessage)
-    this.socket.removeEventListener('close', this.handleClose)
-    this.socket.removeEventListener('error', this.handleError)
-    this.socket.close()
+    this.socket.disconnect()
     this.socket = null
   }
 
-  send(payload: string): void {
-    if (this.socket?.readyState === WebSocket.OPEN) {
-      this.socket.send(payload)
-    }
+  on<TEventName extends keyof TServerEvents & string>(
+    eventName: TEventName,
+    listener: TServerEvents[TEventName],
+  ): void {
+    this.socket?.on(eventName, listener as never)
   }
 
-  subscribe(listener: MessageListener): () => void {
-    this.messageListeners.add(listener)
-    return () => {
-      this.messageListeners.delete(listener)
-    }
+  once<TEventName extends keyof TServerEvents & string>(
+    eventName: TEventName,
+    listener: TServerEvents[TEventName],
+  ): void {
+    this.socket?.once(eventName, listener as never)
   }
 
-  private handleOpen = (): void => {
-    this.reconnectAttempts = 0
+  off<TEventName extends keyof TServerEvents & string>(
+    eventName: TEventName,
+    listener?: TServerEvents[TEventName],
+  ): void {
+    this.socket?.off(eventName, listener as never)
   }
 
-  private handleMessage = (event: MessageEvent<string>): void => {
-    this.messageListeners.forEach((listener) => listener(event.data))
+  emit<TEventName extends keyof TClientEvents & string>(
+    eventName: TEventName,
+    ...args: Parameters<TClientEvents[TEventName]>
+  ): void {
+    this.socket?.emit(eventName, ...args)
   }
 
-  private handleClose = (): void => {
-    this.socket = null
-    const maxReconnectAttempts = this.options.maxReconnectAttempts ?? 5
-    if (this.reconnectAttempts >= maxReconnectAttempts) {
-      return
-    }
-
-    this.reconnectAttempts += 1
-    const reconnectDelayMs = this.options.reconnectDelayMs ?? 1500
-    this.reconnectTimeoutId = window.setTimeout(() => {
-      this.connect()
-    }, reconnectDelayMs)
-  }
-
-  private handleError = (): void => {
-    this.disconnect()
-  }
-
-  private clearReconnectTimeout(): void {
-    if (this.reconnectTimeoutId === undefined) {
-      return
-    }
-
-    window.clearTimeout(this.reconnectTimeoutId)
-    this.reconnectTimeoutId = undefined
+  get isConnected(): boolean {
+    return Boolean(this.socket?.connected)
   }
 }

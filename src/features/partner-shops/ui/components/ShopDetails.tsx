@@ -1,5 +1,5 @@
 import { CheckCircle2 } from 'lucide-react';
-import type { Shop } from '../PartnerShopsPage';
+import type { Shop } from '@/features/partner-shops/types';
 import { Button } from '@/shared/ui/button/Button';
 
 interface ShopDetailsProps {
