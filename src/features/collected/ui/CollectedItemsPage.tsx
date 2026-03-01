@@ -2,19 +2,24 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, CircleAlert } from 'lucide-react'
 import cautionIcon from '@/assets/icons/caution-icon.svg'
-import { Button } from '@/shared/ui/button/Button'
-import { ItemDetailsDialog } from '@/shared/ui/modal/ItemDetailsDialog'
-import { QRCodeDialog } from '@/shared/ui/modal/QRCodeDialog'
-import { CollectionSuccessDialog } from '@/shared/ui/modal/CollectionSuccessDialog'
 import { useCollectedItems } from '@/features/collected/hooks/useCollectedItems'
 import type { CollectedItem } from '@/features/items/types'
 import { useToast } from '@/shared/ui/toast/useToast'
+import { Button } from '@/shared/ui/button/Button'
+import { ItemRowCard } from '@/shared/ui/item/ItemRowCard'
+import { ItemDetailsDialog } from '@/shared/ui/modal/ItemDetailsDialog'
+import { QRCodeDialog } from '@/shared/ui/modal/QRCodeDialog'
+import { CollectionSuccessDialog } from '@/shared/ui/modal/CollectionSuccessDialog'
 
 function statusLabel(claimStatus: string): 'Collected' | 'Claimed' {
   if (claimStatus === 'complete' || claimStatus === 'completed') {
     return 'Collected'
   }
   return 'Claimed'
+}
+
+function statusTone(claimStatus: string): 'claimed' | 'collected' {
+  return statusLabel(claimStatus) === 'Claimed' ? 'claimed' : 'collected'
 }
 
 export default function CollectedItemsPage() {
@@ -140,49 +145,29 @@ export default function CollectedItemsPage() {
       {!isLoading && hasItems ? (
         <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           {items.map((item) => (
-            <div
+            <ItemRowCard
               key={item.claimId}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-3"
-            >
-              <div className="flex items-center gap-3">
-                {item.item.image ? (
-                  <img
-                    src={item.item.image.url}
-                    alt={item.item.title}
-                    className="h-16 w-16 rounded-lg object-cover"
-                  />
-                ) : (
-                  <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-slate-100 text-xs text-slate-500">
-                    No image
-                  </div>
-                )}
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-slate-900">{item.item.title}</h3>
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                        statusLabel(item.claimStatus) === 'Claimed'
-                          ? 'bg-amber-100 text-amber-700'
-                          : 'bg-emerald-100 text-emerald-700'
-                      }`}
-                    >
-                      {statusLabel(item.claimStatus)}
-                    </span>
-                  </div>
-                  <p className="text-sm text-slate-500">
-                    {item.item.category} · From {item.item.ownerName}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button variant="secondary" onClick={() => setSelectedItem(item)}>
-                  View Details
-                </Button>
-                {statusLabel(item.claimStatus) === 'Claimed' ? (
-                  <Button onClick={() => setQrItem(item)}>Open QR Scanner</Button>
-                ) : null}
-              </div>
-            </div>
+              title={item.item.title}
+              subtitle={`${item.item.category} - From ${item.item.ownerName}`}
+              statusLabel={statusLabel(item.claimStatus)}
+              statusTone={statusTone(item.claimStatus)}
+              imageUrl={item.item.image?.url ?? null}
+              imageAlt={item.item.title}
+              actions={
+                <>
+                  <Button
+                    variant="secondary"
+                    className="bg-[#F8FAFC] text-[#222222] ring-0 hover:bg-slate-100"
+                    onClick={() => setSelectedItem(item)}
+                  >
+                    View Details
+                  </Button>
+                  {statusLabel(item.claimStatus) === 'Claimed' ? (
+                    <Button onClick={() => setQrItem(item)}>Open QR Code</Button>
+                  ) : null}
+                </>
+              }
+            />
           ))}
 
           <div className="flex items-center justify-between pt-2">

@@ -166,7 +166,7 @@ export function AppShell({ children }: AppShellProps) {
               <Settings size={20} />
               <span>Settings</span>
             </NavLink>
-            <NavLink className={navLinkClassName} to={`/support/${role}`}>
+            <NavLink className={navLinkClassName} to="/support">
               <HelpCircle size={20} />
               <span>Support & FAQs</span>
             </NavLink>

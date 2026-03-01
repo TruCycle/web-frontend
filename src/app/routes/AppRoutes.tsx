@@ -64,7 +64,7 @@ export function AppRoutes() {
           <Route path="/partner-shops" element={<PartnerShopsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/support" element={<SupportFaqPage />} />
-          <Route path="/support/:viewRole" element={<SupportFaqPage />} />
+          <Route path="/support/:viewRole" element={<Navigate replace to="/support" />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate replace to="/" />} />
