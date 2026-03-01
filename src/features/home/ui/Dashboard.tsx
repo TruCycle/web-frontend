@@ -11,6 +11,7 @@ import { SuccessDialog } from '@/shared/ui/modal/SuccessDialog'
 import { ListItemDialog } from '@/shared/ui/modal/ListItemDialog'
 import { ItemDetailsDialog } from '@/shared/ui/modal/ItemDetailsDialog'
 import { ActiveListingDialog } from '@/shared/ui/modal/ActiveListingDialog'
+import { CustomSelect } from '@/shared/ui/select'
 import { useUserRole } from '@/shared/context/useUserRole'
 import { useCollectorDashboard } from '@/features/home/hooks/useCollectorDashboard'
 import { useDonorListings } from '@/features/listings/hooks/useDonorListings'
@@ -118,6 +119,34 @@ export default function Dashboard() {
       image: selectedDonorActiveItem.imageUrl ?? undefined,
     }
   }, [selectedDonorActiveItem])
+  const categoryFilterOptions = useMemo(
+    () => [
+      { value: 'All Items', label: 'All categories' },
+      ...categories
+        .filter((category) => category.trim().length > 0 && category !== 'All Items')
+        .map((category) => ({ value: category, label: category })),
+    ],
+    [categories],
+  )
+  const conditionFilterOptions = useMemo(
+    () => [
+      { value: 'All condition', label: 'All condition' },
+      ...conditions
+        .filter((condition) => condition.trim().length > 0 && condition !== 'All condition')
+        .map((condition) => ({ value: condition, label: condition })),
+    ],
+    [conditions],
+  )
+  const selectedCategoryFilterValue = categoryFilterOptions.some(
+    (option) => option.value === filters.category,
+  )
+    ? filters.category
+    : 'All Items'
+  const selectedConditionFilterValue = conditionFilterOptions.some(
+    (option) => option.value === filters.condition,
+  )
+    ? filters.condition
+    : 'All condition'
 
   return (
     <div className="space-y-6">
@@ -286,42 +315,26 @@ export default function Dashboard() {
                   <label htmlFor="browse-filter-category" className="block text-xl text-tc-app-secondary">
                     Category
                   </label>
-                  <select
+                  <CustomSelect
                     id="browse-filter-category"
-                    className="h-1 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
-                    value={filters.category}
-                    onChange={(event) => updateCategory(event.target.value)}
-                  >
-                    <option value="All Items">All categories</option>
-                    {categories
-                      .filter((category) => category !== 'All Items')
-                      .map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                  </select>
+                    value={selectedCategoryFilterValue}
+                    options={categoryFilterOptions}
+                    onChange={updateCategory}
+                    buttonClassName="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary"
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <label htmlFor="browse-filter-condition" className="block text-xl text-tc-app-secondary">
                     Condition
                   </label>
-                  <select
+                  <CustomSelect
                     id="browse-filter-condition"
-                    className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
-                    value={filters.condition}
-                    onChange={(event) => updateCondition(event.target.value)}
-                  >
-                    <option value="All condition">All condition</option>
-                    {conditions
-                      .filter((condition) => condition !== 'All condition')
-                      .map((condition) => (
-                        <option key={condition} value={condition}>
-                          {condition}
-                        </option>
-                      ))}
-                  </select>
+                    value={selectedConditionFilterValue}
+                    options={conditionFilterOptions}
+                    onChange={updateCondition}
+                    buttonClassName="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary"
+                  />
                 </div>
 
                 <div className="space-y-2">

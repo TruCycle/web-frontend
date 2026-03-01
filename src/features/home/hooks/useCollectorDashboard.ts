@@ -48,7 +48,10 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
       if (filters.category === 'All Items' && filters.search.trim().length === 0) {
         const computedCategories = new Set<string>(['All Items'])
         result.forEach((item) => {
-          computedCategories.add(item.category)
+          const category = item.category.trim()
+          if (category.length > 0) {
+            computedCategories.add(category)
+          }
         })
         setAllCategories([...computedCategories])
       }
@@ -94,7 +97,10 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
   const categoriesFromItems = useMemo(() => {
     const computedCategories = new Set<string>(['All Items'])
     items.forEach((item) => {
-      computedCategories.add(item.category)
+      const category = item.category.trim()
+      if (category.length > 0) {
+        computedCategories.add(category)
+      }
     })
     return [...computedCategories]
   }, [items])
@@ -103,7 +109,10 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
   const conditions = useMemo(() => {
     const computedConditions = new Set<string>(['All condition'])
     items.forEach((item) => {
-      computedConditions.add(item.condition)
+      const condition = item.condition.trim()
+      if (condition.length > 0) {
+        computedConditions.add(condition)
+      }
     })
     return [...computedConditions]
   }, [items])
@@ -130,11 +139,19 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
   }, [])
 
   const updateCategory = useCallback((nextCategory: string) => {
-    setFilters((currentFilters) => ({ ...currentFilters, category: nextCategory }))
+    const normalizedCategory = nextCategory.trim()
+    setFilters((currentFilters) => ({
+      ...currentFilters,
+      category: normalizedCategory.length > 0 ? normalizedCategory : 'All Items',
+    }))
   }, [])
 
   const updateCondition = useCallback((nextCondition: string) => {
-    setFilters((currentFilters) => ({ ...currentFilters, condition: nextCondition }))
+    const normalizedCondition = nextCondition.trim()
+    setFilters((currentFilters) => ({
+      ...currentFilters,
+      condition: normalizedCondition.length > 0 ? normalizedCondition : 'All condition',
+    }))
   }, [])
 
   const updateLocation = useCallback((nextLocation: string) => {

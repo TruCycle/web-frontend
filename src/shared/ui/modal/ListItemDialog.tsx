@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react';
 import {
     X,
     Upload,
-    ChevronDown,
     Search,
     Plus,
     Clock,
@@ -11,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Modal } from './Modal';
 import { Button } from '../button/Button';
+import { CustomSelect } from '@/shared/ui/select';
 import successIcon from '@/assets/images/success.svg';
 import { classNames } from '@/shared/utils/classNames';
 
@@ -44,8 +44,6 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({ isOpen, onClose 
     const [selectedCondition, setSelectedCondition] = useState<string>('');
     const [itemName, setItemName] = useState('');
     const [itemDescription, setItemDescription] = useState('');
-    const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-    const [isConditionOpen, setIsConditionOpen] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -207,90 +205,24 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({ isOpen, onClose 
 
                     <div className="space-y-2">
                         <label className="text-sm font-semibold text-slate-700">Category</label>
-                        <div className="relative">
-                            <button
-                                className={classNames(
-                                    inputClassName,
-                                    'flex items-center justify-between text-left',
-                                    isCategoryOpen && 'border-lime-400 ring-4 ring-lime-100',
-                                )}
-                                onClick={() => {
-                                    setIsCategoryOpen((prev) => !prev);
-                                    setIsConditionOpen(false);
-                                }}
-                            >
-                                <span className={selectedCategory ? 'text-slate-800' : 'text-slate-400'}>
-                                    {selectedCategory || 'Select'}
-                                </span>
-                                <ChevronDown
-                                    size={18}
-                                    className={classNames('text-slate-500 transition', isCategoryOpen && 'rotate-180')}
-                                />
-                            </button>
-                            {isCategoryOpen ? (
-                                <div className="absolute z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg">
-                                    {CATEGORIES.map((cat) => (
-                                        <button
-                                            key={cat}
-                                            className={classNames(
-                                                'w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50',
-                                                selectedCategory === cat && 'bg-lime-50 font-semibold text-lime-700',
-                                            )}
-                                            onClick={() => {
-                                                setSelectedCategory(cat);
-                                                setIsCategoryOpen(false);
-                                            }}
-                                        >
-                                            {cat}
-                                        </button>
-                                    ))}
-                                </div>
-                            ) : null}
-                        </div>
+                        <CustomSelect
+                            value={selectedCategory}
+                            options={CATEGORIES.map((category) => ({ value: category, label: category }))}
+                            placeholder="Select"
+                            onChange={setSelectedCategory}
+                            buttonClassName={inputClassName}
+                        />
                     </div>
 
                     <div className="space-y-2">
                         <label className="text-sm font-semibold text-slate-700">Condition</label>
-                        <div className="relative">
-                            <button
-                                className={classNames(
-                                    inputClassName,
-                                    'flex items-center justify-between text-left',
-                                    isConditionOpen && 'border-lime-400 ring-4 ring-lime-100',
-                                )}
-                                onClick={() => {
-                                    setIsConditionOpen((prev) => !prev);
-                                    setIsCategoryOpen(false);
-                                }}
-                            >
-                                <span className={selectedCondition ? 'text-slate-800' : 'text-slate-400'}>
-                                    {selectedCondition || 'Select'}
-                                </span>
-                                <ChevronDown
-                                    size={18}
-                                    className={classNames('text-slate-500 transition', isConditionOpen && 'rotate-180')}
-                                />
-                            </button>
-                            {isConditionOpen ? (
-                                <div className="absolute z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg">
-                                    {CONDITIONS.map((cond) => (
-                                        <button
-                                            key={cond}
-                                            className={classNames(
-                                                'w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50',
-                                                selectedCondition === cond && 'bg-lime-50 font-semibold text-lime-700',
-                                            )}
-                                            onClick={() => {
-                                                setSelectedCondition(cond);
-                                                setIsConditionOpen(false);
-                                            }}
-                                        >
-                                            {cond}
-                                        </button>
-                                    ))}
-                                </div>
-                            ) : null}
-                        </div>
+                        <CustomSelect
+                            value={selectedCondition}
+                            options={CONDITIONS.map((condition) => ({ value: condition, label: condition }))}
+                            placeholder="Select"
+                            onChange={setSelectedCondition}
+                            buttonClassName={inputClassName}
+                        />
                     </div>
 
                     <div className="space-y-2">
