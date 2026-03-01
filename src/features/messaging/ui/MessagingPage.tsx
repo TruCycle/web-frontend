@@ -409,6 +409,11 @@ export default function MessagingPage() {
                 )
                 const imageGridClassName =
                   row.messages.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
+                const groupedCaption =
+                  row.messages
+                    .map((message) => (message.text ?? message.caption ?? '').trim())
+                    .filter((text) => text.length > 0)
+                    .at(-1) ?? ''
 
                 return (
                   <div
@@ -448,14 +453,19 @@ export default function MessagingPage() {
                                   className="h-28 w-full rounded-lg object-cover sm:h-36"
                                 />
                               </button>
-                              {message.text ?? message.caption ? (
-                                <p className="mt-1 px-1 text-xs text-[#222222]">
-                                  {message.text ?? message.caption}
-                                </p>
-                              ) : null}
                             </div>
                           ))}
                         </div>
+                        {groupedCaption ? (
+                          <div
+                            className={classNames(
+                              'mt-1 max-w-full rounded-2xl bg-[#A4F5A6] px-5 py-1.5 text-sm text-[#222222]',
+                              isOutgoing ? 'self-end text-right' : 'self-start text-left',
+                            )}
+                          >
+                            {groupedCaption}
+                          </div>
+                        ) : null}
                         <div className="mt-1.5 pl-1 text-left text-xs text-[#222222BF]">
                           {formatTime(lastMessage.createdAt)}
                         </div>
