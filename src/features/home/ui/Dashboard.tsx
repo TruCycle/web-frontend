@@ -9,12 +9,16 @@ import rewardIcon from '@/assets/icons/reward-icon.svg'
 import { SuccessDialog } from '@/shared/ui/modal/SuccessDialog'
 import { ListItemDialog } from '@/shared/ui/modal/ListItemDialog'
 import { ItemDetailsDialog } from '@/shared/ui/modal/ItemDetailsDialog'
+import { ActiveListingDialog } from '@/shared/ui/modal/ActiveListingDialog'
 import { useUserRole } from '@/shared/context/useUserRole'
 import { useCollectorDashboard } from '@/features/home/hooks/useCollectorDashboard'
 import { useDonorListings } from '@/features/listings/hooks/useDonorListings'
+import { ListingsLoadingState } from '@/features/listings/ui/components/ListingsLoadingState'
+import { ListingRow } from '@/features/listings/ui/components/ListingRow'
 import { useToast } from '@/shared/ui/toast/useToast'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import type { BrowseItem } from '@/features/items/types'
+import type { DonorListingItem } from '@/features/listings/types'
 
 function statColor(index: number): string {
   if (index === 0) return 'bg-tc-app-primary/10'
@@ -34,6 +38,8 @@ export default function Dashboard() {
   const [isListItemDialogOpen, setIsListItemDialogOpen] = useState(false)
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
   const [selectedBrowseItem, setSelectedBrowseItem] = useState<BrowseItem | null>(null)
+  const [selectedDonorItem, setSelectedDonorItem] = useState<DonorListingItem | null>(null)
+  const [selectedDonorActiveItem, setSelectedDonorActiveItem] = useState<DonorListingItem | null>(null)
   const {
     filters,
     items,
@@ -85,6 +91,32 @@ export default function Dashboard() {
       }
     : stats
   const shouldShowStatsLoading = isDonorMode ? isLoadingDonorListings : isLoadingStats
+  const donorItemDetailsDialogItem = useMemo(() => {
+    if (!selectedDonorItem) {
+      return null
+    }
+
+    return {
+      title: selectedDonorItem.title,
+      image: selectedDonorItem.imageUrl ?? undefined,
+      status: selectedDonorItem.status,
+      category: selectedDonorItem.category,
+      condition: selectedDonorItem.condition,
+    }
+  }, [selectedDonorItem])
+  const donorActiveListingDialogItem = useMemo(() => {
+    if (!selectedDonorActiveItem) {
+      return null
+    }
+
+    return {
+      title: selectedDonorActiveItem.title,
+      status: selectedDonorActiveItem.status,
+      category: selectedDonorActiveItem.category,
+      condition: selectedDonorActiveItem.condition,
+      image: selectedDonorActiveItem.imageUrl ?? undefined,
+    }
+  }, [selectedDonorActiveItem])
 
   return (
     <div className="space-y-6">
@@ -163,9 +195,7 @@ export default function Dashboard() {
           </div>
           {donorError ? <p className="mb-2 text-sm text-rose-600">{donorError}</p> : null}
           {isLoadingDonorListings ? (
-            <p className="rounded-xl border border-slate-200 p-3 text-sm text-slate-500">
-              Loading your listings...
-            </p>
+            <ListingsLoadingState count={5} />
           ) : null}
           {!isLoadingDonorListings && donorListings.length === 0 ? (
             <p className="rounded-xl border border-dashed border-slate-300 p-3 text-sm text-slate-500">
@@ -173,58 +203,20 @@ export default function Dashboard() {
             </p>
           ) : null}
           <div className="space-y-2">
-            {donorListings.slice(0, 3).map((item) => (
-              <div
-                key={item.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-3"
-              >
-                <div className="flex items-center gap-3">
-                  {item.imageUrl ? (
-                    <img
-                      src={item.imageUrl}
-                      alt={item.title}
-                      className="h-14 w-14 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-slate-100 text-[11px] text-slate-500">
-                      No image
-                    </div>
-                  )}
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-slate-900">{item.title}</h3>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                          item.status === 'Active'
-                            ? 'bg-lime-100 text-lime-700'
-                            : item.status === 'Claimed'
-                              ? 'bg-amber-100 text-amber-700'
-                              : 'bg-sky-100 text-sky-700'
-                        }`}
-                      >
-                        {item.status}
-                      </span>
-                    </div>
-                    <p className="text-sm text-slate-500">
-                      {item.category} - Condition: {item.condition} - {item.meta}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="secondary">View</Button>
-                  <Button
-                    variant="secondary"
-                    disabled={removingId === item.id}
-                    onClick={() => {
-                      void removeListing(item.id)
+            {!isLoadingDonorListings
+              ? donorListings.slice(0, 5).map((item) => (
+                  <ListingRow
+                    key={item.id}
+                    item={item}
+                    removingId={removingId}
+                    onOpenActive={setSelectedDonorActiveItem}
+                    onOpenDetails={setSelectedDonorItem}
+                    onRemove={(listingId) => {
+                      void removeListing(listingId)
                     }}
-                    className="text-rose-600 ring-rose-200 hover:bg-rose-50 hover:text-rose-700"
-                  >
-                    {removingId === item.id ? 'Removing...' : 'Remove'}
-                  </Button>
-                </div>
-              </div>
-            ))}
+                  />
+                ))
+              : null}
           </div>
         </section>
       ) : null}
@@ -451,6 +443,16 @@ export default function Dashboard() {
 
       <SuccessDialog isOpen={isSuccessOpen} onClose={() => setIsSuccessOpen(false)} />
       <ListItemDialog isOpen={isListItemDialogOpen} onClose={() => setIsListItemDialogOpen(false)} />
+      <ItemDetailsDialog
+        isOpen={Boolean(donorItemDetailsDialogItem)}
+        onClose={() => setSelectedDonorItem(null)}
+        item={donorItemDetailsDialogItem}
+      />
+      <ActiveListingDialog
+        isOpen={Boolean(donorActiveListingDialogItem)}
+        onClose={() => setSelectedDonorActiveItem(null)}
+        item={donorActiveListingDialogItem}
+      />
       <ItemDetailsDialog
         isOpen={Boolean(selectedBrowseItem)}
         onClose={() => setSelectedBrowseItem(null)}

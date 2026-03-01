@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { classNames } from '@/shared/utils/classNames';
 
@@ -43,18 +44,21 @@ export const Modal: React.FC<ModalProps> = ({
 
     const isRight = position === 'right';
     const overlayClass = classNames(
-        'fixed inset-0 z-50 flex p-4',
-        isRight ? 'justify-end' : 'items-center justify-center',
-        overlayClassName ?? 'bg-slate-900/45 backdrop-blur-sm',
+        'fixed inset-0 z-[200] flex',
+        'items-start justify-center p-4 pt-8 sm:pt-10 md:pt-12',
+        overlayClassName ?? 'bg-[#22222299] backdrop-blur-[16px]',
     );
     const containerClass = classNames(
         'relative w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl',
-        isRight ? 'h-full max-h-full max-w-[640px] rounded-none rounded-l-2xl' : 'max-w-[560px]',
+        isRight ? 'max-w-[640px]' : 'max-w-[560px]',
         containerClassName,
     );
-    const contentClass = classNames('max-h-[90vh] overflow-y-auto', contentClassName);
+    const contentClass = classNames(
+        'max-h-[calc(100vh-4.75rem)] overflow-y-auto',
+        contentClassName,
+    );
 
-    return (
+    return createPortal(
         <div className={overlayClass} onClick={closeOnOverlayClick ? onClose : undefined}>
             <div className={containerClass} onClick={(e) => e.stopPropagation()}>
                 {!hideCloseButton && (
@@ -70,6 +74,7 @@ export const Modal: React.FC<ModalProps> = ({
                     {children}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body,
     );
 };
