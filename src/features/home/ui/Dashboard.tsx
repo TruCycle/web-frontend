@@ -6,6 +6,7 @@ import collectedItemsIcon from '@/assets/icons/collected-items-icon.svg'
 import exchangeIcon from '@/assets/icons/exchange-icon.svg'
 import sizeIcon from '@/assets/icons/size-icon.svg'
 import rewardIcon from '@/assets/icons/reward-icon.svg'
+import { DonorEnvironmentalImpactCard } from '@/features/home/ui/components/DonorEnvironmentalImpactCard'
 import { SuccessDialog } from '@/shared/ui/modal/SuccessDialog'
 import { ListItemDialog } from '@/shared/ui/modal/ListItemDialog'
 import { ItemDetailsDialog } from '@/shared/ui/modal/ItemDetailsDialog'
@@ -183,42 +184,45 @@ export default function Dashboard() {
       ) : null}
 
       {isDonorMode && showStats ? (
-        <section className="rounded-xl bg-white p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">Your Listings</h2>
-            <Link
-              to="/listings"
-              className="inline-flex items-center gap-1 text-sm font-medium text-tc-auth-link hover:underline"
-            >
-              View All <ChevronRight size={16} />
-            </Link>
-          </div>
-          {donorError ? <p className="mb-2 text-sm text-rose-600">{donorError}</p> : null}
-          {isLoadingDonorListings ? (
-            <ListingsLoadingState count={5} />
-          ) : null}
-          {!isLoadingDonorListings && donorListings.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-slate-300 p-3 text-sm text-slate-500">
-              You have not listed any items yet.
-            </p>
-          ) : null}
-          <div className="space-y-2">
-            {!isLoadingDonorListings
-              ? donorListings.slice(0, 5).map((item) => (
-                  <ListingRow
-                    key={item.id}
-                    item={item}
-                    removingId={removingId}
-                    onOpenActive={setSelectedDonorActiveItem}
-                    onOpenDetails={setSelectedDonorItem}
-                    onRemove={(listingId) => {
-                      void removeListing(listingId)
-                    }}
-                  />
-                ))
-              : null}
-          </div>
-        </section>
+        <>
+          <DonorEnvironmentalImpactCard />
+          <section className="rounded-xl bg-white p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-900">Your Listings</h2>
+              <Link
+                to="/listings"
+                className="inline-flex items-center gap-1 text-sm font-medium text-tc-auth-link hover:underline"
+              >
+                View All <ChevronRight size={16} />
+              </Link>
+            </div>
+            {donorError ? <p className="mb-2 text-sm text-rose-600">{donorError}</p> : null}
+            {isLoadingDonorListings ? (
+              <ListingsLoadingState count={5} />
+            ) : null}
+            {!isLoadingDonorListings && donorListings.length === 0 ? (
+              <p className="rounded-xl border border-dashed border-slate-300 p-3 text-sm text-slate-500">
+                You have not listed any items yet.
+              </p>
+            ) : null}
+            <div className="space-y-2">
+              {!isLoadingDonorListings
+                ? donorListings.slice(0, 5).map((item) => (
+                    <ListingRow
+                      key={item.id}
+                      item={item}
+                      removingId={removingId}
+                      onOpenActive={setSelectedDonorActiveItem}
+                      onOpenDetails={setSelectedDonorItem}
+                      onRemove={(listingId) => {
+                        void removeListing(listingId)
+                      }}
+                    />
+                  ))
+                : null}
+            </div>
+          </section>
+        </>
       ) : null}
 
       {!isDonorMode ? (
