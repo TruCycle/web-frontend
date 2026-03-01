@@ -75,14 +75,34 @@ export default function YourListingsPage() {
 
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
 
-      {!hasListings ? (
+      {isLoading ? (
+        <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <span className="tc-shimmer-block block h-7 w-40 rounded-md" />
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={`listed-item-shimmer-${index}`}
+              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-3"
+            >
+              <div className="flex items-center gap-3">
+                <span className="tc-shimmer-block block h-16 w-16 rounded-lg" />
+                <div className="space-y-2">
+                  <span className="tc-shimmer-block block h-5 w-44 rounded-md" />
+                  <span className="tc-shimmer-block block h-4 w-52 rounded-md" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <span className="tc-shimmer-block block h-9 w-24 rounded-xl" />
+                <span className="tc-shimmer-block block h-9 w-24 rounded-xl" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : !hasListings ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
           <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-lime-100 text-lime-700">
             <Plus size={24} />
           </div>
-          <p className="mt-4 text-lg font-semibold text-slate-900">
-            {isLoading ? 'Loading your listings...' : 'Your listed items will be displayed here'}
-          </p>
+          <p className="mt-4 text-lg font-semibold text-slate-900">Your listed items will be displayed here</p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             <Button className="inline-flex items-center gap-2" onClick={() => setIsListItemDialogOpen(true)}>
               <Plus size={18} />

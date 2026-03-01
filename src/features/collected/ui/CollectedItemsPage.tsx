@@ -81,9 +81,26 @@ export default function CollectedItemsPage() {
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
 
       {isLoading ? (
-        <p className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
-          Loading collected items...
-        </p>
+        <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={`collected-item-shimmer-${index}`}
+              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-3"
+            >
+              <div className="flex items-center gap-3">
+                <span className="tc-shimmer-block block h-16 w-16 rounded-lg" />
+                <div className="space-y-2">
+                  <span className="tc-shimmer-block block h-5 w-40 rounded-md" />
+                  <span className="tc-shimmer-block block h-4 w-48 rounded-md" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <span className="tc-shimmer-block block h-9 w-24 rounded-xl" />
+                <span className="tc-shimmer-block block h-9 w-32 rounded-xl" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : null}
 
       {bannerItem ? (
