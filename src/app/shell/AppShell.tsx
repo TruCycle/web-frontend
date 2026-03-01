@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { classNames } from '@/shared/utils/classNames'
-import { NavLink, type NavLinkRenderProps, useLocation, useNavigate } from 'react-router-dom'
+import { NavLink, type NavLinkRenderProps, useNavigate } from 'react-router-dom'
 import {
   FileText,
   Users,
@@ -51,17 +51,17 @@ export function AppShell({ children }: AppShellProps) {
   const { unreadCount, isLoading } = useNotifications()
   const { user, logout } = useAuthSession()
   const { role, setRole } = useUserRole()
-  const location = useLocation()
   const navigate = useNavigate()
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement | null>(null)
 
   function onRoleChange(nextRole: 'collector' | 'donor') {
-    setRole(nextRole)
-
-    if (location.pathname.startsWith('/support')) {
-      navigate(`/support/${nextRole}`)
+    if (role === nextRole) {
+      return
     }
+
+    setRole(nextRole)
+    navigate('/')
   }
 
   useEffect(() => {
