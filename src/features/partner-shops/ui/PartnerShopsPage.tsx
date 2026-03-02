@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { ShopList } from './components/ShopList'
 import { ShopDetails } from './components/ShopDetails'
 import { ListItemDialog } from '@/shared/ui/modal/ListItemDialog'
 import { Button } from '@/shared/ui/button/Button'
 import { useNearbyShops } from '@/features/partner-shops/hooks/useNearbyShops'
 import { useAuthSession } from '@/shared/context/useAuthSession'
+import { NewItemButton } from '@/shared/ui/button/NewItemButton'
 
 export default function PartnerShopsPage() {
   const { user } = useAuthSession()
@@ -40,13 +41,7 @@ export default function PartnerShopsPage() {
           <h1 className="text-3xl font-bold text-slate-900">Partner Shops</h1>
           <p className="text-slate-500">Browse nearby handoff locations connected to TruCycle.</p>
         </div>
-        <Button
-          className="inline-flex items-center gap-2"
-          onClick={() => setIsListItemDialogOpen(true)}
-        >
-          <Plus size={18} />
-          List New Item
-        </Button>
+        <NewItemButton onClick={() => setIsListItemDialogOpen(true)} />
       </div>
 
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}

@@ -20,18 +20,20 @@ interface ListItemDialogProps {
 }
 
 const CATEGORIES = [
-    'Laptops',
-    'Smartphones',
-    'Accessories',
-    'Tablets',
-    'Monitors',
-    'Other Electronics',
+    'Electronics',
+    'Furniture',
+    'Clothing',
+    'Books',
+    'Sports Equipment',
+    'Home Decor',
+    'Other',
 ];
 const CONDITIONS = [
-    'Like New',
-    'Gently Used',
-    'Minor Defects',
-    'Broken/For Parts',
+    { value: 'new', label: 'New' },
+    { value: 'like_new', label: 'Like New' },
+    { value: 'good', label: 'Good' },
+    { value: 'fair', label: 'Fair' },
+    { value: 'poor', label: 'Poor' },
 ];
 
 const inputClassName =
@@ -73,6 +75,9 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({ isOpen, onClose 
         setPhotos((prev) => prev.filter((_, i) => i !== index));
     };
 
+    const selectedConditionLabel =
+        CONDITIONS.find((condition) => condition.value === selectedCondition)?.label ?? '';
+
     if (isSuccess) {
         return (
             <Modal isOpen={isOpen} onClose={handleClose} hideCloseButton containerClassName="max-w-[520px]">
@@ -96,10 +101,10 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({ isOpen, onClose 
                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                         <h4 className="text-sm font-semibold text-slate-900">{itemName || 'iPhone 12Pro'}</h4>
                         <p className="mt-2 text-xs text-slate-600">
-                            Category: <span className="font-semibold text-slate-800">{selectedCategory || 'Gadget'}</span>
+                            Category: <span className="font-semibold text-slate-800">{selectedCategory || 'Electronics'}</span>
                         </p>
                         <p className="text-xs text-slate-600">
-                            Condition: <span className="font-semibold text-slate-800">{selectedCondition || 'Like New'}</span>
+                            Condition: <span className="font-semibold text-slate-800">{selectedConditionLabel || 'Like New'}</span>
                         </p>
                     </div>
 
@@ -218,7 +223,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({ isOpen, onClose 
                         <label className="text-sm font-semibold text-slate-700">Condition</label>
                         <CustomSelect
                             value={selectedCondition}
-                            options={CONDITIONS.map((condition) => ({ value: condition, label: condition }))}
+                            options={CONDITIONS}
                             placeholder="Select"
                             onChange={setSelectedCondition}
                             buttonClassName={inputClassName}

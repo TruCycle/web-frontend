@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Search, ChevronRight, Plus, SlidersHorizontal, X } from 'lucide-react'
+import { Search, ChevronRight, SlidersHorizontal, X } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
 import collectedItemsIcon from '@/assets/icons/collected-items-icon.svg'
 import exchangeIcon from '@/assets/icons/exchange-icon.svg'
@@ -21,6 +21,7 @@ import { useToast } from '@/shared/ui/toast/useToast'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import type { BrowseItem } from '@/features/items/types'
 import type { DonorListingItem } from '@/features/listings/types'
+import { NewItemButton } from '@/shared/ui/button/NewItemButton'
 
 function statColor(index: number): string {
   if (index === 0) return 'bg-tc-app-primary/10'
@@ -156,13 +157,7 @@ export default function Dashboard() {
           <p className="text-tc-header-labelText">Track your impact and manage your listings</p>
         </div>
         {isDonorMode ? (
-          <Button
-            className="inline-flex items-center gap-2"
-            onClick={() => setIsListItemDialogOpen(true)}
-          >
-            <Plus size={18} />
-            List New Item
-          </Button>
+          <NewItemButton onClick={() => setIsListItemDialogOpen(true)} />
         ) : null}
       </div>
 

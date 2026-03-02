@@ -127,7 +127,7 @@ export function AppShell({ children }: AppShellProps) {
                   <FileText size={20} />
                   <span>My Listed Items</span>
                 </NavLink>
-                <NavLink className={navLinkClassName} to="/partner-shops">
+                <NavLink className={navLinkClassName} to="/shops">
                   <Users size={20} />
                   <span>Partner Shops</span>
                 </NavLink>

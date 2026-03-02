@@ -9,6 +9,7 @@ import { ListingRow } from '@/features/listings/ui/components/ListingRow'
 import { useDonorListings } from '@/features/listings/hooks/useDonorListings'
 import type { DonorListingItem } from '@/features/listings/types'
 import { useToast } from '@/shared/ui/toast/useToast'
+import { NewItemButton } from '@/shared/ui/button/NewItemButton'
 
 export default function YourListingsPage() {
   const { success, error: toastError } = useToast()
@@ -63,10 +64,7 @@ export default function YourListingsPage() {
           <h1 className="text-3xl font-bold text-slate-900">My Listed Items</h1>
           <p className="text-slate-500">Manage active, claimed and completed donor listings.</p>
         </div>
-        <Button className="inline-flex items-center gap-2" onClick={() => setIsListItemDialogOpen(true)}>
-          <Plus size={18} />
-          List New Item
-        </Button>
+        <NewItemButton onClick={() => setIsListItemDialogOpen(true)} />
       </div>
 
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
@@ -82,10 +80,7 @@ export default function YourListingsPage() {
           </div>
           <p className="mt-4 text-lg font-semibold text-slate-900">Your listed items will be displayed here</p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
-            <Button className="inline-flex items-center gap-2" onClick={() => setIsListItemDialogOpen(true)}>
-              <Plus size={18} />
-              List New Item
-            </Button>
+            <NewItemButton onClick={() => setIsListItemDialogOpen(true)} />
             <Button
               variant="secondary"
               onClick={() => {
