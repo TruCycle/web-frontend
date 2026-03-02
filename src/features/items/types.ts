@@ -1,3 +1,5 @@
+import type { PaginationMeta } from '@/shared/types/pagination'
+
 export interface ItemImage {
   readonly url: string
   readonly altText: string | null
@@ -57,4 +59,9 @@ export interface QrScanResult {
   readonly duplicate: boolean
   readonly idempotencyKey: string | null
   readonly direction: 'in' | 'out'
+}
+
+export interface CollectedItemsResponse {
+  readonly items: CollectedItem[]
+  readonly pagination: PaginationMeta
 }

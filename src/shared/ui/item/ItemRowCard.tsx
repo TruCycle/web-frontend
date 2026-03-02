@@ -46,16 +46,16 @@ export function ItemRowCard({
     >
       <div className="flex min-w-0 items-center gap-3">
         {imageUrl ? (
-          <img src={imageUrl} alt={imageAlt ?? title} className="h-16 w-20 rounded-lg object-cover" />
+          <img src={imageUrl} alt={imageAlt ?? title} className="h-20 w-20 rounded-lg object-cover" />
         ) : (
-          <div className="flex h-16 w-20 items-center justify-center rounded-lg bg-slate-100 text-[11px] text-slate-500">
+          <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-slate-100 text-[11px] text-slate-500">
             No image
           </div>
         )}
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="truncate text-xl font-semibold text-[#222222]">{title}</h3>
+            <h3 className="truncate text-lg font-semibold text-[#222222]">{title}</h3>
             <span
               className={classNames(
                 'rounded-full px-2.5 py-0.5 text-xs font-medium',
@@ -65,7 +65,7 @@ export function ItemRowCard({
               {statusLabel}
             </span>
           </div>
-          <p className="mt-1 truncate text-sm text-[#22222299]">{subtitle}</p>
+          <p className="mt-2 truncate text-sm text-[#12121299]">{subtitle}</p>
         </div>
       </div>
 

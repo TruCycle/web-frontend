@@ -6,7 +6,7 @@ type NewItemButtonProps = Omit<ComponentProps<typeof Button>, 'children'>
 
 export function NewItemButton({ className, ...restProps }: NewItemButtonProps) {
   return (
-    <Button className={className} {...restProps}>
+    <Button variant="highlight" className={className} {...restProps}>
       <Plus size={18} />
       List New Item
     </Button>

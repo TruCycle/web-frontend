@@ -30,16 +30,15 @@ export function ListingRow({
           View
         </Button>
         <Button
-          variant="secondary"
+          variant="danger"
           disabled={removingId === item.id}
           onClick={() => onRemove(item.id)}
-          className="bg-[#F43F5E] text-white ring-0 hover:bg-[#E11D48]"
         >
           {removingId === item.id ? 'Removing...' : 'Remove'}
         </Button>
       </>
     ) : (
-      <Button variant="secondary" className="bg-[#F8FAFC] text-[#222222] ring-0 hover:bg-slate-100" onClick={() => onOpenDetails(item)}>
+      <Button onClick={() => onOpenDetails(item)}>
         View Details
       </Button>
     )

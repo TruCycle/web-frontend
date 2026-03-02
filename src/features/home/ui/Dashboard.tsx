@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Search, ChevronRight, SlidersHorizontal, X } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
@@ -10,13 +10,13 @@ import { DonorEnvironmentalImpactCard } from '@/features/home/ui/components/Dono
 import { SuccessDialog } from '@/shared/ui/modal/SuccessDialog'
 import { ListItemDialog } from '@/shared/ui/modal/ListItemDialog'
 import { ItemDetailsDialog } from '@/shared/ui/modal/ItemDetailsDialog'
-import { ActiveListingDialog } from '@/shared/ui/modal/ActiveListingDialog'
 import { CustomSelect } from '@/shared/ui/select'
 import { useUserRole } from '@/shared/context/useUserRole'
 import { useCollectorDashboard } from '@/features/home/hooks/useCollectorDashboard'
 import { useDonorListings } from '@/features/listings/hooks/useDonorListings'
 import { ListingsLoadingState } from '@/features/listings/ui/components/ListingsLoadingState'
 import { ListingRow } from '@/features/listings/ui/components/ListingRow'
+import { ListingOffcanvas } from '@/features/listings/ui/components/ListingOffcanvas'
 import { useToast } from '@/shared/ui/toast/useToast'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import type { BrowseItem } from '@/features/items/types'
@@ -41,8 +41,7 @@ export default function Dashboard() {
   const [isListItemDialogOpen, setIsListItemDialogOpen] = useState(false)
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
   const [selectedBrowseItem, setSelectedBrowseItem] = useState<BrowseItem | null>(null)
-  const [selectedDonorItem, setSelectedDonorItem] = useState<DonorListingItem | null>(null)
-  const [selectedDonorActiveItem, setSelectedDonorActiveItem] = useState<DonorListingItem | null>(null)
+  const [selectedDonorListing, setSelectedDonorListing] = useState<DonorListingItem | null>(null)
   const {
     filters,
     items,
@@ -90,36 +89,10 @@ export default function Dashboard() {
         itemsExchanged: donorSummary.completed,
         totalCo2SavedKg: donorCo2Saved,
         rewardsEarned: donorSummary.claimed,
-      rewardsCurrency: '£',
+        rewardsCurrency: '£',
       }
     : stats
   const shouldShowStatsLoading = isDonorMode ? isLoadingDonorListings : isLoadingStats
-  const donorItemDetailsDialogItem = useMemo(() => {
-    if (!selectedDonorItem) {
-      return null
-    }
-
-    return {
-      title: selectedDonorItem.title,
-      image: selectedDonorItem.imageUrl ?? undefined,
-      status: selectedDonorItem.status,
-      category: selectedDonorItem.category,
-      condition: selectedDonorItem.condition,
-    }
-  }, [selectedDonorItem])
-  const donorActiveListingDialogItem = useMemo(() => {
-    if (!selectedDonorActiveItem) {
-      return null
-    }
-
-    return {
-      title: selectedDonorActiveItem.title,
-      status: selectedDonorActiveItem.status,
-      category: selectedDonorActiveItem.category,
-      condition: selectedDonorActiveItem.condition,
-      image: selectedDonorActiveItem.imageUrl ?? undefined,
-    }
-  }, [selectedDonorActiveItem])
   const categoryFilterOptions = useMemo(
     () => [
       { value: 'All Items', label: 'All categories' },
@@ -210,7 +183,7 @@ export default function Dashboard() {
       {isDonorMode && showStats ? (
         <>
           <DonorEnvironmentalImpactCard />
-          <section className="rounded-xl bg-white p-4">
+          <section className="relative rounded-xl bg-white p-4">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-slate-900">Your Listings</h2>
               <Link
@@ -236,8 +209,8 @@ export default function Dashboard() {
                       key={item.id}
                       item={item}
                       removingId={removingId}
-                      onOpenActive={setSelectedDonorActiveItem}
-                      onOpenDetails={setSelectedDonorItem}
+                      onOpenActive={setSelectedDonorListing}
+                      onOpenDetails={setSelectedDonorListing}
                       onRemove={(listingId) => {
                         void removeListing(listingId)
                       }}
@@ -245,6 +218,12 @@ export default function Dashboard() {
                   ))
                 : null}
             </div>
+            <ListingOffcanvas
+              key={selectedDonorListing?.id ?? 'closed'}
+              isOpen={Boolean(selectedDonorListing)}
+              item={selectedDonorListing}
+              onClose={() => setSelectedDonorListing(null)}
+            />
           </section>
         </>
       ) : null}
@@ -424,6 +403,7 @@ export default function Dashboard() {
                       <p className="text-sm text-tc-app-slate500">{item.locationLabel}</p>
                       <div className="space-y-2 pt-2">
                         <Button
+                          variant='primary'
                           className="w-full rounded-[6px]"
                           disabled={claimInProgress || claimAlreadyCreated}
                           onClick={() => {
@@ -456,16 +436,6 @@ export default function Dashboard() {
       <SuccessDialog isOpen={isSuccessOpen} onClose={() => setIsSuccessOpen(false)} />
       <ListItemDialog isOpen={isListItemDialogOpen} onClose={() => setIsListItemDialogOpen(false)} />
       <ItemDetailsDialog
-        isOpen={Boolean(donorItemDetailsDialogItem)}
-        onClose={() => setSelectedDonorItem(null)}
-        item={donorItemDetailsDialogItem}
-      />
-      <ActiveListingDialog
-        isOpen={Boolean(donorActiveListingDialogItem)}
-        onClose={() => setSelectedDonorActiveItem(null)}
-        item={donorActiveListingDialogItem}
-      />
-      <ItemDetailsDialog
         isOpen={Boolean(selectedBrowseItem)}
         onClose={() => setSelectedBrowseItem(null)}
         item={
@@ -484,3 +454,4 @@ export default function Dashboard() {
     </div>
   )
 }
+

@@ -169,7 +169,7 @@ export default function SettingsPage() {
               />
             </label>
 
-            <Button disabled={isSaving} className="mt-2" onClick={() => void handleProfileUpdate()}>
+            <Button variant='primary' disabled={isSaving} className="mt-2" onClick={() => void handleProfileUpdate()}>
               {isSaving ? 'Saving...' : 'Update Profile'}
             </Button>
           </div>

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, CircleAlert } from 'lucide-react'
+import { CircleAlert } from 'lucide-react'
 import cautionIcon from '@/assets/icons/caution-icon.svg'
 import { useCollectedItems } from '@/features/collected/hooks/useCollectedItems'
 import type { CollectedItem } from '@/features/items/types'
@@ -10,6 +10,7 @@ import { ItemRowCard } from '@/shared/ui/item/ItemRowCard'
 import { ItemDetailsDialog } from '@/shared/ui/modal/ItemDetailsDialog'
 import { QRCodeDialog } from '@/shared/ui/modal/QRCodeDialog'
 import { CollectionSuccessDialog } from '@/shared/ui/modal/CollectionSuccessDialog'
+import { PaginationControls } from '@/shared/ui/pagination/PaginationControls'
 
 function statusLabel(claimStatus: string): 'Collected' | 'Claimed' {
   if (claimStatus === 'complete' || claimStatus === 'completed') {
@@ -31,8 +32,15 @@ export default function CollectedItemsPage() {
     isLoading,
     isCollecting,
     error,
+    currentPage,
+    totalPages,
+    canGoPrevious,
+    canGoNext,
+    previousPage,
+    nextPage,
+    goToPage,
     completeCollection,
-  } = useCollectedItems()
+  } = useCollectedItems({ limit: 6 })
   const [selectedItem, setSelectedItem] = useState<CollectedItem | null>(null)
   const [qrItem, setQrItem] = useState<CollectedItem | null>(null)
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
@@ -109,26 +117,26 @@ export default function CollectedItemsPage() {
       ) : null}
 
       {bannerItem ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-lime-200 bg-lime-50 p-4">
-          <div className="flex items-start gap-3">
-            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-lime-700">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#A6F4A5A6] bg-[#A4F5A60D] p-3">
+          <div className="flex items-start gap-3 ms-3">
+            <div className="inline-flex items-center justify-center rounded-full text-[#A4F5A6]">
               <CircleAlert size={20} strokeWidth={2} />
             </div>
             <div>
-              <h4 className="font-semibold text-slate-900">
+              <h4 className="font-medium text-[#222222]">
                 Item {bannerItem.item.title} is ready for pickup
               </h4>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-[#222222BF]">
                 Scan at pickup location to complete this collection.
               </p>
             </div>
           </div>
-          <Button onClick={() => setQrItem(bannerItem)}>Open QR Scanner</Button>
+          <Button variant='primary' onClick={() => setQrItem(bannerItem)}>Open QR Scanner</Button>
         </div>
       ) : null}
 
       {!isLoading && !hasItems ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+        <div className="rounded-2xl bg-white p-8 text-center">
           <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-lime-100">
             <img src={cautionIcon} alt="Caution" className="h-7 w-7" />
           </div>
@@ -143,7 +151,7 @@ export default function CollectedItemsPage() {
       ) : null}
 
       {!isLoading && hasItems ? (
-        <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="space-y-3 rounded-2xl bg-white p-4">
           {items.map((item) => (
             <ItemRowCard
               key={item.claimId}
@@ -163,26 +171,22 @@ export default function CollectedItemsPage() {
                     View Details
                   </Button>
                   {statusLabel(item.claimStatus) === 'Claimed' ? (
-                    <Button onClick={() => setQrItem(item)}>Open QR Code</Button>
+                    <Button variant='primary' onClick={() => setQrItem(item)}>Open QR Code</Button>
                   ) : null}
                 </>
               }
             />
           ))}
 
-          <div className="flex items-center justify-between pt-2">
-            <button className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">
-              <ChevronLeft size={16} />
-              Previous
-            </button>
-            <span className="rounded-md bg-lime-100 px-3 py-1 text-sm font-semibold text-slate-800">
-              1
-            </span>
-            <button className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">
-              Next
-              <ChevronRight size={16} />
-            </button>
-          </div>
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            canGoPrevious={canGoPrevious}
+            canGoNext={canGoNext}
+            onPrevious={previousPage}
+            onNext={nextPage}
+            onPageChange={goToPage}
+          />
         </div>
       ) : null}
 

@@ -1,12 +1,21 @@
 import { apiRequest } from '@/shared/lib/api/client'
 import { unwrapApiData } from '@/shared/lib/api/envelope'
 import { clampLimit, toQueryString } from '@/shared/lib/api/query'
-import type { DonorListingItem, ListingStatus } from '@/features/listings/types'
+import type {
+  DonorListingItem,
+  ListingStatus,
+  ListingsPagination,
+} from '@/features/listings/types'
 
 interface FetchDonorListingsParams {
   readonly page?: number
   readonly limit?: number
   readonly status?: string
+}
+
+interface DonorListingsResponse {
+  readonly items: DonorListingItem[]
+  readonly pagination: ListingsPagination
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -103,10 +112,12 @@ function mapListing(value: unknown): DonorListingItem | null {
 
 export async function fetchDonorListings(
   params: FetchDonorListingsParams = {},
-): Promise<DonorListingItem[]> {
+): Promise<DonorListingsResponse> {
+  const requestedPage = params.page ?? 1
+  const requestedLimit = clampLimit(params.limit, 20)
   const query = toQueryString({
-    page: params.page ?? 1,
-    limit: clampLimit(params.limit, 20),
+    page: requestedPage,
+    limit: requestedLimit,
     status: params.status,
   })
 
@@ -119,9 +130,31 @@ export async function fetchDonorListings(
       ? data
       : []
 
-  return items
+  const mappedItems = items
     .map((entry) => mapListing(entry))
     .filter((entry): entry is DonorListingItem => entry !== null)
+
+  const paginationRecord = asRecord(payload?.pagination)
+  const page = Math.max(1, Math.trunc(readNumber(paginationRecord?.page) ?? requestedPage))
+  const limit = Math.max(1, Math.trunc(readNumber(paginationRecord?.limit) ?? requestedLimit))
+  const total = Math.max(0, Math.trunc(readNumber(paginationRecord?.total) ?? mappedItems.length))
+  const totalPages = Math.max(
+    1,
+    Math.trunc(
+      readNumber(paginationRecord?.total_pages) ??
+        Math.ceil(total / limit),
+    ),
+  )
+
+  return {
+    items: mappedItems,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+    },
+  }
 }
 
 export async function removeDonorListing(listingId: string): Promise<void> {
