@@ -31,6 +31,7 @@ export default {
             toggle: '#2F382F',
             accent: sharedColors.accentGreen,
             notify: '#FF9C2D',
+            danger: '#F43F5E',
             roleText: '#A1A1AA',
             roleActiveText: '#121212',
             dashboardBg: '#F8FAFC',

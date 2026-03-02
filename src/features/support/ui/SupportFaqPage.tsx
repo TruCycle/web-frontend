@@ -259,7 +259,7 @@ export default function SupportFaqPage() {
   }, [searchQuery])
 
   return (
-    <div className="mx-auto max-w-[1120px]">
+    <div className="w-full">
       <header className="mb-[1.1rem]">
         <h1 className="m-0 text-[2.1rem] font-extrabold leading-[1.1] tracking-[-0.02em] text-slate-900 max-[1024px]:text-[1.8rem] max-md:text-[1.5rem]">
           Welcome back, Pearl!
