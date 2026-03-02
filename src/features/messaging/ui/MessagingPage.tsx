@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Search, Paperclip, Send, X } from 'lucide-react'
 import { useMessages } from '@/features/messaging/hooks/useMessages'
 import type { ActiveRoom, RoomMessage, RoomParticipant } from '@/features/messaging/types'
@@ -167,6 +168,7 @@ function canGroupImages(previousMessage: RoomMessage, nextMessage: RoomMessage):
 
 export default function MessagingPage() {
   const { user } = useAuthSession()
+  const [searchParams, setSearchParams] = useSearchParams()
   const {
     rooms,
     activeRoom,
@@ -179,9 +181,34 @@ export default function MessagingPage() {
     setActiveRoomId,
     sendMessage,
   } = useMessages()
+  const consumedRoomIdRef = useRef<string | null>(null)
   const [searchValue, setSearchValue] = useState('')
   const [inputValue, setInputValue] = useState('')
   const [previewImage, setPreviewImage] = useState<{ readonly src: string; readonly alt: string } | null>(null)
+  const requestedRoomId = searchParams.get('roomId')
+
+  useEffect(() => {
+    if (!requestedRoomId) {
+      return
+    }
+
+    if (consumedRoomIdRef.current === requestedRoomId) {
+      return
+    }
+
+    const requestedRoom = rooms.find((room) => room.id === requestedRoomId)
+    if (!requestedRoom) {
+      return
+    }
+
+    setActiveRoomId(requestedRoom.id)
+    consumedRoomIdRef.current = requestedRoom.id
+    setSearchParams((currentParams) => {
+      const nextParams = new URLSearchParams(currentParams)
+      nextParams.delete('roomId')
+      return nextParams
+    }, { replace: true })
+  }, [requestedRoomId, rooms, setActiveRoomId, setSearchParams])
 
   const filteredRooms = useMemo(() => {
     const query = searchValue.trim().toLowerCase()

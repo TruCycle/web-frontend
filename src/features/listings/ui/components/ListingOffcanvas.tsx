@@ -1,14 +1,19 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
-import type { DonorListingItem } from '@/features/listings/types'
+import type { DonorListingItem, ListingClaim } from '@/features/listings/types'
 import { classNames } from '@/shared/utils/classNames'
+import { approveDonorListingClaim } from '@/features/listings/api/listingsApi'
+import { createOrFindRoom } from '@/features/messaging/api/messagingApi'
+import { useToast } from '@/shared/ui/toast/useToast'
 
 type PanelView = 'details' | 'requests' | 'approved'
 
 interface CollectorRequest {
   readonly id: string
+  readonly collectorId: string | null
   readonly name: string
   readonly message: string
   readonly timeLabel: string
@@ -35,7 +40,7 @@ function toTitleCase(value: string): string {
 
 function statusTone(status: DonorListingItem['status']): string {
   if (status === 'Active') {
-    return 'bg-lime-100 text-lime-700'
+    return 'bg-[#A4F5A6] text-[#121212]'
   }
 
   if (status === 'Claimed') {
@@ -45,74 +50,115 @@ function statusTone(status: DonorListingItem['status']): string {
   return 'bg-emerald-100 text-emerald-700'
 }
 
-function getSeedRequests(item: DonorListingItem): {
-  pending: CollectorRequest[]
-  approved: CollectorRequest[]
-} {
-  if (item.status === 'Completed') {
-    return {
-      pending: [],
-      approved: [
-        {
-          id: `${item.id}-approved-1`,
-          name: 'Sarah Chen',
-          message: `Hi! I would love this ${item.title}. Great condition!`,
-          timeLabel: '2 hours ago',
-          status: 'Approved',
-        },
-        {
-          id: `${item.id}-approved-2`,
-          name: 'Alex Park',
-          message: 'Great item! Can we arrange pickup?',
-          timeLabel: '45 minutes ago',
-          status: 'Approved',
-        },
-      ],
-    }
+function formatRelativeTime(value: string | null): string {
+  if (!value) {
+    return 'Recently'
   }
 
-  if (item.status === 'Claimed') {
-    return {
-      pending: [
-        {
-          id: `${item.id}-pending-1`,
-          name: 'Marcus Johnson',
-          message: 'Interested in this item. Can we discuss the details?',
-          timeLabel: '1 hour ago',
-          status: 'Pending',
-        },
-      ],
-      approved: [
-        {
-          id: `${item.id}-approved-1`,
-          name: 'Emily Rodriguez',
-          message: 'Would like to request this for my collection.',
-          timeLabel: '30 minutes ago',
-          status: 'Approved',
-        },
-      ],
-    }
+  const timestamp = Date.parse(value)
+  if (Number.isNaN(timestamp)) {
+    return 'Recently'
   }
 
+  const elapsedMs = Date.now() - timestamp
+  const elapsedMinutes = Math.max(1, Math.floor(elapsedMs / 60_000))
+  if (elapsedMinutes < 60) {
+    return `${elapsedMinutes} minute${elapsedMinutes === 1 ? '' : 's'} ago`
+  }
+
+  const elapsedHours = Math.floor(elapsedMinutes / 60)
+  if (elapsedHours < 24) {
+    return `${elapsedHours} hour${elapsedHours === 1 ? '' : 's'} ago`
+  }
+
+  const elapsedDays = Math.floor(elapsedHours / 24)
+  return `${elapsedDays} day${elapsedDays === 1 ? '' : 's'} ago`
+}
+
+function formatListedDate(value: string | null): string {
+  if (!value) {
+    return 'N/A'
+  }
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return 'N/A'
+  }
+
+  return date
+    .toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    .toUpperCase()
+}
+
+function formatReward(item: DonorListingItem): string {
+  if (item.reward === null) {
+    return 'Pending'
+  }
+
+  const normalizedReward =
+    Math.abs(item.reward - Math.trunc(item.reward)) < 0.001
+      ? String(Math.trunc(item.reward))
+      : item.reward.toFixed(1)
+
+  return item.rewardCurrency
+    ? `${normalizedReward} ${item.rewardCurrency}`
+    : normalizedReward
+}
+
+function isPendingClaimStatus(status: string): boolean {
+  const normalized = status.toLowerCase()
+  return normalized === 'pending' || normalized === 'pending_approval'
+}
+
+function isRejectedClaimStatus(status: string): boolean {
+  const normalized = status.toLowerCase()
+  return (
+    normalized === 'rejected' ||
+    normalized === 'declined' ||
+    normalized === 'cancelled' ||
+    normalized === 'canceled'
+  )
+}
+
+function toCollectorRequest(item: DonorListingItem, claim: ListingClaim): CollectorRequest {
+  const isPending = isPendingClaimStatus(claim.status)
   return {
-    pending: [
-      {
-        id: `${item.id}-pending-1`,
-        name: 'Marcus Johnson',
-        message: 'Interested in this item. Can we discuss the details?',
-        timeLabel: '1 hour ago',
-        status: 'Pending',
-      },
-      {
-        id: `${item.id}-pending-2`,
-        name: 'Emily Rodriguez',
-        message: 'Would like to request this for my collection.',
-        timeLabel: '30 minutes ago',
-        status: 'Pending',
-      },
-    ],
-    approved: [],
+    id: claim.id,
+    collectorId: claim.collector?.id ?? null,
+    name: claim.collector?.name ?? 'Unknown collector',
+    message:
+      claim.message ??
+      `Interested in collecting "${item.title}".`,
+    timeLabel: formatRelativeTime(
+      claim.createdAt ?? claim.approvedAt ?? claim.completedAt,
+    ),
+    status: isPending ? 'Pending' : 'Approved',
   }
+}
+
+function splitRequests(item: DonorListingItem): {
+  readonly pending: CollectorRequest[]
+  readonly approved: CollectorRequest[]
+} {
+  return item.claims.reduce<{
+    pending: CollectorRequest[]
+    approved: CollectorRequest[]
+  }>(
+    (current, claim) => {
+      if (isRejectedClaimStatus(claim.status)) {
+        return current
+      }
+
+      const request = toCollectorRequest(item, claim)
+      if (request.status === 'Pending') {
+        current.pending.push(request)
+      } else {
+        current.approved.push(request)
+      }
+      return current
+    },
+    { pending: [], approved: [] },
+  )
 }
 
 function CollectorCard({
@@ -126,13 +172,13 @@ function CollectorCard({
     <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 px-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <span className="inline-flex p-4 shrink-0 items-center justify-center rounded-full bg-[#A4F5A61A] text-xl font-bold text-[#15A119]">
+          <span className="inline-flex shrink-0 items-center justify-center rounded-full bg-[#A4F5A61A] p-4 text-xl font-bold text-[#15A119]">
             {toInitials(request.name)}
           </span>
           <div className="min-w-0">
             <p className="text-base font-medium text-[#121212]">{request.name}</p>
-            <p className="text-sm text-[#121212BF] tracking-wide">{request.message}</p>
-            <p className="mt-1 text-[11px] text-[#121212BF] tracking-wide">{request.timeLabel}</p>
+            <p className="text-sm tracking-wide text-[#121212BF]">{request.message}</p>
+            <p className="mt-1 text-[11px] tracking-wide text-[#121212BF]">{request.timeLabel}</p>
           </div>
         </div>
         <span
@@ -152,14 +198,13 @@ function CollectorCard({
 }
 
 export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProps) {
-  const initialSeed = item ? getSeedRequests(item) : { pending: [], approved: [] }
+  const navigate = useNavigate()
+  const { success, error } = useToast()
   const [view, setView] = useState<PanelView>('details')
-  const [pendingRequests, setPendingRequests] = useState<CollectorRequest[]>(
-    initialSeed.pending,
-  )
-  const [approvedRequests, setApprovedRequests] = useState<CollectorRequest[]>(
-    initialSeed.approved,
-  )
+  const [pendingRequests, setPendingRequests] = useState<CollectorRequest[]>([])
+  const [approvedRequests, setApprovedRequests] = useState<CollectorRequest[]>([])
+  const [approvingRequestId, setApprovingRequestId] = useState<string | null>(null)
+  const [openingChatRequestId, setOpeningChatRequestId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isOpen) {
@@ -181,6 +226,19 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
     }
   }, [isOpen, onClose])
 
+  useEffect(() => {
+    if (!item) {
+      setPendingRequests([])
+      setApprovedRequests([])
+      return
+    }
+
+    const requests = splitRequests(item)
+    setPendingRequests(requests.pending)
+    setApprovedRequests(requests.approved)
+    setView('details')
+  }, [item])
+
   const conditionLabel = useMemo(
     () => (item ? toTitleCase(item.condition) : ''),
     [item],
@@ -190,25 +248,52 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
     return null
   }
 
-  const approveRequest = (requestId: string) => {
-    setPendingRequests((currentPending) => {
-      const request = currentPending.find((entry) => entry.id === requestId)
-      if (!request) {
-        return currentPending
-      }
+  const approveRequest = async (requestId: string) => {
+    const request = pendingRequests.find((entry) => entry.id === requestId)
+    if (!request) {
+      return
+    }
 
+    try {
+      setApprovingRequestId(requestId)
+      await approveDonorListingClaim(request.id)
+      setPendingRequests((currentPending) =>
+        currentPending.filter((entry) => entry.id !== request.id),
+      )
       setApprovedRequests((currentApproved) => [
         ...currentApproved,
         { ...request, status: 'Approved' },
       ])
-      return currentPending.filter((entry) => entry.id !== requestId)
-    })
+      success('Claim approved', `${request.name} can now coordinate the handoff.`)
+    } catch {
+      error('Approval failed', 'Unable to approve this claim right now.')
+    } finally {
+      setApprovingRequestId(null)
+    }
   }
 
   const rejectRequest = (requestId: string) => {
     setPendingRequests((currentPending) =>
       currentPending.filter((entry) => entry.id !== requestId),
     )
+  }
+
+  const openCollectorChat = async (request: CollectorRequest) => {
+    if (!request.collectorId) {
+      error('Chat unavailable', 'Collector information is unavailable for this request.')
+      return
+    }
+
+    try {
+      setOpeningChatRequestId(request.id)
+      const room = await createOrFindRoom(request.collectorId)
+      onClose()
+      navigate(`/messages?roomId=${encodeURIComponent(room.id)}`)
+    } catch {
+      error('Unable to open chat', 'Please try again in a moment.')
+    } finally {
+      setOpeningChatRequestId(null)
+    }
   }
 
   const panelTitle =
@@ -229,8 +314,8 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
         onClick={onClose}
         aria-hidden
       />
-      <aside className="fixed right-10 top-[72px] z-[181] h-[90vh] w-full max-w-[600px] bg-white shadow-[0px_4px_20px_0px_#E2E8F080] p-6 rounded-lg">
-        <div className="flex gap-5 h-full flex-col">
+      <aside className="fixed right-10 top-[72px] z-[181] h-[90vh] w-full max-w-[600px] rounded-lg bg-white p-6 shadow-[0px_4px_20px_0px_#E2E8F080]">
+        <div className="flex h-full flex-col gap-5">
           <header className="flex items-start justify-between">
             <div>
               <h2 className="text-lg font-bold text-[#121212]">{panelTitle}</h2>
@@ -264,7 +349,9 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
                 <div>
                   <h3 className="text-2xl font-bold text-[#121212]">{item.title}</h3>
                   <div className="mt-2 flex items-center gap-2">
-                    <span className="bg-[#A4F5A61A] rounded-md p-2 text-xs tracking-wide font-medium uppercase text-[#15A119]">{conditionLabel}</span>
+                    <span className="rounded-md bg-[#A4F5A61A] p-2 text-xs font-medium uppercase tracking-wide text-[#15A119]">
+                      {conditionLabel}
+                    </span>
                     <span className="text-sm text-[#121212BF]">{item.category}</span>
                   </div>
                 </div>
@@ -272,31 +359,34 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div className="rounded-xl border border-[#A4F5A6] bg-[#F8FAFC] px-6 py-5">
                     <p className="text-xs tracking-wide text-[#222222BF]">LISTED</p>
-                    <p className="mt-2 text-sm text-[#121212]">JAN 17</p>
+                    <p className="mt-2 text-sm text-[#121212]">{formatListedDate(item.createdAt)}</p>
                   </div>
                   <div className="rounded-xl border border-[#A4F5A6] bg-[#F8FAFC] px-6 py-5">
                     <p className="text-xs tracking-wide text-[#222222BF]">STATUS</p>
-                    <p className={classNames('mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold', statusTone(item.status))}>
+                    <p
+                      className={classNames(
+                        'mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold',
+                        statusTone(item.status),
+                      )}
+                    >
                       {item.status}
                     </p>
                   </div>
                   <div className="rounded-xl border border-[#A4F5A6] bg-[#F8FAFC] px-6 py-5">
                     <p className="text-xs tracking-wide text-[#222222BF]">REWARD</p>
-                    <p className="mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold text-[#121212] border border-[#E2E8F0]">
-                      Pending
+                    <p className="mt-2 inline-flex rounded-full border border-[#E2E8F0] px-2.5 py-1 text-xs font-semibold text-[#121212]">
+                      {formatReward(item)}
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-2 border-t border-slate-200 pt-3">
                   <h4 className="text-lg font-semibold text-[#121212]">Description</h4>
-                  <p className="text-sm text-[#121212BF]">
-                    {item.meta}
-                  </p>
+                  <p className="text-sm text-[#121212BF]">{item.description ?? item.meta}</p>
                 </div>
 
-                <div className="space-y-3 pt-1 pb-5">
-                  <Button variant='primary' className="w-full" onClick={() => setView('requests')}>
+                <div className="space-y-3 pb-5 pt-1">
+                  <Button variant="primary" className="w-full" onClick={() => setView('requests')}>
                     View Collector Requests
                   </Button>
                   <Button className="w-full" variant="secondary" onClick={onClose}>
@@ -322,11 +412,14 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
                       actionSlot={
                         <div className="flex gap-3">
                           <Button
-                            variant='primary'
+                            variant="primary"
                             className="min-w-[130px]"
-                            onClick={() => approveRequest(request.id)}
+                            disabled={approvingRequestId === request.id}
+                            onClick={() => {
+                              void approveRequest(request.id)
+                            }}
                           >
-                            Approve
+                            {approvingRequestId === request.id ? 'Approving...' : 'Approve'}
                           </Button>
                           <Button
                             className="min-w-[130px]"
@@ -350,7 +443,7 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
                     Back
                   </Button>
                   <Button
-                    variant='primary'
+                    variant="primary"
                     onClick={() => setView('approved')}
                     disabled={approvedRequests.length === 0}
                   >
@@ -371,8 +464,15 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
                       key={request.id}
                       request={request}
                       actionSlot={
-                        <Button variant='primary' className="w-full">
-                          Chat
+                        <Button
+                          variant="primary"
+                          className="w-full"
+                          disabled={openingChatRequestId === request.id || !request.collectorId}
+                          onClick={() => {
+                            void openCollectorChat(request)
+                          }}
+                        >
+                          {openingChatRequestId === request.id ? 'Opening chat...' : 'Chat'}
                         </Button>
                       }
                     />

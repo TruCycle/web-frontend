@@ -111,6 +111,20 @@ export async function fetchRoomMessages(roomId: string): Promise<RoomMessagesRes
   }
 }
 
+export async function createOrFindRoom(otherUserId: string): Promise<ActiveRoom> {
+  const response = await apiRequest<unknown, { otherUserId: string }>('/messages/rooms', {
+    method: 'POST',
+    body: { otherUserId },
+  })
+  const data = unwrapApiData<unknown>(response)
+  const room = mapRoom(data)
+  if (!room) {
+    throw new Error('Unexpected room response from server.')
+  }
+
+  return room
+}
+
 export async function sendGeneralMessage(
   roomId: string,
   payload: { readonly title?: string; readonly text: string },

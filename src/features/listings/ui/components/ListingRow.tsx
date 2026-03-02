@@ -26,7 +26,7 @@ export function ListingRow({
   const actions =
     item.status === 'Active' ? (
       <>
-        <Button variant="secondary" className="bg-[#F8FAFC] text-[#222222] ring-0 hover:bg-slate-100" onClick={() => onOpenActive(item)}>
+        <Button className="bg-[#F8FAFC] text-[#222222] ring-0 hover:bg-slate-100" onClick={() => onOpenActive(item)}>
           View
         </Button>
         <Button

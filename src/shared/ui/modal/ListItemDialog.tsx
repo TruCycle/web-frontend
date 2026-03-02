@@ -405,26 +405,26 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
           </button>
 
           <div className="flex justify-center">
-            <img src={successIcon} alt="Success" className="h-[70px] w-[70px]" />
+            <img src={successIcon} alt="Success" className="h-[100px] w-[100px]" />
           </div>
 
           <div className="text-center">
-            <h2 className="text-xl font-bold text-slate-900">Congratulations!</h2>
-            <p className="mt-1 text-sm text-slate-500">Your listing is live</p>
+            <h2 className="text-xl font-bold text-[#121212]">Congratulations!</h2>
+            <p className="mt-1 text-md text-[#12121299]">Your listing is live</p>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-            <h4 className="text-sm font-semibold text-slate-900">{itemName || 'Untitled item'}</h4>
-            <p className="mt-2 text-xs text-slate-600">
-              Category: <span className="font-semibold text-slate-800">{selectedCategory || 'Electronics'}</span>
+          <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC80] p-5">
+            <h4 className="text-md text-[#222222]">{itemName || 'Untitled item'}</h4>
+            <p className="mt-2 text-md text-[#222222BF]">
+              Category: <span className="font-medium text-[#222222]">{selectedCategory || 'Electronics'}</span>
             </p>
-            <p className="text-xs text-slate-600">
-              Condition: <span className="font-semibold text-slate-800">{selectedConditionLabel || 'Like New'}</span>
+            <p className="text-md text-[#222222BF]">
+              Condition: <span className="font-medium text-[#222222]">{selectedConditionLabel || 'Like New'}</span>
             </p>
           </div>
 
-          <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-center">
-            <div className="mx-auto mb-2 flex h-28 w-28 items-center justify-center rounded-xl bg-white p-2">
+          <div className="rounded-xl p-4 text-center">
+            <div className="mx-auto mb-2 flex h-72 w-72 items-center justify-center rounded-xl bg-white p-2">
               {createdQrCodeUrl ? (
                 <img
                   src={createdQrCodeUrl}
@@ -435,39 +435,39 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
                 <QrCode size={52} className="text-emerald-700" strokeWidth={1.5} />
               )}
             </div>
-            <p className="text-xs text-slate-600">
+            <p className="text-sm text-[#222222BF]">
               Share this QR code with potential collectors or use it at handoff.
             </p>
             {createdQrCodeUrl ? null : (
-              <p className="mt-2 text-xs text-orange-600">QR code was not returned for this listing.</p>
+              <p className="mt-2 text-sm text-orange-600">QR code was not returned for this listing.</p>
             )}
           </div>
 
-          <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-3">
+          <div className="rounded-xl border border-[#A4F5A680] bg-[#A4F5A60D] p-5">
             <div className="flex items-start gap-2">
-              <MapPin size={18} className="mt-0.5 text-emerald-700" />
+              <MapPin size={18} className="mt-0.5 text-[#A4F5A6]" />
               <div>
-                <h4 className="text-sm font-semibold text-slate-900">{pickupTitle}</h4>
-                <p className="text-xs text-slate-600">{pickupAddress}</p>
+                <h4 className="text-sm font-semibold text-[#222222]">{pickupTitle}</h4>
+                <p className="text-xs text-[#222222BF]">{pickupAddress}</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-orange-100 bg-orange-50 p-3">
+          <div className="rounded-xl border border-[#F9731680] bg-[#F973160D] p-5">
             <div className="flex items-start gap-2">
-              <Clock size={18} className="mt-0.5 text-orange-600" />
+              <Clock size={18} className="mt-0.5 text-[#F97316]" />
               <div>
-                <h4 className="text-sm font-semibold text-slate-900">Expires in 71h</h4>
-                <p className="text-xs text-slate-600">Listing expires if not claimed within 3 days.</p>
+                <h4 className="text-sm font-semibold text-[#222222]">Expires in 71h</h4>
+                <p className="text-xs text-[#222222BF]">Listing expires if not claimed within 3 days.</p>
               </div>
             </div>
           </div>
 
           {qrDownloadError ? <p className="text-xs text-rose-600">{qrDownloadError}</p> : null}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="flex justify-end gap-3 py-3">
             <Button variant="secondary" onClick={handleClose}>Done</Button>
-            <Button onClick={() => { void handleSaveQrCode(); }} disabled={!createdQrCodeUrl}>
+            <Button variant="primary" onClick={() => { void handleSaveQrCode(); }} disabled={!createdQrCodeUrl}>
               Save QR Code
             </Button>
           </div>
@@ -717,7 +717,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
 
         <footer className="flex justify-end gap-3 border-t border-slate-100 px-6 pb-6 pt-4">
           <Button variant="secondary" onClick={handleClose} disabled={isSubmitting}>Cancel</Button>
-          <Button onClick={() => { void handleListAction(); }} disabled={isSubmitting}>
+          <Button variant="primary" onClick={() => { void handleListAction(); }} disabled={isSubmitting}>
             <Plus size={18} />
             {isSubmitting ? 'Listing...' : 'List Item'}
           </Button>
