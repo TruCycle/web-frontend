@@ -19,6 +19,7 @@ export const QRCodeDialog = ({
 }: QRCodeDialogProps) => {
   const [payload, setPayload] = useState('')
   const [scannerError, setScannerError] = useState<string | null>(null)
+  const hasScannedPayload = payload.trim().length > 0
 
   const handleClose = () => {
     setPayload('')
@@ -67,7 +68,7 @@ export const QRCodeDialog = ({
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-slate-200" />
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-            or enter manually
+            scanned payload
           </span>
           <div className="h-px flex-1 bg-slate-200" />
         </div>
@@ -76,13 +77,14 @@ export const QRCodeDialog = ({
           <label className="text-sm font-semibold text-slate-700">QR payload or item id</label>
           <input
             type="text"
-            className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
-            placeholder="Paste QR payload or UUID"
+            className="h-11 w-full rounded-xl border border-slate-200 bg-slate-100 px-3 text-sm text-slate-800 outline-none disabled:cursor-not-allowed disabled:text-slate-500"
+            placeholder="Waiting for QR scan..."
             value={payload}
-            onChange={(event) => setPayload(event.target.value)}
+            disabled
+            readOnly
           />
           <p className="text-xs leading-5 text-slate-500">
-            We&apos;ll attempt one collection per scan to avoid duplicates. You can scan again if needed.
+            This field is filled automatically from camera scan.
           </p>
         </div>
 
@@ -92,7 +94,7 @@ export const QRCodeDialog = ({
           </Button>
           <Button
             className="min-w-[110px]"
-            disabled={!payload.trim() || isCollecting}
+            disabled={!hasScannedPayload || isCollecting}
             onClick={() => {
               void handleCollect()
             }}

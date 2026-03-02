@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { QrCode } from 'lucide-react'
+import jsQR from 'jsqr'
 import { classNames } from '@/shared/utils/classNames'
 
 interface BarcodeDetectorInstance {
@@ -40,16 +40,20 @@ export function CameraQrScanner({
   className,
 }: CameraQrScannerProps) {
   const [isLive, setIsLive] = useState(false)
+  const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const frameRequestRef = useRef<number | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const isRunningRef = useRef(false)
+  const hasScanErrorRef = useRef(false)
   const barcodeDetector = useMemo(() => getBarcodeDetectorConstructor(), [])
-  const hasCameraScanner = Boolean(barcodeDetector)
 
   const stopScanner = useCallback(() => {
     isRunningRef.current = false
     setIsLive(false)
+    setStatusMessage(null)
+    hasScanErrorRef.current = false
 
     if (frameRequestRef.current !== null) {
       window.cancelAnimationFrame(frameRequestRef.current)
@@ -64,6 +68,43 @@ export function CameraQrScanner({
     if (videoRef.current) {
       videoRef.current.srcObject = null
     }
+
+    canvasRef.current = null
+  }, [])
+
+  const decodeWithJsQr = useCallback((videoElement: HTMLVideoElement): string | null => {
+    if (videoElement.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+      return null
+    }
+
+    const width = videoElement.videoWidth
+    const height = videoElement.videoHeight
+    if (!width || !height) {
+      return null
+    }
+
+    if (!canvasRef.current) {
+      canvasRef.current = document.createElement('canvas')
+    }
+
+    const canvas = canvasRef.current
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width
+      canvas.height = height
+    }
+
+    const context = canvas.getContext('2d')
+    if (!context) {
+      return null
+    }
+
+    context.drawImage(videoElement, 0, 0, width, height)
+    const imageData = context.getImageData(0, 0, width, height)
+    const result = jsQR(imageData.data, imageData.width, imageData.height, {
+      inversionAttempts: 'dontInvert',
+    })
+
+    return result?.data?.trim() ?? null
   }, [])
 
   const startScanner = useCallback(async () => {
@@ -71,43 +112,78 @@ export function CameraQrScanner({
       return
     }
 
-    if (!hasCameraScanner || !barcodeDetector) {
-      onError?.('Camera scan is not supported on this device. Paste QR payload manually.')
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      const message = 'Camera access is not available in this browser.'
+      setStatusMessage(message)
+      onError?.(message)
       return
     }
 
     isRunningRef.current = true
+    hasScanErrorRef.current = false
+    setStatusMessage('Connecting camera...')
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment' },
       })
-      streamRef.current = stream
-
-      if (!videoRef.current) {
+      if (!isRunningRef.current) {
+        stream.getTracks().forEach((track) => track.stop())
         return
       }
 
+      if (!videoRef.current) {
+        stream.getTracks().forEach((track) => track.stop())
+        return
+      }
+
+      streamRef.current = stream
       videoRef.current.srcObject = stream
       await videoRef.current.play()
-      setIsLive(true)
 
-      const detector = new barcodeDetector({ formats: ['qr_code'] })
+      if (!isRunningRef.current) {
+        stream.getTracks().forEach((track) => track.stop())
+        return
+      }
+
+      setIsLive(true)
+      setStatusMessage(null)
+
+      const detector = barcodeDetector
+        ? new barcodeDetector({ formats: ['qr_code'] })
+        : null
+
       const scanFrame = async () => {
         if (!isRunningRef.current || !videoRef.current) {
           return
         }
 
+        let nextPayload: string | null = null
         try {
-          const results = await detector.detect(videoRef.current)
-          const nextPayload = results[0]?.rawValue?.trim()
-          if (nextPayload) {
-            onDetected(nextPayload)
-            stopScanner()
-            return
+          if (detector) {
+            const results = await detector.detect(videoRef.current)
+            nextPayload = results[0]?.rawValue?.trim() ?? null
+          }
+
+          if (!nextPayload) {
+            nextPayload = decodeWithJsQr(videoRef.current)
           }
         } catch {
-          onError?.('Unable to scan QR right now. You can paste it manually.')
+          if (!hasScanErrorRef.current) {
+            if (!isRunningRef.current) {
+              return
+            }
+            const message = 'Unable to scan QR right now. Please try again.'
+            onError?.(message)
+            setStatusMessage(message)
+            hasScanErrorRef.current = true
+          }
+        }
+
+        if (nextPayload) {
+          onDetected(nextPayload)
+          stopScanner()
+          return
         }
 
         frameRequestRef.current = window.requestAnimationFrame(() => {
@@ -119,10 +195,15 @@ export function CameraQrScanner({
         void scanFrame()
       })
     } catch {
-      onError?.('Camera access was denied or unavailable. Paste QR payload manually.')
+      if (!isRunningRef.current) {
+        return
+      }
+      const message = 'Camera access was denied or unavailable.'
+      onError?.(message)
+      setStatusMessage(message)
       stopScanner()
     }
-  }, [barcodeDetector, hasCameraScanner, isActive, onDetected, onError, stopScanner])
+  }, [barcodeDetector, decodeWithJsQr, isActive, onDetected, onError, stopScanner])
 
   useEffect(() => {
     if (!isActive) {
@@ -144,13 +225,21 @@ export function CameraQrScanner({
       )}
       style={{ boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.2)' }}
     >
-      {isLive ? (
-        <video ref={videoRef} className="h-full w-full object-cover" muted playsInline />
-      ) : (
-        <div className="flex h-full w-full items-center justify-center">
-          <QrCode size={80} className="text-white" strokeWidth={1.5} />
+      <video
+        ref={videoRef}
+        className={classNames(
+          'h-full w-full object-cover transition-opacity duration-200',
+          isLive ? 'opacity-100' : 'opacity-0',
+        )}
+        muted
+        playsInline
+        autoPlay
+      />
+      {!isLive && statusMessage ? (
+        <div className="absolute inset-0 flex items-center justify-center bg-[#0000004D] px-4 text-center text-xs font-medium text-white">
+          {statusMessage}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
