@@ -7,9 +7,11 @@ import {
   Settings,
   HelpCircle,
   ChevronDown,
+  Menu,
   Store,
   User,
   LogOut,
+  X,
 } from 'lucide-react'
 import { useNotifications } from '@/features/notifications/hooks/useNotifications'
 import { useAuthSession } from '@/shared/context/useAuthSession'
@@ -54,10 +56,12 @@ export function AppShell({ children }: AppShellProps) {
   const { role, setRole } = useUserRole()
   const navigate = useNavigate()
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement | null>(null)
 
   function onRoleChange(nextRole: 'collector' | 'donor') {
     if (role === nextRole) {
+      setIsMobileSidebarOpen(false)
       return
     }
 
@@ -79,6 +83,7 @@ export function AppShell({ children }: AppShellProps) {
     function handleEscape(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         setIsProfileMenuOpen(false)
+        setIsMobileSidebarOpen(false)
       }
     }
 
@@ -91,11 +96,133 @@ export function AppShell({ children }: AppShellProps) {
     }
   }, [])
 
+  useEffect(() => {
+    if (!isMobileSidebarOpen) {
+      return
+    }
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [isMobileSidebarOpen])
+
   const initials = `${user?.firstName?.[0] ?? 'P'}${user?.lastName?.[0] ?? ''}`.toUpperCase()
+  const onSidebarNavigate = () => {
+    if (isMobileSidebarOpen) {
+      setIsMobileSidebarOpen(false)
+    }
+  }
+
+  const sidebarNavigation = (
+    <nav className="flex flex-1 flex-col gap-2 overflow-visible">
+      <div className="flex flex-col gap-1">
+        <NavLink className={navLinkClassName} to="/" onClick={onSidebarNavigate}>
+          <DashboardIcon />
+          <span>Dashboard</span>
+        </NavLink>
+        {role === 'collector' ? (
+          <>
+            <NavLink className={navLinkClassName} to="/browse" onClick={onSidebarNavigate}>
+              <FileText size={20} />
+              <span>Browse Items</span>
+            </NavLink>
+            <NavLink className={navLinkClassName} to="/collected" onClick={onSidebarNavigate}>
+              <Users size={20} />
+              <span>My Selected Items</span>
+            </NavLink>
+          </>
+        ) : (
+          <>
+            <NavLink className={navLinkClassName} to="/listings" onClick={onSidebarNavigate}>
+              <FileText size={20} />
+              <span>My Listed Items</span>
+            </NavLink>
+            <NavLink className={navLinkClassName} to="/shops" onClick={onSidebarNavigate}>
+              <Users size={20} />
+              <span>Partner Shops</span>
+            </NavLink>
+          </>
+        )}
+        <NavLink className={navLinkClassName} to="/messages" onClick={onSidebarNavigate}>
+          <MessageIcon />
+          <span>Messages</span>
+        </NavLink>
+      </div>
+
+      <div className="-mx-4 my-4 h-px bg-tc-shell-divider" />
+
+      <div className="flex flex-col gap-1">
+        <NavLink className={navLinkClassName} to="/notifications" onClick={onSidebarNavigate}>
+          {({ isActive }) => (
+            <>
+              <div className="relative flex items-center justify-center">
+                <BellIcon />
+                {!isLoading && unreadCount > 0 && (
+                  <span
+                    className={classNames(
+                      'absolute -right-1.5 top-0 inline-block h-2 w-2 rounded-full border-[1.5px] bg-tc-shell-notify',
+                      isActive
+                        ? 'border-tc-shell-active'
+                        : 'border-tc-shell-bg',
+                    )}
+                  />
+                )}
+              </div>
+              <span>Notifications</span>
+            </>
+          )}
+        </NavLink>
+        <NavLink className={navLinkClassName} to="/settings" onClick={onSidebarNavigate}>
+          <Settings size={20} />
+          <span>Settings</span>
+        </NavLink>
+        <NavLink className={navLinkClassName} to="/support" onClick={onSidebarNavigate}>
+          <HelpCircle size={20} />
+          <span>Support & FAQs</span>
+        </NavLink>
+      </div>
+
+      <div className="mt-auto flex justify-center pb-2 pt-3">
+        <div className="flex h-[50px] w-fit items-center gap-1 rounded-[10px] border border-tc-shell-accent bg-tc-shell-toggle p-1">
+          <button
+            className={classNames(
+              'h-full flex-1 rounded-[5px] px-4 text-[0.85rem] font-bold transition',
+              role === 'collector'
+                ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
+                : 'bg-transparent text-tc-shell-roleText',
+            )}
+            onClick={() => {
+              onRoleChange('collector')
+              onSidebarNavigate()
+            }}
+          >
+            Collector
+          </button>
+          <button
+            className={classNames(
+              'h-full flex-1 rounded-[5px] px-4 text-[0.85rem] font-bold transition',
+              role === 'donor'
+                ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
+                : 'bg-transparent text-tc-shell-roleText',
+            )}
+            onClick={() => {
+              onRoleChange('donor')
+              onSidebarNavigate()
+            }}
+          >
+            Donor
+          </button>
+        </div>
+      </div>
+    </nav>
+  )
 
   return (
     <div className="flex min-h-screen bg-tc-app-canvas text-tc-app-text max-md:flex-col max-md:p-2">
-      <aside className="sticky top-4 z-10 my-4 ml-4 mr-0 flex h-[calc(100vh-2rem)] w-[250px] shrink-0 flex-col rounded-[25px] bg-tc-shell-bg px-4 py-5 max-[1024px]:w-[220px] max-md:relative max-md:top-auto max-md:m-0 max-md:mb-2 max-md:h-auto max-md:w-full">
+      <aside className="sticky top-4 z-10 my-4 ml-4 mr-0 flex h-[calc(100vh-2rem)] w-[250px] shrink-0 flex-col rounded-[25px] bg-tc-shell-bg px-4 py-5 max-[1024px]:w-[220px] max-md:hidden">
         <div className="px-3 pb-4 pt-2">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center">
@@ -105,105 +232,55 @@ export function AppShell({ children }: AppShellProps) {
           </div>
         </div>
 
-        <nav className="flex flex-1 flex-col gap-2 overflow-visible">
-          <div className="flex flex-col gap-1">
-            <NavLink className={navLinkClassName} to="/">
-              <DashboardIcon />
-              <span>Dashboard</span>
-            </NavLink>
-            {role === 'collector' ? (
-              <>
-                <NavLink className={navLinkClassName} to="/browse">
-                  <FileText size={20} />
-                  <span>Browse Items</span>
-                </NavLink>
-                <NavLink className={navLinkClassName} to="/collected">
-                  <Users size={20} />
-                  <span>My Selected Items</span>
-                </NavLink>
-              </>
-            ) : (
-              <>
-                <NavLink className={navLinkClassName} to="/listings">
-                  <FileText size={20} />
-                  <span>My Listed Items</span>
-                </NavLink>
-                <NavLink className={navLinkClassName} to="/shops">
-                  <Users size={20} />
-                  <span>Partner Shops</span>
-                </NavLink>
-              </>
-            )}
-            <NavLink className={navLinkClassName} to="/messages">
-              <MessageIcon />
-              <span>Messages</span>
-            </NavLink>
-          </div>
-
-          <div className="-mx-4 my-4 h-px bg-tc-shell-divider" />
-
-          <div className="flex flex-col gap-1">
-            <NavLink className={navLinkClassName} to="/notifications">
-              {({ isActive }) => (
-                <>
-                  <div className="relative flex items-center justify-center">
-                    <BellIcon />
-                    {!isLoading && unreadCount > 0 && (
-                      <span
-                        className={classNames(
-                          'absolute -right-1.5 top-0 inline-block h-2 w-2 rounded-full border-[1.5px] bg-tc-shell-notify',
-                          isActive
-                            ? 'border-tc-shell-active'
-                            : 'border-tc-shell-bg',
-                        )}
-                      />
-                    )}
-                  </div>
-                  <span>Notifications</span>
-                </>
-              )}
-            </NavLink>
-            <NavLink className={navLinkClassName} to="/settings">
-              <Settings size={20} />
-              <span>Settings</span>
-            </NavLink>
-            <NavLink className={navLinkClassName} to="/support">
-              <HelpCircle size={20} />
-              <span>Support & FAQs</span>
-            </NavLink>
-          </div>
-
-          <div className="mt-auto flex justify-center pb-2 pt-3">
-            <div className="flex h-[50px] w-fit items-center gap-1 rounded-[10px] border border-tc-shell-accent bg-tc-shell-toggle p-1">
-              <button
-                className={classNames(
-                  'h-full flex-1 rounded-[5px] px-4 text-[0.85rem] font-bold transition',
-                  role === 'collector'
-                    ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
-                    : 'bg-transparent text-tc-shell-roleText',
-                )}
-                onClick={() => onRoleChange('collector')}
-              >
-                Collector
-              </button>
-              <button
-                className={classNames(
-                  'h-full flex-1 rounded-[5px] px-4 text-[0.85rem] font-bold transition',
-                  role === 'donor'
-                    ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
-                    : 'bg-transparent text-tc-shell-roleText',
-                )}
-                onClick={() => onRoleChange('donor')}
-              >
-                Donor
-              </button>
-            </div>
-          </div>
-        </nav>
+        {sidebarNavigation}
       </aside>
 
+      {isMobileSidebarOpen ? (
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-[130] bg-slate-900/40 md:hidden"
+            onClick={() => setIsMobileSidebarOpen(false)}
+            aria-label="Close sidebar overlay"
+          />
+          <aside id="mobile-sidebar" className="fixed inset-y-0 left-0 z-[131] flex w-[min(85vw,320px)] flex-col bg-tc-shell-bg px-4 py-5 shadow-2xl md:hidden">
+            <div className="flex items-center justify-between px-3 pb-4 pt-2">
+              <div className="flex items-center gap-3">
+                <img src={logo} alt="TruCycle Logo" width="34" height="34" />
+                <span className="text-2xl font-bold tracking-[-0.01em] text-white">TruCycle</span>
+              </div>
+              <button
+                type="button"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
+                onClick={() => setIsMobileSidebarOpen(false)}
+                aria-label="Close sidebar"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            {sidebarNavigation}
+          </aside>
+        </>
+      ) : null}
+
       <main className="flex h-screen flex-1 flex-col overflow-x-hidden bg-transparent max-md:h-auto max-md:rounded-2xl">
-        <header className="sticky top-0 z-[100] flex h-[72px] w-full items-center justify-end border-b border-tc-header-border bg-[#FFFFFF] px-6 shadow-none">
+        <header className="sticky top-0 z-[100] flex h-[72px] w-full items-center justify-between border-b border-tc-header-border bg-[#FFFFFF] px-6 shadow-none max-md:px-4">
+          <div className="hidden items-center gap-2 max-md:flex">
+            <button
+              type="button"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-tc-header-border text-[#334155] transition hover:bg-slate-100"
+              onClick={() => {
+                setIsProfileMenuOpen(false)
+                setIsMobileSidebarOpen(true)
+              }}
+              aria-label="Open sidebar menu"
+              aria-expanded={isMobileSidebarOpen}
+              aria-controls="mobile-sidebar"
+            >
+              <Menu size={20} />
+            </button>
+            <span className="text-sm font-semibold text-slate-700">Menu</span>
+          </div>
           <div className="flex items-center gap-4">
             <button className="relative flex items-center justify-center p-2 text-tc-app-text opacity-80 transition hover:opacity-100">
               <BellIcon />
