@@ -18,6 +18,7 @@ const CollectedItemsPage = lazy(() => import('@/features/collected/ui/CollectedI
 const YourListingsPage = lazy(() => import('@/features/listings/ui/YourListingsPage'))
 const SettingsPage = lazy(() => import('@/features/settings/ui/SettingsPage'))
 const PartnerShopsPage = lazy(() => import('@/features/partner-shops/ui/PartnerShopsPage'))
+const PartnerConsolePage = lazy(() => import('@/features/partner/ui/PartnerConsolePage'))
 const SupportFaqPage = lazy(() => import('@/features/support/ui/SupportFaqPage'))
 
 function ShellLayout() {
@@ -61,6 +62,7 @@ export function AppRoutes() {
           <Route path="/collected" element={<CollectedItemsPage />} />
           <Route path="/listings" element={<YourListingsPage />} />
           <Route path="/selected" element={<CollectedItemsPage />} />
+          <Route path="/partner" element={<PartnerConsolePage />} />
           <Route path="/shops" element={<PartnerShopsPage />} />
           <Route path="/partner-shops" element={<Navigate replace to="/shops" />} />
           <Route path="/settings" element={<SettingsPage />} />

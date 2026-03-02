@@ -7,6 +7,7 @@ import {
   Settings,
   HelpCircle,
   ChevronDown,
+  Store,
   User,
   LogOut,
 } from 'lucide-react'
@@ -231,6 +232,18 @@ export function AppShell({ children }: AppShellProps) {
                   role="menu"
                   className="absolute right-0 top-[calc(100%+0.5rem)] z-[110] min-w-[180px] rounded-xl border border-slate-200 bg-white p-1 shadow-lg"
                 >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100"
+                    onClick={() => {
+                      setIsProfileMenuOpen(false)
+                      navigate('/partner')
+                    }}
+                  >
+                    <Store size={16} />
+                    Go to Shop
+                  </button>
                   <button
                     type="button"
                     role="menuitem"
