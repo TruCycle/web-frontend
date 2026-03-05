@@ -2,11 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Search, Paperclip, Send, X } from 'lucide-react'
 import { useMessages } from '@/features/messaging/hooks/useMessages'
-import { playIncomingMessageTone } from '@/features/messaging/lib/playIncomingMessageTone'
 import type { ActiveRoom, RoomMessage, RoomParticipant } from '@/features/messaging/types'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { Button } from '@/shared/ui/button/Button'
-import { useToast } from '@/shared/ui/toast/useToast'
 import { classNames } from '@/shared/utils/classNames'
 
 const IMAGE_GROUP_WINDOW_MS = 30_000
@@ -170,7 +168,6 @@ function canGroupImages(previousMessage: RoomMessage, nextMessage: RoomMessage):
 
 export default function MessagingPage() {
   const { user } = useAuthSession()
-  const { info } = useToast()
   const [searchParams, setSearchParams] = useSearchParams()
   const {
     rooms,
@@ -182,19 +179,15 @@ export default function MessagingPage() {
     isSending,
     error,
     unreadCountByRoom,
-    incomingAlert,
-    clearIncomingAlert,
     setActiveRoomId,
     sendMessage,
   } = useMessages()
   const consumedRoomIdRef = useRef<string | null>(null)
-  const lastToastMessageIdRef = useRef<string | null>(null)
   const lastScrolledRoomIdRef = useRef<string | null>(null)
   const messageListRef = useRef<HTMLDivElement | null>(null)
   const [searchValue, setSearchValue] = useState('')
   const [inputValue, setInputValue] = useState('')
   const [previewImage, setPreviewImage] = useState<{ readonly src: string; readonly alt: string } | null>(null)
-  const [isPageVisible, setIsPageVisible] = useState(document.visibilityState === 'visible')
   const requestedRoomId = searchParams.get('roomId')
 
   useEffect(() => {
@@ -219,49 +212,6 @@ export default function MessagingPage() {
       return nextParams
     }, { replace: true })
   }, [requestedRoomId, rooms, setActiveRoomId, setSearchParams])
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      setIsPageVisible(document.visibilityState === 'visible')
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!incomingAlert) {
-      return
-    }
-
-    if (lastToastMessageIdRef.current === incomingAlert.messageId) {
-      clearIncomingAlert(incomingAlert.messageId)
-      return
-    }
-
-    if (!isPageVisible) {
-      return
-    }
-
-    if (activeRoomId === incomingAlert.roomId) {
-      lastToastMessageIdRef.current = incomingAlert.messageId
-      clearIncomingAlert(incomingAlert.messageId)
-      return
-    }
-
-    const room = rooms.find((entry) => entry.id === incomingAlert.roomId)
-    const roomName = room ? getRoomDisplayName(room, user?.id) : 'Conversation'
-    info(
-      `New message from ${roomName}`,
-      incomingAlert.text?.trim() || 'You received a new message.',
-      4200,
-    )
-    playIncomingMessageTone()
-    lastToastMessageIdRef.current = incomingAlert.messageId
-    clearIncomingAlert(incomingAlert.messageId)
-  }, [activeRoomId, clearIncomingAlert, incomingAlert, info, isPageVisible, rooms, user?.id])
 
   useEffect(() => {
     if (!activeRoomId || isLoadingMessages) {

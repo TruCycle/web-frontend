@@ -4,7 +4,7 @@ import {
   fetchRoomMessages,
   sendGeneralMessage,
 } from '@/features/messaging/api/messagingApi'
-import type { ActiveRoom, IncomingMessageAlert, RoomMessage } from '@/features/messaging/types'
+import type { ActiveRoom, RoomMessage } from '@/features/messaging/types'
 import { WebSocketClient } from '@/shared/lib/websocket/client'
 
 interface MessagingServerEvents extends Record<string, (...args: never[]) => void> {
@@ -43,7 +43,6 @@ export function useMessages() {
   const [activeRoomId, setActiveRoomIdState] = useState<string | null>(null)
   const [roomMessages, setRoomMessages] = useState<Record<string, RoomMessage[]>>({})
   const [unreadCountByRoom, setUnreadCountByRoom] = useState<Record<string, number>>({})
-  const [incomingAlert, setIncomingAlert] = useState<IncomingMessageAlert | null>(null)
   const [isLoadingRooms, setIsLoadingRooms] = useState(true)
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
   const [isSending, setIsSending] = useState(false)
@@ -112,20 +111,6 @@ export function useMessages() {
     },
     [clearUnreadForRoom],
   )
-
-  const clearIncomingAlert = useCallback((messageId?: string) => {
-    setIncomingAlert((currentAlert) => {
-      if (!currentAlert) {
-        return currentAlert
-      }
-
-      if (messageId && currentAlert.messageId !== messageId) {
-        return currentAlert
-      }
-
-      return null
-    })
-  }, [])
 
   const loadMessagesForRoom = useCallback(async (roomId: string) => {
     try {
@@ -228,13 +213,6 @@ export function useMessages() {
         }
       })
 
-      if (!isActiveRoomVisible) {
-        setIncomingAlert({
-          messageId: message.id,
-          roomId: message.roomId,
-          text: message.text ?? message.caption,
-        })
-      }
     }
 
     const handleRoomActivity = (payload: { roomId: string; updatedAt: string }) => {
@@ -368,8 +346,6 @@ export function useMessages() {
     isSending,
     error,
     unreadCountByRoom,
-    incomingAlert,
-    clearIncomingAlert,
     setActiveRoomId,
     sendMessage,
     reloadRooms: loadRooms,

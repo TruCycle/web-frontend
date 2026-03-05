@@ -13,6 +13,7 @@ import {
   LogOut,
   X,
 } from 'lucide-react'
+import { useMessageAlerts } from '@/features/messaging/hooks/useMessageAlerts'
 import { useNotifications } from '@/features/notifications/hooks/useNotifications'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import logo from '@/assets/logo.svg'
@@ -52,6 +53,7 @@ function navLinkClassName({ isActive }: NavLinkRenderProps): string {
 
 export function AppShell({ children }: AppShellProps) {
   const { unreadCount, isLoading } = useNotifications()
+  const { unreadMessagesCount } = useMessageAlerts()
   const { user, logout } = useAuthSession()
   const { role, setRole } = useUserRole()
   const navigate = useNavigate()
@@ -147,8 +149,26 @@ export function AppShell({ children }: AppShellProps) {
           </>
         )}
         <NavLink className={navLinkClassName} to="/messages" onClick={onSidebarNavigate}>
-          <MessageIcon />
-          <span>Messages</span>
+          {({ isActive }) => (
+            <>
+              <div className="relative flex items-center justify-center">
+                <MessageIcon />
+                {unreadMessagesCount > 0 && (
+                  <span
+                    className={classNames(
+                      'absolute -right-1.5 top-0 inline-flex h-4 min-w-4 items-center justify-center rounded-full border-[1.5px] px-1 text-[0.55rem] font-bold leading-none',
+                      isActive
+                        ? 'border-tc-shell-active bg-tc-shell-accent text-tc-shell-roleActiveText'
+                        : 'border-tc-shell-bg bg-tc-shell-notify text-white',
+                    )}
+                  >
+                    {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                  </span>
+                )}
+              </div>
+              <span>Messages</span>
+            </>
+          )}
         </NavLink>
       </div>
 

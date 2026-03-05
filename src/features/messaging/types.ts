@@ -33,9 +33,3 @@ export interface ActiveRoom {
   readonly createdAt: string
   readonly updatedAt: string
 }
-
-export interface IncomingMessageAlert {
-  readonly messageId: string
-  readonly roomId: string
-  readonly text: string | null
-}
