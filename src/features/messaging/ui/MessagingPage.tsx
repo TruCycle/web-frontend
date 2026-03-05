@@ -2,9 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Search, Paperclip, Send, X } from 'lucide-react'
 import { useMessages } from '@/features/messaging/hooks/useMessages'
+import { playIncomingMessageTone } from '@/features/messaging/lib/playIncomingMessageTone'
 import type { ActiveRoom, RoomMessage, RoomParticipant } from '@/features/messaging/types'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { Button } from '@/shared/ui/button/Button'
+import { useToast } from '@/shared/ui/toast/useToast'
 import { classNames } from '@/shared/utils/classNames'
 
 const IMAGE_GROUP_WINDOW_MS = 30_000
@@ -168,6 +170,7 @@ function canGroupImages(previousMessage: RoomMessage, nextMessage: RoomMessage):
 
 export default function MessagingPage() {
   const { user } = useAuthSession()
+  const { info } = useToast()
   const [searchParams, setSearchParams] = useSearchParams()
   const {
     rooms,
@@ -178,13 +181,20 @@ export default function MessagingPage() {
     isLoadingMessages,
     isSending,
     error,
+    unreadCountByRoom,
+    incomingAlert,
+    clearIncomingAlert,
     setActiveRoomId,
     sendMessage,
   } = useMessages()
   const consumedRoomIdRef = useRef<string | null>(null)
+  const lastToastMessageIdRef = useRef<string | null>(null)
+  const lastScrolledRoomIdRef = useRef<string | null>(null)
+  const messageListRef = useRef<HTMLDivElement | null>(null)
   const [searchValue, setSearchValue] = useState('')
   const [inputValue, setInputValue] = useState('')
   const [previewImage, setPreviewImage] = useState<{ readonly src: string; readonly alt: string } | null>(null)
+  const [isPageVisible, setIsPageVisible] = useState(document.visibilityState === 'visible')
   const requestedRoomId = searchParams.get('roomId')
 
   useEffect(() => {
@@ -209,6 +219,74 @@ export default function MessagingPage() {
       return nextParams
     }, { replace: true })
   }, [requestedRoomId, rooms, setActiveRoomId, setSearchParams])
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsPageVisible(document.visibilityState === 'visible')
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!incomingAlert) {
+      return
+    }
+
+    if (lastToastMessageIdRef.current === incomingAlert.messageId) {
+      clearIncomingAlert(incomingAlert.messageId)
+      return
+    }
+
+    if (!isPageVisible) {
+      return
+    }
+
+    if (activeRoomId === incomingAlert.roomId) {
+      lastToastMessageIdRef.current = incomingAlert.messageId
+      clearIncomingAlert(incomingAlert.messageId)
+      return
+    }
+
+    const room = rooms.find((entry) => entry.id === incomingAlert.roomId)
+    const roomName = room ? getRoomDisplayName(room, user?.id) : 'Conversation'
+    info(
+      `New message from ${roomName}`,
+      incomingAlert.text?.trim() || 'You received a new message.',
+      4200,
+    )
+    playIncomingMessageTone()
+    lastToastMessageIdRef.current = incomingAlert.messageId
+    clearIncomingAlert(incomingAlert.messageId)
+  }, [activeRoomId, clearIncomingAlert, incomingAlert, info, isPageVisible, rooms, user?.id])
+
+  useEffect(() => {
+    if (!activeRoomId || isLoadingMessages) {
+      return
+    }
+
+    const messageList = messageListRef.current
+    if (!messageList) {
+      return
+    }
+
+    const roomChanged = lastScrolledRoomIdRef.current !== activeRoomId
+    lastScrolledRoomIdRef.current = activeRoomId
+    const behavior: ScrollBehavior = roomChanged ? 'auto' : 'smooth'
+    const animationFrameId = window.requestAnimationFrame(() => {
+      messageList.scrollTo({
+        top: messageList.scrollHeight,
+        behavior,
+      })
+    })
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId)
+    }
+  }, [activeRoomId, isLoadingMessages, messages.length])
 
   const filteredRooms = useMemo(() => {
     const query = searchValue.trim().toLowerCase()
@@ -347,35 +425,63 @@ export default function MessagingPage() {
               </p>
             ) : null}
 
-            {!isLoadingRooms && filteredRooms.map((room) => (
-              <button
-                key={room.id}
-                className={classNames(
-                  'mb-2 flex w-full items-start gap-3 rounded-lg p-3 text-left transition',
-                  activeRoomId === room.id
-                    ? 'bg-[#A4F5A61A] border border-[#15A119]'
-                    : 'hover:bg-slate-50',
-                )}
-                onClick={() => setActiveRoomId(room.id)}
-              >
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#15A1191A] text-xs font-semibold text-slate-700">
-                  {getRoomInitials(room, user?.id)}
-                </span>
-                <span className="flex flex-col items-start justify-between gap-1">
-                  <span className="truncate text-sm font-semibold text-slate-900">
-                    {getRoomDisplayName(room, user?.id)}
-                  </span>
-                  <span className="block truncate text-sm text-slate-500">
-                    {formatPreview(room.lastMessage)}
-                  </span>
-                  <span className="text-xs text-slate-400">
-                    {room.lastMessage
-                      ? formatConversationTimestamp(room.lastMessage.createdAt)
-                      : ''}
-                  </span>
-                </span>
-              </button>
-            ))}
+            {!isLoadingRooms &&
+              filteredRooms.map((room) => {
+                const unreadCount = unreadCountByRoom[room.id] ?? 0
+                const isActiveRoom = activeRoomId === room.id
+                const isUnread = unreadCount > 0 && !isActiveRoom
+
+                return (
+                  <button
+                    key={room.id}
+                    className={classNames(
+                      'mb-2 flex w-full items-start gap-3 rounded-lg border p-3 text-left transition',
+                      isActiveRoom
+                        ? 'border-[#15A119] bg-[#A4F5A61A]'
+                        : isUnread
+                          ? 'border-[#86EFAC] bg-[#F0FDF4] hover:bg-[#ECFDF3]'
+                          : 'border-transparent hover:bg-slate-50',
+                    )}
+                    onClick={() => setActiveRoomId(room.id)}
+                  >
+                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#15A1191A] text-xs font-semibold text-slate-700">
+                      {getRoomInitials(room, user?.id)}
+                    </span>
+                    <span className="flex min-w-0 flex-1 items-start justify-between gap-2">
+                      <span className="flex min-w-0 flex-col items-start justify-between gap-1">
+                        <span
+                          className={classNames(
+                            'truncate text-sm text-slate-900',
+                            isUnread ? 'font-bold' : 'font-semibold',
+                          )}
+                        >
+                          {getRoomDisplayName(room, user?.id)}
+                        </span>
+                        <span
+                          className={classNames(
+                            'block truncate text-sm',
+                            isUnread ? 'font-medium text-slate-700' : 'text-slate-500',
+                          )}
+                        >
+                          {formatPreview(room.lastMessage)}
+                        </span>
+                      </span>
+                      <span className="flex shrink-0 flex-col items-end gap-1">
+                        <span className="text-xs text-slate-400">
+                          {room.lastMessage
+                            ? formatConversationTimestamp(room.lastMessage.createdAt)
+                            : ''}
+                        </span>
+                        {isUnread ? (
+                          <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#15A119] px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                          </span>
+                        ) : null}
+                      </span>
+                    </span>
+                  </button>
+                )
+              })}
           </div>
         </div>
 
@@ -391,7 +497,10 @@ export default function MessagingPage() {
             </div>
           </div>
 
-          <div className="min-h-[520px] flex-1 space-y-3 overflow-y-auto p-4 md:min-h-0 md:p-7">
+          <div
+            ref={messageListRef}
+            className="min-h-[520px] flex-1 space-y-3 overflow-y-auto p-4 md:min-h-0 md:p-7"
+          >
             {isLoadingMessages ? (
               <p className="rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-500">
                 Loading messages...
