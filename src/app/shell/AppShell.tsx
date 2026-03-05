@@ -118,9 +118,12 @@ export function AppShell({ children }: AppShellProps) {
   )
   const isPartnerArea =
     isPartnerUser &&
-    (location.pathname === '/partner' ||
-      location.pathname.startsWith('/shops') ||
-      location.pathname.startsWith('/partner-shops'))
+    location.pathname.startsWith('/partner')
+  const profileShopAction = isPartnerUser
+    ? isPartnerArea
+      ? { label: 'Back to Marketplace', path: '/dashboard' }
+      : { label: 'Go to Shop', path: '/partner' }
+    : { label: 'Become a partner', path: '/partner/onboard' }
   const onSidebarNavigate = () => {
     if (isMobileSidebarOpen) {
       setIsMobileSidebarOpen(false)
@@ -130,11 +133,11 @@ export function AppShell({ children }: AppShellProps) {
   const sidebarNavigation = isPartnerArea ? (
     <nav className="flex flex-1 flex-col gap-2 overflow-visible">
       <div className="flex flex-col gap-1">
-        <NavLink className={navLinkClassName} to="/partner" onClick={onSidebarNavigate}>
+        <NavLink className={navLinkClassName} to="/partner" end onClick={onSidebarNavigate}>
           <DashboardIcon />
           <span>Dashboard</span>
         </NavLink>
-        <NavLink className={navLinkClassName} to="/shops" onClick={onSidebarNavigate}>
+        <NavLink className={navLinkClassName} to="/partner/items" onClick={onSidebarNavigate}>
           <FileText size={20} />
           <span>Items</span>
         </NavLink>
@@ -143,7 +146,7 @@ export function AppShell({ children }: AppShellProps) {
       <div className="-mx-4 my-4 h-px bg-tc-shell-divider" />
 
       <div className="flex flex-col gap-1">
-        <NavLink className={navLinkClassName} to="/notifications" onClick={onSidebarNavigate}>
+        <NavLink className={navLinkClassName} to="/partner/notifications" onClick={onSidebarNavigate}>
           {({ isActive }) => (
             <>
               <div className="relative flex items-center justify-center">
@@ -161,11 +164,11 @@ export function AppShell({ children }: AppShellProps) {
             </>
           )}
         </NavLink>
-        <NavLink className={navLinkClassName} to="/settings" onClick={onSidebarNavigate}>
+        <NavLink className={navLinkClassName} to="/partner/settings" onClick={onSidebarNavigate}>
           <Settings size={20} />
           <span>Settings</span>
         </NavLink>
-        <NavLink className={navLinkClassName} to="/support" onClick={onSidebarNavigate}>
+        <NavLink className={navLinkClassName} to="/partner/support" onClick={onSidebarNavigate}>
           <HelpCircle size={20} />
           <span>Support & FAQs</span>
         </NavLink>
@@ -391,36 +394,36 @@ export function AppShell({ children }: AppShellProps) {
               {isProfileMenuOpen ? (
                 <div
                   role="menu"
-                  className="absolute right-0 top-[calc(100%+0.5rem)] z-[110] min-w-[180px] rounded-xl border border-slate-200 bg-white p-1 shadow-lg"
+                  className="absolute right-0 top-[calc(100%+0.5rem)] z-[110] min-w-[220px] rounded-2xl border border-slate-200 bg-white p-2 shadow-lg"
                 >
                   <button
                     type="button"
                     role="menuitem"
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100"
+                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[0.9rem] font-medium text-slate-700 hover:bg-slate-100"
                     onClick={() => {
                       setIsProfileMenuOpen(false)
-                      navigate(isPartnerUser ? '/partner' : '/partner/onboard')
+                      navigate(profileShopAction.path)
                     }}
                   >
-                    <Store size={16} />
-                    {isPartnerUser ? 'Go to Shop' : 'Become a partner'}
+                    <Store size={20} />
+                    {profileShopAction.label}
                   </button>
                   <button
                     type="button"
                     role="menuitem"
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100"
+                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[0.9rem] font-medium text-slate-700 hover:bg-slate-100"
                     onClick={() => {
                       setIsProfileMenuOpen(false)
-                      navigate('/settings')
+                      navigate(isPartnerUser ? '/partner/settings' : '/settings')
                     }}
                   >
-                    <User size={16} />
+                    <User size={20} />
                     Profile
                   </button>
                   <button
                     type="button"
                     role="menuitem"
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-rose-600 hover:bg-rose-50"
+                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[0.9rem] font-medium text-rose-600 hover:bg-rose-50"
                     onClick={async () => {
                       setIsProfileMenuOpen(false)
                       setRole('collector')
@@ -428,7 +431,7 @@ export function AppShell({ children }: AppShellProps) {
                       navigate('/login')
                     }}
                   >
-                    <LogOut size={16} />
+                    <LogOut size={20} />
                     Log out
                   </button>
                 </div>

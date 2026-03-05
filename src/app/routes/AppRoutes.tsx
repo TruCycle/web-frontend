@@ -19,6 +19,8 @@ const YourListingsPage = lazy(() => import('@/features/listings/ui/YourListingsP
 const SettingsPage = lazy(() => import('@/features/settings/ui/SettingsPage'))
 const PartnerShopsPage = lazy(() => import('@/features/partner-shops/ui/PartnerShopsPage'))
 const PartnerConsolePage = lazy(() => import('@/features/partner/ui/PartnerConsolePage'))
+const PartnerItemsPage = lazy(() => import('@/features/partner/ui/PartnerItemsPage'))
+const PartnerSettingsPage = lazy(() => import('@/features/partner/ui/PartnerSettingsPage'))
 const PartnerOnboardPage = lazy(
   () => import('@/features/partner-onboarding/ui/PartnerOnboardPage'),
 )
@@ -107,6 +109,10 @@ export function AppRoutes() {
           <Route path="/partner-shops" element={<Navigate replace to="/shops" />} />
           <Route element={<PartnerOnlyRoute />}>
             <Route path="/partner" element={<PartnerConsolePage />} />
+            <Route path="/partner/items" element={<PartnerItemsPage />} />
+            <Route path="/partner/settings" element={<PartnerSettingsPage />} />
+            <Route path="/partner/notifications" element={<NotificationsPage />} />
+            <Route path="/partner/support" element={<SupportFaqPage />} />
           </Route>
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/support" element={<SupportFaqPage />} />

@@ -181,7 +181,7 @@ export default function CollectedItemsPage() {
                       aria-label="Open item QR code"
                       title="Open item QR code"
                     >
-                      <QrCode size={18} />
+                      <QrCode size={22} />
                     </Button>
                   ) : null}
                   <Button

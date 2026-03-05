@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, RefreshCw } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
 import { ListItemDialog } from '@/shared/ui/modal/ListItemDialog'
 import { ItemQrCodeDialog } from '@/shared/ui/modal/ItemQrCodeDialog'
@@ -92,11 +92,14 @@ export default function YourListingsPage() {
             <NewItemButton onClick={() => setIsListItemDialogOpen(true)} />
             <Button
               variant="danger"
+              className="h-12 w-12 p-0"
+              aria-label="Refresh listings"
+              title="Refresh listings"
               onClick={() => {
                 void reload()
               }}
             >
-              Refresh
+              <RefreshCw size={18} />
             </Button>
           </div>
         </div>
