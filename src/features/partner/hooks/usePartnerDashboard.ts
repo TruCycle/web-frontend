@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { fetchMyPartnerShops, fetchPartnerItems } from '@/features/partner/api/partnerApi'
-import type { PartnerManagedItem } from '@/features/partner/types'
+import type { PartnerManagedItem, PartnerShop } from '@/features/partner/types'
 
 interface PartnerDashboardStats {
   readonly totalShops: number
@@ -21,6 +21,7 @@ const initialStats: PartnerDashboardStats = {
 }
 
 export function usePartnerDashboard() {
+  const [shops, setShops] = useState<readonly PartnerShop[]>([])
   const [stats, setStats] = useState<PartnerDashboardStats>(initialStats)
   const [recentItems, setRecentItems] = useState<readonly PartnerManagedItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -43,6 +44,7 @@ export function usePartnerDashboard() {
 
       const totalShops = shops.length
       const totalItems = allItems.pagination.total
+      setShops(shops)
       setStats({
         totalShops,
         totalItems,
@@ -69,6 +71,7 @@ export function usePartnerDashboard() {
   }, [loadDashboard])
 
   return {
+    shops,
     stats,
     recentItems,
     isLoading,

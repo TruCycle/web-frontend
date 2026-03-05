@@ -4,6 +4,11 @@ import { clampLimit, toQueryString } from '@/shared/lib/api/query'
 import type {
   CreatePartnerShopPayload,
   FetchPartnerItemsParams,
+  PartnerQrActionResult,
+  PartnerQrClaimContext,
+  PartnerQrItemContext,
+  PartnerQrScanEvent,
+  PartnerQrScanResult,
   PartnerItemsResponse,
   PartnerManagedItem,
   PartnerOpeningHours,
@@ -144,6 +149,105 @@ function mapPartnerItem(value: unknown): PartnerManagedItem | null {
   }
 }
 
+function mapPartnerQrScanEvent(value: unknown): PartnerQrScanEvent | null {
+  const scanEvent = asRecord(value)
+  if (!scanEvent) {
+    return null
+  }
+
+  const scanType = readString(scanEvent.scan_type) ?? readString(scanEvent.scanType)
+  if (!scanType) {
+    return null
+  }
+
+  return {
+    scanType,
+    shopId: readString(scanEvent.shop_id) ?? readString(scanEvent.shopId),
+    scannedAt: readString(scanEvent.scanned_at) ?? readString(scanEvent.scannedAt),
+  }
+}
+
+function mapPartnerQrClaim(value: unknown): PartnerQrClaimContext | null {
+  const claim = asRecord(value)
+  if (!claim) {
+    return null
+  }
+
+  return {
+    id: readString(claim.id),
+    status: readString(claim.status),
+    collectorId: readString(claim.collector_id) ?? readString(claim.collectorId),
+  }
+}
+
+function mapPartnerQrItemContext(value: unknown): PartnerQrItemContext | null {
+  const payload = asRecord(value)
+  if (!payload) {
+    return null
+  }
+
+  const item = asRecord(payload.item) ?? payload
+  const id = readString(item.id) ?? readString(payload.id)
+  if (!id) {
+    return null
+  }
+
+  const claim = mapPartnerQrClaim(item.claim ?? payload.claim)
+  const dropoffLocation = asRecord(item.dropoff_location) ?? asRecord(payload.dropoff_location)
+  const scanEventsSource = Array.isArray(item.scan_events)
+    ? item.scan_events
+    : Array.isArray(payload.scan_events)
+      ? payload.scan_events
+      : []
+
+  return {
+    id,
+    title: readString(item.title),
+    category: readString(item.category),
+    condition: readString(item.condition),
+    status: readString(item.status) ?? 'unknown',
+    pickupOption: readString(item.pickup_option) ?? 'unknown',
+    qrCode: readString(item.qr_code),
+    createdAt: readString(item.created_at) ?? readString(item.createdAt),
+    shopId: readString(dropoffLocation?.id),
+    shopName: readString(dropoffLocation?.name),
+    claim,
+    scanEvents: scanEventsSource
+      .map((scanEvent) => mapPartnerQrScanEvent(scanEvent))
+      .filter((scanEvent): scanEvent is PartnerQrScanEvent => scanEvent !== null),
+  }
+}
+
+function mapPartnerQrActionResult(value: unknown): PartnerQrActionResult {
+  const payload = asRecord(value)
+  const scanEventsSource = Array.isArray(payload?.scan_events) ? payload.scan_events : []
+
+  return {
+    scanType: readString(payload?.scan_type) ?? readString(payload?.scanType),
+    scanResult: readString(payload?.scan_result) ?? readString(payload?.scanResult),
+    itemStatus: readString(payload?.item_status) ?? readString(payload?.itemStatus),
+    claimStatus: readString(payload?.status),
+    completedAt: readString(payload?.completed_at) ?? readString(payload?.completedAt),
+    scannedAt: readString(payload?.scanned_at) ?? readString(payload?.scannedAt),
+    scanEvents: scanEventsSource
+      .map((scanEvent) => mapPartnerQrScanEvent(scanEvent))
+      .filter((scanEvent): scanEvent is PartnerQrScanEvent => scanEvent !== null),
+  }
+}
+
+function readQrScanItemId(payload: Record<string, unknown> | null): string | null {
+  if (!payload) {
+    return null
+  }
+
+  return (
+    readString(payload.item_id) ??
+    readString(payload.itemId) ??
+    readString(asRecord(payload.item)?.id) ??
+    null
+  )
+}
+
 function mapShopPayload(
   payload: CreatePartnerShopPayload | UpdatePartnerShopPayload,
 ): Record<string, unknown> {
@@ -266,4 +370,77 @@ export async function fetchPartnerItems(
       totalPages,
     },
   }
+}
+
+export async function scanPartnerQrCode(payload: {
+  readonly qrPayload: string
+  readonly direction: 'in' | 'out'
+  readonly shopId?: string
+}): Promise<PartnerQrScanResult> {
+  const idempotencyKey = crypto.randomUUID()
+  const response = await apiRequest<unknown, Record<string, unknown>>('/qr/scan', {
+    method: 'POST',
+    body: {
+      qrPayload: payload.qrPayload,
+      direction: payload.direction,
+      ...(payload.shopId ? { shopId: payload.shopId } : {}),
+    },
+    headers: {
+      'Idempotency-Key': idempotencyKey,
+    },
+  })
+  const data = asRecord(unwrapApiData<unknown>(response))
+
+  return {
+    accepted: Boolean(data?.accepted),
+    duplicate: Boolean(data?.duplicate),
+    idempotencyKey: readString(data?.idempotencyKey),
+    direction: payload.direction,
+    itemId: readQrScanItemId(data),
+  }
+}
+
+export async function fetchPartnerQrItemContext(itemId: string): Promise<PartnerQrItemContext> {
+  const response = await apiRequest<unknown>(`/qr/item/${encodeURIComponent(itemId)}/view`)
+  const data = unwrapApiData<unknown>(response)
+  const itemContext = mapPartnerQrItemContext(data)
+
+  if (!itemContext) {
+    throw new Error('Unable to load item details from scanned QR code.')
+  }
+
+  return itemContext
+}
+
+export async function confirmPartnerDropoff(
+  itemId: string,
+  shopId: string,
+): Promise<PartnerQrActionResult> {
+  const response = await apiRequest<unknown, { shop_id: string; action: 'accept' }>(
+    `/qr/item/${encodeURIComponent(itemId)}/dropoff-in`,
+    {
+      method: 'POST',
+      body: {
+        shop_id: shopId,
+        action: 'accept',
+      },
+    },
+  )
+
+  return mapPartnerQrActionResult(unwrapApiData<unknown>(response))
+}
+
+export async function completePartnerPickup(
+  itemId: string,
+  shopId: string,
+): Promise<PartnerQrActionResult> {
+  const response = await apiRequest<unknown, { shop_id: string }>(
+    `/qr/item/${encodeURIComponent(itemId)}/claim-out`,
+    {
+      method: 'POST',
+      body: { shop_id: shopId },
+    },
+  )
+
+  return mapPartnerQrActionResult(unwrapApiData<unknown>(response))
 }

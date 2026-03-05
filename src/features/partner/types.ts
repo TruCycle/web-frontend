@@ -40,6 +40,51 @@ export interface PartnerManagedItem {
   readonly shopName: string | null
 }
 
+export interface PartnerQrScanEvent {
+  readonly scanType: string
+  readonly shopId: string | null
+  readonly scannedAt: string | null
+}
+
+export interface PartnerQrClaimContext {
+  readonly id: string | null
+  readonly status: string | null
+  readonly collectorId: string | null
+}
+
+export interface PartnerQrItemContext {
+  readonly id: string
+  readonly title: string | null
+  readonly category: string | null
+  readonly condition: string | null
+  readonly status: string
+  readonly pickupOption: string
+  readonly qrCode: string | null
+  readonly createdAt: string | null
+  readonly shopId: string | null
+  readonly shopName: string | null
+  readonly claim: PartnerQrClaimContext | null
+  readonly scanEvents: readonly PartnerQrScanEvent[]
+}
+
+export interface PartnerQrScanResult {
+  readonly accepted: boolean
+  readonly duplicate: boolean
+  readonly idempotencyKey: string | null
+  readonly direction: 'in' | 'out'
+  readonly itemId: string | null
+}
+
+export interface PartnerQrActionResult {
+  readonly scanType: string | null
+  readonly scanResult: string | null
+  readonly itemStatus: string | null
+  readonly claimStatus: string | null
+  readonly completedAt: string | null
+  readonly scannedAt: string | null
+  readonly scanEvents: readonly PartnerQrScanEvent[]
+}
+
 export interface PartnerItemsResponse {
   readonly items: readonly PartnerManagedItem[]
   readonly pagination: PaginationMeta

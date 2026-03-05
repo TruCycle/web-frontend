@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { AlertCircle, Heart, PackageCheck, RefreshCw, ScanLine, ShoppingBag } from 'lucide-react'
 import { PartnerScanDialog } from '@/features/partner/ui/components/PartnerScanDialog'
 import { usePartnerDashboard } from '@/features/partner/hooks/usePartnerDashboard'
@@ -53,12 +53,7 @@ function activityStatusClassName(status: string): string {
 
 export default function PartnerConsolePage() {
   const [isScanDialogOpen, setIsScanDialogOpen] = useState(false)
-  const { stats, recentItems, isLoading, error, reload } = usePartnerDashboard()
-
-  const scanShopName = useMemo(() => {
-    const firstShopWithName = recentItems.find((item) => item.shopName)?.shopName
-    return firstShopWithName ?? 'My Partner Shop'
-  }, [recentItems])
+  const { shops, stats, recentItems, isLoading, error, reload } = usePartnerDashboard()
 
   return (
     <div className="space-y-6">
@@ -194,7 +189,7 @@ export default function PartnerConsolePage() {
       <PartnerScanDialog
         isOpen={isScanDialogOpen}
         onClose={() => setIsScanDialogOpen(false)}
-        shopName={scanShopName}
+        shops={shops}
       />
     </div>
   )
