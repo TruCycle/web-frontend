@@ -13,12 +13,14 @@ import {
   registerUser,
   requestPasswordReset as requestPasswordResetApi,
   resetPassword as resetPasswordApi,
+  upgradeToPartner as upgradeToPartnerApi,
 } from '@/features/auth/api/authApi'
 import type {
   AuthUser,
   LoginPayload,
   RegisterPayload,
   ResetPasswordPayload,
+  UpgradeToPartnerPayload,
 } from '@/features/auth/types'
 import {
   clearSession,
@@ -202,6 +204,24 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
     await registerUser(payload)
   }, [])
 
+  const upgradeToPartner = useCallback(async (payload: UpgradeToPartnerPayload) => {
+    const upgraded = await upgradeToPartnerApi(payload)
+    const persistMode = getStoredPersistMode() ?? 'session'
+
+    if (upgraded.tokens) {
+      storeSession({
+        tokens: upgraded.tokens,
+        user: upgraded.user,
+        persistMode,
+        keepRefreshToken: Boolean(upgraded.tokens.refreshToken),
+      })
+    } else {
+      storeUser(upgraded.user, persistMode)
+    }
+
+    setUser(upgraded.user)
+  }, [])
+
   const requestPasswordReset = useCallback(async (email: string) => {
     await requestPasswordResetApi(email)
   }, [])
@@ -223,11 +243,21 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
       isBootstrapping,
       login,
       register,
+      upgradeToPartner,
       requestPasswordReset,
       resetPassword,
       logout,
     }),
-    [user, isBootstrapping, login, register, requestPasswordReset, resetPassword, logout],
+    [
+      user,
+      isBootstrapping,
+      login,
+      register,
+      upgradeToPartner,
+      requestPasswordReset,
+      resetPassword,
+      logout,
+    ],
   )
 
   return (

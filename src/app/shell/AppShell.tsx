@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { classNames } from '@/shared/utils/classNames'
-import { NavLink, type NavLinkRenderProps, useNavigate } from 'react-router-dom'
+import { NavLink, type NavLinkRenderProps, useLocation, useNavigate } from 'react-router-dom'
 import {
   FileText,
   Users,
@@ -56,6 +56,7 @@ export function AppShell({ children }: AppShellProps) {
   const { unreadMessagesCount } = useMessageAlerts()
   const { user, logout } = useAuthSession()
   const { role, setRole } = useUserRole()
+  const location = useLocation()
   const navigate = useNavigate()
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
@@ -112,13 +113,78 @@ export function AppShell({ children }: AppShellProps) {
   }, [isMobileSidebarOpen])
 
   const initials = `${user?.firstName?.[0] ?? 'P'}${user?.lastName?.[0] ?? ''}`.toUpperCase()
+  const isPartnerUser = (user?.roles ?? []).some(
+    (userRole) => userRole.toLowerCase() === 'partner',
+  )
+  const isPartnerArea =
+    isPartnerUser &&
+    (location.pathname === '/partner' ||
+      location.pathname.startsWith('/shops') ||
+      location.pathname.startsWith('/partner-shops'))
   const onSidebarNavigate = () => {
     if (isMobileSidebarOpen) {
       setIsMobileSidebarOpen(false)
     }
   }
 
-  const sidebarNavigation = (
+  const sidebarNavigation = isPartnerArea ? (
+    <nav className="flex flex-1 flex-col gap-2 overflow-visible">
+      <div className="flex flex-col gap-1">
+        <NavLink className={navLinkClassName} to="/partner" onClick={onSidebarNavigate}>
+          <DashboardIcon />
+          <span>Dashboard</span>
+        </NavLink>
+        <NavLink className={navLinkClassName} to="/shops" onClick={onSidebarNavigate}>
+          <FileText size={20} />
+          <span>Items</span>
+        </NavLink>
+      </div>
+
+      <div className="-mx-4 my-4 h-px bg-tc-shell-divider" />
+
+      <div className="flex flex-col gap-1">
+        <NavLink className={navLinkClassName} to="/notifications" onClick={onSidebarNavigate}>
+          {({ isActive }) => (
+            <>
+              <div className="relative flex items-center justify-center">
+                <BellIcon />
+                {!isLoading && unreadCount > 0 && (
+                  <span
+                    className={classNames(
+                      'absolute -right-1.5 top-0 inline-block h-2 w-2 rounded-full border-[1.5px] bg-tc-shell-notify',
+                      isActive ? 'border-tc-shell-active' : 'border-tc-shell-bg',
+                    )}
+                  />
+                )}
+              </div>
+              <span>Notifications</span>
+            </>
+          )}
+        </NavLink>
+        <NavLink className={navLinkClassName} to="/settings" onClick={onSidebarNavigate}>
+          <Settings size={20} />
+          <span>Settings</span>
+        </NavLink>
+        <NavLink className={navLinkClassName} to="/support" onClick={onSidebarNavigate}>
+          <HelpCircle size={20} />
+          <span>Support & FAQs</span>
+        </NavLink>
+      </div>
+
+      <div className="mt-auto px-3 pb-2 pt-3">
+        <button
+          type="button"
+          className="inline-flex h-[50px] w-full items-center justify-center rounded-[10px] border border-tc-shell-accent bg-transparent px-4 text-sm font-medium text-white/90 transition hover:bg-white/5"
+          onClick={() => {
+            onSidebarNavigate()
+            navigate('/partner')
+          }}
+        >
+          Partner Console
+        </button>
+      </div>
+    </nav>
+  ) : (
     <nav className="flex flex-1 flex-col gap-2 overflow-visible">
       <div className="flex flex-col gap-1">
         <NavLink className={navLinkClassName} to="/" onClick={onSidebarNavigate}>
@@ -184,9 +250,7 @@ export function AppShell({ children }: AppShellProps) {
                   <span
                     className={classNames(
                       'absolute -right-1.5 top-0 inline-block h-2 w-2 rounded-full border-[1.5px] bg-tc-shell-notify',
-                      isActive
-                        ? 'border-tc-shell-active'
-                        : 'border-tc-shell-bg',
+                      isActive ? 'border-tc-shell-active' : 'border-tc-shell-bg',
                     )}
                   />
                 )}
@@ -335,11 +399,11 @@ export function AppShell({ children }: AppShellProps) {
                     className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100"
                     onClick={() => {
                       setIsProfileMenuOpen(false)
-                      navigate('/partner')
+                      navigate(isPartnerUser ? '/partner' : '/partner/onboard')
                     }}
                   >
                     <Store size={16} />
-                    Go to Shop
+                    {isPartnerUser ? 'Go to Shop' : 'Become a partner'}
                   </button>
                   <button
                     type="button"

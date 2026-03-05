@@ -2,8 +2,10 @@ import type {
   AuthTokens,
   AuthUser,
   LoginPayload,
+  PartnerOpeningHoursPayload,
   RegisterPayload,
   ResetPasswordPayload,
+  UpgradeToPartnerPayload,
 } from '@/features/auth/types'
 import { apiRequest } from '@/shared/lib/api/client'
 
@@ -129,6 +131,82 @@ interface RefreshData {
     readonly refreshToken?: string
     readonly accessTokenExpiry?: string
     readonly refreshTokenExpiry?: string
+  }
+}
+
+interface UpgradeToPartnerData {
+  readonly user: ApiAuthUser
+  readonly tokens?: {
+    readonly accessToken: string
+    readonly refreshToken?: string
+    readonly accessTokenExpiry?: string
+    readonly refreshTokenExpiry?: string
+  }
+}
+
+interface UpgradeToPartnerRequest {
+  readonly name: string
+  readonly address_line: string
+  readonly postcode: string
+  readonly phone_number?: string
+  readonly latitude?: number
+  readonly longitude?: number
+  readonly operational_notes?: string
+  readonly acceptable_categories?: readonly string[]
+  readonly opening_hours?: {
+    readonly days: readonly string[]
+    readonly open_time: string
+    readonly close_time: string
+  }
+}
+
+function mapOpeningHoursToApi(
+  payload?: PartnerOpeningHoursPayload,
+): UpgradeToPartnerRequest['opening_hours'] | undefined {
+  if (!payload) {
+    return undefined
+  }
+
+  return {
+    days: payload.days,
+    open_time: payload.openTime,
+    close_time: payload.closeTime,
+  }
+}
+
+export async function upgradeToPartner(
+  payload: UpgradeToPartnerPayload,
+): Promise<{ user: AuthUser; tokens?: AuthTokens }> {
+  const requestPayload: UpgradeToPartnerRequest = {
+    name: payload.name,
+    address_line: payload.addressLine,
+    postcode: payload.postcode,
+    phone_number: payload.phoneNumber,
+    latitude: payload.latitude,
+    longitude: payload.longitude,
+    operational_notes: payload.operationalNotes,
+    acceptable_categories: payload.acceptableCategories,
+    opening_hours: mapOpeningHoursToApi(payload.openingHours),
+  }
+
+  const response = await apiRequest<ApiEnvelope<UpgradeToPartnerData>, UpgradeToPartnerRequest>(
+    '/auth/upgrade-to-partner',
+    {
+      method: 'POST',
+      body: requestPayload,
+    },
+  )
+
+  return {
+    user: normalizeUser(response.data.user),
+    tokens: response.data.tokens
+      ? {
+          accessToken: response.data.tokens.accessToken,
+          refreshToken: response.data.tokens.refreshToken,
+          accessTokenExpiry: response.data.tokens.accessTokenExpiry,
+          refreshTokenExpiry: response.data.tokens.refreshTokenExpiry,
+        }
+      : undefined,
   }
 }
 

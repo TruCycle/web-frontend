@@ -118,7 +118,6 @@ async function uploadPhotoToCloudinary(file: File): Promise<{
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', cloudinaryUploadPreset);
-  formData.append('return_delete_token', 'true');
 
   if (cloudinaryFolder) {
     formData.append('folder', cloudinaryFolder);
