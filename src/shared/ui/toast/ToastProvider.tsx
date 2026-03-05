@@ -123,7 +123,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={contextValue}>
       {children}
 
-      <div className="pointer-events-none fixed right-5 top-5 z-[120] flex w-[min(92vw,22rem)] flex-col gap-2">
+      <div className="pointer-events-none fixed right-5 top-5 z-[300] flex w-[min(92vw,22rem)] flex-col gap-2">
         {toasts.map((toast, index) => {
           const resolvedTone = toast.tone === 'error' ? 'danger' : toast.tone
 

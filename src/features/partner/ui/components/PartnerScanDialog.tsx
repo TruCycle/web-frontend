@@ -4,7 +4,6 @@ import {
   completePartnerPickup,
   confirmPartnerDropoff,
   fetchPartnerQrItemContext,
-  scanPartnerQrCode,
 } from '@/features/partner/api/partnerApi'
 import type { PartnerQrItemContext, PartnerShop } from '@/features/partner/types'
 import { Button } from '@/shared/ui/button/Button'
@@ -165,16 +164,13 @@ function getStatusClassName(status: string): string {
 }
 
 export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogProps) {
-  const { success, error: errorToast, info } = useToast()
+  const { success, error: errorToast } = useToast()
 
   const [selectedShopId, setSelectedShopId] = useState('')
   const [scannerSession, setScannerSession] = useState(0)
   const [manualCode, setManualCode] = useState('')
   const [lastScannedPayload, setLastScannedPayload] = useState('')
   const [itemContext, setItemContext] = useState<PartnerQrItemContext | null>(null)
-  const [scanError, setScanError] = useState<string | null>(null)
-  const [scannerError, setScannerError] = useState<string | null>(null)
-  const [actionError, setActionError] = useState<string | null>(null)
   const [isResolvingScan, setIsResolvingScan] = useState(false)
   const [isExecutingAction, setIsExecutingAction] = useState(false)
 
@@ -232,9 +228,6 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
     setManualCode('')
     setLastScannedPayload('')
     setItemContext(null)
-    setScanError(null)
-    setScannerError(null)
-    setActionError(null)
   }, [isOpen])
 
   const resolveQrPayload = useCallback(async (payload: string) => {
@@ -244,43 +237,30 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
     }
 
     if (!selectedShopId) {
-      setScanError('Select an active shop before scanning.')
+      errorToast('Select a shop', 'Select an active shop before scanning.')
       return
     }
 
-    setScanError(null)
-    setActionError(null)
-    setScannerError(null)
     setManualCode(normalizedPayload)
     setLastScannedPayload(normalizedPayload)
     setIsResolvingScan(true)
 
     try {
-      const scanResult = await scanPartnerQrCode({
-        qrPayload: normalizedPayload,
-        direction: 'in',
-        shopId: selectedShopId,
-      })
-      const resolvedItemId = scanResult.itemId ?? extractItemIdFromPayload(normalizedPayload)
+      const resolvedItemId = extractItemIdFromPayload(normalizedPayload)
       if (!resolvedItemId) {
         throw new Error('Scanned QR does not contain a valid item identifier.')
       }
 
       const nextItemContext = await fetchPartnerQrItemContext(resolvedItemId)
       setItemContext(nextItemContext)
-
-      if (scanResult.duplicate) {
-        info('Duplicate scan', 'This QR was recently scanned for the selected shop.')
-      }
     } catch (error) {
       const message = readErrorMessage(error, 'Unable to process this QR code right now.')
-      setScanError(message)
       setItemContext(null)
       errorToast('Scan failed', message)
     } finally {
       setIsResolvingScan(false)
     }
-  }, [errorToast, info, selectedShopId])
+  }, [errorToast, selectedShopId])
 
   const refreshScannedItem = useCallback(async () => {
     if (!itemContext) {
@@ -288,24 +268,22 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
     }
 
     setIsResolvingScan(true)
-    setActionError(null)
     try {
       const refreshed = await fetchPartnerQrItemContext(itemContext.id)
       setItemContext(refreshed)
     } catch (error) {
       const message = readErrorMessage(error, 'Unable to refresh item details.')
-      setActionError(message)
+      errorToast('Refresh failed', message)
     } finally {
       setIsResolvingScan(false)
     }
-  }, [itemContext])
+  }, [errorToast, itemContext])
 
   const handleDropoff = useCallback(async () => {
     if (!itemContext || !selectedShopId || isExecutingAction) {
       return
     }
 
-    setActionError(null)
     setIsExecutingAction(true)
     try {
       await confirmPartnerDropoff(itemContext.id, selectedShopId)
@@ -313,7 +291,6 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
       await refreshScannedItem()
     } catch (error) {
       const message = readErrorMessage(error, 'Unable to confirm drop-off right now.')
-      setActionError(message)
       errorToast('Drop-off failed', message)
     } finally {
       setIsExecutingAction(false)
@@ -325,7 +302,6 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
       return
     }
 
-    setActionError(null)
     setIsExecutingAction(true)
     try {
       await completePartnerPickup(itemContext.id, selectedShopId)
@@ -333,7 +309,6 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
       await refreshScannedItem()
     } catch (error) {
       const message = readErrorMessage(error, 'Unable to confirm pick-up right now.')
-      setActionError(message)
       errorToast('Pick-up failed', message)
     } finally {
       setIsExecutingAction(false)
@@ -344,9 +319,6 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
     setItemContext(null)
     setManualCode('')
     setLastScannedPayload('')
-    setScanError(null)
-    setScannerError(null)
-    setActionError(null)
     setScannerSession((current) => current + 1)
   }, [])
 
@@ -355,8 +327,8 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
       <div className="flex max-h-[88vh] flex-col">
         <header className="flex items-start justify-between border-b border-slate-100 px-5 pb-4 pt-5">
           <div>
-            <h2 className="text-base font-semibold text-slate-900">Scan Item</h2>
-            <p className="mt-1 text-xs text-slate-500">
+            <h2 className="text-xl font-semibold text-slate-900">Scan Item</h2>
+            <p className="mt-1 text-sm text-slate-500">
               Scan once to load item details, then confirm drop-off or pick-up.
             </p>
           </div>
@@ -372,7 +344,7 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
 
         <div className="space-y-4 overflow-y-auto px-5 py-4">
           <div className="space-y-1">
-            <label htmlFor="scan-shop" className="text-[11px] font-medium text-slate-700">
+            <label htmlFor="scan-shop" className="text-sm font-medium text-slate-700">
               Shop
             </label>
             <CustomSelect
@@ -382,9 +354,9 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
               onChange={setSelectedShopId}
               disabled={!hasActiveShops || isResolvingScan || isExecutingAction}
               placeholder={hasActiveShops ? 'Select a shop' : 'No active shop'}
-              buttonClassName="h-10 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-700"
+              buttonClassName="h-11 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700"
             />
-            <p className="text-[10px] text-slate-500">
+            <p className="text-xs text-slate-500">
               {hasActiveShops
                 ? 'Scans and actions are recorded against the selected active shop.'
                 : 'No active partner shop available. Activate or create one in settings.'}
@@ -399,17 +371,17 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
                 onDetected={(payload) => {
                   void resolveQrPayload(payload)
                 }}
-                onError={(message) => setScannerError(message)}
+                onError={(message) => errorToast('Scanner error', message)}
                 className="h-[160px] w-[160px] rounded-xl"
               />
             </div>
-            <p className="mt-2 text-center text-[10px] text-slate-500">
+            <p className="mt-2 text-center text-xs text-slate-500">
               Point camera at QR code. Payload is submitted automatically on detection.
             </p>
           </div>
 
           <div className="space-y-1">
-            <label htmlFor="scan-code" className="text-[11px] font-medium text-slate-700">
+            <label htmlFor="scan-code" className="text-sm font-medium text-slate-700">
               QR Code or Manual Code
             </label>
             <div className="flex gap-2">
@@ -418,7 +390,7 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
                   id="scan-code"
                   value={manualCode}
                   onChange={(event) => setManualCode(event.target.value)}
-                  className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 pr-9 text-xs text-slate-700 outline-none focus:border-lime-400 focus:ring-2 focus:ring-lime-100"
+                  className="h-11 w-full rounded-md border border-slate-200 bg-white px-3 pr-9 text-sm text-slate-700 outline-none focus:border-lime-400 focus:ring-2 focus:ring-lime-100"
                   placeholder="Paste QR payload or item link"
                   disabled={!hasActiveShops || isResolvingScan || isExecutingAction}
                 />
@@ -428,7 +400,7 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
               </div>
               <Button
                 variant="secondary"
-                className="h-10 rounded-md px-4 text-sm"
+                className="h-11 rounded-md px-4 text-sm"
                 disabled={
                   !hasActiveShops ||
                   manualCode.trim().length === 0 ||
@@ -448,16 +420,10 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
             </div>
           </div>
 
-          {scannerError ? (
-            <p className="text-xs text-amber-600">{scannerError}</p>
-          ) : null}
-          {scanError ? <p className="text-xs text-rose-600">{scanError}</p> : null}
-          {actionError ? <p className="text-xs text-rose-600">{actionError}</p> : null}
-
           <section className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <h3 className="text-xs font-semibold text-slate-800">Item Details</h3>
+            <h3 className="text-sm font-semibold text-slate-800">Item Details</h3>
             {!itemContext ? (
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-sm text-slate-500">
                 Scan an item QR to view details and next action.
               </p>
             ) : (
@@ -465,19 +431,19 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
                 <div className="rounded-md border border-slate-200 bg-white p-3">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">
+                      <p className="text-base font-semibold text-slate-800">
                         {itemContext.title ?? `Item ${itemContext.id}`}
                       </p>
-                      <p className="text-[10px] text-slate-500">{itemContext.id}</p>
+                      <p className="text-xs text-slate-500">{itemContext.id}</p>
                     </div>
                     <span
-                      className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold ${getStatusClassName(itemContext.status)}`}
+                      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getStatusClassName(itemContext.status)}`}
                     >
                       {toTitleCase(itemContext.status)}
                     </span>
                   </div>
 
-                  <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-slate-600">
+                  <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-slate-600">
                     <p>
                       Pickup: <span className="font-medium text-slate-700">{toTitleCase(itemContext.pickupOption)}</span>
                     </p>
@@ -540,7 +506,7 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
                 </div>
 
                 {pendingAction === null ? (
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-sm text-slate-500">
                     No pending drop-off or pick-up action for the current item status.
                   </p>
                 ) : null}
@@ -549,7 +515,7 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
           </section>
 
           <section>
-            <h3 className="text-xs font-semibold text-slate-800">Recent Scan Events</h3>
+            <h3 className="text-sm font-semibold text-slate-800">Recent Scan Events</h3>
             <div className="mt-2 space-y-2">
               {itemContext && sortedScanEvents.length > 0 ? (
                 sortedScanEvents.slice(0, 6).map((scanEvent, index) => (
@@ -558,20 +524,20 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
                     className="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2"
                   >
                     <div>
-                      <p className="text-xs font-medium text-slate-800">
+                      <p className="text-sm font-medium text-slate-800">
                         {toTitleCase(scanEvent.scanType)}
                       </p>
-                      <p className="text-[10px] text-slate-500">
+                      <p className="text-xs text-slate-500">
                         {formatScanTimestamp(scanEvent.scannedAt)}
                       </p>
                     </div>
-                    <span className="text-[10px] font-medium text-slate-500">
+                    <span className="text-xs font-medium text-slate-500">
                       {scanEvent.shopId ?? selectedShop?.name ?? '-'}
                     </span>
                   </div>
                 ))
               ) : (
-                <div className="rounded-md border border-slate-200 bg-white px-3 py-2 text-[11px] text-slate-500">
+                <div className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-500">
                   {lastScannedPayload
                     ? 'No scan events returned for this item yet.'
                     : 'Scan events appear here after QR is resolved.'}

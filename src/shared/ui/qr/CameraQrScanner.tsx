@@ -49,10 +49,13 @@ export function CameraQrScanner({
   const hasScanErrorRef = useRef(false)
   const barcodeDetector = useMemo(() => getBarcodeDetectorConstructor(), [])
 
-  const stopScanner = useCallback(() => {
+  const stopScanner = useCallback((options?: { readonly clearStatus?: boolean }) => {
+    const shouldClearStatus = options?.clearStatus ?? true
     isRunningRef.current = false
     setIsLive(false)
-    setStatusMessage(null)
+    if (shouldClearStatus) {
+      setStatusMessage(null)
+    }
     hasScanErrorRef.current = false
 
     if (frameRequestRef.current !== null) {
@@ -194,14 +197,34 @@ export function CameraQrScanner({
       frameRequestRef.current = window.requestAnimationFrame(() => {
         void scanFrame()
       })
-    } catch {
+    } catch (error) {
       if (!isRunningRef.current) {
         return
       }
-      const message = 'Camera access was denied or unavailable.'
+
+      const errorName =
+        typeof error === 'object' &&
+        error !== null &&
+        'name' in error &&
+        typeof (error as { name?: unknown }).name === 'string'
+          ? ((error as { name: string }).name ?? '')
+          : ''
+
+      if (errorName === 'AbortError') {
+        return
+      }
+
+      const message =
+        errorName === 'NotAllowedError' || errorName === 'SecurityError'
+          ? 'Camera permission was denied. Please allow camera access and try again.'
+          : errorName === 'NotFoundError' || errorName === 'DevicesNotFoundError'
+            ? 'No camera was found on this device.'
+            : errorName === 'NotReadableError' || errorName === 'TrackStartError'
+              ? 'Camera is currently unavailable. Close other camera apps and retry.'
+              : 'Unable to start camera right now. Please try again.'
       onError?.(message)
       setStatusMessage(message)
-      stopScanner()
+      stopScanner({ clearStatus: false })
     }
   }, [barcodeDetector, decodeWithJsQr, isActive, onDetected, onError, stopScanner])
 
