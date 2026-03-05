@@ -8,6 +8,7 @@ import { classNames } from '@/shared/utils/classNames';
 import { useAuthSession } from '@/shared/context/useAuthSession';
 import { apiRequest } from '@/shared/lib/api/client';
 import { unwrapApiData } from '@/shared/lib/api/envelope';
+import { env } from '@/shared/lib/config/env';
 
 interface ListItemDialogProps {
   isOpen: boolean;
@@ -27,6 +28,10 @@ interface CreateItemRequest {
   readonly description?: string;
   readonly condition: 'new' | 'like_new' | 'good' | 'fair' | 'poor';
   readonly category: string;
+  readonly images?: readonly {
+    readonly url: string;
+    readonly altText?: string;
+  }[];
   readonly address_line: string;
   readonly postcode: string;
   readonly pickup_option: 'donate' | 'exchange';
@@ -41,6 +46,15 @@ interface CreateItemRequest {
 interface CreatedPickupLocation {
   readonly title: string;
   readonly address: string;
+}
+
+interface UploadedPhoto {
+  readonly id: string;
+  readonly previewUrl: string;
+  readonly cloudinaryUrl: string | null;
+  readonly deleteToken: string | null;
+  readonly isUploading: boolean;
+  readonly error: string | null;
 }
 
 const CATEGORIES = [
@@ -73,6 +87,85 @@ function readString(value: unknown): string | null {
     : null;
 }
 
+function stripWrappingQuotes(value: string): string {
+  return value.replace(/^['"]|['"]$/g, '');
+}
+
+const cloudinaryCloudName = stripWrappingQuotes(env.cloudinaryCloudName.trim());
+const cloudinaryUploadPreset = stripWrappingQuotes(env.cloudinaryUploadPreset.trim());
+const cloudinaryFolder = stripWrappingQuotes(env.cloudinaryFolder.trim());
+
+function getCloudinaryUploadUrl(): string {
+  return `https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudinaryCloudName)}/image/upload`;
+}
+
+function getCloudinaryDeleteUrl(): string {
+  return `https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudinaryCloudName)}/delete_by_token`;
+}
+
+function hasCloudinaryConfig(): boolean {
+  return cloudinaryCloudName.length > 0 && cloudinaryUploadPreset.length > 0;
+}
+
+async function uploadPhotoToCloudinary(file: File): Promise<{
+  readonly cloudinaryUrl: string;
+  readonly deleteToken: string | null;
+}> {
+  if (!hasCloudinaryConfig()) {
+    throw new Error('Image upload is not configured. Missing Cloudinary env values.');
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', cloudinaryUploadPreset);
+  formData.append('return_delete_token', 'true');
+
+  if (cloudinaryFolder) {
+    formData.append('folder', cloudinaryFolder);
+  }
+
+  const response = await fetch(getCloudinaryUploadUrl(), {
+    method: 'POST',
+    body: formData,
+  });
+  const payload = asRecord(await response.json().catch(() => null));
+  if (!response.ok) {
+    const uploadError = asRecord(payload?.error);
+    throw new Error(
+      readString(uploadError?.message) ?? 'Unable to upload this image right now.',
+    );
+  }
+
+  const cloudinaryUrl =
+    readString(payload?.secure_url) ?? readString(payload?.url);
+  if (!cloudinaryUrl) {
+    throw new Error('Image upload succeeded but no hosted URL was returned.');
+  }
+
+  return {
+    cloudinaryUrl,
+    deleteToken: readString(payload?.delete_token),
+  };
+}
+
+async function deletePhotoFromCloudinary(deleteToken: string): Promise<void> {
+  if (!deleteToken || !cloudinaryCloudName) {
+    return;
+  }
+
+  const response = await fetch(getCloudinaryDeleteUrl(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({ token: deleteToken }).toString(),
+  });
+
+  if (!response.ok) {
+    throw new Error('Unable to delete uploaded image from Cloudinary.');
+  }
+}
+
 const inputClassName =
   'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-lime-400 focus:ring-4 focus:ring-lime-100';
 
@@ -85,7 +178,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
   const [locationType, setLocationType] = useState<'address' | 'shop'>(
     preselectedShop ? 'shop' : 'address',
   );
-  const [photos, setPhotos] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedCondition, setSelectedCondition] = useState<string>('');
   const [itemName, setItemName] = useState('');
@@ -106,9 +199,11 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
   const [qrDownloadError, setQrDownloadError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const removedPhotoIdsRef = useRef<Set<string>>(new Set());
 
   const selectedConditionLabel =
     CONDITIONS.find((condition) => condition.value === selectedCondition)?.label ?? '';
+  const hasUploadingPhotos = photos.some((photo) => photo.isUploading);
 
   const selectedShop = useMemo(() => {
     if (!selectedShopId) {
@@ -193,7 +288,10 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
   };
 
   const resetFormState = () => {
-    photos.forEach((photoUrl) => URL.revokeObjectURL(photoUrl));
+    photos.forEach((photo) => {
+      URL.revokeObjectURL(photo.previewUrl);
+    });
+    removedPhotoIdsRef.current.clear();
     setPhotos([]);
     setSelectedCategory('');
     setSelectedCondition('');
@@ -241,32 +339,144 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
     setNearbyShops((current) => [preselectedShop, ...current]);
   }, [nearbyShops, preselectedShop]);
 
+  const cleanupDraftUploads = async (draftPhotos: readonly UploadedPhoto[]) => {
+    const photosToDelete = draftPhotos.filter((photo) => photo.deleteToken);
+    if (photosToDelete.length === 0) {
+      return;
+    }
+
+    await Promise.allSettled(
+      photosToDelete.map((photo) => deletePhotoFromCloudinary(photo.deleteToken ?? '')),
+    );
+  };
+
   const handleClose = () => {
+    if (!isSuccess) {
+      void cleanupDraftUploads(photos);
+    }
     resetFormState();
     onClose();
   };
 
-  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
 
-    const newPhotos = Array.from(files).map((file) => URL.createObjectURL(file));
-    setPhotos((prev) => [...prev, ...newPhotos].slice(0, 4));
+    const availableSlots = Math.max(0, 4 - photos.length);
+    if (availableSlots === 0) {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
+    if (!hasCloudinaryConfig()) {
+      setSubmitError(
+        'Image upload is unavailable. Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET.',
+      );
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
+    const selectedFiles = Array.from(files).slice(0, availableSlots);
+    const nextPhotos = selectedFiles.map((file) => {
+      const id = typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random()}`;
+
+      return {
+        id,
+        previewUrl: URL.createObjectURL(file),
+        cloudinaryUrl: null,
+        deleteToken: null,
+        isUploading: true,
+        error: null,
+      } satisfies UploadedPhoto;
+    });
+    setSubmitError(null);
+    setPhotos((currentPhotos) => [...currentPhotos, ...nextPhotos].slice(0, 4));
 
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+
+    await Promise.all(
+      selectedFiles.map(async (file, index) => {
+        const photoEntry = nextPhotos[index];
+        if (!photoEntry) {
+          return;
+        }
+
+        try {
+          const uploadedPhoto = await uploadPhotoToCloudinary(file);
+          if (removedPhotoIdsRef.current.has(photoEntry.id)) {
+            removedPhotoIdsRef.current.delete(photoEntry.id);
+            if (uploadedPhoto.deleteToken) {
+              await deletePhotoFromCloudinary(uploadedPhoto.deleteToken);
+            }
+            return;
+          }
+
+          setPhotos((currentPhotos) =>
+            currentPhotos.map((photo) =>
+              photo.id === photoEntry.id
+                ? {
+                    ...photo,
+                    cloudinaryUrl: uploadedPhoto.cloudinaryUrl,
+                    deleteToken: uploadedPhoto.deleteToken,
+                    isUploading: false,
+                    error: null,
+                  }
+                : photo,
+            ),
+          );
+        } catch (error) {
+          if (removedPhotoIdsRef.current.has(photoEntry.id)) {
+            removedPhotoIdsRef.current.delete(photoEntry.id);
+            return;
+          }
+
+          setPhotos((currentPhotos) =>
+            currentPhotos.map((photo) =>
+              photo.id === photoEntry.id
+                ? {
+                    ...photo,
+                    isUploading: false,
+                    error:
+                      error instanceof Error
+                        ? error.message
+                        : 'Unable to upload this image right now.',
+                  }
+                : photo,
+            ),
+          );
+        }
+      }),
+    );
   };
 
-  const removePhoto = (index: number) => {
-    setPhotos((prev) => {
-      const target = prev[index];
-      if (target) {
-        URL.revokeObjectURL(target);
-      }
+  const removePhoto = async (photoId: string) => {
+    const targetPhoto = photos.find((photo) => photo.id === photoId);
+    if (!targetPhoto) {
+      return;
+    }
 
-      return prev.filter((_, i) => i !== index);
-    });
+    removedPhotoIdsRef.current.add(photoId);
+    URL.revokeObjectURL(targetPhoto.previewUrl);
+    setPhotos((currentPhotos) => currentPhotos.filter((photo) => photo.id !== photoId));
+
+    if (!targetPhoto.deleteToken) {
+      return;
+    }
+
+    try {
+      await deletePhotoFromCloudinary(targetPhoto.deleteToken);
+      removedPhotoIdsRef.current.delete(photoId);
+    } catch {
+      setSubmitError('Image removed locally, but Cloudinary cleanup failed.');
+    }
   };
 
   const handleListAction = async () => {
@@ -308,12 +518,31 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
       return;
     }
 
+    if (photos.some((photo) => photo.isUploading)) {
+      setSubmitError('Please wait for all image uploads to finish.');
+      return;
+    }
+
+    if (photos.some((photo) => photo.error || !photo.cloudinaryUrl)) {
+      setSubmitError('One or more images failed to upload. Remove failed images and try again.');
+      return;
+    }
+
+    const uploadedImages = photos
+      .map((photo) => photo.cloudinaryUrl)
+      .filter((photoUrl): photoUrl is string => Boolean(photoUrl))
+      .map((photoUrl) => ({
+        url: photoUrl,
+        altText: normalizedItemName,
+      }));
+
     // Matches backend OpenAPI `CreateItemDto` field names and enums.
     const payload: CreateItemRequest = {
       title: normalizedItemName,
       description: normalizedDescription.length > 0 ? normalizedDescription : undefined,
       condition: selectedCondition as CreateItemRequest['condition'],
       category: normalizedCategory,
+      images: uploadedImages.length > 0 ? uploadedImages : undefined,
       address_line: resolvedAddressLine,
       postcode: resolvedPostcode,
       pickup_option: usingAddress ? 'exchange' : 'donate',
@@ -505,12 +734,25 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
             />
             <div className="flex flex-wrap gap-3">
               {photos.map((photo, index) => (
-                <div key={index} className="relative h-20 w-20 overflow-hidden rounded-xl border border-slate-200">
-                  <img src={photo} alt={`Upload ${index + 1}`} className="h-full w-full object-cover" />
+                <div key={photo.id} className="relative h-20 w-20 overflow-hidden rounded-xl border border-slate-200">
+                  <img src={photo.previewUrl} alt={`Upload ${index + 1}`} className="h-full w-full object-cover" />
+                  {photo.isUploading ? (
+                    <div className="absolute inset-0 flex items-center justify-center bg-slate-900/40">
+                      <span className="text-[10px] font-semibold text-white">Uploading...</span>
+                    </div>
+                  ) : null}
+                  {photo.error ? (
+                    <div className="absolute inset-x-0 bottom-0 bg-rose-600/85 px-1 py-0.5 text-center text-[9px] font-semibold text-white">
+                      Failed
+                    </div>
+                  ) : null}
                   <button
                     className="absolute right-1 top-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-white text-rose-500 shadow-sm"
-                    onClick={() => removePhoto(index)}
+                    onClick={() => {
+                      void removePhoto(photo.id);
+                    }}
                     title="Remove photo"
+                    disabled={isSubmitting}
                   >
                     <X size={12} />
                   </button>
@@ -520,6 +762,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
                 <button
                   className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-slate-300 text-slate-500 transition hover:border-lime-300 hover:text-slate-700"
                   onClick={() => fileInputRef.current?.click()}
+                  disabled={isSubmitting}
                 >
                   <Upload size={20} />
                   <span className="text-[11px] font-medium">Add photo</span>
@@ -717,9 +960,9 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
 
         <footer className="flex justify-end gap-3 border-t border-slate-100 px-6 pb-6 pt-4">
           <Button variant="secondary" onClick={handleClose} disabled={isSubmitting}>Cancel</Button>
-          <Button variant="primary" onClick={() => { void handleListAction(); }} disabled={isSubmitting}>
+          <Button variant="primary" onClick={() => { void handleListAction(); }} disabled={isSubmitting || hasUploadingPhotos}>
             <Plus size={18} />
-            {isSubmitting ? 'Listing...' : 'List Item'}
+            {isSubmitting ? 'Listing...' : hasUploadingPhotos ? 'Uploading images...' : 'List Item'}
           </Button>
         </footer>
       </div>

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
 import { ListItemDialog } from '@/shared/ui/modal/ListItemDialog'
+import { ItemQrCodeDialog } from '@/shared/ui/modal/ItemQrCodeDialog'
 import { ListingsLoadingState } from '@/features/listings/ui/components/ListingsLoadingState'
 import { ListingRow } from '@/features/listings/ui/components/ListingRow'
 import { ListingOffcanvas } from '@/features/listings/ui/components/ListingOffcanvas'
@@ -29,6 +30,7 @@ export default function YourListingsPage() {
     goToPage,
   } = useDonorListings({ enabled: true, limit: 6 })
   const [selectedListing, setSelectedListing] = useState<DonorListingItem | null>(null)
+  const [selectedQrListing, setSelectedQrListing] = useState<DonorListingItem | null>(null)
   const [isListItemDialogOpen, setIsListItemDialogOpen] = useState(false)
 
   const hasListings = listings.length > 0
@@ -40,6 +42,28 @@ export default function YourListingsPage() {
     } catch {
       toastError('Remove failed', 'Unable to remove listing right now.')
     }
+  }
+
+  const shouldShowQrAction = (item: DonorListingItem): boolean => {
+    if (!item.qrCode) {
+      return false
+    }
+
+    const normalizedPickupOption = item.pickupOption.toLowerCase()
+    const hasApprovedClaim =
+      item.claims.some((claim) => claim.status.toLowerCase() === 'approved') ||
+      item.claimStatus?.toLowerCase() === 'approved'
+    const isNonActive = item.status !== 'Active'
+
+    if (normalizedPickupOption === 'exchange' && hasApprovedClaim) {
+      return true
+    }
+
+    if ((normalizedPickupOption === 'donate' || normalizedPickupOption === 'donor') && isNonActive) {
+      return true
+    }
+
+    return false
   }
 
   return (
@@ -86,6 +110,8 @@ export default function YourListingsPage() {
               removingId={removingId}
               onOpenActive={setSelectedListing}
               onOpenDetails={setSelectedListing}
+              onOpenQr={setSelectedQrListing}
+              showQrAction={shouldShowQrAction(item)}
               onRemove={(listingId) => {
                 void handleRemoveListing(listingId)
               }}
@@ -107,6 +133,13 @@ export default function YourListingsPage() {
             isOpen={Boolean(selectedListing)}
             item={selectedListing}
             onClose={() => setSelectedListing(null)}
+          />
+
+          <ItemQrCodeDialog
+            isOpen={Boolean(selectedQrListing)}
+            onClose={() => setSelectedQrListing(null)}
+            itemTitle={selectedQrListing?.title ?? 'Item'}
+            qrCodeUrl={selectedQrListing?.qrCode ?? null}
           />
         </div>
       )}

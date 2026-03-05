@@ -10,6 +10,7 @@ import { DonorEnvironmentalImpactCard } from '@/features/home/ui/components/Dono
 import { SuccessDialog } from '@/shared/ui/modal/SuccessDialog'
 import { ListItemDialog } from '@/shared/ui/modal/ListItemDialog'
 import { ItemDetailsDialog } from '@/shared/ui/modal/ItemDetailsDialog'
+import { ItemQrCodeDialog } from '@/shared/ui/modal/ItemQrCodeDialog'
 import { CustomSelect } from '@/shared/ui/select'
 import { useUserRole } from '@/shared/context/useUserRole'
 import { useCollectorDashboard } from '@/features/home/hooks/useCollectorDashboard'
@@ -42,6 +43,7 @@ export default function Dashboard() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
   const [selectedBrowseItem, setSelectedBrowseItem] = useState<BrowseItem | null>(null)
   const [selectedDonorListing, setSelectedDonorListing] = useState<DonorListingItem | null>(null)
+  const [selectedDonorQrListing, setSelectedDonorQrListing] = useState<DonorListingItem | null>(null)
   const {
     filters,
     items,
@@ -121,6 +123,28 @@ export default function Dashboard() {
   )
     ? filters.condition
     : 'All condition'
+
+  const shouldShowDonorListingQrAction = (item: DonorListingItem): boolean => {
+    if (!item.qrCode) {
+      return false
+    }
+
+    const normalizedPickupOption = item.pickupOption.toLowerCase()
+    const hasApprovedClaim =
+      item.claims.some((claim) => claim.status.toLowerCase() === 'approved') ||
+      item.claimStatus?.toLowerCase() === 'approved'
+    const isNonActive = item.status !== 'Active'
+
+    if (normalizedPickupOption === 'exchange' && hasApprovedClaim) {
+      return true
+    }
+
+    if ((normalizedPickupOption === 'donate' || normalizedPickupOption === 'donor') && isNonActive) {
+      return true
+    }
+
+    return false
+  }
 
   return (
     <div className="space-y-6">
@@ -211,6 +235,8 @@ export default function Dashboard() {
                       removingId={removingId}
                       onOpenActive={setSelectedDonorListing}
                       onOpenDetails={setSelectedDonorListing}
+                      onOpenQr={setSelectedDonorQrListing}
+                      showQrAction={shouldShowDonorListingQrAction(item)}
                       onRemove={(listingId) => {
                         void removeListing(listingId)
                       }}
@@ -223,6 +249,12 @@ export default function Dashboard() {
               isOpen={Boolean(selectedDonorListing)}
               item={selectedDonorListing}
               onClose={() => setSelectedDonorListing(null)}
+            />
+            <ItemQrCodeDialog
+              isOpen={Boolean(selectedDonorQrListing)}
+              onClose={() => setSelectedDonorQrListing(null)}
+              itemTitle={selectedDonorQrListing?.title ?? 'Item'}
+              qrCodeUrl={selectedDonorQrListing?.qrCode ?? null}
             />
           </section>
         </>
@@ -454,4 +486,3 @@ export default function Dashboard() {
     </div>
   )
 }
-

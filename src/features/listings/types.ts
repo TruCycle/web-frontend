@@ -24,11 +24,13 @@ export interface DonorListingItem {
   readonly id: string
   readonly title: string
   readonly status: ListingStatus
+  readonly pickupOption: string
   readonly category: string
   readonly condition: string
   readonly meta: string
   readonly description: string | null
   readonly imageUrl: string | null
+  readonly qrCode: string | null
   readonly rawStatus: string
   readonly claimStatus: string | null
   readonly createdAt: string | null

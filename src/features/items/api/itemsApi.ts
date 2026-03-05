@@ -161,6 +161,7 @@ function mapCollectedItem(value: unknown): CollectedItem | null {
       category: readString(item.category) ?? 'Uncategorized',
       condition: readString(item.condition) ?? 'Unknown',
       status: readString(item.status) ?? 'unknown',
+      pickupOption: readString(item.pickup_option) ?? 'exchange',
       qrCode: readString(item.qr_code),
       image: firstImage ?? null,
       ownerName: formatOwnerName(owner),

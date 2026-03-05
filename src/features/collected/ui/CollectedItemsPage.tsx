@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CircleAlert } from 'lucide-react'
+import { CircleAlert, QrCode } from 'lucide-react'
 import cautionIcon from '@/assets/icons/caution-icon.svg'
 import { useCollectedItems } from '@/features/collected/hooks/useCollectedItems'
 import type { CollectedItem } from '@/features/items/types'
@@ -8,6 +8,7 @@ import { useToast } from '@/shared/ui/toast/useToast'
 import { Button } from '@/shared/ui/button/Button'
 import { ItemRowCard } from '@/shared/ui/item/ItemRowCard'
 import { ItemDetailsDialog } from '@/shared/ui/modal/ItemDetailsDialog'
+import { ItemQrCodeDialog } from '@/shared/ui/modal/ItemQrCodeDialog'
 import { QRCodeDialog } from '@/shared/ui/modal/QRCodeDialog'
 import { CollectionSuccessDialog } from '@/shared/ui/modal/CollectionSuccessDialog'
 import { PaginationControls } from '@/shared/ui/pagination/PaginationControls'
@@ -42,6 +43,7 @@ export default function CollectedItemsPage() {
     completeCollection,
   } = useCollectedItems({ limit: 6 })
   const [selectedItem, setSelectedItem] = useState<CollectedItem | null>(null)
+  const [selectedQrPreviewItem, setSelectedQrPreviewItem] = useState<CollectedItem | null>(null)
   const [qrItem, setQrItem] = useState<CollectedItem | null>(null)
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const [collectedItemName, setCollectedItemName] = useState('')
@@ -82,6 +84,14 @@ export default function CollectedItemsPage() {
     } catch {
       toastError('Collection failed', 'Please verify the QR and try again.')
     }
+  }
+
+  const shouldShowQrPreviewAction = (item: CollectedItem): boolean => {
+    return (
+      item.claimStatus.toLowerCase() === 'approved' &&
+      item.item.pickupOption.toLowerCase() === 'donate' &&
+      Boolean(item.item.qrCode)
+    )
   }
 
   return (
@@ -163,6 +173,17 @@ export default function CollectedItemsPage() {
               imageAlt={item.item.title}
               actions={
                 <>
+                  {shouldShowQrPreviewAction(item) ? (
+                    <Button
+                      variant="primary"
+                      className="h-10 w-10 rounded-xl p-0"
+                      onClick={() => setSelectedQrPreviewItem(item)}
+                      aria-label="Open item QR code"
+                      title="Open item QR code"
+                    >
+                      <QrCode size={18} />
+                    </Button>
+                  ) : null}
                   <Button
                     variant="secondary"
                     className="bg-[#F8FAFC] text-[#222222] ring-0 hover:bg-slate-100"
@@ -170,9 +191,6 @@ export default function CollectedItemsPage() {
                   >
                     View Details
                   </Button>
-                  {statusLabel(item.claimStatus) === 'Claimed' ? (
-                    <Button variant='primary' onClick={() => setQrItem(item)}>Open QR Code</Button>
-                  ) : null}
                 </>
               }
             />
@@ -194,6 +212,13 @@ export default function CollectedItemsPage() {
         isOpen={Boolean(dialogItem)}
         onClose={() => setSelectedItem(null)}
         item={dialogItem}
+      />
+
+      <ItemQrCodeDialog
+        isOpen={Boolean(selectedQrPreviewItem)}
+        onClose={() => setSelectedQrPreviewItem(null)}
+        itemTitle={selectedQrPreviewItem?.item.title ?? 'Item'}
+        qrCodeUrl={selectedQrPreviewItem?.item.qrCode ?? null}
       />
 
       <QRCodeDialog

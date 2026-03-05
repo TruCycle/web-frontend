@@ -52,9 +52,8 @@ export function useCollectedItems(options: UseCollectedItemsOptions = {}) {
     () =>
       items.filter(
         (item) =>
-          item.claimStatus === 'approved' ||
-          item.claimStatus === 'pending_dropoff' ||
-          item.claimStatus === 'pending_collection',
+          item.claimStatus.toLowerCase() === 'approved' &&
+          item.item.pickupOption.toLowerCase() === 'donate',
       ),
     [items],
   )

@@ -46,6 +46,7 @@ export interface CollectedItem {
     readonly category: string
     readonly condition: string
     readonly status: string
+    readonly pickupOption: string
     readonly qrCode: string | null
     readonly image: ItemImage | null
     readonly ownerName: string
