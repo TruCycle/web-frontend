@@ -28,6 +28,7 @@ export interface LoginPayload {
 }
 
 export interface ResetPasswordPayload {
-  readonly token: string
+  readonly email: string
+  readonly otp: string
   readonly newPassword: string
 }

@@ -109,12 +109,13 @@ export async function requestPasswordReset(email: string): Promise<void> {
 }
 
 export async function resetPassword(payload: ResetPasswordPayload): Promise<void> {
-  await apiRequest<ApiEnvelope<null>, { token: string; new_password: string }>(
+  await apiRequest<ApiEnvelope<null>, { email: string; otp: string; new_password: string }>(
     '/auth/reset-password',
     {
       method: 'POST',
       body: {
-        token: payload.token,
+        email: payload.email,
+        otp: payload.otp,
         new_password: payload.newPassword,
       },
     },

@@ -264,7 +264,7 @@ export function AppShell({ children }: AppShellProps) {
       ) : null}
 
       <main className="flex h-screen flex-1 flex-col overflow-x-hidden bg-transparent max-md:h-auto max-md:rounded-2xl">
-        <header className="sticky top-0 z-[100] flex h-[72px] w-full items-center justify-between border-b border-tc-header-border bg-[#FFFFFF] px-6 shadow-none max-md:px-4">
+        <header className="sticky top-0 z-[100] flex h-[72px] w-full items-center justify-end border-b border-tc-header-border bg-[#FFFFFF] px-6 shadow-none max-md:justify-between max-md:px-4">
           <div className="hidden items-center gap-2 max-md:flex">
             <button
               type="button"

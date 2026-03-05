@@ -243,11 +243,11 @@
     "/auth/forget-password": {
       "post": {
         "operationId": "AuthController_forgetPassword",
-        "summary": "Request a password reset email",
+        "summary": "Request a password reset OTP",
         "parameters": [],
         "requestBody": {
           "required": true,
-          "description": "Email to send reset link to",
+          "description": "Email to send reset OTP to",
           "content": {
             "application/json": {
               "schema": {
@@ -264,7 +264,7 @@
                 "schema": {
                   "example": {
                     "status": "success",
-                    "message": "Reset password email sent successfully.",
+                    "message": "Reset OTP sent successfully.",
                     "data": null
                   }
                 }
@@ -329,11 +329,11 @@
     "/auth/reset-password": {
       "post": {
         "operationId": "AuthController_resetPassword",
-        "summary": "Reset password using a token",
+        "summary": "Reset password using email + OTP",
         "parameters": [],
         "requestBody": {
           "required": true,
-          "description": "New password and reset token",
+          "description": "Email, OTP, and new password",
           "content": {
             "application/json": {
               "schema": {
@@ -3967,10 +3967,14 @@
       "ResetPasswordDto": {
         "type": "object",
         "properties": {
-          "token": {
+          "email": {
             "type": "string",
-            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-            "description": "Password reset token (JWT)"
+            "example": "user@example.com"
+          },
+          "otp": {
+            "type": "string",
+            "example": "123456",
+            "description": "6-digit OTP sent to email"
           },
           "new_password": {
             "type": "string",
@@ -3979,7 +3983,8 @@
           }
         },
         "required": [
-          "token",
+          "email",
+          "otp",
           "new_password"
         ]
       },
