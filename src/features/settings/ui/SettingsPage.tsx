@@ -5,6 +5,7 @@ import { classNames } from '@/shared/utils/classNames'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { updateCurrentUserProfile } from '@/features/settings/api/settingsApi'
 import { useToast } from '@/shared/ui/toast/useToast'
+import { ChangePasswordModal } from '@/features/settings/ui/components/ChangePasswordModal'
 
 type TabKey = 'profile' | 'security' | 'notifications'
 
@@ -42,6 +43,7 @@ export default function SettingsPage() {
   const [is2FAEnabled, setIs2FAEnabled] = useState(false)
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [inAppNotifications, setInAppNotifications] = useState(true)
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [profileForm, setProfileForm] = useState({
     fullName: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim(),
@@ -184,7 +186,11 @@ export default function SettingsPage() {
                 <h3 className="font-medium text-slate-900">Password</h3>
                 <p className="text-sm text-[#22222299]">Update your password</p>
               </div>
-              <button className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-700">
+              <button
+                type="button"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                onClick={() => setIsChangePasswordModalOpen(true)}
+              >
                 <Edit2 size={18} />
               </button>
             </div>
@@ -227,6 +233,12 @@ export default function SettingsPage() {
           </div>
         ) : null}
       </div>
+
+      <ChangePasswordModal
+        isOpen={isChangePasswordModalOpen}
+        onClose={() => setIsChangePasswordModalOpen(false)}
+        email={user?.email ?? ''}
+      />
     </div>
   )
 }
