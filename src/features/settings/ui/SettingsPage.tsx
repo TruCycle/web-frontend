@@ -5,6 +5,7 @@ import { classNames } from '@/shared/utils/classNames'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { updateCurrentUserProfile } from '@/features/settings/api/settingsApi'
 import { useToast } from '@/shared/ui/toast/useToast'
+import { ChangePasswordModal } from '@/features/settings/ui/components/ChangePasswordModal'
 
 type TabKey = 'profile' | 'security' | 'notifications'
 
@@ -21,7 +22,7 @@ function Toggle({
       onClick={() => onChange(!checked)}
       className={classNames(
         'relative inline-flex h-7 w-12 items-center rounded-full transition',
-        checked ? 'bg-lime-400' : 'bg-slate-300',
+        checked ? 'bg-[#34DA45]' : 'bg-[#00537A0D]',
       )}
       aria-pressed={checked}
     >
@@ -42,6 +43,7 @@ export default function SettingsPage() {
   const [is2FAEnabled, setIs2FAEnabled] = useState(false)
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [inAppNotifications, setInAppNotifications] = useState(true)
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [profileForm, setProfileForm] = useState({
     fullName: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim(),
@@ -85,21 +87,21 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-5">
+    <div className="w-full space-y-5">
       <div>
         <h1 className="text-3xl font-bold text-slate-900">Settings</h1>
         <p className="text-slate-500">Manage your profile, security and preferences.</p>
       </div>
 
-      <div className="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-white p-2">
+      <div className="flex flex-wrap gap-1 rounded-xl bg-[#E2E8F040] p-2 w-fit">
         {(['profile', 'security', 'notifications'] as const).map((tab) => (
           <button
             key={tab}
             className={classNames(
-              'rounded-lg px-4 py-2 text-sm font-medium capitalize transition',
+              'rounded-md px-4 py-3 text-sm font-medium capitalize transition',
               activeTab === tab
-                ? 'bg-lime-100 text-slate-900 ring-1 ring-lime-200'
-                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800',
+                ? 'bg-white text-slate-900'
+                : 'text-[#22222299] hover:bg-slate-100 hover:text-slate-800',
             )}
             onClick={() => setActiveTab(tab)}
           >
@@ -108,7 +110,7 @@ export default function SettingsPage() {
         ))}
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl bg-white p-6 shadow-sm">
         {activeTab === 'profile' ? (
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-slate-900">Your Profile</h2>
@@ -116,7 +118,7 @@ export default function SettingsPage() {
             <label className="block space-y-1">
               <span className="text-sm font-medium text-slate-700">Full Name</span>
               <input
-                className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+                className="h-11 w-full rounded-md border border-[#E2E8F0] px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
                 type="text"
                 value={profileForm.fullName}
                 onChange={(event) =>
@@ -131,7 +133,7 @@ export default function SettingsPage() {
             <label className="block space-y-1">
               <span className="text-sm font-medium text-slate-700">Phone (optional)</span>
               <input
-                className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+                className="h-11 w-full rounded-md border border-[#E2E8F0] px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
                 type="tel"
                 placeholder="Enter your phone number"
                 value={profileForm.phone}
@@ -147,7 +149,7 @@ export default function SettingsPage() {
             <label className="block space-y-1">
               <span className="text-sm font-medium text-slate-700">Email</span>
               <input
-                className="h-11 w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-3 text-sm text-slate-500"
+                className="h-11 w-full cursor-not-allowed rounded-md border border-[#E2E8F0] bg-slate-100 px-3 text-sm text-slate-500"
                 type="email"
                 value={user?.email ?? ''}
                 disabled
@@ -157,7 +159,7 @@ export default function SettingsPage() {
             <label className="block space-y-1">
               <span className="text-sm font-medium text-slate-700">Postcode</span>
               <input
-                className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+                className="h-11 w-full rounded-md border border-[#E2E8F0] px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
                 type="text"
                 value={profileForm.postcode}
                 onChange={(event) =>
@@ -169,7 +171,7 @@ export default function SettingsPage() {
               />
             </label>
 
-            <Button disabled={isSaving} className="mt-2" onClick={() => void handleProfileUpdate()}>
+            <Button variant='primary' disabled={isSaving} className="mt-2" onClick={() => void handleProfileUpdate()}>
               {isSaving ? 'Saving...' : 'Update Profile'}
             </Button>
           </div>
@@ -179,20 +181,24 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-slate-900">Security</h2>
 
-            <div className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
-              <div>
+            <div className="flex items-center justify-between rounded-md border border-[#E2E8F0] p-4">
+              <div className='flex flex-col gap-2'>
                 <h3 className="font-medium text-slate-900">Password</h3>
-                <p className="text-sm text-slate-500">Update your password</p>
+                <p className="text-sm text-[#22222299]">Update your password</p>
               </div>
-              <button className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-700">
+              <button
+                type="button"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                onClick={() => setIsChangePasswordModalOpen(true)}
+              >
                 <Edit2 size={18} />
               </button>
             </div>
 
-            <div className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
-              <div>
+            <div className="flex items-center justify-between rounded-md border border-[#E2E8F0] p-4">
+              <div className='flex flex-col gap-2'>
                 <h3 className="font-medium text-slate-900">2FA</h3>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-[#22222299]">
                   Enable or disable two-factor authentication
                 </p>
               </div>
@@ -205,20 +211,20 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-slate-900">Notifications</h2>
 
-            <div className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
-              <div>
+            <div className="flex items-center justify-between rounded-md border border-[#E2E8F0] p-4">
+              <div className='flex flex-col gap-2'>
                 <h3 className="font-medium text-slate-900">Email Notifications</h3>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-[#22222299]">
                   Receive email notifications when updates happen
                 </p>
               </div>
               <Toggle checked={emailNotifications} onChange={setEmailNotifications} />
             </div>
 
-            <div className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
-              <div>
+            <div className="flex items-center justify-between rounded-md border border-[#E2E8F0] p-4">
+              <div className='flex flex-col gap-2'>
                 <h3 className="font-medium text-slate-900">In-App Notifications</h3>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-[#22222299]">
                   Receive notifications in the dashboard
                 </p>
               </div>
@@ -227,6 +233,12 @@ export default function SettingsPage() {
           </div>
         ) : null}
       </div>
+
+      <ChangePasswordModal
+        isOpen={isChangePasswordModalOpen}
+        onClose={() => setIsChangePasswordModalOpen(false)}
+        email={user?.email ?? ''}
+      />
     </div>
   )
 }

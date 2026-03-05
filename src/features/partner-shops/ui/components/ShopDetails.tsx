@@ -4,9 +4,10 @@ import { Button } from '@/shared/ui/button/Button';
 
 interface ShopDetailsProps {
     shop: Shop;
+    onPlanHandoff: (shop: Shop) => void;
 }
 
-export function ShopDetails({ shop }: ShopDetailsProps) {
+export function ShopDetails({ shop, onPlanHandoff }: ShopDetailsProps) {
     return (
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div>
@@ -52,7 +53,7 @@ export function ShopDetails({ shop }: ShopDetailsProps) {
 
             <div className="mt-5 flex flex-wrap gap-3">
                 <Button variant="secondary">Get Direction</Button>
-                <Button>Plan Handoff Here</Button>
+                <Button onClick={() => onPlanHandoff(shop)}>Plan Handoff Here</Button>
             </div>
         </div>
     );

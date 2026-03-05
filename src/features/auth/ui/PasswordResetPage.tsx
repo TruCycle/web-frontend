@@ -253,9 +253,10 @@ export default function PasswordResetPage() {
 
     setIsSubmitting(true)
     try {
-      const resetToken = otpValues.join('')
+      const resetOtp = otpValues.join('')
       await resetPassword({
-        token: resetToken,
+        email: email.trim(),
+        otp: resetOtp,
         newPassword: passwordValues.password,
       })
       success('Password updated', 'Redirecting you now...')

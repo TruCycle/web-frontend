@@ -4,6 +4,7 @@ import { clampLimit, toQueryString } from '@/shared/lib/api/query'
 import { env } from '@/shared/lib/config/env'
 import type {
   BrowseItem,
+  CollectedItemsResponse,
   CollectedItem,
   ImpactMetrics,
   ItemImage,
@@ -17,6 +18,12 @@ interface FetchBrowseItemsParams {
   readonly postcode?: string
   readonly page?: number
   readonly limit?: number
+}
+
+interface FetchCollectedItemsParams {
+  readonly page?: number
+  readonly limit?: number
+  readonly claimStatus?: string
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -154,6 +161,7 @@ function mapCollectedItem(value: unknown): CollectedItem | null {
       category: readString(item.category) ?? 'Uncategorized',
       condition: readString(item.condition) ?? 'Unknown',
       status: readString(item.status) ?? 'unknown',
+      pickupOption: readString(item.pickup_option) ?? 'exchange',
       qrCode: readString(item.qr_code),
       image: firstImage ?? null,
       ownerName: formatOwnerName(owner),
@@ -222,10 +230,18 @@ export async function createItemClaim(itemId: string): Promise<void> {
   })
 }
 
-export async function fetchCollectedItems(): Promise<CollectedItem[]> {
-  const response = await apiRequest<unknown>(
-    `/items/me/collected?limit=${clampLimit(50)}`,
-  )
+export async function fetchCollectedItems(
+  params: FetchCollectedItemsParams = {},
+): Promise<CollectedItemsResponse> {
+  const requestedPage = params.page ?? 1
+  const requestedLimit = clampLimit(params.limit, 10)
+  const query = toQueryString({
+    page: requestedPage,
+    limit: requestedLimit,
+    claim_status: params.claimStatus,
+  })
+
+  const response = await apiRequest<unknown>(`/items/me/collected${query}`)
   const data = unwrapApiData<unknown>(response)
   const payloadRecord = asRecord(data)
   const items = Array.isArray(payloadRecord?.items)
@@ -234,9 +250,31 @@ export async function fetchCollectedItems(): Promise<CollectedItem[]> {
       ? data
       : []
 
-  return items
+  const mappedItems = items
     .map((entry) => mapCollectedItem(entry))
     .filter((entry): entry is CollectedItem => entry !== null)
+
+  const paginationRecord = asRecord(payloadRecord?.pagination)
+  const page = Math.max(1, Math.trunc(readNumber(paginationRecord?.page) ?? requestedPage))
+  const limit = Math.max(1, Math.trunc(readNumber(paginationRecord?.limit) ?? requestedLimit))
+  const total = Math.max(0, Math.trunc(readNumber(paginationRecord?.total) ?? mappedItems.length))
+  const totalPages = Math.max(
+    1,
+    Math.trunc(
+      readNumber(paginationRecord?.total_pages) ??
+        Math.ceil(total / limit),
+    ),
+  )
+
+  return {
+    items: mappedItems,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+    },
+  }
 }
 
 export async function fetchImpactMetrics(): Promise<ImpactMetrics> {

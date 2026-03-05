@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, Mail, MessageCircle, Phone, Search } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useUserRole, type UserRole } from '@/shared/context/useUserRole'
 import { classNames } from '@/shared/utils/classNames'
 
 interface FaqItem {
@@ -22,13 +21,11 @@ interface SupportContent {
 }
 
 interface ExpansionState {
-  readonly role: UserRole
   readonly sectionId: string
   readonly faqId: string | null
 }
 
-const supportContentByRole: Record<UserRole, SupportContent> = {
-  collector: {
+const supportContent: SupportContent = {
     defaultSection: 'getting-started',
     sections: [
       {
@@ -36,149 +33,210 @@ const supportContentByRole: Record<UserRole, SupportContent> = {
         title: 'Getting Started',
         faqs: [
           {
-            id: 'collector-create-account',
+            id: 'create-account',
             question: 'How do I create an account?',
             answer:
-              'Open the signup page, choose Collector, verify your email, and complete your profile.',
+              'Open the signup page, complete your details, verify your email, and sign in to access dashboard features.',
           },
           {
-            id: 'collector-role-difference',
+            id: 'role-switching',
             question: 'What is the difference between a Collector and Donor account?',
             answer:
-              'Collectors browse and claim listed items, while Donors publish available items for exchange.',
+              'Collectors browse and claim items, while Donors create listings. You can switch between both modes using the role toggle in the sidebar.',
           },
           {
-            id: 'collector-pricing',
+            id: 'pricing',
             question: 'Is TruCycle free to use?',
             answer: 'Yes. Basic account usage is free for both collectors and donors.',
           },
+          {
+            id: 'first-steps',
+            question: 'What should I do after signing in for the first time?',
+            answer:
+              'Set your location, review your profile details, and then either browse items (Collector) or create your first listing (Donor).',
+          },
         ],
-      },
-      {
-        id: 'listing-items',
-        title: 'Listing Items',
-        faqs: [],
-      },
-      {
-        id: 'claiming-items',
-        title: 'Claiming Items',
-        faqs: [],
-      },
-      {
-        id: 'safety-trust',
-        title: 'Safety & Trust',
-        faqs: [],
-      },
-      {
-        id: 'rewards-impact',
-        title: 'Rewards & Impact',
-        faqs: [],
-      },
-      {
-        id: 'account-settings',
-        title: 'Account & Settings',
-        faqs: [],
-      },
-    ],
-  },
-  donor: {
-    defaultSection: 'listing-items',
-    sections: [
-      {
-        id: 'getting-started',
-        title: 'Getting Started',
-        faqs: [],
       },
       {
         id: 'listing-items',
         title: 'Listing Items',
         faqs: [
           {
-            id: 'donor-what-list',
+            id: 'what-to-list',
             question: 'What items can I list?',
             answer:
-              'You can list reusable household items, electronics, books, clothing, and more.',
+              'You can list reusable household items, electronics, books, clothing, furniture, and similar items in fair condition.',
           },
           {
-            id: 'donor-how-list',
-            question: 'How do I list an item?',
-            answer: 'Click "List New Item", add photos and details, then submit for listing.',
-          },
-          {
-            id: 'donor-listing-duration',
-            question: 'How long does an item stay listed?',
+            id: 'how-to-list',
+            question: 'How do I list a new item?',
             answer:
-              'Listings remain active until collected or manually removed from your dashboard.',
+              'Open your dashboard, click "List New Item", upload images, add category/condition details, and publish.',
+          },
+          {
+            id: 'listing-photos',
+            question: 'How many photos should I add?',
+            answer:
+              'Add at least one clear cover image. Multiple photos are recommended to show item condition from different angles.',
+          },
+          {
+            id: 'edit-remove-listing',
+            question: 'Can I edit or remove a listing?',
+            answer:
+              'Yes. Open "My Listed Items" and use the available actions to view details, update listing info, or remove the item.',
           },
         ],
       },
       {
         id: 'claiming-items',
         title: 'Claiming Items',
-        faqs: [],
+        faqs: [
+          {
+            id: 'how-to-claim',
+            question: 'How do I claim an item?',
+            answer:
+              'From Browse Items, open an item and click "Request a Claim". The donor reviews and approves the request.',
+          },
+          {
+            id: 'claim-status',
+            question: 'Where can I track claim status?',
+            answer:
+              'Open "My Selected Items" to see whether a claim is pending, approved, or completed.',
+          },
+          {
+            id: 'pickup-process',
+            question: 'How is pickup confirmed?',
+            answer:
+              'When a claim is approved, use the provided QR flow at handoff to confirm and complete collection.',
+          },
+          {
+            id: 'cancel-claim',
+            question: 'Can I cancel a claim request?',
+            answer:
+              'Yes. If the claim is still pending, you can cancel it from the selected item details before completion.',
+          },
+        ],
       },
       {
         id: 'safety-trust',
         title: 'Safety & Trust',
-        faqs: [],
+        faqs: [
+          {
+            id: 'safe-meetups',
+            question: 'How can I stay safe during handoff?',
+            answer:
+              'Use verified partner shops when available, meet in well-lit public places, and confirm item details before completion.',
+          },
+          {
+            id: 'report-user',
+            question: 'How do I report suspicious behavior?',
+            answer:
+              'Open the conversation or item details and use the report option, or contact support directly with the listing and user details.',
+          },
+          {
+            id: 'item-accuracy',
+            question: 'What if the item condition does not match the listing?',
+            answer:
+              'Do not complete handoff. Report the issue in-app and include photos so the support team can review quickly.',
+          },
+          {
+            id: 'privacy',
+            question: 'Is my personal information shared publicly?',
+            answer:
+              'No. TruCycle only shows essential profile details required for secure exchanges and communication.',
+          },
+        ],
       },
       {
         id: 'rewards-impact',
         title: 'Rewards & Impact',
-        faqs: [],
+        faqs: [
+          {
+            id: 'how-rewards-work',
+            question: 'How are rewards calculated?',
+            answer:
+              'Rewards are calculated from completed exchanges and impact actions based on item category, condition, and completion status.',
+          },
+          {
+            id: 'co2-impact',
+            question: 'How is environmental impact shown?',
+            answer:
+              'Impact metrics such as estimated CO2 saved are displayed in your dashboard and update after successful exchanges.',
+          },
+          {
+            id: 'rewards-availability',
+            question: 'When will my rewards appear?',
+            answer:
+              'Rewards are posted after a collection is confirmed and marked completed in the platform workflow.',
+          },
+          {
+            id: 'impact-history',
+            question: 'Can I view past impact performance?',
+            answer:
+              'Yes. The dashboard includes historical summaries so you can track trends in your contribution over time.',
+          },
+        ],
       },
       {
         id: 'account-settings',
         title: 'Account & Settings',
-        faqs: [],
+        faqs: [
+          {
+            id: 'update-profile',
+            question: 'How do I update my profile information?',
+            answer:
+              'Go to Settings and update your personal details, preferences, and location information.',
+          },
+          {
+            id: 'change-password',
+            question: 'How do I change my password?',
+            answer:
+              'Use the account security section in Settings or the password reset flow from the login page.',
+          },
+          {
+            id: 'notifications',
+            question: 'Can I control notifications?',
+            answer:
+              'Yes. Notification preferences are available in Settings so you can choose relevant alerts.',
+          },
+          {
+            id: 'delete-account',
+            question: 'How can I request account deletion?',
+            answer:
+              'Contact support from this page using email or phone and we will guide you through verification and deletion.',
+          },
+        ],
       },
     ],
-  },
 }
 
-const validRoles: readonly UserRole[] = ['collector', 'donor']
-
 export default function SupportFaqPage() {
-  const { role } = useUserRole()
   const { viewRole } = useParams<{ readonly viewRole?: string }>()
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const [expansionState, setExpansionState] = useState<ExpansionState>(() => ({
-    role,
-    sectionId: supportContentByRole[role].defaultSection,
+    sectionId: supportContent.defaultSection,
     faqId: null,
   }))
 
   useEffect(() => {
-    if (!viewRole || !validRoles.includes(viewRole as UserRole)) {
-      navigate(`/support/${role}`, { replace: true })
-      return
+    if (viewRole) {
+      navigate('/support', { replace: true })
     }
+  }, [navigate, viewRole])
 
-    if (viewRole !== role) {
-      navigate(`/support/${role}`, { replace: true })
-    }
-  }, [navigate, role, viewRole])
-
-  const expandedSectionId =
-    expansionState.role === role
-      ? expansionState.sectionId
-      : supportContentByRole[role].defaultSection
-
-  const expandedFaqId =
-    expansionState.role === role
-      ? expansionState.faqId
-      : null
+  const expandedSectionId = expansionState.sectionId
+  const expandedFaqId = expansionState.faqId
 
   const filteredSections = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase()
-    const roleContent = supportContentByRole[role]
+    const pageContent = supportContent
 
     if (normalizedQuery.length === 0) {
-      return roleContent.sections
+      return pageContent.sections
     }
 
-    return roleContent.sections
+    return pageContent.sections
       .map((section) => {
         const titleMatches = section.title.toLowerCase().includes(normalizedQuery)
         const filteredFaqs = section.faqs.filter((faq) =>
@@ -198,10 +256,10 @@ export default function SupportFaqPage() {
         const titleMatches = section.title.toLowerCase().includes(normalizedQuery)
         return titleMatches || section.faqs.length > 0
       })
-  }, [role, searchQuery])
+  }, [searchQuery])
 
   return (
-    <div className="mx-auto max-w-[1120px]">
+    <div className="w-full">
       <header className="mb-[1.1rem]">
         <h1 className="m-0 text-[2.1rem] font-extrabold leading-[1.1] tracking-[-0.02em] text-slate-900 max-[1024px]:text-[1.8rem] max-md:text-[1.5rem]">
           Welcome back, Pearl!
@@ -211,7 +269,7 @@ export default function SupportFaqPage() {
         </p>
       </header>
 
-      <section className="rounded-2xl border border-slate-200 bg-slate-100 p-[1.4rem] max-md:rounded-xl max-md:p-4">
+      <section className="rounded-2xl border border-slate-200 bg-white p-[1.4rem] max-md:rounded-xl max-md:p-4">
         <h2 className="m-0 text-[1.05rem] font-bold text-slate-900">Frequently Asked Questions</h2>
 
         <label
@@ -234,19 +292,13 @@ export default function SupportFaqPage() {
             const isOpen = expandedSectionId === section.id
 
             return (
-              <article className="overflow-hidden rounded-xl border border-slate-200 bg-white" key={section.id}>
+              <article className="overflow-hidden rounded-xl border border-[#64748B40] bg-white shadow-[0px_3px_3.75px_0px_#64748B1A]" key={section.id}>
                 <button
-                  className="flex w-full items-center justify-between gap-3 border-0 bg-transparent px-[1.1rem] py-[0.95rem] text-left text-[0.99rem] font-bold text-slate-900 max-md:px-4 max-md:py-[0.85rem] max-md:text-[0.94rem]"
+                  className="flex w-full items-center justify-between gap-3 border-0 bg-transparent px-[2rem] py-[0.95rem] text-left text-[0.99rem] font-medium text-slate-900 max-md:px-4 max-md:py-[0.85rem] max-md:text-[0.94rem]"
                   onClick={() =>
                     setExpansionState((current) => {
-                      const currentSectionId =
-                        current.role === role
-                          ? current.sectionId
-                          : supportContentByRole[role].defaultSection
-
                       return {
-                        role,
-                        sectionId: currentSectionId === section.id ? '' : section.id,
+                        sectionId: current.sectionId === section.id ? '' : section.id,
                         faqId: null,
                       }
                     })
@@ -257,7 +309,7 @@ export default function SupportFaqPage() {
                   <ChevronDown
                     aria-hidden
                     className={classNames(
-                      'shrink-0 text-slate-400 transition',
+                      'shrink-0 text-[#46B3A7] transition',
                       isOpen && 'rotate-180',
                     )}
                     size={16}
@@ -265,7 +317,7 @@ export default function SupportFaqPage() {
                 </button>
 
                 {isOpen && section.faqs.length > 0 && (
-                  <ul className="m-0 list-none px-[1.1rem] pb-3 max-md:px-4 max-md:pb-[0.65rem]">
+                  <ul className="m-0 list-none px-[2rem] pb-3 max-md:px-4 max-md:pb-[0.65rem]">
                     {section.faqs.map((faq) => {
                       const isFaqOpen = expandedFaqId === faq.id
 
@@ -275,15 +327,9 @@ export default function SupportFaqPage() {
                             className="flex w-full items-center justify-between gap-3 border-0 bg-transparent py-[0.6rem] text-left text-[0.92rem] text-slate-700 max-md:py-[0.52rem] max-md:text-[0.89rem]"
                             onClick={() =>
                               setExpansionState((current) => {
-                                const currentFaqId =
-                                  current.role === role
-                                    ? current.faqId
-                                    : null
-
                                 return {
-                                  role,
                                   sectionId: expandedSectionId,
-                                  faqId: currentFaqId === faq.id ? null : faq.id,
+                                  faqId: current.faqId === faq.id ? null : faq.id,
                                 }
                               })
                             }
@@ -314,32 +360,32 @@ export default function SupportFaqPage() {
           })}
         </div>
 
-        <section className="mt-[1.1rem] rounded-xl border border-slate-200 bg-white p-[1.1rem] max-md:p-4">
+        <section className="mt-[2rem] rounded-xl border border-[#64748B40] bg-white shadow-[0px_3px_3.75px_0px_#64748B1A] p-[2rem] max-md:p-4">
           <h3 className="m-0 text-[0.95rem] font-bold text-slate-900">Other ways to reach us</h3>
-          <div className="mt-3 grid grid-cols-3 gap-4 max-[1024px]:grid-cols-2 max-md:grid-cols-1 max-md:gap-[0.9rem]">
+          <div className="mt-5 grid grid-cols-3 gap-4 max-[1024px]:grid-cols-2 max-md:grid-cols-1 max-md:gap-[0.9rem]">
             <article>
               <p className="mb-[0.45rem] inline-flex items-center gap-1.5 text-[0.86rem] font-bold text-slate-900">
                 <Mail aria-hidden size={14} className="shrink-0" />
                 Email
               </p>
-              <p className="m-0 text-[0.86rem] leading-[1.45] text-slate-600">support@trucycle.com</p>
-              <p className="mt-1 text-[0.86rem] leading-[1.45] text-slate-600">Response time: 24 hours</p>
+              <p className="m-0 text-[0.86rem] leading-[1.45] text-[#121212BF]">support@trucycle.com</p>
+              <p className="mt-1 text-[0.86rem] leading-[1.45] text-[#12121299]">Response time: 24 hours</p>
             </article>
             <article>
               <p className="mb-[0.45rem] inline-flex items-center gap-1.5 text-[0.86rem] font-bold text-slate-900">
                 <Phone aria-hidden size={14} className="shrink-0" />
                 Phone
               </p>
-              <p className="m-0 text-[0.86rem] leading-[1.45] text-slate-600">+44 (0)20 1234 5678</p>
-              <p className="mt-1 text-[0.86rem] leading-[1.45] text-slate-600">Mon-Fri 9am-6pm GMT</p>
+              <p className="m-0 text-[0.86rem] leading-[1.45] text-[#121212BF]">+44 (0)20 1234 5678</p>
+              <p className="mt-1 text-[0.86rem] leading-[1.45] text-[#12121299]">Mon-Fri 9am-6pm GMT</p>
             </article>
             <article>
               <p className="mb-[0.45rem] inline-flex items-center gap-1.5 text-[0.86rem] font-bold text-slate-900">
                 <MessageCircle aria-hidden size={14} className="shrink-0" />
                 Live Chat
               </p>
-              <p className="m-0 text-[0.86rem] leading-[1.45] text-slate-600">Available during business hours</p>
-              <p className="mt-1 text-[0.86rem] leading-[1.45] text-slate-600">Mon-Fri 9am-6pm GMT</p>
+              <p className="m-0 text-[0.86rem] leading-[1.45] text-[#121212BF]">Available during business hours</p>
+              <p className="mt-1 text-[0.86rem] leading-[1.45] text-[#12121299]">Mon-Fri 9am-6pm GMT</p>
             </article>
           </div>
         </section>

@@ -17,6 +17,14 @@ function readString(value: unknown): string | null {
   return typeof value === 'string' && value.trim() ? value : null
 }
 
+function readCount(value: unknown): number | null {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return null
+  }
+
+  return Math.max(0, Math.trunc(value))
+}
+
 function mapParticipant(value: unknown): RoomParticipant | null {
   const participant = asRecord(value)
   const id = readString(participant?.id)
@@ -81,6 +89,11 @@ function mapRoom(value: unknown): ActiveRoom | null {
     id,
     participants,
     lastMessage,
+    unreadCount:
+      readCount(room.unreadCount) ??
+      readCount(room.unread_count) ??
+      readCount(room.unread) ??
+      0,
     createdAt: readString(room.createdAt) ?? new Date().toISOString(),
     updatedAt: readString(room.updatedAt) ?? new Date().toISOString(),
   }
@@ -109,6 +122,20 @@ export async function fetchRoomMessages(roomId: string): Promise<RoomMessagesRes
     messages,
     nextCursor: readString(data?.nextCursor),
   }
+}
+
+export async function createOrFindRoom(otherUserId: string): Promise<ActiveRoom> {
+  const response = await apiRequest<unknown, { otherUserId: string }>('/messages/rooms', {
+    method: 'POST',
+    body: { otherUserId },
+  })
+  const data = unwrapApiData<unknown>(response)
+  const room = mapRoom(data)
+  if (!room) {
+    throw new Error('Unexpected room response from server.')
+  }
+
+  return room
 }
 
 export async function sendGeneralMessage(

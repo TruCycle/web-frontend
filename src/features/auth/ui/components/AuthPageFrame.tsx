@@ -15,6 +15,11 @@ interface AuthShowcaseProps {
   readonly avatarLabel?: string
   readonly avatarSrc?: string
   readonly dateLabel?: string
+  readonly titlePrefix?: string
+  readonly titleAccent?: string
+  readonly benefits?: readonly string[]
+  readonly authorName?: string
+  readonly authorRole?: string
 }
 
 interface AuthPageFrameProps {
@@ -31,6 +36,11 @@ function AuthShowcasePanel({
   avatarLabel = 'SL',
   avatarSrc,
   dateLabel = 'Jan 2026',
+  titlePrefix = "Join London's",
+  titleAccent = 'circular economy.',
+  benefits = defaultBenefits,
+  authorName = 'Sophie, London',
+  authorRole = 'Sustainable Living Enthusiast',
 }: AuthShowcaseProps) {
   return (
     <aside className="flex h-full basis-[50%] flex-col justify-between gap-7 rounded-[25px] bg-tc-auth-hero px-[6rem] py-8 text-tc-auth-heroText max-[900px]:hidden">
@@ -48,14 +58,14 @@ function AuthShowcasePanel({
 
       <section className="my-auto flex flex-col gap-8">
         <h1 className="m-0 text-[clamp(2rem,4vw,3.2rem)] leading-[1.1] tracking-[-0.02em] text-tc-auth-heroTitle">
-          Join London&apos;s
+          {titlePrefix}
           <br />
           <span className="font-bold tracking-[0.01em] text-tc-auth-heroAccent">
-            circular economy.
+            {titleAccent}
           </span>
         </h1>
         <ul className="grid list-none gap-[0.65rem] p-0">
-          {defaultBenefits.map((benefit) => (
+          {benefits.map((benefit) => (
             <li
               key={benefit}
               className="inline-flex items-center gap-[0.55rem] text-base text-tc-auth-quote"
@@ -84,10 +94,10 @@ function AuthShowcasePanel({
             )}
             <div>
               <p className="m-0 text-base text-tc-auth-author">
-                Sophie, London
+                {authorName}
               </p>
               <p className="mt-[0.15rem] text-sm text-tc-auth-authorRole">
-                Sustainable Living Enthusiast
+                {authorRole}
               </p>
             </div>
           </div>
@@ -138,6 +148,11 @@ export function AuthPageFrame({
           avatarLabel={showcase?.avatarLabel}
           avatarSrc={showcase?.avatarSrc}
           dateLabel={showcase?.dateLabel}
+          titlePrefix={showcase?.titlePrefix}
+          titleAccent={showcase?.titleAccent}
+          benefits={showcase?.benefits}
+          authorName={showcase?.authorName}
+          authorRole={showcase?.authorRole}
         />
 
         <section className="flex h-full basis-[50%] flex-col overflow-y-auto px-[6rem] py-[5rem] max-[900px]:basis-full max-[900px]:px-[3rem] max-[900px]:pb-[3rem] max-[900px]:pt-[2.4rem] max-sm:px-[2rem] max-sm:pb-8 max-sm:pt-[3rem]">

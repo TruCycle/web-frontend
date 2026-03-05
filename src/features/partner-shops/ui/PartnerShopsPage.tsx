@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { ShopList } from './components/ShopList'
 import { ShopDetails } from './components/ShopDetails'
-import { ListItemDialog } from '@/shared/ui/modal/ListItemDialog'
+import { ListItemDialog, type ListItemDialogShop } from '@/shared/ui/modal/ListItemDialog'
 import { Button } from '@/shared/ui/button/Button'
 import { useNearbyShops } from '@/features/partner-shops/hooks/useNearbyShops'
 import { useAuthSession } from '@/shared/context/useAuthSession'
+import { NewItemButton } from '@/shared/ui/button/NewItemButton'
 
 export default function PartnerShopsPage() {
   const { user } = useAuthSession()
@@ -21,6 +22,7 @@ export default function PartnerShopsPage() {
   } = useNearbyShops(user?.postcode)
   const [selectedShopId, setSelectedShopId] = useState<string>('')
   const [isListItemDialogOpen, setIsListItemDialogOpen] = useState(false)
+  const [preselectedShopForListing, setPreselectedShopForListing] = useState<ListItemDialogShop | null>(null)
   const resolvedSelectedShopId = filteredShops.some((shop) => shop.id === selectedShopId)
     ? selectedShopId
     : filteredShops[0]?.id ?? ''
@@ -40,13 +42,12 @@ export default function PartnerShopsPage() {
           <h1 className="text-3xl font-bold text-slate-900">Partner Shops</h1>
           <p className="text-slate-500">Browse nearby handoff locations connected to TruCycle.</p>
         </div>
-        <Button
-          className="inline-flex items-center gap-2"
-          onClick={() => setIsListItemDialogOpen(true)}
-        >
-          <Plus size={18} />
-          List New Item
-        </Button>
+        <NewItemButton
+          onClick={() => {
+            setPreselectedShopForListing(null)
+            setIsListItemDialogOpen(true)
+          }}
+        />
       </div>
 
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
@@ -86,7 +87,18 @@ export default function PartnerShopsPage() {
             onSelectShop={setSelectedShopId}
           />
           {selectedShop ? (
-            <ShopDetails shop={selectedShop} />
+            <ShopDetails
+              shop={selectedShop}
+              onPlanHandoff={(shop) => {
+                setPreselectedShopForListing({
+                  id: shop.id,
+                  name: shop.name,
+                  postcode: shop.postcode,
+                  address: shop.address,
+                })
+                setIsListItemDialogOpen(true)
+              }}
+            />
           ) : (
             <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
               {isLoading ? 'Loading nearby shops...' : 'No partner shops found nearby.'}
@@ -117,6 +129,7 @@ export default function PartnerShopsPage() {
       <ListItemDialog
         isOpen={isListItemDialogOpen}
         onClose={() => setIsListItemDialogOpen(false)}
+        preselectedShop={preselectedShopForListing}
       />
     </div>
   )

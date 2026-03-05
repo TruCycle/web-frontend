@@ -1,3 +1,5 @@
+import { text } from 'stream/consumers'
+
 /** @type {import('tailwindcss').Config} */
 const sharedColors = {
   white: '#FFFFFF',
@@ -15,7 +17,12 @@ export default {
         tc: {
           app: {
             canvas: '#F8FAFC',
+            primary: sharedColors.accentGreen,
+            secondary: '#121212B3',
             text: '#172033',
+            slate500: sharedColors.slate500,
+            badgeOutline: '#22222299',
+            badgeText: '#12121299',
           },
           shell: {
             bg: '#232323',
@@ -24,13 +31,17 @@ export default {
             toggle: '#2F382F',
             accent: sharedColors.accentGreen,
             notify: '#FF9C2D',
+            danger: '#F43F5E',
             roleText: '#A1A1AA',
             roleActiveText: '#121212',
+            dashboardBg: '#F8FAFC',
           },
           header: {
             border: sharedColors.slate200,
             divider: '#CBD5E1',
             avatar: '#16A34A',
+            text: '#121212',
+            labelText: '#12121299',
           },
           auth: {
             page: sharedColors.white,

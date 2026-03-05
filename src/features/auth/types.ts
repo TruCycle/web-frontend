@@ -28,6 +28,25 @@ export interface LoginPayload {
 }
 
 export interface ResetPasswordPayload {
-  readonly token: string
+  readonly email: string
+  readonly otp: string
   readonly newPassword: string
+}
+
+export interface PartnerOpeningHoursPayload {
+  readonly days: readonly string[]
+  readonly openTime: string
+  readonly closeTime: string
+}
+
+export interface UpgradeToPartnerPayload {
+  readonly name: string
+  readonly addressLine: string
+  readonly postcode: string
+  readonly phoneNumber?: string
+  readonly latitude?: number
+  readonly longitude?: number
+  readonly operationalNotes?: string
+  readonly acceptableCategories?: readonly string[]
+  readonly openingHours?: PartnerOpeningHoursPayload
 }

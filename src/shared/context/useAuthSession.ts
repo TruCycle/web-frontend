@@ -4,6 +4,7 @@ import type {
   LoginPayload,
   RegisterPayload,
   ResetPasswordPayload,
+  UpgradeToPartnerPayload,
 } from '@/features/auth/types'
 
 interface LoginOptions {
@@ -16,6 +17,7 @@ interface AuthSessionContextValue {
   readonly isBootstrapping: boolean
   login: (payload: LoginPayload, options: LoginOptions) => Promise<void>
   register: (payload: RegisterPayload) => Promise<void>
+  upgradeToPartner: (payload: UpgradeToPartnerPayload) => Promise<void>
   requestPasswordReset: (email: string) => Promise<void>
   resetPassword: (payload: ResetPasswordPayload) => Promise<void>
   logout: () => Promise<void>

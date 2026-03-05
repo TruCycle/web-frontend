@@ -1,0 +1,1 @@
+export { CameraQrScanner } from './CameraQrScanner'

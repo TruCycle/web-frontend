@@ -29,6 +29,7 @@ export interface ActiveRoom {
   readonly id: string
   readonly participants: readonly RoomParticipant[]
   readonly lastMessage: RoomMessage | null
+  readonly unreadCount: number
   readonly createdAt: string
   readonly updatedAt: string
 }

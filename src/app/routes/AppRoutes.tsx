@@ -18,6 +18,12 @@ const CollectedItemsPage = lazy(() => import('@/features/collected/ui/CollectedI
 const YourListingsPage = lazy(() => import('@/features/listings/ui/YourListingsPage'))
 const SettingsPage = lazy(() => import('@/features/settings/ui/SettingsPage'))
 const PartnerShopsPage = lazy(() => import('@/features/partner-shops/ui/PartnerShopsPage'))
+const PartnerConsolePage = lazy(() => import('@/features/partner/ui/PartnerConsolePage'))
+const PartnerItemsPage = lazy(() => import('@/features/partner/ui/PartnerItemsPage'))
+const PartnerSettingsPage = lazy(() => import('@/features/partner/ui/PartnerSettingsPage'))
+const PartnerOnboardPage = lazy(
+  () => import('@/features/partner-onboarding/ui/PartnerOnboardPage'),
+)
 const SupportFaqPage = lazy(() => import('@/features/support/ui/SupportFaqPage'))
 
 function ShellLayout() {
@@ -45,6 +51,34 @@ function ProtectedShellRoute() {
   return <Outlet />
 }
 
+function hasPartnerRole(roles: readonly string[] | undefined): boolean {
+  if (!roles) {
+    return false
+  }
+
+  return roles.some((role) => role.toLowerCase() === 'partner')
+}
+
+function PartnerOnlyRoute() {
+  const { user } = useAuthSession()
+
+  if (!hasPartnerRole(user?.roles)) {
+    return <Navigate replace to="/partner/onboard" />
+  }
+
+  return <Outlet />
+}
+
+function PartnerOnboardRoute() {
+  const { user } = useAuthSession()
+
+  if (hasPartnerRole(user?.roles)) {
+    return <Navigate replace to="/partner" />
+  }
+
+  return <Outlet />
+}
+
 export function AppRoutes() {
   return (
     <Routes>
@@ -52,6 +86,16 @@ export function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/reset-password" element={<PasswordResetPage />} />
       <Route element={<ProtectedShellRoute />}>
+        <Route element={<PartnerOnboardRoute />}>
+          <Route
+            path="/partner/onboard"
+            element={
+              <Suspense fallback={<LoadingState label="Loading page" />}>
+                <PartnerOnboardPage />
+              </Suspense>
+            }
+          />
+        </Route>
         <Route element={<ShellLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/browse" element={<Dashboard />} />
@@ -61,10 +105,18 @@ export function AppRoutes() {
           <Route path="/collected" element={<CollectedItemsPage />} />
           <Route path="/listings" element={<YourListingsPage />} />
           <Route path="/selected" element={<CollectedItemsPage />} />
-          <Route path="/partner-shops" element={<PartnerShopsPage />} />
+          <Route path="/shops" element={<PartnerShopsPage />} />
+          <Route path="/partner-shops" element={<Navigate replace to="/shops" />} />
+          <Route element={<PartnerOnlyRoute />}>
+            <Route path="/partner" element={<PartnerConsolePage />} />
+            <Route path="/partner/items" element={<PartnerItemsPage />} />
+            <Route path="/partner/settings" element={<PartnerSettingsPage />} />
+            <Route path="/partner/notifications" element={<NotificationsPage />} />
+            <Route path="/partner/support" element={<SupportFaqPage />} />
+          </Route>
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/support" element={<SupportFaqPage />} />
-          <Route path="/support/:viewRole" element={<SupportFaqPage />} />
+          <Route path="/support/:viewRole" element={<Navigate replace to="/support" />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate replace to="/" />} />

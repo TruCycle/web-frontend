@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   fetchActiveRooms,
   fetchRoomMessages,
@@ -40,12 +40,15 @@ function mergeMessageIntoRoom(messages: readonly RoomMessage[], next: RoomMessag
 
 export function useMessages() {
   const [rooms, setRooms] = useState<ActiveRoom[]>([])
-  const [activeRoomId, setActiveRoomId] = useState<string | null>(null)
+  const [activeRoomId, setActiveRoomIdState] = useState<string | null>(null)
   const [roomMessages, setRoomMessages] = useState<Record<string, RoomMessage[]>>({})
+  const [unreadCountByRoom, setUnreadCountByRoom] = useState<Record<string, number>>({})
   const [isLoadingRooms, setIsLoadingRooms] = useState(true)
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const activeRoomIdRef = useRef<string | null>(null)
+  const isPageVisibleRef = useRef<boolean>(true)
 
   const websocketClient = useMemo(
     () =>
@@ -61,13 +64,53 @@ export function useMessages() {
       setError(null)
       const nextRooms = sortRoomsByRecentActivity(await fetchActiveRooms())
       setRooms(nextRooms)
-      setActiveRoomId((current) => current ?? nextRooms[0]?.id ?? null)
+      setUnreadCountByRoom((currentCounts) => {
+        const nextCounts = { ...currentCounts }
+        nextRooms.forEach((room) => {
+          const existingCount = currentCounts[room.id] ?? 0
+          nextCounts[room.id] = Math.max(existingCount, room.unreadCount)
+        })
+        Object.keys(nextCounts).forEach((roomId) => {
+          if (!nextRooms.some((room) => room.id === roomId)) {
+            delete nextCounts[roomId]
+          }
+        })
+        return nextCounts
+      })
+      setActiveRoomIdState((current) => current ?? nextRooms[0]?.id ?? null)
     } catch {
       setError('Unable to load conversations right now.')
     } finally {
       setIsLoadingRooms(false)
     }
   }, [])
+
+  const clearUnreadForRoom = useCallback((roomId: string | null) => {
+    if (!roomId) {
+      return
+    }
+
+    setUnreadCountByRoom((currentCounts) => {
+      if (!currentCounts[roomId]) {
+        return currentCounts
+      }
+
+      return {
+        ...currentCounts,
+        [roomId]: 0,
+      }
+    })
+  }, [])
+
+  const setActiveRoomId = useCallback(
+    (roomId: string | null) => {
+      setActiveRoomIdState(roomId)
+      if (roomId && document.visibilityState === 'visible') {
+        clearUnreadForRoom(roomId)
+      }
+    },
+    [clearUnreadForRoom],
+  )
 
   const loadMessagesForRoom = useCallback(async (roomId: string) => {
     try {
@@ -98,7 +141,39 @@ export function useMessages() {
   }, [activeRoomId, loadMessagesForRoom, roomMessages])
 
   useEffect(() => {
+    activeRoomIdRef.current = activeRoomId
+  }, [activeRoomId])
+
+  useEffect(() => {
+    if (!activeRoomId || document.visibilityState !== 'visible') {
+      return
+    }
+
+    clearUnreadForRoom(activeRoomId)
+  }, [activeRoomId, clearUnreadForRoom])
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const isVisible = document.visibilityState === 'visible'
+      isPageVisibleRef.current = isVisible
+      if (isVisible) {
+        clearUnreadForRoom(activeRoomIdRef.current)
+      }
+    }
+
+    handleVisibilityChange()
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [clearUnreadForRoom])
+
+  useEffect(() => {
     const handleNewMessage = (message: RoomMessage) => {
+      const isIncomingMessage = message.direction === 'incoming'
+      const isActiveRoomVisible =
+        activeRoomIdRef.current === message.roomId && isPageVisibleRef.current
+
       setRoomMessages((currentMessages) => ({
         ...currentMessages,
         [message.roomId]: mergeMessageIntoRoom(
@@ -115,6 +190,29 @@ export function useMessages() {
           ),
         ),
       )
+
+      if (!isIncomingMessage) {
+        return
+      }
+
+      setUnreadCountByRoom((currentCounts) => {
+        if (isActiveRoomVisible) {
+          if (!currentCounts[message.roomId]) {
+            return currentCounts
+          }
+
+          return {
+            ...currentCounts,
+            [message.roomId]: 0,
+          }
+        }
+
+        return {
+          ...currentCounts,
+          [message.roomId]: (currentCounts[message.roomId] ?? 0) + 1,
+        }
+      })
+
     }
 
     const handleRoomActivity = (payload: { roomId: string; updatedAt: string }) => {
@@ -145,10 +243,18 @@ export function useMessages() {
         delete remaining[payload.roomId]
         return remaining
       })
+      setUnreadCountByRoom((currentCounts) => {
+        if (!(payload.roomId in currentCounts)) {
+          return currentCounts
+        }
+        const nextCounts = { ...currentCounts }
+        delete nextCounts[payload.roomId]
+        return nextCounts
+      })
       setRooms((currentRooms) =>
         currentRooms.filter((room) => room.id !== payload.roomId),
       )
-      setActiveRoomId((currentId) => (currentId === payload.roomId ? null : currentId))
+      setActiveRoomIdState((currentId) => (currentId === payload.roomId ? null : currentId))
     }
 
     const handlePresenceUpdate = (payload: { userId: string; online: boolean }) => {
@@ -239,6 +345,7 @@ export function useMessages() {
     isLoadingMessages,
     isSending,
     error,
+    unreadCountByRoom,
     setActiveRoomId,
     sendMessage,
     reloadRooms: loadRooms,

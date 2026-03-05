@@ -1,20 +1,27 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, CircleAlert } from 'lucide-react'
+import { CircleAlert, QrCode } from 'lucide-react'
 import cautionIcon from '@/assets/icons/caution-icon.svg'
-import { Button } from '@/shared/ui/button/Button'
-import { ItemDetailsDialog } from '@/shared/ui/modal/ItemDetailsDialog'
-import { QRCodeDialog } from '@/shared/ui/modal/QRCodeDialog'
-import { CollectionSuccessDialog } from '@/shared/ui/modal/CollectionSuccessDialog'
 import { useCollectedItems } from '@/features/collected/hooks/useCollectedItems'
 import type { CollectedItem } from '@/features/items/types'
 import { useToast } from '@/shared/ui/toast/useToast'
+import { Button } from '@/shared/ui/button/Button'
+import { ItemRowCard } from '@/shared/ui/item/ItemRowCard'
+import { ItemDetailsDialog } from '@/shared/ui/modal/ItemDetailsDialog'
+import { ItemQrCodeDialog } from '@/shared/ui/modal/ItemQrCodeDialog'
+import { QRCodeDialog } from '@/shared/ui/modal/QRCodeDialog'
+import { CollectionSuccessDialog } from '@/shared/ui/modal/CollectionSuccessDialog'
+import { PaginationControls } from '@/shared/ui/pagination/PaginationControls'
 
 function statusLabel(claimStatus: string): 'Collected' | 'Claimed' {
   if (claimStatus === 'complete' || claimStatus === 'completed') {
     return 'Collected'
   }
   return 'Claimed'
+}
+
+function statusTone(claimStatus: string): 'claimed' | 'collected' {
+  return statusLabel(claimStatus) === 'Claimed' ? 'claimed' : 'collected'
 }
 
 export default function CollectedItemsPage() {
@@ -26,9 +33,17 @@ export default function CollectedItemsPage() {
     isLoading,
     isCollecting,
     error,
+    currentPage,
+    totalPages,
+    canGoPrevious,
+    canGoNext,
+    previousPage,
+    nextPage,
+    goToPage,
     completeCollection,
-  } = useCollectedItems()
+  } = useCollectedItems({ limit: 6 })
   const [selectedItem, setSelectedItem] = useState<CollectedItem | null>(null)
+  const [selectedQrPreviewItem, setSelectedQrPreviewItem] = useState<CollectedItem | null>(null)
   const [qrItem, setQrItem] = useState<CollectedItem | null>(null)
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const [collectedItemName, setCollectedItemName] = useState('')
@@ -71,6 +86,14 @@ export default function CollectedItemsPage() {
     }
   }
 
+  const shouldShowQrPreviewAction = (item: CollectedItem): boolean => {
+    return (
+      item.claimStatus.toLowerCase() === 'approved' &&
+      item.item.pickupOption.toLowerCase() === 'donate' &&
+      Boolean(item.item.qrCode)
+    )
+  }
+
   return (
     <div className="space-y-5">
       <div>
@@ -81,32 +104,49 @@ export default function CollectedItemsPage() {
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
 
       {isLoading ? (
-        <p className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
-          Loading collected items...
-        </p>
+        <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={`collected-item-shimmer-${index}`}
+              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-3"
+            >
+              <div className="flex items-center gap-3">
+                <span className="tc-shimmer-block block h-16 w-16 rounded-lg" />
+                <div className="space-y-2">
+                  <span className="tc-shimmer-block block h-5 w-40 rounded-md" />
+                  <span className="tc-shimmer-block block h-4 w-48 rounded-md" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <span className="tc-shimmer-block block h-9 w-24 rounded-xl" />
+                <span className="tc-shimmer-block block h-9 w-32 rounded-xl" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : null}
 
       {bannerItem ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-lime-200 bg-lime-50 p-4">
-          <div className="flex items-start gap-3">
-            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-lime-700">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#A6F4A5A6] bg-[#A4F5A60D] p-3">
+          <div className="flex items-start gap-3 ms-3">
+            <div className="inline-flex items-center justify-center rounded-full text-[#A4F5A6]">
               <CircleAlert size={20} strokeWidth={2} />
             </div>
             <div>
-              <h4 className="font-semibold text-slate-900">
+              <h4 className="font-medium text-[#222222]">
                 Item {bannerItem.item.title} is ready for pickup
               </h4>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-[#222222BF]">
                 Scan at pickup location to complete this collection.
               </p>
             </div>
           </div>
-          <Button onClick={() => setQrItem(bannerItem)}>Open QR Scanner</Button>
+          <Button variant='primary' onClick={() => setQrItem(bannerItem)}>Open QR Scanner</Button>
         </div>
       ) : null}
 
       {!isLoading && !hasItems ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+        <div className="rounded-2xl bg-white p-8 text-center">
           <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-lime-100">
             <img src={cautionIcon} alt="Caution" className="h-7 w-7" />
           </div>
@@ -121,66 +161,50 @@ export default function CollectedItemsPage() {
       ) : null}
 
       {!isLoading && hasItems ? (
-        <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="space-y-3 rounded-2xl bg-white p-4">
           {items.map((item) => (
-            <div
+            <ItemRowCard
               key={item.claimId}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-3"
-            >
-              <div className="flex items-center gap-3">
-                {item.item.image ? (
-                  <img
-                    src={item.item.image.url}
-                    alt={item.item.title}
-                    className="h-16 w-16 rounded-lg object-cover"
-                  />
-                ) : (
-                  <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-slate-100 text-xs text-slate-500">
-                    No image
-                  </div>
-                )}
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-slate-900">{item.item.title}</h3>
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                        statusLabel(item.claimStatus) === 'Claimed'
-                          ? 'bg-amber-100 text-amber-700'
-                          : 'bg-emerald-100 text-emerald-700'
-                      }`}
+              title={item.item.title}
+              subtitle={`${item.item.category} - From ${item.item.ownerName}`}
+              statusLabel={statusLabel(item.claimStatus)}
+              statusTone={statusTone(item.claimStatus)}
+              imageUrl={item.item.image?.url ?? null}
+              imageAlt={item.item.title}
+              actions={
+                <>
+                  {shouldShowQrPreviewAction(item) ? (
+                    <Button
+                      variant="primary"
+                      className="h-10 w-10 rounded-xl p-0"
+                      onClick={() => setSelectedQrPreviewItem(item)}
+                      aria-label="Open item QR code"
+                      title="Open item QR code"
                     >
-                      {statusLabel(item.claimStatus)}
-                    </span>
-                  </div>
-                  <p className="text-sm text-slate-500">
-                    {item.item.category} · From {item.item.ownerName}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button variant="secondary" onClick={() => setSelectedItem(item)}>
-                  View Details
-                </Button>
-                {statusLabel(item.claimStatus) === 'Claimed' ? (
-                  <Button onClick={() => setQrItem(item)}>Open QR Scanner</Button>
-                ) : null}
-              </div>
-            </div>
+                      <QrCode size={22} />
+                    </Button>
+                  ) : null}
+                  <Button
+                    variant="secondary"
+                    className="bg-[#F8FAFC] text-[#222222] ring-0 hover:bg-slate-100"
+                    onClick={() => setSelectedItem(item)}
+                  >
+                    View Details
+                  </Button>
+                </>
+              }
+            />
           ))}
 
-          <div className="flex items-center justify-between pt-2">
-            <button className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">
-              <ChevronLeft size={16} />
-              Previous
-            </button>
-            <span className="rounded-md bg-lime-100 px-3 py-1 text-sm font-semibold text-slate-800">
-              1
-            </span>
-            <button className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">
-              Next
-              <ChevronRight size={16} />
-            </button>
-          </div>
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            canGoPrevious={canGoPrevious}
+            canGoNext={canGoNext}
+            onPrevious={previousPage}
+            onNext={nextPage}
+            onPageChange={goToPage}
+          />
         </div>
       ) : null}
 
@@ -188,6 +212,13 @@ export default function CollectedItemsPage() {
         isOpen={Boolean(dialogItem)}
         onClose={() => setSelectedItem(null)}
         item={dialogItem}
+      />
+
+      <ItemQrCodeDialog
+        isOpen={Boolean(selectedQrPreviewItem)}
+        onClose={() => setSelectedQrPreviewItem(null)}
+        itemTitle={selectedQrPreviewItem?.item.title ?? 'Item'}
+        qrCodeUrl={selectedQrPreviewItem?.item.qrCode ?? null}
       />
 
       <QRCodeDialog

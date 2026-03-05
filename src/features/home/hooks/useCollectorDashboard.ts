@@ -10,14 +10,19 @@ import type { BrowseItem } from '@/features/items/types'
 interface CollectorDashboardFilters {
   readonly search: string
   readonly category: string
+  readonly condition: string
+  readonly location: string
 }
 
 export function useCollectorDashboard(enabled: boolean = true, postcode?: string) {
   const [filters, setFilters] = useState<CollectorDashboardFilters>({
     search: '',
     category: 'All Items',
+    condition: 'All condition',
+    location: '',
   })
   const [items, setItems] = useState<BrowseItem[]>([])
+  const [allCategories, setAllCategories] = useState<string[]>(['All Items'])
   const [isLoadingItems, setIsLoadingItems] = useState(true)
   const [isLoadingStats, setIsLoadingStats] = useState(true)
   const [isClaimingItemId, setIsClaimingItemId] = useState<string | null>(null)
@@ -27,7 +32,7 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
     itemsExchanged: 0,
     totalCo2SavedKg: 0,
     rewardsEarned: 0,
-    rewardsCurrency: 'PTS',
+    rewardsCurrency: '£',
   })
 
   const loadItems = useCallback(async () => {
@@ -40,6 +45,16 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
         postcode,
       })
       setItems(result)
+      if (filters.category === 'All Items' && filters.search.trim().length === 0) {
+        const computedCategories = new Set<string>(['All Items'])
+        result.forEach((item) => {
+          const category = item.category.trim()
+          if (category.length > 0) {
+            computedCategories.add(category)
+          }
+        })
+        setAllCategories([...computedCategories])
+      }
     } catch {
       setError('Unable to load available items right now.')
     } finally {
@@ -79,20 +94,77 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
     void loadStats()
   }, [enabled, loadStats])
 
-  const categories = useMemo(() => {
+  const categoriesFromItems = useMemo(() => {
     const computedCategories = new Set<string>(['All Items'])
     items.forEach((item) => {
-      computedCategories.add(item.category)
+      const category = item.category.trim()
+      if (category.length > 0) {
+        computedCategories.add(category)
+      }
     })
     return [...computedCategories]
   }, [items])
+  const categories = allCategories.length > 1 ? allCategories : categoriesFromItems
+
+  const conditions = useMemo(() => {
+    const computedConditions = new Set<string>(['All condition'])
+    items.forEach((item) => {
+      const condition = item.condition.trim()
+      if (condition.length > 0) {
+        computedConditions.add(condition)
+      }
+    })
+    return [...computedConditions]
+  }, [items])
+
+  const filteredItems = useMemo(() => {
+    const normalizedCondition = filters.condition.trim().toLowerCase()
+    const normalizedLocation = filters.location.trim().toLowerCase()
+
+    return items.filter((item) => {
+      const conditionMatches =
+        !normalizedCondition ||
+        normalizedCondition === 'all condition' ||
+        item.condition.toLowerCase() === normalizedCondition
+      const locationMatches =
+        !normalizedLocation ||
+        item.locationLabel.toLowerCase().includes(normalizedLocation)
+
+      return conditionMatches && locationMatches
+    })
+  }, [filters.condition, filters.location, items])
 
   const updateSearch = useCallback((nextSearch: string) => {
     setFilters((currentFilters) => ({ ...currentFilters, search: nextSearch }))
   }, [])
 
   const updateCategory = useCallback((nextCategory: string) => {
-    setFilters((currentFilters) => ({ ...currentFilters, category: nextCategory }))
+    const normalizedCategory = nextCategory.trim()
+    setFilters((currentFilters) => ({
+      ...currentFilters,
+      category: normalizedCategory.length > 0 ? normalizedCategory : 'All Items',
+    }))
+  }, [])
+
+  const updateCondition = useCallback((nextCondition: string) => {
+    const normalizedCondition = nextCondition.trim()
+    setFilters((currentFilters) => ({
+      ...currentFilters,
+      condition: normalizedCondition.length > 0 ? normalizedCondition : 'All condition',
+    }))
+  }, [])
+
+  const updateLocation = useCallback((nextLocation: string) => {
+    setFilters((currentFilters) => ({ ...currentFilters, location: nextLocation }))
+  }, [])
+
+  const clearFilters = useCallback(() => {
+    setFilters({
+      search: '',
+      category: 'All Items',
+      condition: 'All condition',
+      location: '',
+    })
   }, [])
 
   const claimItem = useCallback(async (itemId: string) => {
@@ -115,8 +187,9 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
 
   return {
     filters,
-    items,
+    items: filteredItems,
     categories,
+    conditions,
     stats,
     isLoadingItems,
     isLoadingStats,
@@ -126,6 +199,9 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
     reloadStats: loadStats,
     updateSearch,
     updateCategory,
+    updateCondition,
+    updateLocation,
+    clearFilters,
     claimItem,
   }
 }
