@@ -346,19 +346,22 @@ export default function HomePage() {
           </article>
         </section>
 
-        <footer className="tc-landing-fade-up tc-landing-delay-4 mt-auto flex flex-col gap-3 rounded-[22px] border border-white/70 bg-white/70 px-4 py-5 text-sm text-slate-600 shadow-[0_12px_36px_rgba(15,23,42,0.06)] backdrop-blur sm:px-5 md:flex-row md:items-center md:justify-between md:px-6">
-          <div>
-            <p className="m-0 font-semibold text-slate-900">TruCycle</p>
-            <p className="m-0 mt-1">Simple exchange for clothes and everyday items.</p>
+        <footer className="tc-landing-fade-up tc-landing-delay-4 mt-auto flex flex-col gap-4 rounded-[22px] border border-white/70 bg-white/70 px-4 py-5 text-sm text-slate-600 shadow-[0_12px_36px_rgba(15,23,42,0.06)] backdrop-blur sm:px-5 md:px-6">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="m-0 font-semibold text-slate-900">TruCycle</p>
+              <p className="m-0 mt-1">Simple exchange for clothes and everyday items.</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-4">
+              <Link className="text-slate-600 no-underline transition hover:text-slate-950" to="/privacy">
+                Privacy
+              </Link>
+              <Link className="text-slate-600 no-underline transition hover:text-slate-950" to="/terms">
+                Terms
+              </Link>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-4">
-            <Link className="text-slate-600 no-underline transition hover:text-slate-950" to={isAuthenticated ? '/dashboard' : '/signup'}>
-              {isAuthenticated ? 'Dashboard' : 'Get Started'}
-            </Link>
-            <Link className="text-slate-600 no-underline transition hover:text-slate-950" to={isAuthenticated ? '/settings' : '/login'}>
-              {isAuthenticated ? 'Profile' : 'Login'}
-            </Link>
-          </div>
+          <p className="m-0 text-center text-xs text-slate-500">Copyright TruCycle 2026. All rights reserved.</p>
         </footer>
       </div>
     </main>
