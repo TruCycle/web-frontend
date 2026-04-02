@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { classNames } from '@/shared/utils/classNames'
-import { NavLink, type NavLinkRenderProps, useLocation, useNavigate } from 'react-router-dom'
+import { Link, NavLink, type NavLinkRenderProps, useLocation, useNavigate } from 'react-router-dom'
 import {
   FileText,
   Users,
@@ -311,12 +311,12 @@ export function AppShell({ children }: AppShellProps) {
     <div className="flex min-h-screen bg-tc-app-canvas text-tc-app-text max-md:flex-col max-md:p-2">
       <aside className="sticky top-4 z-10 my-4 ml-4 mr-0 flex h-[calc(100vh-2rem)] w-[250px] shrink-0 flex-col rounded-[25px] bg-tc-shell-bg px-4 py-5 max-[1024px]:w-[220px] max-md:hidden">
         <div className="px-3 pb-4 pt-2">
-          <div className="flex items-center gap-3">
+          <Link className="flex items-center gap-3 no-underline" to="/">
             <div className="flex items-center justify-center">
               <img src={logo} alt="TruCycle Logo" width="34" height="34" />
             </div>
             <span className="text-2xl font-bold tracking-[-0.01em] text-white">TruCycle</span>
-          </div>
+          </Link>
         </div>
 
         {sidebarNavigation}
@@ -332,10 +332,14 @@ export function AppShell({ children }: AppShellProps) {
           />
           <aside id="mobile-sidebar" className="fixed inset-y-0 left-0 z-[131] flex w-[min(85vw,320px)] flex-col bg-tc-shell-bg px-4 py-5 shadow-2xl md:hidden">
             <div className="flex items-center justify-between px-3 pb-4 pt-2">
-              <div className="flex items-center gap-3">
+              <Link
+                className="flex items-center gap-3 no-underline"
+                to="/"
+                onClick={() => setIsMobileSidebarOpen(false)}
+              >
                 <img src={logo} alt="TruCycle Logo" width="34" height="34" />
                 <span className="text-2xl font-bold tracking-[-0.01em] text-white">TruCycle</span>
-              </div>
+              </Link>
               <button
                 type="button"
                 className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
