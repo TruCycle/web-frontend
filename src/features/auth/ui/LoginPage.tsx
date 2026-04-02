@@ -96,7 +96,7 @@ export default function LoginPage() {
       showcase={{
         avatarLabel: 'SL',
         quote:
-          'TruCycle makes donating my unused items easy, secure, and rewarding.',
+          'TruCycle makes donating my unused items easy, secure, and straightforward.',
       }}
       footer={
         <p className={authFooterCopyClassName}>

@@ -7,7 +7,7 @@ import { classNames } from '@/shared/utils/classNames'
 const defaultBenefits = [
   'Free forever',
   'No hidden fees',
-  '£10 reward for your first exchange',
+  'Easy to get started',
 ]
 
 interface AuthShowcaseProps {
@@ -143,7 +143,7 @@ export function AuthPageFrame({
         <AuthShowcasePanel
           quote={
             showcase?.quote ??
-            'TruCycle makes donating my unused items easy, secure, and rewarding!'
+            'TruCycle makes donating my unused items easy, secure, and straightforward.'
           }
           avatarLabel={showcase?.avatarLabel}
           avatarSrc={showcase?.avatarSrc}

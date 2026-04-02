@@ -412,7 +412,7 @@ export default function PasswordResetPage() {
       showcase={{
         avatarSrc: '/profile-picture.jpg',
         quote:
-          'TruCycle makes donating my unused items easy, secure, and rewarding!',
+          'TruCycle makes donating my unused items easy, secure, and straightforward.',
       }}
     >
       <form className="mt-8 grid gap-4" onSubmit={onSubmit}>

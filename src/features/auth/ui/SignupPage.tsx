@@ -162,7 +162,7 @@ export default function SignupPage({
         showcase={{
           avatarSrc: '/profile-picture.jpg',
           quote:
-            'TruCycle makes donating my unused items easy, secure, and rewarding.',
+            'TruCycle makes donating my unused items easy, secure, and straightforward.',
         }}
         footer={
           <p className={authFooterCopyClassName}>
@@ -247,7 +247,7 @@ export default function SignupPage({
               className={authInputClassName}
               name="referralCode"
               onChange={(event) => onInputChange('referralCode', event)}
-              placeholder="Enter code for bonus rewards"
+              placeholder="Enter referral code if you have one"
               type="text"
               value={formValues.referralCode}
             />
