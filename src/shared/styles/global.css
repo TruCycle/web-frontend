@@ -82,6 +82,7 @@ p {
   0% {
     transform: rotateX(0deg);
   }
+
   100% {
     transform: rotateX(360deg);
   }
@@ -118,18 +119,94 @@ p {
   0% {
     background-position: -220% 0;
   }
+
   100% {
     background-position: 220% 0;
   }
 }
 
 .tc-shimmer-block {
-  background-image: linear-gradient(
-    90deg,
-    rgba(148, 163, 184, 0.2) 0%,
-    rgba(226, 232, 240, 0.65) 50%,
-    rgba(148, 163, 184, 0.2) 100%
-  );
+  background-image: linear-gradient(90deg,
+      rgba(148, 163, 184, 0.2) 0%,
+      rgba(226, 232, 240, 0.65) 50%,
+      rgba(148, 163, 184, 0.2) 100%);
   background-size: 220% 100%;
   animation: tcShimmer 1.2s linear infinite;
+}
+
+@keyframes tcLandingFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tcLandingCardFloat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.tc-landing-fade-up,
+.tc-landing-card {
+  opacity: 0;
+  animation-fill-mode: forwards;
+}
+
+.tc-landing-fade-up {
+  animation: tcLandingFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.tc-landing-card {
+  animation:
+    tcLandingFadeUp 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    tcLandingCardFloat 6s ease-in-out 1s infinite;
+}
+
+.tc-landing-delay-1 {
+  animation-delay: 0.08s;
+}
+
+.tc-landing-delay-2 {
+  animation-delay: 0.16s;
+}
+
+.tc-landing-delay-3 {
+  animation-delay: 0.24s;
+}
+
+.tc-landing-delay-4 {
+  animation-delay: 0.32s;
+}
+
+.tc-landing-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.tc-landing-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .tc-landing-fade-up,
+  .tc-landing-card,
+  .tc-loading-logo-flipper,
+  .tc-shimmer-block {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
 }

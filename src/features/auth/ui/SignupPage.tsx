@@ -133,7 +133,7 @@ export default function SignupPage({
         { rememberSession: true },
       )
       setIsOnboardingOpen(false)
-      navigate('/')
+      navigate('/dashboard')
     } catch (caughtError) {
       const message =
         caughtError instanceof ApiError

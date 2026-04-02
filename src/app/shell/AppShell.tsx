@@ -69,7 +69,7 @@ export function AppShell({ children }: AppShellProps) {
     }
 
     setRole(nextRole)
-    navigate('/')
+    navigate('/dashboard')
   }
 
   useEffect(() => {
@@ -190,7 +190,7 @@ export function AppShell({ children }: AppShellProps) {
   ) : (
     <nav className="flex flex-1 flex-col gap-2 overflow-visible">
       <div className="flex flex-col gap-1">
-        <NavLink className={navLinkClassName} to="/" onClick={onSidebarNavigate}>
+        <NavLink className={navLinkClassName} to="/dashboard" onClick={onSidebarNavigate}>
           <DashboardIcon />
           <span>Dashboard</span>
         </NavLink>

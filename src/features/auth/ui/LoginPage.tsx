@@ -77,7 +77,7 @@ export default function LoginPage() {
         { rememberSession: formValues.keepLoggedIn },
       )
       success('Login successful', 'Welcome back to TruCycle.')
-      navigate('/')
+      navigate('/dashboard')
     } catch (caughtError) {
       const message =
         caughtError instanceof ApiError

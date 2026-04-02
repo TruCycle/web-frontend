@@ -37,7 +37,7 @@ export default function Dashboard() {
   const { user } = useAuthSession()
   const { role } = useUserRole()
   const isDonorMode = role === 'donor'
-  const showStats = location.pathname === '/' || location.pathname === '/dashboard'
+  const showStats = location.pathname === '/dashboard'
   const [isSuccessOpen, setIsSuccessOpen] = useState(false)
   const [isListItemDialogOpen, setIsListItemDialogOpen] = useState(false)
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
@@ -87,12 +87,12 @@ export default function Dashboard() {
   )
   const dashboardStats = isDonorMode
     ? {
-        itemsCollected: donorListings.length,
-        itemsExchanged: donorSummary.completed,
-        totalCo2SavedKg: donorCo2Saved,
-        rewardsEarned: donorSummary.claimed,
-        rewardsCurrency: '£',
-      }
+      itemsCollected: donorListings.length,
+      itemsExchanged: donorSummary.completed,
+      totalCo2SavedKg: donorCo2Saved,
+      rewardsEarned: donorSummary.claimed,
+      rewardsCurrency: '£',
+    }
     : stats
   const shouldShowStatsLoading = isDonorMode ? isLoadingDonorListings : isLoadingStats
   const categoryFilterOptions = useMemo(
@@ -229,19 +229,19 @@ export default function Dashboard() {
             <div className="space-y-2">
               {!isLoadingDonorListings
                 ? donorListings.slice(0, 5).map((item) => (
-                    <ListingRow
-                      key={item.id}
-                      item={item}
-                      removingId={removingId}
-                      onOpenActive={setSelectedDonorListing}
-                      onOpenDetails={setSelectedDonorListing}
-                      onOpenQr={setSelectedDonorQrListing}
-                      showQrAction={shouldShowDonorListingQrAction(item)}
-                      onRemove={(listingId) => {
-                        void removeListing(listingId)
-                      }}
-                    />
-                  ))
+                  <ListingRow
+                    key={item.id}
+                    item={item}
+                    removingId={removingId}
+                    onOpenActive={setSelectedDonorListing}
+                    onOpenDetails={setSelectedDonorListing}
+                    onOpenQr={setSelectedDonorQrListing}
+                    showQrAction={shouldShowDonorListingQrAction(item)}
+                    onRemove={(listingId) => {
+                      void removeListing(listingId)
+                    }}
+                  />
+                ))
                 : null}
             </div>
             <ListingOffcanvas
@@ -364,11 +364,10 @@ export default function Dashboard() {
             {categories.map((category) => (
               <button
                 key={category}
-                className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition ${
-                  category === filters.category
+                className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition ${category === filters.category
                     ? 'bg-white text-tc-app-text'
                     : 'bg-transparent text-tc-app-secondary hover:bg-slate-200'
-                }`}
+                  }`}
                 onClick={() => updateCategory(category)}
               >
                 {category}
@@ -473,13 +472,13 @@ export default function Dashboard() {
         item={
           selectedBrowseItem
             ? {
-                title: selectedBrowseItem.title,
-                image: selectedBrowseItem.image?.url,
-                status: selectedBrowseItem.claimStatus ? 'Claimed' : 'Active',
-                category: selectedBrowseItem.category,
-                condition: selectedBrowseItem.condition,
-                location: selectedBrowseItem.locationLabel,
-              }
+              title: selectedBrowseItem.title,
+              image: selectedBrowseItem.image?.url,
+              status: selectedBrowseItem.claimStatus ? 'Claimed' : 'Active',
+              category: selectedBrowseItem.category,
+              condition: selectedBrowseItem.condition,
+              location: selectedBrowseItem.locationLabel,
+            }
             : null
         }
       />

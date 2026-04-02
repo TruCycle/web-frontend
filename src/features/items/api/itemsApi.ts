@@ -18,6 +18,7 @@ interface FetchBrowseItemsParams {
   readonly postcode?: string
   readonly page?: number
   readonly limit?: number
+  readonly includeAuth?: boolean
 }
 
 interface FetchCollectedItemsParams {
@@ -209,7 +210,9 @@ export async function fetchBrowseItems(
     limit: safeLimit,
   })
 
-  const response = await apiRequest<unknown>(`/items${query}`)
+  const response = await apiRequest<unknown>(`/items${query}`, {
+    includeAuth: params.includeAuth,
+  })
   const data = unwrapApiData<unknown>(response)
   const collection = Array.isArray(data)
     ? data
@@ -262,7 +265,7 @@ export async function fetchCollectedItems(
     1,
     Math.trunc(
       readNumber(paginationRecord?.total_pages) ??
-        Math.ceil(total / limit),
+      Math.ceil(total / limit),
     ),
   )
 
