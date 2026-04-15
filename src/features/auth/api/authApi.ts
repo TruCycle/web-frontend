@@ -110,6 +110,14 @@ export async function requestPasswordReset(email: string): Promise<void> {
   })
 }
 
+export async function resendVerificationEmail(email: string): Promise<void> {
+  await apiRequest<ApiEnvelope<null>, { email: string }>('/auth/resend-verification', {
+    method: 'POST',
+    body: { email },
+    includeAuth: false,
+  })
+}
+
 export async function resetPassword(payload: ResetPasswordPayload): Promise<void> {
   await apiRequest<ApiEnvelope<null>, { email: string; otp: string; new_password: string }>(
     '/auth/reset-password',
@@ -201,11 +209,11 @@ export async function upgradeToPartner(
     user: normalizeUser(response.data.user),
     tokens: response.data.tokens
       ? {
-          accessToken: response.data.tokens.accessToken,
-          refreshToken: response.data.tokens.refreshToken,
-          accessTokenExpiry: response.data.tokens.accessTokenExpiry,
-          refreshTokenExpiry: response.data.tokens.refreshTokenExpiry,
-        }
+        accessToken: response.data.tokens.accessToken,
+        refreshToken: response.data.tokens.refreshToken,
+        accessTokenExpiry: response.data.tokens.accessTokenExpiry,
+        refreshTokenExpiry: response.data.tokens.refreshTokenExpiry,
+      }
       : undefined,
   }
 }

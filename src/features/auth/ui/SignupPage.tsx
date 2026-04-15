@@ -1,11 +1,11 @@
 import { type ChangeEvent, type FormEvent, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import { Mail, RefreshCw } from 'lucide-react'
+import { resendVerificationEmail } from '@/features/auth/api/authApi'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { ApiError } from '@/shared/types/network'
 import { useToast } from '@/shared/ui/toast/useToast'
 import { classNames } from '@/shared/utils/classNames'
-import { useUserRole } from '@/shared/context/useUserRole'
-import { OnboardingChoiceDialog } from './components/OnboardingChoiceDialog'
 import { PasswordVisibilityIcon } from './components/PasswordVisibilityIcon'
 import {
   AuthPageFrame,
@@ -47,15 +47,10 @@ export default function SignupPage({
   const [formValues, setFormValues] = useState(initialFormValues)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isRegistering, setIsRegistering] = useState(false)
-  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false)
-  const [isChoosingRole, setIsChoosingRole] = useState(false)
-  const [pendingChoice, setPendingChoice] = useState<'collect' | 'donate' | null>(
-    null,
-  )
-  const { register, login } = useAuthSession()
+  const [isResendingVerification, setIsResendingVerification] = useState(false)
+  const [verificationEmail, setVerificationEmail] = useState<string | null>(null)
+  const { register } = useAuthSession()
   const { success, error } = useToast()
-  const { setRole } = useUserRole()
-  const navigate = useNavigate()
 
   function onInputChange(
     key: keyof SignupFormValues,
@@ -103,8 +98,8 @@ export default function SignupPage({
         password: formValues.password,
       })
       onSubmitSuccess?.()
-      setIsOnboardingOpen(true)
-      success('Account created', 'Choose how you want to start on TruCycle.')
+      setVerificationEmail(formValues.email.trim())
+      success('Account created', 'Check your email to verify your account and complete registration.')
     } catch (caughtError) {
       const message =
         caughtError instanceof ApiError
@@ -116,63 +111,105 @@ export default function SignupPage({
     }
   }
 
-  async function handleOnboardingSelect(choice: 'collect' | 'donate') {
-    if (isChoosingRole) {
+  async function handleResendVerification() {
+    if (!verificationEmail || isResendingVerification) {
       return
     }
 
-    setIsChoosingRole(true)
-    setPendingChoice(choice)
+    setIsResendingVerification(true)
     try {
-      setRole(choice === 'collect' ? 'collector' : 'donor')
-      await login(
-        {
-          email: formValues.email.trim(),
-          password: formValues.password,
-        },
-        { rememberSession: true },
-      )
-      setIsOnboardingOpen(false)
-      navigate('/dashboard')
+      await resendVerificationEmail(verificationEmail)
+      success('Verification email sent', 'Check your inbox for a fresh verification link.')
     } catch (caughtError) {
       const message =
         caughtError instanceof ApiError
           ? caughtError.message
-          : 'Unable to login after signup. Please login manually.'
-      error('Could not continue', message)
-      setIsChoosingRole(false)
-      setPendingChoice(null)
+          : 'Unable to resend the verification email right now. Please try again.'
+      error('Resend failed', message)
+    } finally {
+      setIsResendingVerification(false)
     }
-  }
-
-  function handleOnboardingClose() {
-    if (isChoosingRole) {
-      return
-    }
-    setIsOnboardingOpen(false)
-    navigate('/login')
   }
 
   return (
-    <>
-      <AuthPageFrame
-        className={className}
-        formTitle="Welcome to TruCycle"
-        formDescription="Create your free account to start making an impact"
-        showcase={{
-          avatarSrc: '/profile-picture.jpg',
-          quote:
-            'TruCycle makes donating my unused items easy, secure, and straightforward.',
-        }}
-        footer={
-          <p className={authFooterCopyClassName}>
-            Already have an account?{' '}
-            <Link className={authFooterLinkClassName} to="/login">
-              Log in
-            </Link>
-          </p>
-        }
-      >
+    <AuthPageFrame
+      className={className}
+      formTitle="Welcome to TruCycle"
+      formDescription="Create your free account to start making an impact"
+      showcase={{
+        avatarSrc: '/profile-picture.jpg',
+        quote:
+          'TruCycle makes donating my unused items easy, secure, and straightforward.',
+      }}
+      footer={
+        <p className={authFooterCopyClassName}>
+          Already have an account?{' '}
+          <Link className={authFooterLinkClassName} to="/login">
+            Log in
+          </Link>
+        </p>
+      }
+    >
+      {verificationEmail ? (
+        <div className="mt-8 grid gap-5">
+          <div className="rounded-[0.9rem] border border-tc-auth-inputBorder bg-[#F8FAFC] p-5">
+            <div className="flex items-start gap-3">
+              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tc-shell-accent/20 text-tc-shell-bg">
+                <Mail size={20} />
+              </span>
+              <div>
+                <p className="m-0 text-sm font-medium text-tc-auth-formText">Verification email sent to</p>
+                <p className="mt-1 break-all text-base font-semibold text-tc-auth-formTitle">{verificationEmail}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-3 rounded-[0.9rem] border border-tc-auth-inputBorder bg-white p-5 text-sm leading-7 text-tc-auth-formText">
+            <p className="m-0">1. Open your inbox and look for the TruCycle verification email.</p>
+            <p className="m-0">2. Click the verification link in that email.</p>
+            <p className="m-0">3. Once verified, return here and log in to continue.</p>
+            <p className="m-0">If you don’t see it, check your spam or promotions folder.</p>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <a
+              className={classNames(
+                authPrimaryButtonClassName,
+                'no-underline sm:flex-1',
+              )}
+              href={`mailto:${verificationEmail}`}
+            >
+              Open email app
+            </a>
+            <button
+              className={classNames(
+                'inline-flex h-[3.05rem] items-center justify-center gap-2 rounded-[0.55rem] border border-tc-auth-inputBorder bg-white px-4 text-base font-semibold text-tc-auth-formTitle transition hover:bg-slate-50 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-tc-auth-submitFocus disabled:cursor-not-allowed disabled:opacity-70 sm:flex-1',
+                isResendingVerification && 'opacity-80',
+              )}
+              type="button"
+              onClick={handleResendVerification}
+              disabled={isResendingVerification}
+              aria-busy={isResendingVerification}
+            >
+              {isResendingVerification ? (
+                <>
+                  <span className={authLoadingSpinnerClassName} aria-hidden />
+                  Resending...
+                </>
+              ) : (
+                <>
+                  <RefreshCw size={18} />
+                  Resend verification email
+                </>
+              )}
+            </button>
+          </div>
+
+          <Link className="text-center text-sm font-medium text-tc-auth-link no-underline hover:underline" to="/login">
+            I&apos;ve verified my email, continue to login
+          </Link>
+        </div>
+      ) : (
         <form className="mt-8 grid gap-4" onSubmit={onSubmit}>
           <label className={authFieldClassName}>
             <span className={authLabelClassName}>Full Name</span>
@@ -273,15 +310,7 @@ export default function SignupPage({
             )}
           </button>
         </form>
-      </AuthPageFrame>
-
-      <OnboardingChoiceDialog
-        isOpen={isOnboardingOpen}
-        onClose={handleOnboardingClose}
-        onSelect={handleOnboardingSelect}
-        isLoading={isChoosingRole}
-        loadingChoice={pendingChoice}
-      />
-    </>
+      )}
+    </AuthPageFrame>
   )
 }
