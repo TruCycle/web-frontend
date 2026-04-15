@@ -5,6 +5,7 @@ import { useAuthSession } from '@/shared/context/useAuthSession'
 import { LoadingState } from '@/shared/ui/loading/LoadingState'
 
 const SignupPage = lazy(() => import('@/features/auth/ui/SignupPage'))
+const VerifyEmailPage = lazy(() => import('@/features/auth/ui/VerifyEmailPage'))
 const LoginPage = lazy(() => import('@/features/auth/ui/LoginPage'))
 const PasswordResetPage = lazy(
   () => import('@/features/auth/ui/PasswordResetPage'),
@@ -89,6 +90,7 @@ export function AppRoutes() {
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/reset-password" element={<PasswordResetPage />} />
       <Route element={<ProtectedShellRoute />}>

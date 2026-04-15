@@ -14,6 +14,7 @@ import {
   requestPasswordReset as requestPasswordResetApi,
   resetPassword as resetPasswordApi,
   upgradeToPartner as upgradeToPartnerApi,
+  verifyEmailToken,
 } from '@/features/auth/api/authApi'
 import type {
   AuthUser,
@@ -204,6 +205,17 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
     await registerUser(payload)
   }, [])
 
+  const verifyEmail = useCallback(async (token: string) => {
+    const verifiedSession = await verifyEmailToken(token)
+    storeSession({
+      tokens: verifiedSession.tokens,
+      user: verifiedSession.user,
+      persistMode: 'local',
+      keepRefreshToken: Boolean(verifiedSession.tokens.refreshToken),
+    })
+    setUser(verifiedSession.user)
+  }, [])
+
   const upgradeToPartner = useCallback(async (payload: UpgradeToPartnerPayload) => {
     const upgraded = await upgradeToPartnerApi(payload)
     const persistMode = getStoredPersistMode() ?? 'session'
@@ -243,6 +255,7 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
       isBootstrapping,
       login,
       register,
+      verifyEmail,
       upgradeToPartner,
       requestPasswordReset,
       resetPassword,
@@ -253,6 +266,7 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
       isBootstrapping,
       login,
       register,
+      verifyEmail,
       upgradeToPartner,
       requestPasswordReset,
       resetPassword,

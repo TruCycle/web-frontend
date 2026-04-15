@@ -118,6 +118,24 @@ export async function resendVerificationEmail(email: string): Promise<void> {
   })
 }
 
+export async function verifyEmailToken(
+  token: string,
+): Promise<{ user: AuthUser; tokens: AuthTokens }> {
+  const response = await apiRequest<ApiEnvelope<AuthDataWithTokens>, { token: string }>(
+    '/auth/verify',
+    {
+      method: 'POST',
+      body: { token },
+      includeAuth: false,
+    },
+  )
+
+  return {
+    user: normalizeUser(response.data.user),
+    tokens: mapTokens(response.data),
+  }
+}
+
 export async function resetPassword(payload: ResetPasswordPayload): Promise<void> {
   await apiRequest<ApiEnvelope<null>, { email: string; otp: string; new_password: string }>(
     '/auth/reset-password',
