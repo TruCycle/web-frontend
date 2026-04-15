@@ -35,6 +35,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 * {
   box-sizing: border-box;
   scrollbar-width: thin;
@@ -158,6 +162,32 @@ p {
   }
 }
 
+@keyframes tcSoftFloat {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes tcSoftPulse {
+
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.96);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.04);
+  }
+}
+
 .tc-landing-fade-up,
 .tc-landing-card {
   opacity: 0;
@@ -199,12 +229,22 @@ p {
   display: none;
 }
 
+.animate-float {
+  animation: tcSoftFloat 6s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: tcSoftPulse 4.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
 
   .tc-landing-fade-up,
   .tc-landing-card,
   .tc-loading-logo-flipper,
-  .tc-shimmer-block {
+  .tc-shimmer-block,
+  .animate-float,
+  .animate-pulse-soft {
     animation: none !important;
     opacity: 1;
     transform: none;
