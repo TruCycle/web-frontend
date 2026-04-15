@@ -39,7 +39,7 @@ export function LandingWhyItWorks() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((feature, index) => (
             <div
-              className={`tc-landing-card rounded-[1.75rem] border border-white/70 bg-white/82 p-7 shadow-[0_18px_38px_rgba(15,23,42,0.08)] backdrop-blur ${index === 0 ? 'tc-landing-delay-1' : index === 1 ? 'tc-landing-delay-2' : index === 2 ? 'tc-landing-delay-3' : 'tc-landing-delay-4'}`}
+              className={`tc-landing-card rounded-[1.75rem] border border-slate-200 bg-white p-7 shadow-none ring-1 ring-slate-100/80 backdrop-blur transition-shadow duration-300 hover:shadow-[0_12px_28px_rgba(15,23,42,0.08)] ${index === 0 ? 'tc-landing-delay-1' : index === 1 ? 'tc-landing-delay-2' : index === 2 ? 'tc-landing-delay-3' : 'tc-landing-delay-4'}`}
               key={feature.title}
             >
               <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-tc-shell-accent/20 text-tc-shell-bg">

@@ -43,7 +43,7 @@ export function LandingHowItWorks() {
           {steps.map((step, index) => (
             <div className="group relative" key={step.number}>
               <div
-                className={`tc-landing-card flex h-full flex-col gap-5 rounded-[1.8rem] border border-white/70 bg-white/80 p-8 shadow-[0_18px_48px_rgba(15,23,42,0.08)] backdrop-blur ${index === 0 ? 'tc-landing-delay-1' : index === 1 ? 'tc-landing-delay-2' : 'tc-landing-delay-3'}`}
+                className={`tc-landing-card flex h-full flex-col gap-5 rounded-[1.8rem] border border-slate-200 bg-white p-8 shadow-none ring-1 ring-slate-100/80 backdrop-blur transition-shadow duration-300 hover:shadow-[0_12px_30px_rgba(15,23,42,0.08)] ${index === 0 ? 'tc-landing-delay-1' : index === 1 ? 'tc-landing-delay-2' : 'tc-landing-delay-3'}`}
               >
                 <div className="flex items-center justify-between">
                   <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${step.colorClassName}`}>
