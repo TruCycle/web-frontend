@@ -7,7 +7,7 @@ const dashboardRoles = [
 
 export function LandingDashboardSection() {
   return (
-    <section className="overflow-hidden bg-tc-shell-bg px-6 py-24 text-white">
+    <section className="overflow-hidden bg-[#0d2018] px-6 py-24 text-white">
       <div className="mx-auto grid max-w-7xl gap-16 lg:grid-cols-2 lg:items-center">
         <div className="max-w-xl">
           <span className="tc-landing-fade-up text-sm font-semibold uppercase tracking-[0.2em] text-tc-shell-accent">
@@ -26,7 +26,7 @@ export function LandingDashboardSection() {
             {dashboardRoles.map((entry, index) => (
               <div
                 key={entry.role}
-                className={`tc-landing-card rounded-[1.35rem] border border-white/5 bg-[#24332c] px-5 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] ${index === 0 ? 'tc-landing-delay-2' : 'tc-landing-delay-3'}`}
+                className={`tc-landing-fade-up rounded-[1.35rem] border border-white/5 bg-[#24332c] px-5 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] ${index === 0 ? 'tc-landing-delay-2' : 'tc-landing-delay-3'}`}
               >
                 <div className="flex items-start gap-4">
                   <div className="mt-2.5 h-2.5 w-2.5 shrink-0 rounded-full bg-[#2f9d7e]" />
