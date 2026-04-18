@@ -1,5 +1,6 @@
 import { ArrowRight, Recycle } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import logoSrc from '@/assets/logo.svg'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 
 interface LegalSection {
@@ -29,9 +30,7 @@ export function LegalPageLayout({
       <nav className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between rounded-full border border-white/70 bg-white/75 px-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:px-6">
           <Link className="inline-flex items-center gap-2.5 no-underline" to="/">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-tc-shell-bg text-white shadow-[0_10px_24px_rgba(35,35,35,0.18)]">
-              <Recycle className="h-5 w-5" />
-            </div>
+            <img alt="TruCycle" className="h-10 w-10 rounded-2xl" src={logoSrc} />
             <span className="text-lg font-semibold tracking-[-0.03em] text-slate-950">TruCycle</span>
           </Link>
 
