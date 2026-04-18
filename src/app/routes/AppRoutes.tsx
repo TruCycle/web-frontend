@@ -11,6 +11,7 @@ const PasswordResetPage = lazy(
   () => import('@/features/auth/ui/PasswordResetPage'),
 )
 const HomePage = lazy(() => import('@/features/home/ui/HomePage'))
+const CookiesPage = lazy(() => import('@/features/legal/ui/CookiesPage'))
 const PrivacyPage = lazy(() => import('@/features/legal/ui/PrivacyPage'))
 const TermsPage = lazy(() => import('@/features/legal/ui/TermsPage'))
 const NotificationsPage = lazy(
@@ -87,6 +88,7 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/cookies" element={<CookiesPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/signup" element={<SignupPage />} />

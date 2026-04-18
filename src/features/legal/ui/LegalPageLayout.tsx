@@ -117,6 +117,9 @@ export function LegalPageLayout({
           <div className="mx-auto mt-20 flex max-w-7xl flex-col items-center justify-between gap-4 border-t border-slate-900/10 pt-8 text-sm text-slate-500 sm:flex-row">
             <span>© {new Date().getFullYear()} TruCycle. All rights reserved.</span>
             <div className="flex flex-wrap items-center justify-center gap-6">
+              <Link className="no-underline transition-colors hover:text-slate-950" to="/cookies">
+                Cookies
+              </Link>
               <Link className="no-underline transition-colors hover:text-slate-950" to="/privacy">
                 Privacy
               </Link>

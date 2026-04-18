@@ -5,6 +5,8 @@ const defaultSearchPostcode =
 const cloudinaryCloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME?.trim() || ''
 const cloudinaryUploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET?.trim() || ''
 const cloudinaryFolder = import.meta.env.VITE_CLOUDINARY_FOLDER?.trim() || ''
+const googleAnalyticsMeasurementId = import.meta.env.VITE_GA_MEASUREMENT_ID?.trim() || ''
+const metaPixelId = import.meta.env.VITE_META_PIXEL_ID?.trim() || ''
 
 export const env = {
   apiBaseUrl,
@@ -13,4 +15,6 @@ export const env = {
   cloudinaryCloudName,
   cloudinaryUploadPreset,
   cloudinaryFolder,
+  googleAnalyticsMeasurementId,
+  metaPixelId,
 } as const
