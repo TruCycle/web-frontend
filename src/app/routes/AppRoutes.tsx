@@ -30,6 +30,10 @@ const PartnerOnboardPage = lazy(
   () => import('@/features/partner-onboarding/ui/PartnerOnboardPage'),
 )
 const SupportFaqPage = lazy(() => import('@/features/support/ui/SupportFaqPage'))
+const AchievementsPage = lazy(() => import('@/features/gamification/ui/AchievementsPage'))
+const FoundItemsPage = lazy(() => import('@/features/found-items/ui/FoundItemsPage'))
+const PostFoundItemPage = lazy(() => import('@/features/found-items/ui/PostFoundItemPage'))
+const MyFoundPostsPage = lazy(() => import('@/features/found-items/ui/MyFoundPostsPage'))
 
 function ShellLayout() {
   return (
@@ -111,8 +115,12 @@ export function AppRoutes() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/messages" element={<MessagingPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/achievements" element={<AchievementsPage />} />
           <Route path="/collected" element={<CollectedItemsPage />} />
           <Route path="/listings" element={<YourListingsPage />} />
+          <Route path="/found-items" element={<FoundItemsPage />} />
+          <Route path="/found-items/post" element={<PostFoundItemPage />} />
+          <Route path="/found-items/my-posts" element={<MyFoundPostsPage />} />
           <Route path="/selected" element={<CollectedItemsPage />} />
           <Route path="/shops" element={<PartnerShopsPage />} />
           <Route path="/partner-shops" element={<Navigate replace to="/shops" />} />

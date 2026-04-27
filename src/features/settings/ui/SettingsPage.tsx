@@ -6,6 +6,7 @@ import { useAuthSession } from '@/shared/context/useAuthSession'
 import { updateCurrentUserProfile } from '@/features/settings/api/settingsApi'
 import { useToast } from '@/shared/ui/toast/useToast'
 import { ChangePasswordModal } from '@/features/settings/ui/components/ChangePasswordModal'
+import { ProfileBadges } from '@/features/gamification/ui/ProfileBadges'
 
 type TabKey = 'profile' | 'security' | 'notifications'
 
@@ -233,6 +234,8 @@ export default function SettingsPage() {
           </div>
         ) : null}
       </div>
+
+      {activeTab === 'profile' ? <ProfileBadges limit={4} /> : null}
 
       <ChangePasswordModal
         isOpen={isChangePasswordModalOpen}

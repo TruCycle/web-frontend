@@ -12,6 +12,8 @@ import {
   User,
   LogOut,
   X,
+  MapPin,
+  Trophy,
 } from 'lucide-react'
 import { useMessageAlerts } from '@/features/messaging/hooks/useMessageAlerts'
 import { useNotifications } from '@/features/notifications/hooks/useNotifications'
@@ -217,6 +219,14 @@ export function AppShell({ children }: AppShellProps) {
             </NavLink>
           </>
         )}
+        <NavLink className={navLinkClassName} to="/found-items" onClick={onSidebarNavigate}>
+          <MapPin size={20} />
+          <span>Found Items</span>
+        </NavLink>
+        <NavLink className={navLinkClassName} to="/achievements" onClick={onSidebarNavigate}>
+          <Trophy size={20} />
+          <span>Achievements</span>
+        </NavLink>
         <NavLink className={navLinkClassName} to="/messages" onClick={onSidebarNavigate}>
           {({ isActive }) => (
             <>

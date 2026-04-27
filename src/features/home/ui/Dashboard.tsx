@@ -23,6 +23,15 @@ import { useAuthSession } from '@/shared/context/useAuthSession'
 import type { BrowseItem } from '@/features/items/types'
 import type { DonorListingItem } from '@/features/listings/types'
 import { NewItemButton } from '@/shared/ui/button/NewItemButton'
+import { useUserProgress } from '@/features/gamification/hooks/useUserProgress'
+import { useStreaks } from '@/features/gamification/hooks/useStreaks'
+import { useBadges } from '@/features/gamification/hooks/useBadges'
+import { LevelBadge } from '@/features/gamification/ui/components/LevelBadge'
+import { ProgressBar } from '@/features/gamification/ui/components/ProgressBar'
+import { StreakIndicator } from '@/features/gamification/ui/components/StreakIndicator'
+import { useFoundItems } from '@/features/found-items/hooks/useFoundItems'
+import { FoundItemStatusBadge } from '@/features/found-items/ui/components/FoundItemStatusBadge'
+import { formatRelativeTime } from '@/shared/utils/formatRelativeTime'
 
 function statColor(index: number): string {
   if (index === 0) return 'bg-tc-app-primary/10'
@@ -69,6 +78,25 @@ export default function Dashboard() {
     removingId,
     removeListing,
   } = useDonorListings(isDonorMode)
+  const {
+    progress: userProgress,
+    isLoading: isLoadingProgress,
+  } = useUserProgress()
+  const {
+    primaryStreak,
+  } = useStreaks()
+  const {
+    earnedBadges,
+    isLoading: isLoadingBadges,
+  } = useBadges('earned')
+  const {
+    items: foundItems,
+    isLoading: isLoadingFoundItems,
+  } = useFoundItems({
+    status: 'available',
+    sortBy: 'nearest',
+    maxDistance: 5,
+  })
 
   const handleClaimItem = async (itemId: string) => {
     try {
@@ -201,6 +229,127 @@ export default function Dashboard() {
               </div>
             </div>
           ))}
+        </div>
+      ) : null}
+
+      {showStats ? (
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+          <section className="space-y-4 rounded-xl bg-white p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold text-tc-app-secondary">Achievements</h2>
+                <p className="text-sm text-slate-500">Current pace</p>
+              </div>
+              {userProgress ? <LevelBadge progress={userProgress} /> : null}
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#F8FAFC] p-4">
+              <div>
+                <p className="text-sm text-slate-500">Streak</p>
+                {primaryStreak ? <StreakIndicator streak={primaryStreak} size="lg" /> : <p className="text-sm text-slate-400">-</p>}
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-slate-500">Points</p>
+                <p className="text-2xl font-bold text-slate-900">
+                  {isLoadingProgress ? '-' : userProgress?.totalPoints ?? 0}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3 text-sm text-slate-500">
+                <span>Level progress</span>
+                <span>{isLoadingProgress ? '-' : `${userProgress?.pointsToNextLevel ?? 0} pts left`}</span>
+              </div>
+              <ProgressBar value={userProgress?.levelProgressPercent ?? 0} />
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {isLoadingBadges ? (
+                <p className="text-sm text-slate-500">Loading badges...</p>
+              ) : (
+                earnedBadges.slice(0, 3).map((entry) => (
+                  <span
+                    key={entry.badge.id}
+                    className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700"
+                  >
+                    {entry.badge.name}
+                  </span>
+                ))
+              )}
+            </div>
+
+            <Link
+              to="/achievements"
+              className="inline-flex items-center gap-1 text-sm font-medium text-tc-app-secondary transition hover:underline"
+            >
+              View All <ChevronRight size={16} />
+            </Link>
+          </section>
+
+          <section className="space-y-4 rounded-xl bg-white p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold text-tc-app-secondary">Found Nearby</h2>
+                <p className="text-sm text-slate-500">Community board</p>
+              </div>
+              <Link
+                to="/found-items"
+                className="inline-flex items-center gap-1 text-sm font-medium text-tc-app-secondary transition hover:underline"
+              >
+                Open <ChevronRight size={16} />
+              </Link>
+            </div>
+
+            <div className="space-y-3">
+              {isLoadingFoundItems ? <p className="text-sm text-slate-500">Loading board...</p> : null}
+              {!isLoadingFoundItems
+                ? foundItems.slice(0, 2).map((item) => (
+                    <div key={item.id} className="flex gap-3 rounded-xl border border-slate-200 p-3">
+                      {item.images[0] ? (
+                        <img
+                          src={item.images[0].thumbnailUrl || item.images[0].url}
+                          alt={item.title}
+                          className="h-20 w-20 rounded-xl object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-slate-100 text-xs text-slate-500">
+                          No image
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-semibold text-slate-900">{item.title}</p>
+                            <p className="text-sm text-slate-500">{item.location.neighborhood || item.location.postcode}</p>
+                          </div>
+                          <FoundItemStatusBadge status={item.status} />
+                        </div>
+                        <div className="flex items-center justify-between gap-3 text-xs text-slate-400">
+                          <span>{formatRelativeTime(item.postedAt)}</span>
+                          <span>{item.location.approximateDistance?.toFixed(1) ?? '-'} km</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                : null}
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                to="/found-items/post"
+                className="inline-flex items-center rounded-xl bg-tc-action-primary px-4 py-3 text-sm font-medium text-tc-action-primaryText transition hover:bg-tc-action-primaryHover"
+              >
+                Post Item
+              </Link>
+              <Link
+                to="/found-items/my-posts"
+                className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                My Posts
+              </Link>
+            </div>
+          </section>
         </div>
       ) : null}
 
