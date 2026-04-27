@@ -1,204 +1,209 @@
+import { apiRequest } from '@/shared/lib/api/client'
+import { unwrapApiData } from '@/shared/lib/api/envelope'
+import { clampLimit, toQueryString } from '@/shared/lib/api/query'
 import type {
   Badge,
   BadgeCategory,
+  BadgeRarity,
   PointTransaction,
   Streak,
   UserBadge,
   UserProgress,
 } from '../types'
 
-interface GamificationSnapshot {
-  progress: UserProgress
-  streaks: Streak[]
-  badges: Badge[]
-  earnedBadges: UserBadge[]
-  transactions: PointTransaction[]
+const badgeCategorySet = new Set<BadgeCategory>([
+  'milestone',
+  'streak',
+  'impact',
+  'community',
+  'special',
+])
+
+const badgeRaritySet = new Set<BadgeRarity>(['common', 'rare', 'epic', 'legendary'])
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === 'object' && value !== null
+    ? (value as Record<string, unknown>)
+    : null
 }
 
-const baseBadges: Badge[] = [
-  {
-    id: 'first-steps',
-    name: 'First Steps',
-    description: 'Complete your first exchange',
-    category: 'milestone',
-    rarity: 'common',
-    iconUrl: '',
-    requirement: '1 exchange',
-    pointsAwarded: 40,
-  },
-  {
-    id: 'warming-up',
-    name: 'Warming Up',
-    description: 'Keep a 3 day streak alive',
-    category: 'streak',
-    rarity: 'common',
-    iconUrl: '',
-    requirement: '3 day streak',
-    pointsAwarded: 30,
-  },
-  {
-    id: 'earth-saver',
-    name: 'Earth Saver',
-    description: 'Save 10 kg of CO2',
-    category: 'impact',
-    rarity: 'rare',
-    iconUrl: '',
-    requirement: '10 kg CO2 saved',
-    pointsAwarded: 75,
-  },
-  {
-    id: 'good-samaritan',
-    name: 'Good Samaritan',
-    description: 'Post your first found item',
-    category: 'community',
-    rarity: 'rare',
-    iconUrl: '',
-    requirement: '1 found item',
-    pointsAwarded: 50,
-  },
-  {
-    id: 'community-helper',
-    name: 'Community Helper',
-    description: 'Help 5 items find a new home',
-    category: 'community',
-    rarity: 'epic',
-    iconUrl: '',
-    requirement: '5 pickups',
-    pointsAwarded: 120,
-  },
-  {
-    id: 'app-explorer',
-    name: 'App Explorer',
-    description: 'Try every core flow in TruCycle',
-    category: 'special',
-    rarity: 'legendary',
-    iconUrl: '',
-    requirement: 'All core flows',
-    pointsAwarded: 160,
-  },
-]
-
-let snapshot: GamificationSnapshot = {
-  progress: {
-    userId: 'current-user',
-    totalPoints: 1240,
-    currentLevel: 7,
-    pointsToNextLevel: 160,
-    levelProgressPercent: 61,
-  },
-  streaks: [
-    {
-      userId: 'current-user',
-      currentStreak: 7,
-      longestStreak: 18,
-      lastActivityDate: '2026-04-26T14:00:00.000Z',
-      streakType: 'daily',
-      isActive: true,
-      expiresAt: '2026-04-28T00:00:00.000Z',
-    },
-    {
-      userId: 'current-user',
-      currentStreak: 2,
-      longestStreak: 6,
-      lastActivityDate: '2026-04-20T14:00:00.000Z',
-      streakType: 'weekly',
-      isActive: true,
-      expiresAt: '2026-05-01T00:00:00.000Z',
-    },
-  ],
-  badges: baseBadges,
-  earnedBadges: [
-    {
-      badge: baseBadges[0],
-      earnedAt: '2026-03-05T10:30:00.000Z',
-      isNew: false,
-    },
-    {
-      badge: baseBadges[1],
-      earnedAt: '2026-04-04T08:10:00.000Z',
-      isNew: false,
-    },
-    {
-      badge: baseBadges[2],
-      earnedAt: '2026-04-22T15:30:00.000Z',
-      isNew: true,
-    },
-  ],
-  transactions: [
-    {
-      id: 'pt-1',
-      userId: 'current-user',
-      points: 35,
-      reason: 'Picked up an item',
-      actionType: 'pickup',
-      actionId: 'item-14',
-      createdAt: '2026-04-26T14:10:00.000Z',
-    },
-    {
-      id: 'pt-2',
-      userId: 'current-user',
-      points: 60,
-      reason: 'Completed exchange streak',
-      actionType: 'streak',
-      actionId: null,
-      createdAt: '2026-04-24T09:20:00.000Z',
-    },
-    {
-      id: 'pt-3',
-      userId: 'current-user',
-      points: 50,
-      reason: 'Impact milestone reached',
-      actionType: 'badge',
-      actionId: 'earth-saver',
-      createdAt: '2026-04-22T15:30:00.000Z',
-    },
-  ],
+function readString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null
 }
 
-function cloneSnapshot<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value)) as T
+function readNumber(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null
 }
 
-async function respond<T>(value: T): Promise<T> {
-  return new Promise((resolve) => {
-    window.setTimeout(() => resolve(cloneSnapshot(value)), 120)
-  })
+function normalizeBadgeCategory(value: unknown): BadgeCategory {
+  return badgeCategorySet.has(value as BadgeCategory)
+    ? (value as BadgeCategory)
+    : 'milestone'
+}
+
+function normalizeBadgeRarity(value: unknown): BadgeRarity {
+  return badgeRaritySet.has(value as BadgeRarity)
+    ? (value as BadgeRarity)
+    : 'common'
+}
+
+function normalizeUserProgress(value: unknown): UserProgress | null {
+  const record = asRecord(value)
+  if (!record) {
+    return null
+  }
+
+  const userId = readString(record.userId)
+  if (!userId) {
+    return null
+  }
+
+  return {
+    userId,
+    totalPoints: readNumber(record.totalPoints) ?? 0,
+    currentLevel: readNumber(record.currentLevel) ?? 1,
+    pointsToNextLevel: readNumber(record.pointsToNextLevel) ?? 0,
+    levelProgressPercent: readNumber(record.levelProgressPercent) ?? 0,
+  }
+}
+
+function normalizeStreak(value: unknown): Streak | null {
+  const record = asRecord(value)
+  if (!record) {
+    return null
+  }
+
+  const userId = readString(record.userId)
+  const streakType = readString(record.streakType)
+  if (!userId || (streakType !== 'daily' && streakType !== 'weekly')) {
+    return null
+  }
+
+  return {
+    userId,
+    currentStreak: readNumber(record.currentStreak) ?? 0,
+    longestStreak: readNumber(record.longestStreak) ?? 0,
+    lastActivityDate: readString(record.lastActivityDate) ?? '',
+    streakType,
+    isActive: Boolean(record.isActive),
+    expiresAt: readString(record.expiresAt),
+  }
+}
+
+function normalizeBadge(value: unknown): Badge | null {
+  const record = asRecord(value)
+  if (!record) {
+    return null
+  }
+
+  const id = readString(record.id)
+  const name = readString(record.name)
+  if (!id || !name) {
+    return null
+  }
+
+  return {
+    id,
+    name,
+    description: readString(record.description) ?? '',
+    category: normalizeBadgeCategory(record.category),
+    rarity: normalizeBadgeRarity(record.rarity),
+    iconUrl: readString(record.iconUrl) ?? '',
+    requirement: readString(record.requirement) ?? '',
+    pointsAwarded: readNumber(record.pointsAwarded) ?? 0,
+  }
+}
+
+function normalizeUserBadge(value: unknown): UserBadge | null {
+  const record = asRecord(value)
+  if (!record) {
+    return null
+  }
+
+  const badge = normalizeBadge(record.badge)
+  if (!badge) {
+    return null
+  }
+
+  return {
+    badge,
+    earnedAt: readString(record.earnedAt) ?? new Date().toISOString(),
+    isNew: Boolean(record.isNew),
+  }
+}
+
+function normalizePointTransaction(value: unknown): PointTransaction | null {
+  const record = asRecord(value)
+  if (!record) {
+    return null
+  }
+
+  const id = readString(record.id)
+  const userId = readString(record.userId)
+  const reason = readString(record.reason)
+  const actionType = readString(record.actionType)
+  if (!id || !userId || !reason || !actionType) {
+    return null
+  }
+
+  return {
+    id,
+    userId,
+    points: readNumber(record.points) ?? 0,
+    reason,
+    actionType,
+    actionId: readString(record.actionId),
+    createdAt: readString(record.createdAt) ?? new Date().toISOString(),
+  }
+}
+
+function requireProgress(value: unknown): UserProgress {
+  const progress = normalizeUserProgress(value)
+  if (!progress) {
+    throw new Error('Invalid progress response.')
+  }
+
+  return progress
 }
 
 export async function fetchUserProgress(): Promise<UserProgress> {
-  return respond(snapshot.progress)
+  const response = await apiRequest<unknown>('/gamification/progress')
+  return requireProgress(unwrapApiData<unknown>(response))
 }
 
 export async function fetchStreaks(): Promise<Streak[]> {
-  return respond(snapshot.streaks)
+  const response = await apiRequest<unknown>('/gamification/streaks')
+  const data = unwrapApiData<unknown>(response)
+  const collection = Array.isArray(data) ? data : []
+
+  return collection
+    .map((entry) => normalizeStreak(entry))
+    .filter((entry): entry is Streak => entry !== null)
 }
 
 export async function fetchBadges(
   filter: 'all' | 'earned' | 'available' = 'all',
   category?: BadgeCategory,
 ): Promise<{ badges: Badge[]; earnedBadges: UserBadge[] }> {
-  const earnedBadgeIds = new Set(snapshot.earnedBadges.map((entry) => entry.badge.id))
-  const badges = snapshot.badges.filter((badge) => {
-    if (category && badge.category !== category) {
-      return false
-    }
-
-    if (filter === 'earned') {
-      return earnedBadgeIds.has(badge.id)
-    }
-
-    if (filter === 'available') {
-      return !earnedBadgeIds.has(badge.id)
-    }
-
-    return true
+  const query = toQueryString({
+    filter,
+    category,
   })
+  const response = await apiRequest<unknown>(`/gamification/badges${query}`)
+  const record = asRecord(unwrapApiData<unknown>(response))
 
-  const earnedBadges = snapshot.earnedBadges.filter((entry) =>
-    category ? entry.badge.category === category : true,
-  )
-
-  return respond({ badges, earnedBadges })
+  return {
+    badges: Array.isArray(record?.badges)
+      ? record.badges
+          .map((entry) => normalizeBadge(entry))
+          .filter((entry): entry is Badge => entry !== null)
+      : [],
+    earnedBadges: Array.isArray(record?.earnedBadges)
+      ? record.earnedBadges
+          .map((entry) => normalizeUserBadge(entry))
+          .filter((entry): entry is UserBadge => entry !== null)
+      : [],
+  }
 }
 
 export async function fetchPointHistory(
@@ -208,29 +213,34 @@ export async function fetchPointHistory(
   transactions: PointTransaction[]
   pagination: { page: number; limit: number; total: number; totalPages: number }
 }> {
-  const total = snapshot.transactions.length
-  const totalPages = Math.max(1, Math.ceil(total / limit))
-  const startIndex = (page - 1) * limit
-  const transactions = snapshot.transactions.slice(startIndex, startIndex + limit)
-
-  return respond({
-    transactions,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages,
-    },
+  const safeLimit = clampLimit(limit, 8)
+  const query = toQueryString({
+    page,
+    limit: safeLimit,
   })
+  const response = await apiRequest<unknown>(`/gamification/points/history${query}`)
+  const record = asRecord(unwrapApiData<unknown>(response))
+  const pagination = asRecord(record?.pagination)
+  const total = readNumber(pagination?.total) ?? 0
+
+  return {
+    transactions: Array.isArray(record?.transactions)
+      ? record.transactions
+          .map((entry) => normalizePointTransaction(entry))
+          .filter((entry): entry is PointTransaction => entry !== null)
+      : [],
+    pagination: {
+      page: readNumber(pagination?.page) ?? page,
+      limit: readNumber(pagination?.limit) ?? safeLimit,
+      total,
+      totalPages:
+        readNumber(pagination?.totalPages) ?? Math.max(1, Math.ceil(total / safeLimit)),
+    },
+  }
 }
 
 export async function markBadgeSeen(badgeId: string): Promise<void> {
-  snapshot = {
-    ...snapshot,
-    earnedBadges: snapshot.earnedBadges.map((entry) =>
-      entry.badge.id === badgeId ? { ...entry, isNew: false } : entry,
-    ),
-  }
-
-  await respond(undefined)
+  await apiRequest<void>(`/gamification/badges/${encodeURIComponent(badgeId.trim())}/seen`, {
+    method: 'POST',
+  })
 }

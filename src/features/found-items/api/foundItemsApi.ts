@@ -1,10 +1,18 @@
+import { apiRequest } from '@/shared/lib/api/client'
+import { unwrapApiData } from '@/shared/lib/api/envelope'
+import { clampLimit, toQueryString } from '@/shared/lib/api/query'
+import { env } from '@/shared/lib/config/env'
 import type { PaginationMeta } from '@/shared/types/pagination'
-import type {
-  CreateFoundItemPayload,
-  FoundItem,
-  FoundItemClaim,
-  FoundItemsFilter,
-  FoundItemStatus,
+import {
+  foundItemCategories,
+  foundItemStatuses,
+  type CreateFoundItemPayload,
+  type FoundItem,
+  type FoundItemCategory,
+  type FoundItemClaim,
+  type FoundItemImage,
+  type FoundItemsFilter,
+  type FoundItemStatus,
 } from '../types'
 
 interface ActorSummary {
@@ -18,244 +26,203 @@ interface FoundItemsResponse {
   readonly pagination: PaginationMeta
 }
 
-interface FoundItemsStore {
-  items: FoundItem[]
-  claimsByItemId: Record<string, FoundItemClaim[]>
+type FoundItemClaimStatus = FoundItemClaim['status']
+
+const foundItemCategorySet = new Set<FoundItemCategory>(foundItemCategories)
+const foundItemStatusSet = new Set<FoundItemStatus>(foundItemStatuses)
+const foundItemClaimStatusSet = new Set<FoundItemClaimStatus>([
+  'pending',
+  'acknowledged',
+  'completed',
+  'cancelled',
+])
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === 'object' && value !== null
+    ? (value as Record<string, unknown>)
+    : null
 }
 
-const defaultActor: ActorSummary = {
-  id: 'current-user',
-  name: 'You',
-  avatarUrl: null,
+function readString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null
 }
 
-let store: FoundItemsStore = {
-  items: [
-    {
-      id: 'found-1',
-      title: 'Oak side table',
-      description: 'Dry, sturdy and ready for pickup by the gate.',
-      category: 'furniture',
-      status: 'available',
-      images: [
-        {
-          url: 'https://images.unsplash.com/photo-1517705008128-361805f42e86?auto=format&fit=crop&w=1200&q=80',
-          thumbnailUrl: 'https://images.unsplash.com/photo-1517705008128-361805f42e86?auto=format&fit=crop&w=600&q=80',
-          altText: 'Oak side table outdoors',
-        },
-      ],
-      location: {
-        latitude: 51.5078,
-        longitude: -0.1274,
-        address: 'Near St. Martin Lane',
-        neighborhood: 'Covent Garden',
-        postcode: 'WC2N',
-        approximateDistance: 0.4,
-      },
-      condition: 'Good',
-      poster: {
-        id: 'neighbor-1',
-        name: 'Amina',
-        avatarUrl: null,
-      },
-      postedAt: '2026-04-27T07:15:00.000Z',
-      expiresAt: '2026-05-02T07:15:00.000Z',
-      claimCount: 0,
-      viewCount: 42,
-    },
-    {
-      id: 'found-2',
-      title: 'Plant stand',
-      description: 'Metal frame. Needs a wipe down but solid.',
-      category: 'outdoor',
-      status: 'claimed',
-      images: [
-        {
-          url: 'https://images.unsplash.com/photo-1484101403633-562f891dc89a?auto=format&fit=crop&w=1200&q=80',
-          thumbnailUrl: 'https://images.unsplash.com/photo-1484101403633-562f891dc89a?auto=format&fit=crop&w=600&q=80',
-          altText: 'Black metal plant stand',
-        },
-      ],
-      location: {
-        latitude: 51.5131,
-        longitude: -0.1402,
-        address: 'Outside the corner shop',
-        neighborhood: 'Soho',
-        postcode: 'W1F',
-        approximateDistance: 1.2,
-      },
-      condition: 'Fair',
-      poster: {
-        id: 'current-user',
-        name: 'You',
-        avatarUrl: null,
-      },
-      postedAt: '2026-04-26T17:10:00.000Z',
-      expiresAt: '2026-05-01T17:10:00.000Z',
-      claimCount: 1,
-      viewCount: 63,
-    },
-    {
-      id: 'found-3',
-      title: 'Stack of novels',
-      description: 'Eight paperbacks in a clean tote bag.',
-      category: 'books',
-      status: 'available',
-      images: [],
-      location: {
-        latitude: 51.5195,
-        longitude: -0.1024,
-        address: 'Next to the blue recycling bins',
-        neighborhood: 'Clerkenwell',
-        postcode: 'EC1M',
-        approximateDistance: 2.1,
-      },
-      condition: 'Good',
-      poster: {
-        id: 'neighbor-2',
-        name: 'Jordan',
-        avatarUrl: null,
-      },
-      postedAt: '2026-04-27T05:45:00.000Z',
-      expiresAt: '2026-05-04T05:45:00.000Z',
-      claimCount: 0,
-      viewCount: 19,
-    },
-  ],
-  claimsByItemId: {
-    'found-2': [
-      {
-        id: 'claim-1',
-        foundItemId: 'found-2',
-        claimerId: 'neighbor-3',
-        claimerName: 'Malik',
-        message: 'I can collect this after work.',
-        status: 'pending',
-        createdAt: '2026-04-26T17:35:00.000Z',
-      },
-    ],
-  },
+function readNumber(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null
 }
 
-function cloneValue<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value)) as T
+function normalizeFoundItemCategory(value: unknown): FoundItemCategory {
+  return foundItemCategorySet.has(value as FoundItemCategory)
+    ? (value as FoundItemCategory)
+    : 'other'
 }
 
-async function respond<T>(value: T): Promise<T> {
-  return new Promise((resolve) => {
-    window.setTimeout(() => resolve(cloneValue(value)), 120)
-  })
+function normalizeFoundItemStatus(value: unknown): FoundItemStatus {
+  return foundItemStatusSet.has(value as FoundItemStatus)
+    ? (value as FoundItemStatus)
+    : 'available'
 }
 
-function withClaimCount(item: FoundItem): FoundItem {
-  const activeClaims = (store.claimsByItemId[item.id] ?? []).filter(
-    (claim) => claim.status !== 'cancelled',
-  )
+function normalizeFoundItemClaimStatus(value: unknown): FoundItemClaimStatus {
+  return foundItemClaimStatusSet.has(value as FoundItemClaimStatus)
+    ? (value as FoundItemClaimStatus)
+    : 'pending'
+}
+
+function normalizeFoundItemImage(value: unknown): FoundItemImage | null {
+  const record = asRecord(value)
+  if (!record) {
+    return null
+  }
+
+  const url = readString(record.url)
+  if (!url) {
+    return null
+  }
 
   return {
-    ...item,
-    claimCount: activeClaims.length,
+    url,
+    thumbnailUrl: readString(record.thumbnailUrl) ?? url,
+    altText: readString(record.altText),
   }
 }
 
-function paginate<T>(values: T[], page: number, limit: number): { items: T[]; pagination: PaginationMeta } {
-  const total = values.length
-  const totalPages = Math.max(1, Math.ceil(total / limit))
-  const startIndex = (page - 1) * limit
+function normalizeActorSummary(value: unknown): FoundItem['poster'] {
+  const record = asRecord(value)
 
   return {
-    items: values.slice(startIndex, startIndex + limit),
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages,
-    },
+    id: readString(record?.id) ?? '',
+    name: readString(record?.name) ?? 'Community member',
+    avatarUrl: readString(record?.avatarUrl),
   }
 }
 
-function sortItems(items: FoundItem[], sortBy: FoundItemsFilter['sortBy']): FoundItem[] {
-  if (sortBy === 'nearest') {
-    return [...items].sort(
-      (left, right) =>
-        (left.location.approximateDistance ?? Number.MAX_SAFE_INTEGER) -
-        (right.location.approximateDistance ?? Number.MAX_SAFE_INTEGER),
-    )
-  }
+function normalizeLocation(value: unknown): FoundItem['location'] {
+  const record = asRecord(value)
 
-  if (sortBy === 'popular') {
-    return [...items].sort((left, right) => right.viewCount - left.viewCount)
+  return {
+    latitude: readNumber(record?.latitude) ?? 0,
+    longitude: readNumber(record?.longitude) ?? 0,
+    address: readString(record?.address),
+    neighborhood: readString(record?.neighborhood),
+    postcode: readString(record?.postcode) ?? '',
+    approximateDistance: readNumber(record?.approximateDistance),
   }
-
-  return [...items].sort(
-    (left, right) => new Date(right.postedAt).getTime() - new Date(left.postedAt).getTime(),
-  )
 }
 
-function filterItems(items: FoundItem[], filters: FoundItemsFilter): FoundItem[] {
-  return items.filter((item) => {
-    if (filters.category && item.category !== filters.category) {
-      return false
-    }
+function normalizeFoundItem(value: unknown): FoundItem | null {
+  const record = asRecord(value)
+  if (!record) {
+    return null
+  }
 
-    if (filters.status && item.status !== filters.status) {
-      return false
-    }
+  const id = readString(record.id)
+  const title = readString(record.title)
+  if (!id || !title) {
+    return null
+  }
 
-    if (filters.postcode) {
-      const normalizedPostcode = filters.postcode.trim().toLowerCase()
-      const itemPostcode = item.location.postcode.toLowerCase()
-      if (normalizedPostcode.length > 0 && !itemPostcode.includes(normalizedPostcode)) {
-        return false
-      }
-    }
+  const images = Array.isArray(record.images)
+    ? record.images
+        .map((entry) => normalizeFoundItemImage(entry))
+        .filter((entry): entry is FoundItemImage => entry !== null)
+    : []
 
-    if (
-      filters.maxDistance !== undefined &&
-      item.location.approximateDistance !== null &&
-      item.location.approximateDistance > filters.maxDistance
-    ) {
-      return false
-    }
-
-    return true
-  })
+  return {
+    id,
+    title,
+    description: readString(record.description) ?? '',
+    category: normalizeFoundItemCategory(record.category),
+    status: normalizeFoundItemStatus(record.status),
+    images,
+    location: normalizeLocation(record.location),
+    condition: readString(record.condition),
+    poster: normalizeActorSummary(record.poster),
+    postedAt: readString(record.postedAt) ?? new Date().toISOString(),
+    expiresAt: readString(record.expiresAt),
+    claimCount: readNumber(record.claimCount) ?? 0,
+    viewCount: readNumber(record.viewCount) ?? 0,
+  }
 }
 
-function getItemOrThrow(itemId: string): FoundItem {
-  const item = store.items.find((currentItem) => currentItem.id === itemId)
+function normalizeFoundItemClaim(value: unknown): FoundItemClaim | null {
+  const record = asRecord(value)
+  if (!record) {
+    return null
+  }
 
+  const id = readString(record.id)
+  const foundItemId = readString(record.foundItemId)
+  const claimerId = readString(record.claimerId)
+  const claimerName = readString(record.claimerName)
+  if (!id || !foundItemId || !claimerId || !claimerName) {
+    return null
+  }
+
+  return {
+    id,
+    foundItemId,
+    claimerId,
+    claimerName,
+    message: readString(record.message),
+    status: normalizeFoundItemClaimStatus(record.status),
+    createdAt: readString(record.createdAt) ?? new Date().toISOString(),
+  }
+}
+
+function readPagination(value: unknown, page: number, limit: number, total: number): PaginationMeta {
+  const record = asRecord(value)
+  const nextPage = readNumber(record?.page) ?? page
+  const nextLimit = readNumber(record?.limit) ?? limit
+  const nextTotal = readNumber(record?.total) ?? total
+  const nextTotalPages = readNumber(record?.totalPages) ?? Math.max(1, Math.ceil(nextTotal / nextLimit))
+
+  return {
+    page: Math.max(1, Math.floor(nextPage)),
+    limit: Math.max(1, Math.floor(nextLimit)),
+    total: Math.max(0, Math.floor(nextTotal)),
+    totalPages: Math.max(1, Math.floor(nextTotalPages)),
+  }
+}
+
+function unwrapFoundItemsResponse(value: unknown, page: number, limit: number): FoundItemsResponse {
+  const record = asRecord(value)
+  const rawItems = Array.isArray(record?.items) ? record.items : []
+  const items = rawItems
+    .map((entry) => normalizeFoundItem(entry))
+    .filter((entry): entry is FoundItem => entry !== null)
+
+  return {
+    items,
+    pagination: readPagination(record?.pagination, page, limit, items.length),
+  }
+}
+
+function requireFoundItem(value: unknown): FoundItem {
+  const item = normalizeFoundItem(value)
   if (!item) {
-    throw new Error('Found item not found.')
+    throw new Error('Invalid found item response.')
   }
 
   return item
 }
 
-function viewerActor(actor?: ActorSummary): ActorSummary {
-  return actor ?? defaultActor
+function requireFoundItemClaim(value: unknown): FoundItemClaim {
+  const claim = normalizeFoundItemClaim(value)
+  if (!claim) {
+    throw new Error('Invalid found item claim response.')
+  }
+
+  return claim
 }
 
-function updateItem(itemId: string, updater: (item: FoundItem) => FoundItem): FoundItem {
-  let updatedItem: FoundItem | null = null
+function stripWrappingQuotes(value: string): string {
+  return value.replace(/^['"]+|['"]+$/g, '')
+}
 
-  store = {
-    ...store,
-    items: store.items.map((item) => {
-      if (item.id !== itemId) {
-        return item
-      }
-
-      updatedItem = updater(item)
-      return updatedItem
-    }),
-  }
-
-  if (!updatedItem) {
-    throw new Error('Found item not found.')
-  }
-
-  return updatedItem
+function getCloudinaryUploadUrl(): string {
+  const cloudName = stripWrappingQuotes(env.cloudinaryCloudName.trim())
+  return `https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/image/upload`
 }
 
 export async function fetchFoundItems(
@@ -263,209 +230,183 @@ export async function fetchFoundItems(
   page: number = 1,
   limit: number = 9,
 ): Promise<FoundItemsResponse> {
-  const items = store.items.map(withClaimCount)
-  const filteredItems = sortItems(filterItems(items, filters), filters.sortBy ?? 'newest')
+  const safeLimit = clampLimit(limit, 9)
+  const query = toQueryString({
+    category: filters.category,
+    status: filters.status,
+    maxDistance: filters.maxDistance,
+    postcode: filters.postcode?.trim() || undefined,
+    sortBy: filters.sortBy,
+    page,
+    limit: safeLimit,
+  })
 
-  return respond(paginate(filteredItems, page, limit))
+  const response = await apiRequest<unknown>(`/found-items${query}`)
+  return unwrapFoundItemsResponse(unwrapApiData<unknown>(response), page, safeLimit)
 }
 
 export async function fetchFoundItemById(
   id: string,
-  viewerId?: string,
+  _viewerId?: string,
 ): Promise<{ item: FoundItem; claims: FoundItemClaim[] }> {
-  const item = withClaimCount(getItemOrThrow(id))
-  const claims = viewerId && viewerId === item.poster.id ? store.claimsByItemId[id] ?? [] : []
+  const response = await apiRequest<unknown>(`/found-items/${encodeURIComponent(id.trim())}`)
+  const record = asRecord(unwrapApiData<unknown>(response))
 
-  return respond({ item, claims })
+  return {
+    item: requireFoundItem(record?.item),
+    claims: Array.isArray(record?.claims)
+      ? record.claims
+          .map((entry) => normalizeFoundItemClaim(entry))
+          .filter((entry): entry is FoundItemClaim => entry !== null)
+      : [],
+  }
 }
 
 export async function fetchMyFoundPosts(
-  userId: string = defaultActor.id,
+  _userId?: string,
   status?: FoundItemStatus,
   page: number = 1,
   limit: number = 12,
 ): Promise<FoundItemsResponse> {
-  const items = store.items
-    .map(withClaimCount)
-    .filter((item) => item.poster.id === userId)
-    .filter((item) => (status ? item.status === status : true))
-    .sort((left, right) => new Date(right.postedAt).getTime() - new Date(left.postedAt).getTime())
+  const safeLimit = clampLimit(limit, 12)
+  const query = toQueryString({
+    status,
+    page,
+    limit: safeLimit,
+  })
 
-  return respond(paginate(items, page, limit))
+  const response = await apiRequest<unknown>(`/found-items/my-posts${query}`)
+  return unwrapFoundItemsResponse(unwrapApiData<unknown>(response), page, safeLimit)
 }
 
 export async function createFoundItem(
   payload: CreateFoundItemPayload,
-  poster?: ActorSummary,
+  _poster?: ActorSummary,
 ): Promise<FoundItem> {
-  const resolvedPoster = viewerActor(poster)
-  const nextItem: FoundItem = {
-    id: `found-${crypto.randomUUID()}`,
-    title: payload.title,
-    description: payload.description,
-    category: payload.category,
-    status: 'available',
-    images: payload.images.map((image) => ({
-      url: image.url,
-      thumbnailUrl: image.url,
-      altText: image.altText ?? payload.title,
-    })),
-    location: {
-      latitude: payload.location.latitude,
-      longitude: payload.location.longitude,
-      address: payload.location.address ?? null,
-      neighborhood: null,
-      postcode: payload.location.postcode,
-      approximateDistance: 0,
+  const response = await apiRequest<unknown, Record<string, unknown>>('/found-items', {
+    method: 'POST',
+    body: {
+      title: payload.title.trim(),
+      description: payload.description.trim(),
+      category: payload.category,
+      condition: payload.condition?.trim() || undefined,
+      images: payload.images.map((image) => ({
+        url: image.url,
+        altText: image.altText?.trim() || payload.title.trim(),
+      })),
+      location: {
+        latitude: payload.location.latitude,
+        longitude: payload.location.longitude,
+        address: payload.location.address?.trim() || undefined,
+        postcode: payload.location.postcode.trim(),
+      },
     },
-    condition: payload.condition ?? null,
-    poster: resolvedPoster,
-    postedAt: new Date().toISOString(),
-    expiresAt: null,
-    claimCount: 0,
-    viewCount: 0,
-  }
+  })
 
-  store = {
-    ...store,
-    items: [nextItem, ...store.items],
-  }
-
-  return respond(nextItem)
+  return requireFoundItem(asRecord(unwrapApiData<unknown>(response))?.item)
 }
 
 export async function updateFoundItemStatus(
   id: string,
   status: FoundItemStatus,
 ): Promise<FoundItem> {
-  const updatedItem = updateItem(id, (item) => ({
-    ...item,
-    status,
-  }))
+  const response = await apiRequest<unknown, { status: FoundItemStatus }>(
+    `/found-items/${encodeURIComponent(id.trim())}/status`,
+    {
+      method: 'PATCH',
+      body: { status },
+    },
+  )
 
-  return respond(withClaimCount(updatedItem))
+  return requireFoundItem(asRecord(unwrapApiData<unknown>(response))?.item)
 }
 
 export async function deleteFoundItem(id: string): Promise<void> {
-  store = {
-    items: store.items.filter((item) => item.id !== id),
-    claimsByItemId: Object.fromEntries(
-      Object.entries(store.claimsByItemId).filter(([itemId]) => itemId !== id),
-    ),
-  }
-
-  await respond(undefined)
+  await apiRequest<void>(`/found-items/${encodeURIComponent(id.trim())}`, {
+    method: 'DELETE',
+  })
 }
 
 export async function claimFoundItem(
   id: string,
-  actor?: ActorSummary,
+  _actor?: ActorSummary,
   message?: string,
 ): Promise<FoundItemClaim> {
-  const resolvedActor = viewerActor(actor)
-  const item = getItemOrThrow(id)
-  const currentClaims = store.claimsByItemId[id] ?? []
-  const existingClaim = currentClaims.find(
-    (claim) => claim.claimerId === resolvedActor.id && claim.status !== 'cancelled',
+  const response = await apiRequest<unknown, { message?: string }>(
+    `/found-items/${encodeURIComponent(id.trim())}/claim`,
+    {
+      method: 'POST',
+      body: {
+        message: message?.trim() || undefined,
+      },
+    },
   )
 
-  if (existingClaim) {
-    return respond(existingClaim)
-  }
-
-  const nextClaim: FoundItemClaim = {
-    id: `claim-${crypto.randomUUID()}`,
-    foundItemId: id,
-    claimerId: resolvedActor.id,
-    claimerName: resolvedActor.name,
-    message: message ?? null,
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-  }
-
-  store = {
-    ...store,
-    claimsByItemId: {
-      ...store.claimsByItemId,
-      [id]: [nextClaim, ...currentClaims],
-    },
-  }
-
-  if (item.status === 'available') {
-    updateItem(id, (currentItem) => ({
-      ...currentItem,
-      status: 'claimed',
-    }))
-  }
-
-  return respond(nextClaim)
+  return requireFoundItemClaim(asRecord(unwrapApiData<unknown>(response))?.claim)
 }
 
 export async function cancelFoundItemClaim(
   id: string,
-  claimerId: string = defaultActor.id,
+  _claimerId: string = 'current-user',
 ): Promise<void> {
-  const currentClaims = store.claimsByItemId[id] ?? []
-  const nextClaims = currentClaims.map((claim) =>
-    claim.claimerId === claimerId ? { ...claim, status: 'cancelled' as const } : claim,
-  )
-
-  store = {
-    ...store,
-    claimsByItemId: {
-      ...store.claimsByItemId,
-      [id]: nextClaims,
-    },
-  }
-
-  const hasActiveClaim = nextClaims.some((claim) => claim.status !== 'cancelled')
-  if (!hasActiveClaim) {
-    updateItem(id, (item) => ({
-      ...item,
-      status: item.status === 'claimed' ? 'available' : item.status,
-    }))
-  }
-
-  await respond(undefined)
+  await apiRequest<void>(`/found-items/${encodeURIComponent(id.trim())}/claim`, {
+    method: 'DELETE',
+  })
 }
 
 export async function reportFoundItem(
   id: string,
-  _reason: string,
-  _details?: string,
+  reason: string,
+  details?: string,
 ): Promise<void> {
-  updateItem(id, (item) => ({
-    ...item,
-    status: 'reported',
-  }))
-
-  await respond(undefined)
-}
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      if (typeof reader.result !== 'string') {
-        reject(new Error('Unable to read selected image.'))
-        return
-      }
-
-      resolve(reader.result)
-    }
-    reader.onerror = () => reject(new Error('Unable to read selected image.'))
-    reader.readAsDataURL(file)
-  })
+  await apiRequest<unknown, { reason: string; details?: string }>(
+    `/found-items/${encodeURIComponent(id.trim())}/report`,
+    {
+      method: 'POST',
+      body: {
+        reason: reason.trim(),
+        details: details?.trim() || undefined,
+      },
+    },
+  )
 }
 
 export async function uploadFoundItemImage(file: File): Promise<{
   url: string
   thumbnailUrl: string
 }> {
-  const imageUrl = await readFileAsDataUrl(file)
+  const cloudName = stripWrappingQuotes(env.cloudinaryCloudName.trim())
+  const uploadPreset = stripWrappingQuotes(env.cloudinaryUploadPreset.trim())
+  const folder = stripWrappingQuotes(env.cloudinaryFolder.trim())
 
-  return respond({
-    url: imageUrl,
-    thumbnailUrl: imageUrl,
+  if (!cloudName || !uploadPreset) {
+    throw new Error('Image upload is unavailable. Missing Cloudinary env values.')
+  }
+
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('upload_preset', uploadPreset)
+  if (folder) {
+    formData.append('folder', folder)
+  }
+
+  const response = await fetch(getCloudinaryUploadUrl(), {
+    method: 'POST',
+    body: formData,
   })
+
+  if (!response.ok) {
+    throw new Error('Unable to upload image right now.')
+  }
+
+  const payload = (await response.json()) as Record<string, unknown>
+  const url = readString(payload.secure_url) ?? readString(payload.url)
+  if (!url) {
+    throw new Error('Image upload succeeded but no URL was returned.')
+  }
+
+  return {
+    url,
+    thumbnailUrl: url,
+  }
 }
