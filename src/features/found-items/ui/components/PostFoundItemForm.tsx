@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ImagePlus } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
 import { CustomSelect } from '@/shared/ui/select'
@@ -31,13 +31,53 @@ export function PostFoundItemForm({
   const [imageUrl, setImageUrl] = useState('')
   const [isUploading, setIsUploading] = useState(false)
   const [isCameraOpen, setIsCameraOpen] = useState(false)
+  const [liveLocation, setLiveLocation] = useState<{ latitude: number; longitude: number } | null>(null)
+  const [isLocating, setIsLocating] = useState(true)
+  const [locationError, setLocationError] = useState<string | null>(null)
+
+  const requestLiveLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setLiveLocation(null)
+      setIsLocating(false)
+      setLocationError('Live location is not available in this browser.')
+      return
+    }
+
+    setIsLocating(true)
+    setLocationError(null)
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLiveLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        })
+        setIsLocating(false)
+      },
+      () => {
+        setLiveLocation(null)
+        setIsLocating(false)
+        setLocationError('Allow location access to post this item.')
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000,
+      },
+    )
+  }, [])
+
+  useEffect(() => {
+    requestLiveLocation()
+  }, [requestLiveLocation])
 
   const canSubmit = useMemo(
     () =>
       title.trim().length > 2 &&
       description.trim().length > 8 &&
-      defaultPostcode.trim().length > 1,
-    [defaultPostcode, description, title],
+      defaultPostcode.trim().length > 1 &&
+      liveLocation !== null &&
+      !isLocating,
+    [defaultPostcode, description, isLocating, liveLocation, title],
   )
 
   const handleCapturedFile = async (file: File) => {
@@ -56,7 +96,7 @@ export function PostFoundItemForm({
       className="space-y-5"
       onSubmit={(event) => {
         event.preventDefault()
-        if (!canSubmit) {
+        if (!canSubmit || !liveLocation) {
           return
         }
 
@@ -67,8 +107,8 @@ export function PostFoundItemForm({
           condition: condition.trim() || undefined,
           images: imageUrl ? [{ url: imageUrl, altText: title.trim() }] : [],
           location: {
-            latitude: 51.5074,
-            longitude: -0.1278,
+            latitude: liveLocation.latitude,
+            longitude: liveLocation.longitude,
             address: address.trim() || undefined,
             postcode: defaultPostcode.trim(),
           },
@@ -84,7 +124,6 @@ export function PostFoundItemForm({
             onChange={(event) => setTitle(event.target.value)}
             placeholder="What did you spot?"
           />
-          <p className="text-xs text-slate-500 mt-1">Use a nearby landmark or general area instead of a precise address.</p>
         </label>
 
         <label className="space-y-2">
@@ -108,7 +147,7 @@ export function PostFoundItemForm({
         />
       </label>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2">
           <span className="text-sm font-medium text-slate-700">Condition</span>
           <input
@@ -128,12 +167,17 @@ export function PostFoundItemForm({
             placeholder="Outside the gate"
           />
         </label>
-
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Location</p>
-          <p className="mt-1 text-sm font-medium text-slate-700">Using your saved address</p>
-        </div>
       </div>
+
+      {isLocating ? <p className="text-sm text-slate-500">Getting your live location...</p> : null}
+      {locationError ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm text-rose-600">{locationError}</p>
+          <Button type="button" variant="secondary" onClick={requestLiveLocation}>
+            Retry location
+          </Button>
+        </div>
+      ) : null}
 
       <div className="space-y-3 rounded-2xl border border-dashed border-slate-300 p-4">
         <div className="flex items-center gap-3 text-slate-600">
@@ -173,6 +217,7 @@ export function PostFoundItemForm({
       </div>
 
       <Button
+        type="submit"
         variant="primary"
         className="w-full md:w-auto"
         disabled={!canSubmit || isSubmitting || isUploading || isCameraOpen}

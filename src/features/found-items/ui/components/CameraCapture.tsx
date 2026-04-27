@@ -11,18 +11,20 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const [stream, setStream] = useState<MediaStream | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment')
   const [error, setError] = useState<string | null>(null)
 
   const stopCamera = useCallback(() => {
-    if (!stream) {
-      return
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop())
+      streamRef.current = null
     }
 
-    stream.getTracks().forEach((track) => track.stop())
-    setStream(null)
-  }, [stream])
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+    }
+  }, [])
 
   const startCamera = useCallback(async () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -31,24 +33,35 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
     }
 
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode },
-        audio: false,
-      })
+      stopCamera()
+
+      let mediaStream: MediaStream
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: facingMode } },
+          audio: false,
+        })
+      } catch {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        })
+      }
 
       if (!videoRef.current) {
         mediaStream.getTracks().forEach((track) => track.stop())
         return
       }
 
+      streamRef.current = mediaStream
       videoRef.current.srcObject = mediaStream
       await videoRef.current.play()
-      setStream(mediaStream)
       setError(null)
     } catch {
+      stopCamera()
       setError('Unable to access camera. Please allow permissions or upload instead.')
     }
-  }, [facingMode])
+  }, [facingMode, stopCamera])
 
   useEffect(() => {
     void startCamera()
@@ -92,11 +105,10 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
   }, [onCapture, stopCamera])
 
   const onSwitchCamera = useCallback(() => {
-    stopCamera()
     setFacingMode((currentFacingMode) =>
       currentFacingMode === 'environment' ? 'user' : 'environment',
     )
-  }, [stopCamera])
+  }, [])
 
   const onFileSelected = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -116,7 +128,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
       {error ? (
         <div className="flex min-h-[280px] flex-col items-center justify-center gap-4 p-6 text-center">
           <p className="max-w-sm text-sm text-white/80">{error}</p>
-          <Button variant="secondary" onClick={() => fileInputRef.current?.click()}>
+          <Button type="button" variant="secondary" onClick={() => fileInputRef.current?.click()}>
             <Upload size={16} />
             Upload Instead
           </Button>
@@ -128,16 +140,23 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <Button variant="secondary" onClick={onCancel}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                stopCamera()
+                onCancel()
+              }}
+            >
               <X size={16} />
               Close Camera
             </Button>
             <div className="flex items-center gap-3">
-              <Button variant="secondary" onClick={onSwitchCamera}>
+              <Button type="button" variant="secondary" onClick={onSwitchCamera}>
                 <RotateCw size={16} />
                 Flip
               </Button>
-              <Button variant="primary" onClick={capturePhoto}>
+              <Button type="button" variant="primary" onClick={capturePhoto}>
                 <Camera size={16} />
                 Take Photo
               </Button>
