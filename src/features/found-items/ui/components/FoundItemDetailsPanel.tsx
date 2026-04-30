@@ -16,14 +16,16 @@ function StatTile({
   readonly icon: React.ReactNode
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-sm font-medium text-slate-500">{label}</span>
+        <span className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-slate-400">
+          {label}
+        </span>
         <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm">
           {icon}
         </span>
       </div>
-      <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-slate-950">{value}</p>
+      <p className="mt-2 text-lg font-semibold tracking-[-0.02em] text-slate-950 sm:text-xl">{value}</p>
     </div>
   )
 }
@@ -132,22 +134,22 @@ export function FoundItemDetailsPanel({
                 </div>
 
                 <div className="space-y-3 rounded-[24px] border border-slate-200 p-5 text-sm text-slate-500">
-                  <span className="inline-flex items-start gap-2">
+                  <div className="flex items-start gap-2 leading-6">
                     <MapPin size={16} className="mt-0.5 shrink-0" />
                     <span>{formatFoundItemLocationSummary(item)}</span>
-                  </span>
-                  <span className="inline-flex items-center gap-2">
+                  </div>
+                  <div className="flex items-center gap-2 leading-6">
                     <Clock3 size={16} />
                     {formatRelativeTime(item.postedAt)}
-                  </span>
-                  <span className="inline-flex items-center gap-2">
+                  </div>
+                  <div className="flex items-center gap-2 leading-6">
                     <Users size={16} />
                     {item.claimCount} interested · {item.viewCount} views
-                  </span>
-                  <span className="inline-flex items-center gap-2">
+                  </div>
+                  <div className="flex items-center gap-2 leading-6">
                     <Flag size={16} />
                     {item.isFlyTipped ? 'Marked as fly-tipped' : 'Standard public-space post'}
-                  </span>
+                  </div>
                 </div>
 
                 <div>
