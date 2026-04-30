@@ -31,6 +31,7 @@ const PartnerOnboardPage = lazy(
 )
 const SupportFaqPage = lazy(() => import('@/features/support/ui/SupportFaqPage'))
 const AchievementsPage = lazy(() => import('@/features/gamification/ui/AchievementsPage'))
+const CommunityBoardPage = lazy(() => import('@/features/gamification/ui/CommunityBoardPage'))
 const FoundItemsPage = lazy(() => import('@/features/found-items/ui/FoundItemsPage'))
 const PostFoundItemPage = lazy(() => import('@/features/found-items/ui/PostFoundItemPage'))
 const MyFoundPostsPage = lazy(() => import('@/features/found-items/ui/MyFoundPostsPage'))
@@ -115,7 +116,9 @@ export function AppRoutes() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/messages" element={<MessagingPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/achievements" element={<AchievementsPage />} />
+          <Route path="/impact" element={<AchievementsPage />} />
+          <Route path="/achievements" element={<Navigate replace to="/impact" />} />
+          <Route path="/community-board" element={<CommunityBoardPage />} />
           <Route path="/collected" element={<CollectedItemsPage />} />
           <Route path="/listings" element={<YourListingsPage />} />
           <Route path="/found-items" element={<FoundItemsPage />} />

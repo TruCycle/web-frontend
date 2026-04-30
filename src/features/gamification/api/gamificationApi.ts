@@ -5,6 +5,9 @@ import type {
   Badge,
   BadgeCategory,
   BadgeRarity,
+  CommunityBoardSnapshot,
+  CommunityBoardWindow,
+  FoundItemImpactSummary,
   PointTransaction,
   Streak,
   UserBadge,
@@ -157,6 +160,126 @@ function normalizePointTransaction(value: unknown): PointTransaction | null {
   }
 }
 
+function normalizeCommunityBoardSnapshot(value: unknown): CommunityBoardSnapshot | null {
+  const record = asRecord(value)
+  if (!record) {
+    return null
+  }
+
+  const window = readString(record.window)
+  const currentUser = asRecord(record.currentUser)
+  if (window !== 'week' && window !== 'month' && window !== 'all') {
+    return null
+  }
+
+  return {
+    window,
+    userArea: readString(record.userArea),
+    activeArea: readString(record.activeArea),
+    postcodes: Array.isArray(record.postcodes)
+      ? record.postcodes
+          .map((entry) => {
+            const postcodeRecord = asRecord(entry)
+            const postcode = readString(postcodeRecord?.postcode)
+            if (!postcode) {
+              return null
+            }
+
+            return {
+              postcode,
+              spots: readNumber(postcodeRecord?.spots) ?? 0,
+              rescues: readNumber(postcodeRecord?.rescues) ?? 0,
+              activeSpots: readNumber(postcodeRecord?.activeSpots) ?? 0,
+              totalCo2eKg: readNumber(postcodeRecord?.totalCo2eKg) ?? 0,
+              impactPoints: readNumber(postcodeRecord?.impactPoints) ?? 0,
+            }
+          })
+          .filter((entry): entry is CommunityBoardSnapshot['postcodes'][number] => entry !== null)
+      : [],
+    localSpotters: Array.isArray(record.localSpotters)
+      ? record.localSpotters
+          .map((entry) => {
+            const spotterRecord = asRecord(entry)
+            const userId = readString(spotterRecord?.userId)
+            const name = readString(spotterRecord?.name)
+            if (!userId || !name) {
+              return null
+            }
+
+            return {
+              userId,
+              name,
+              postcode: readString(spotterRecord?.postcode),
+              spotsPosted: readNumber(spotterRecord?.spotsPosted) ?? 0,
+              rescues: readNumber(spotterRecord?.rescues) ?? 0,
+              totalCo2eKg: readNumber(spotterRecord?.totalCo2eKg) ?? 0,
+              impactPoints: readNumber(spotterRecord?.impactPoints) ?? 0,
+            }
+          })
+          .filter((entry): entry is CommunityBoardSnapshot['localSpotters'][number] => entry !== null)
+      : [],
+    currentUser: {
+      areaRank: readNumber(currentUser?.areaRank),
+      localSpotterRank: readNumber(currentUser?.localSpotterRank),
+      impactPoints: readNumber(currentUser?.impactPoints) ?? 0,
+      spotsPosted: readNumber(currentUser?.spotsPosted) ?? 0,
+      totalCo2eKg: readNumber(currentUser?.totalCo2eKg) ?? 0,
+    },
+  }
+}
+
+function normalizeFoundItemImpactSummary(value: unknown): FoundItemImpactSummary | null {
+  const record = asRecord(value)
+  if (!record) {
+    return null
+  }
+
+  return {
+    spotsPosted: readNumber(record.spotsPosted) ?? 0,
+    liveSpots: readNumber(record.liveSpots) ?? 0,
+    rescuedSpots: readNumber(record.rescuedSpots) ?? 0,
+    reportedSpots: readNumber(record.reportedSpots) ?? 0,
+    totalCo2eKg: readNumber(record.totalCo2eKg) ?? 0,
+    totalImpactPoints: readNumber(record.totalImpactPoints) ?? 0,
+    topArea: readString(record.topArea),
+    userArea: readString(record.userArea),
+    currentMonthAreaRank: readNumber(record.currentMonthAreaRank),
+    recentPosts: Array.isArray(record.recentPosts)
+      ? record.recentPosts
+          .map((entry) => {
+            const postRecord = asRecord(entry)
+            const id = readString(postRecord?.id)
+            const title = readString(postRecord?.title)
+            const postcode = readString(postRecord?.postcode)
+            const status = readString(postRecord?.status)
+            if (
+              !id ||
+              !title ||
+              !postcode ||
+              (status !== 'available' &&
+                status !== 'claimed' &&
+                status !== 'picked_up' &&
+                status !== 'expired' &&
+                status !== 'reported')
+            ) {
+              return null
+            }
+
+            return {
+              id,
+              title,
+              postcode,
+              status,
+              estimatedCo2eKg: readNumber(postRecord?.estimatedCo2eKg) ?? 0,
+              impactPoints: readNumber(postRecord?.impactPoints) ?? 0,
+              postedAt: readString(postRecord?.postedAt) ?? new Date().toISOString(),
+            }
+          })
+          .filter((entry): entry is FoundItemImpactSummary['recentPosts'][number] => entry !== null)
+      : [],
+  }
+}
+
 function requireProgress(value: unknown): UserProgress {
   const progress = normalizeUserProgress(value)
   if (!progress) {
@@ -237,6 +360,31 @@ export async function fetchPointHistory(
         readNumber(pagination?.totalPages) ?? Math.max(1, Math.ceil(total / safeLimit)),
     },
   }
+}
+
+export async function fetchCommunityBoard(
+  window: CommunityBoardWindow = 'month',
+): Promise<CommunityBoardSnapshot> {
+  const query = toQueryString({ window })
+  const response = await apiRequest<unknown>(`/gamification/community-board${query}`)
+  const snapshot = normalizeCommunityBoardSnapshot(unwrapApiData<unknown>(response))
+
+  if (!snapshot) {
+    throw new Error('Invalid community board response.')
+  }
+
+  return snapshot
+}
+
+export async function fetchFoundItemImpact(): Promise<FoundItemImpactSummary> {
+  const response = await apiRequest<unknown>('/gamification/impact/found-items')
+  const summary = normalizeFoundItemImpactSummary(unwrapApiData<unknown>(response))
+
+  if (!summary) {
+    throw new Error('Invalid found-item impact response.')
+  }
+
+  return summary
 }
 
 export async function markBadgeSeen(badgeId: string): Promise<void> {

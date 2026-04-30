@@ -121,6 +121,7 @@ export function AppShell({ children }: AppShellProps) {
   const isPartnerArea =
     isPartnerUser &&
     location.pathname.startsWith('/partner')
+  const isFoundItemsPostRoute = location.pathname === '/found-items/post'
   const profileShopAction = isPartnerUser
     ? isPartnerArea
       ? { label: 'Back to Marketplace', path: '/dashboard' }
@@ -223,9 +224,9 @@ export function AppShell({ children }: AppShellProps) {
           <MapPin size={20} />
           <span>Found Items</span>
         </NavLink>
-        <NavLink className={navLinkClassName} to="/achievements" onClick={onSidebarNavigate}>
+        <NavLink className={navLinkClassName} to="/impact" onClick={onSidebarNavigate}>
           <Trophy size={20} />
-          <span>Achievements</span>
+          <span>My Impact</span>
         </NavLink>
         <NavLink className={navLinkClassName} to="/messages" onClick={onSidebarNavigate}>
           {({ isActive }) => (
@@ -318,7 +319,12 @@ export function AppShell({ children }: AppShellProps) {
   )
 
   return (
-    <div className="flex min-h-screen bg-tc-app-canvas text-tc-app-text max-md:flex-col max-md:p-2">
+    <div
+      className={classNames(
+        'flex min-h-screen bg-tc-app-canvas text-tc-app-text max-md:flex-col',
+        isFoundItemsPostRoute ? 'max-md:p-0' : 'max-md:p-2',
+      )}
+    >
       <aside className="sticky top-4 z-10 my-4 ml-4 mr-0 flex h-[calc(100vh-2rem)] w-[250px] shrink-0 flex-col rounded-[25px] bg-tc-shell-bg px-4 py-5 max-[1024px]:w-[220px] max-md:hidden">
         <div className="px-3 pb-4 pt-2">
           <Link className="flex items-center gap-3 no-underline" to="/">
@@ -364,8 +370,18 @@ export function AppShell({ children }: AppShellProps) {
         </>
       ) : null}
 
-      <main className="flex h-screen flex-1 flex-col overflow-x-hidden bg-transparent max-md:h-auto max-md:rounded-2xl">
-        <header className="sticky top-0 z-[100] flex h-[72px] w-full items-center justify-end border-b border-tc-header-border bg-[#FFFFFF] px-6 shadow-none max-md:justify-between max-md:px-4">
+      <main
+        className={classNames(
+          'flex h-screen flex-1 flex-col overflow-x-hidden bg-transparent max-md:h-auto max-md:rounded-2xl',
+          isFoundItemsPostRoute && 'max-md:h-[100dvh] max-md:rounded-none',
+        )}
+      >
+        <header
+          className={classNames(
+            'sticky top-0 z-[100] flex h-[72px] w-full items-center justify-end border-b border-tc-header-border bg-[#FFFFFF] px-6 shadow-none max-md:justify-between max-md:px-4',
+            isFoundItemsPostRoute && 'max-md:hidden',
+          )}
+        >
           <div className="hidden items-center gap-2 max-md:flex">
             <button
               type="button"
@@ -453,7 +469,14 @@ export function AppShell({ children }: AppShellProps) {
             </div>
           </div>
         </header>
-        <div className="flex-1 overflow-y-auto px-8 pb-8 pt-6 max-md:px-4 max-md:pb-6">{children}</div>
+        <div
+          className={classNames(
+            'flex-1 overflow-y-auto px-8 pb-8 pt-6 max-md:px-4 max-md:pb-6',
+            isFoundItemsPostRoute && 'max-md:px-0 max-md:pb-0 max-md:pt-0',
+          )}
+        >
+          {children}
+        </div>
       </main>
     </div>
   )

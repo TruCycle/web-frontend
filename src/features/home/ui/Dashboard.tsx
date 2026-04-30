@@ -237,7 +237,7 @@ export default function Dashboard() {
           <section className="space-y-4 rounded-xl bg-white p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold text-tc-app-secondary">Achievements</h2>
+                <h2 className="text-lg font-semibold text-tc-app-secondary">My Impact</h2>
                 <p className="text-sm text-slate-500">Current pace</p>
               </div>
               {userProgress ? <LevelBadge progress={userProgress} /> : null}
@@ -280,7 +280,7 @@ export default function Dashboard() {
             </div>
 
             <Link
-              to="/achievements"
+              to="/impact"
               className="inline-flex items-center gap-1 text-sm font-medium text-tc-app-secondary transition hover:underline"
             >
               View All <ChevronRight size={16} />
@@ -291,7 +291,7 @@ export default function Dashboard() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold text-tc-app-secondary">Found Nearby</h2>
-                <p className="text-sm text-slate-500">Community board</p>
+                <p className="text-sm text-slate-500">Found items near you</p>
               </div>
               <Link
                 to="/found-items"

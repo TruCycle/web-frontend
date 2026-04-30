@@ -1,9 +1,32 @@
-import { Clock3, MapPin, Users } from 'lucide-react'
+import { Clock3, Flag, MapPin, Scale, Sparkles, Users } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
 import { Modal } from '@/shared/ui/modal/Modal'
 import { formatRelativeTime } from '@/shared/utils/formatRelativeTime'
 import type { FoundItem, FoundItemClaim } from '../../types'
 import { FoundItemStatusBadge } from './FoundItemStatusBadge'
+import { formatFoundItemAttribution, formatFoundItemLocationSummary } from './foundItemDisplay'
+
+function StatTile({
+  label,
+  value,
+  icon,
+}: {
+  readonly label: string
+  readonly value: string
+  readonly icon: React.ReactNode
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm font-medium text-slate-500">{label}</span>
+        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm">
+          {icon}
+        </span>
+      </div>
+      <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-slate-950">{value}</p>
+    </div>
+  )
+}
 
 interface FoundItemDetailsPanelProps {
   readonly isOpen: boolean
@@ -36,79 +59,122 @@ export function FoundItemDetailsPanel({
     item?.status === 'picked_up' || item?.status === 'expired' || item?.status === 'reported'
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} containerClassName="max-w-[720px]">
-      <div className="space-y-4 p-5 sm:p-6">
+    <Modal isOpen={isOpen} onClose={onClose} containerClassName="max-w-[860px]">
+      <div className="space-y-5 p-5 sm:p-6">
         {isLoading ? <p className="text-sm text-slate-500">Loading item...</p> : null}
 
         {!isLoading && !item ? <p className="text-sm text-slate-500">Choose an item to inspect.</p> : null}
 
         {!isLoading && item ? (
           <>
-            {primaryImage ? (
-              <img src={primaryImage.url} alt={item.title} className="h-64 w-full rounded-xl object-cover" />
-            ) : (
-              <div className="flex h-64 items-center justify-center rounded-xl bg-slate-100 text-sm text-slate-500">
-                No image
-              </div>
-            )}
-
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-semibold text-slate-900">{item.title}</h2>
-                <p className="mt-1 text-sm text-slate-500">Shared by {item.poster.name}</p>
-              </div>
-              <FoundItemStatusBadge status={item.status} />
-            </div>
-
-            <p className="text-sm leading-6 text-slate-600">{item.description}</p>
-
-            <div className="grid gap-3 rounded-xl border border-slate-200 p-4 text-sm text-slate-500">
-              <span className="inline-flex items-center gap-2">
-                <MapPin size={15} />
-                {item.location.address || item.location.neighborhood || item.location.postcode}
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <Clock3 size={15} />
-                {formatRelativeTime(item.postedAt)}
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <Users size={15} />
-                {item.claimCount} interested
-              </span>
-            </div>
-
-            {isOwnPost ? (
-              <div className="space-y-3 rounded-xl bg-[#F8FAFC] p-4">
-                <p className="text-sm font-medium text-slate-900">Your post</p>
-                {claims.length > 0 ? (
-                  <div className="space-y-2">
-                    {claims.map((claim) => (
-                      <div key={claim.id} className="rounded-xl border border-slate-200 bg-white px-3 py-2">
-                        <p className="text-sm font-medium text-slate-900">{claim.claimerName}</p>
-                        <p className="text-xs text-slate-500">{claim.message || 'No note added.'}</p>
-                      </div>
-                    ))}
-                  </div>
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(300px,0.95fr)]">
+              <div className="space-y-5">
+                {primaryImage ? (
+                  <img src={primaryImage.url} alt={item.title} className="h-72 w-full rounded-[28px] object-cover" />
                 ) : (
-                  <p className="text-sm text-slate-500">No pickup requests yet.</p>
+                  <div className="flex h-72 items-center justify-center rounded-[28px] bg-slate-100 text-sm text-slate-500">
+                    No image
+                  </div>
                 )}
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <StatTile
+                    label="Impact"
+                    value={`${item.estimatedCo2eKg} kg CO2e`}
+                    icon={<Sparkles size={16} />}
+                  />
+                  <StatTile
+                    label="Community score"
+                    value={`${item.impactPoints} pts`}
+                    icon={<Users size={16} />}
+                  />
+                  <StatTile
+                    label="Estimated weight"
+                    value={`${item.weightKg ?? 0} kg`}
+                    icon={<Scale size={16} />}
+                  />
+                  <StatTile
+                    label="Postcode"
+                    value={item.location.postcode}
+                    icon={<MapPin size={16} />}
+                  />
+                </div>
+
+                {isOwnPost ? (
+                  <div className="space-y-3 rounded-[24px] bg-[#F8FAFC] p-4">
+                    <p className="text-sm font-medium text-slate-900">Your post</p>
+                    {claims.length > 0 ? (
+                      <div className="space-y-2">
+                        {claims.map((claim) => (
+                          <div key={claim.id} className="rounded-xl border border-slate-200 bg-white px-3 py-3">
+                            <p className="text-sm font-medium text-slate-900">{claim.claimerName}</p>
+                            <p className="text-xs text-slate-500">{claim.message || 'No note added.'}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-500">No pickup requests yet.</p>
+                    )}
+                  </div>
+                ) : null}
               </div>
-            ) : (
-              <Button
-                variant="primary"
-                className="w-full"
-                disabled={isClaiming || isClosed || item.status === 'claimed'}
-                onClick={() => {
-                  onClaim?.(item.id)
-                }}
-              >
-                {item.status === 'claimed'
-                  ? 'Interest sent'
-                  : isClaiming
-                    ? 'Sending...'
-                    : 'I’ll Pick This Up'}
-              </Button>
-            )}
+              <div className="space-y-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="text-[2rem] font-semibold tracking-[-0.04em] text-slate-950">
+                        {item.title}
+                      </h2>
+                      <FoundItemStatusBadge status={item.status} />
+                    </div>
+                    <p className="mt-2 text-sm text-slate-500">{formatFoundItemAttribution(item)}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3 rounded-[24px] border border-slate-200 p-5 text-sm text-slate-500">
+                  <span className="inline-flex items-start gap-2">
+                    <MapPin size={16} className="mt-0.5 shrink-0" />
+                    <span>{formatFoundItemLocationSummary(item)}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-2">
+                    <Clock3 size={16} />
+                    {formatRelativeTime(item.postedAt)}
+                  </span>
+                  <span className="inline-flex items-center gap-2">
+                    <Users size={16} />
+                    {item.claimCount} interested · {item.viewCount} views
+                  </span>
+                  <span className="inline-flex items-center gap-2">
+                    <Flag size={16} />
+                    {item.isFlyTipped ? 'Marked as fly-tipped' : 'Standard public-space post'}
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    Notes
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
+                </div>
+
+                {!isOwnPost ? (
+                  <Button
+                    variant="primary"
+                    className="w-full"
+                    disabled={isClaiming || isClosed || item.status === 'claimed'}
+                    onClick={() => {
+                      onClaim?.(item.id)
+                    }}
+                  >
+                    {item.status === 'claimed'
+                      ? 'Interest sent'
+                      : isClaiming
+                        ? 'Sending...'
+                        : 'I’ll Pick This Up'}
+                  </Button>
+                ) : null}
+              </div>
+            </div>
           </>
         ) : null}
       </div>

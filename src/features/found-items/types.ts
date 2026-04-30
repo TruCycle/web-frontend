@@ -45,6 +45,10 @@ export interface FoundItem {
   readonly images: readonly FoundItemImage[]
   readonly location: FoundItemLocation
   readonly condition: string | null
+  readonly weightKg: number | null
+  readonly estimatedCo2eKg: number
+  readonly impactPoints: number
+  readonly isFlyTipped: boolean
   readonly poster: {
     readonly id: string
     readonly name: string
@@ -71,6 +75,8 @@ export interface CreateFoundItemPayload {
   readonly description: string
   readonly category: FoundItemCategory
   readonly condition?: string
+  readonly weightKg?: number
+  readonly isFlyTipped?: boolean
   readonly images: readonly {
     readonly url: string
     readonly altText?: string
