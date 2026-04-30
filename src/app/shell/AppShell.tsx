@@ -12,6 +12,7 @@ import {
   User,
   LogOut,
   X,
+  Map as MapIcon,
   MapPin,
   Trophy,
 } from 'lucide-react'
@@ -197,6 +198,23 @@ export function AppShell({ children }: AppShellProps) {
           <DashboardIcon />
           <span>Dashboard</span>
         </NavLink>
+        <NavLink className={navLinkClassName} to="/found-items" onClick={onSidebarNavigate}>
+          <MapPin size={20} />
+          <span>Found Items</span>
+        </NavLink>
+        <NavLink className={navLinkClassName} to="/map" onClick={onSidebarNavigate}>
+          <MapIcon size={20} />
+          <span>Map</span>
+        </NavLink>
+        <NavLink className={navLinkClassName} to="/impact" onClick={onSidebarNavigate}>
+          <Trophy size={20} />
+          <span>My Impact</span>
+        </NavLink>
+      </div>
+
+      <div className="-mx-4 my-4 h-px bg-tc-shell-divider" />
+
+      <div className="flex flex-col gap-1">
         {role === 'collector' ? (
           <>
             <NavLink className={navLinkClassName} to="/browse" onClick={onSidebarNavigate}>
@@ -220,14 +238,6 @@ export function AppShell({ children }: AppShellProps) {
             </NavLink>
           </>
         )}
-        <NavLink className={navLinkClassName} to="/found-items" onClick={onSidebarNavigate}>
-          <MapPin size={20} />
-          <span>Found Items</span>
-        </NavLink>
-        <NavLink className={navLinkClassName} to="/impact" onClick={onSidebarNavigate}>
-          <Trophy size={20} />
-          <span>My Impact</span>
-        </NavLink>
         <NavLink className={navLinkClassName} to="/messages" onClick={onSidebarNavigate}>
           {({ isActive }) => (
             <>

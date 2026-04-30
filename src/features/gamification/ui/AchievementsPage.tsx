@@ -9,7 +9,6 @@ import { useStreaks } from '../hooks/useStreaks'
 import { useUserProgress } from '../hooks/useUserProgress'
 import type { PointTransaction } from '../types'
 import { BadgeGrid } from './components/BadgeGrid'
-import { FoundItemImpactOverview } from './components/FoundItemImpactOverview'
 import { LevelBadge } from './components/LevelBadge'
 import { ProgressBar } from './components/ProgressBar'
 
@@ -79,7 +78,6 @@ export default function AchievementsPage() {
   const {
     summary: foundItemImpact,
     isLoading: isLoadingFoundItemImpact,
-    error: foundItemImpactError,
   } = useFoundItemImpact()
   const [transactions, setTransactions] = useState<PointTransaction[]>([])
 
@@ -161,12 +159,6 @@ export default function AchievementsPage() {
           accentClassName="bg-lime-400/30"
         />
       </div>
-
-      <FoundItemImpactOverview
-        summary={foundItemImpact}
-        isLoading={isLoadingFoundItemImpact}
-        error={foundItemImpactError}
-      />
 
       <section className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">

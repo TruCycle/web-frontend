@@ -569,7 +569,9 @@ export default function PostFoundItemPage() {
           <button
             type="button"
             className="mt-7 text-sm font-medium text-[#446B16] transition hover:text-[#29470C]"
-            onClick={() => navigate('/found-items')}
+            onClick={() => {
+              navigate(createdItem ? `/map?highlight=${encodeURIComponent(createdItem.id)}` : '/map')
+            }}
           >
             View on the map →
           </button>

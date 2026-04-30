@@ -33,6 +33,7 @@ const SupportFaqPage = lazy(() => import('@/features/support/ui/SupportFaqPage')
 const AchievementsPage = lazy(() => import('@/features/gamification/ui/AchievementsPage'))
 const CommunityBoardPage = lazy(() => import('@/features/gamification/ui/CommunityBoardPage'))
 const FoundItemsPage = lazy(() => import('@/features/found-items/ui/FoundItemsPage'))
+const FoundItemsMapPage = lazy(() => import('@/features/found-items/ui/FoundItemsMapPage'))
 const PostFoundItemPage = lazy(() => import('@/features/found-items/ui/PostFoundItemPage'))
 const MyFoundPostsPage = lazy(() => import('@/features/found-items/ui/MyFoundPostsPage'))
 
@@ -121,6 +122,7 @@ export function AppRoutes() {
           <Route path="/community-board" element={<CommunityBoardPage />} />
           <Route path="/collected" element={<CollectedItemsPage />} />
           <Route path="/listings" element={<YourListingsPage />} />
+          <Route path="/map" element={<FoundItemsMapPage />} />
           <Route path="/found-items" element={<FoundItemsPage />} />
           <Route path="/found-items/post" element={<PostFoundItemPage />} />
           <Route path="/found-items/my-posts" element={<MyFoundPostsPage />} />
