@@ -230,11 +230,11 @@ function SelectedItemDetails({
 
   return (
     <div className="space-y-2.5">
-      <div className="overflow-hidden rounded-[24px] bg-[linear-gradient(180deg,#E3F0C7_0%,#F2F7E6_100%)]">
+      <div className="aspect-square overflow-hidden rounded-[24px] bg-[linear-gradient(180deg,#E3F0C7_0%,#F2F7E6_100%)] sm:aspect-auto">
         {item.images[0] ? (
-          <img src={item.images[0].url} alt={item.title} className="h-[196px] w-full object-cover" />
+          <img src={item.images[0].url} alt={item.title} className="h-full w-full object-cover sm:h-[196px]" />
         ) : (
-          <div className="flex h-[196px] items-center justify-center text-center text-[#446B16]">
+          <div className="flex h-full items-center justify-center text-center text-[#446B16] sm:h-[196px]">
             <div>
               <p className="text-xs font-semibold tracking-[0.01em]">No image yet</p>
               <p className="mt-2 text-lg font-bold tracking-[-0.03em]">{item.title}</p>
