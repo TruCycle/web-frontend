@@ -44,7 +44,7 @@ export const Modal: React.FC<ModalProps> = ({
 
     const isRight = position === 'right';
     const overlayClass = classNames(
-        'fixed inset-0 z-[200] flex',
+        'fixed inset-0 z-[1200] flex',
         'items-start justify-center p-4 pt-8 sm:pt-10 md:pt-12',
         overlayClassName ?? 'bg-[#22222299] backdrop-blur-[16px]',
     );

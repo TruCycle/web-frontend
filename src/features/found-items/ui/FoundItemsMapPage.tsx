@@ -17,6 +17,8 @@ import {
   formatFoundItemLocationSummary,
 } from './components/foundItemDisplay'
 import { useAuthSession } from '@/shared/context/useAuthSession'
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
+import { Modal } from '@/shared/ui/modal/Modal'
 import { useToast } from '@/shared/ui/toast/useToast'
 import { classNames } from '@/shared/utils/classNames'
 
@@ -195,9 +197,115 @@ function FilterChip({
   )
 }
 
+interface SelectedItemDetailsProps {
+  readonly item: FoundItem | null
+  readonly distanceKm: number | null
+  readonly isOwnPost: boolean
+  readonly isLocating: boolean
+  readonly isClaiming: boolean
+  readonly isClaimed: boolean
+  readonly onClaim: () => void
+}
+
+function SelectedItemDetails({
+  item,
+  distanceKm,
+  isOwnPost,
+  isLocating,
+  isClaiming,
+  isClaimed,
+  onClaim,
+}: SelectedItemDetailsProps) {
+  if (!item) {
+    return (
+      <div className="flex h-full min-h-[420px] flex-col items-center justify-center rounded-[24px] bg-[#F7FAF1] px-6 text-center">
+        <p className="text-sm font-semibold text-slate-400">No spots yet</p>
+        <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-slate-950">Nothing matches this view</h2>
+        <p className="mt-2 max-w-[240px] text-sm leading-6 text-slate-500">
+          Switch filters or refresh the board to pull in more nearby finds.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-2.5">
+      <div className="overflow-hidden rounded-[24px] bg-[linear-gradient(180deg,#E3F0C7_0%,#F2F7E6_100%)]">
+        {item.images[0] ? (
+          <img src={item.images[0].url} alt={item.title} className="h-[196px] w-full object-cover" />
+        ) : (
+          <div className="flex h-[196px] items-center justify-center text-center text-[#446B16]">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.01em]">No image yet</p>
+              <p className="mt-2 text-lg font-bold tracking-[-0.03em]">{item.title}</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-start justify-between gap-2.5">
+        <div>
+          <h2 className="text-[0.95rem] font-semibold leading-snug tracking-[-0.02em] text-slate-950 sm:text-[1.02rem]">
+            {item.title}
+          </h2>
+          <p className="mt-0.5 text-[0.78rem] leading-5 text-slate-500">{formatFoundItemLocationSummary(item)}</p>
+        </div>
+        <FoundItemStatusBadge status={item.status} />
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        <div className="rounded-2xl bg-[#F3F5EE] px-3 py-2.5">
+          <p className="text-[0.62rem] font-semibold tracking-[0.01em] text-slate-400">Weight</p>
+          <p className="mt-0.5 text-[0.78rem] font-semibold tracking-[-0.01em] text-slate-950 sm:text-[0.86rem]">{item.weightKg ?? 0} kg</p>
+        </div>
+        <div className="rounded-2xl bg-[#F3F5EE] px-3 py-2.5">
+          <p className="text-[0.62rem] font-semibold tracking-[0.01em] text-slate-400">CO2e</p>
+          <p className="mt-0.5 text-[0.78rem] font-semibold tracking-[-0.01em] text-slate-950 sm:text-[0.86rem]">{item.estimatedCo2eKg} kg</p>
+        </div>
+        <div className="rounded-2xl bg-[#F3F5EE] px-3 py-2.5">
+          <p className="text-[0.62rem] font-semibold tracking-[0.01em] text-slate-400">Distance</p>
+          <p className="mt-0.5 text-[0.78rem] font-semibold tracking-[-0.01em] text-slate-950 sm:text-[0.86rem]">{formatDistance(distanceKm)}</p>
+        </div>
+      </div>
+
+      <div className="rounded-2xl bg-[#F7FAF1] px-3.5 py-3 text-[0.8rem] leading-5 text-slate-600">
+        <p className="italic">“{item.description}”</p>
+      </div>
+
+      <div className="flex items-center justify-between gap-2 text-[0.72rem] text-slate-500">
+        <span>{formatFoundItemAttribution(item)}</span>
+        {isLocating ? <span className="font-medium text-[#446B16]">Tracking live location…</span> : null}
+      </div>
+
+      {isOwnPost ? (
+        <Link
+          to="/found-items/my-posts"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#111611] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#1B231B]"
+        >
+          Open my posts
+          <ArrowRight size={16} />
+        </Link>
+      ) : (
+        <button
+          type="button"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#111611] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#1B231B] disabled:cursor-not-allowed disabled:bg-slate-300"
+          disabled={isClaiming || item.status !== 'available' || isClaimed}
+          onClick={() => {
+            onClaim()
+          }}
+        >
+          {isClaimed ? 'Interest sent' : isClaiming ? 'Sending...' : 'Rescue this'}
+          <ArrowRight size={16} />
+        </button>
+      )}
+    </div>
+  )
+}
+
 export default function FoundItemsMapPage() {
   const { user } = useAuthSession()
   const { success, error } = useToast()
+  const isMobileViewport = useMediaQuery('(max-width: 767px)')
   const [searchParams] = useSearchParams()
   const highlightId = searchParams.get('highlight')?.trim() ?? ''
   const [items, setItems] = useState<FoundItem[]>([])
@@ -212,6 +320,7 @@ export default function FoundItemsMapPage() {
   const [locationError, setLocationError] = useState<string | null>(null)
   const [focusMode, setFocusMode] = useState<FocusMode>(highlightId ? 'selected' : 'me')
   const [focusRequestKey, setFocusRequestKey] = useState(0)
+  const [isMobileItemModalOpen, setIsMobileItemModalOpen] = useState(Boolean(highlightId))
 
   const actor = {
     id: user?.id ?? 'current-user',
@@ -357,12 +466,15 @@ export default function FoundItemsMapPage() {
       ? selectedPoint
       : liveLocation ?? selectedPoint ?? fallbackCenter
   const mapZoom = focusMode === 'selected' && selectedPoint ? 16 : liveLocation ? 15 : 13
-  const liveCount = items.filter((item) => item.status === 'available').length
-  const claimedCount = items.filter((item) => item.status === 'claimed').length
-  const rescuedCount = items.filter((item) => item.status === 'picked_up').length
   const locationLabel = user?.postcode?.trim()
     ? `Live spots around ${user.postcode.trim().toUpperCase()} · tap a pin to rescue`
     : 'Live spots around you · tap a pin to rescue'
+
+  useEffect(() => {
+    if (!selectedItem) {
+      setIsMobileItemModalOpen(false)
+    }
+  }, [selectedItem])
 
   const handleClaim = async () => {
     if (!selectedItem || selectedItemOwnPost || selectedItem.status !== 'available') {
@@ -394,10 +506,10 @@ export default function FoundItemsMapPage() {
       {itemsError ? <p className="text-sm text-rose-600">{itemsError}</p> : null}
       {locationError ? <p className="text-sm text-amber-700">{locationError}</p> : null}
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_320px]">
-        <div className="space-y-2">
-          <div className="relative overflow-hidden rounded-[30px] border border-[#E4E8D8] bg-[#EEF3E6] shadow-sm">
-            <div className="absolute left-4 top-4 z-[500] flex items-center gap-1 rounded-full bg-white/95 p-1 shadow-[0_12px_30px_rgba(148,163,184,0.16)] backdrop-blur">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.38fr)_340px] 2xl:grid-cols-[minmax(0,1.26fr)_360px]">
+        <div className="min-w-0 space-y-2">
+          <div className="relative isolate overflow-hidden rounded-[30px] border border-[#E4E8D8] bg-[#EEF3E6] shadow-sm">
+            <div className="absolute left-4 top-4 z-[700] flex items-center gap-1 rounded-full bg-white/95 p-1 shadow-[0_12px_30px_rgba(148,163,184,0.16)] backdrop-blur">
               <FilterChip isActive={mapFilter === 'all'} label="All" onClick={() => setMapFilter('all')} />
               <FilterChip isActive={mapFilter === 'available'} label="Live" onClick={() => setMapFilter('available')} />
               <FilterChip isActive={mapFilter === 'fly_tipped'} label="Fly-tipped" onClick={() => setMapFilter('fly_tipped')} />
@@ -405,7 +517,7 @@ export default function FoundItemsMapPage() {
 
             <button
               type="button"
-              className="absolute right-4 top-4 z-[500] inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-slate-700 shadow-[0_12px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:text-slate-950"
+              className="absolute right-4 top-4 z-[700] inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-slate-700 shadow-[0_12px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:text-slate-950"
               onClick={() => {
                 void loadBoard()
               }}
@@ -419,7 +531,7 @@ export default function FoundItemsMapPage() {
               zoom={mapZoom}
               zoomControl={false}
               attributionControl={false}
-              className="h-[520px] w-full sm:h-[640px]"
+              className="z-0 h-[520px] w-full sm:h-[640px]"
             >
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -462,13 +574,16 @@ export default function FoundItemsMapPage() {
                       setSelectedItemId(item.id)
                       setFocusMode('selected')
                       setFocusRequestKey((current) => current + 1)
+                      if (isMobileViewport) {
+                        setIsMobileItemModalOpen(true)
+                      }
                     },
                   }}
                 />
               ))}
             </MapContainer>
 
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-3 p-4">
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[700] flex flex-wrap items-end justify-between gap-3 p-4">
               <div className="pointer-events-auto inline-flex flex-wrap items-center gap-4 rounded-full bg-white/95 px-4 py-3 text-sm text-slate-600 shadow-[0_12px_30px_rgba(148,163,184,0.16)] backdrop-blur">
                 <span className="inline-flex items-center gap-2">
                   <span className="h-3 w-3 rounded-full bg-[#2FB463]" />
@@ -506,114 +621,39 @@ export default function FoundItemsMapPage() {
           <p className="text-xs text-slate-400">Map data © OpenStreetMap contributors</p>
         </div>
 
-        <aside className="rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm">
-          {selectedItem ? (
-            <div className="space-y-4">
-              <div className="overflow-hidden rounded-[24px] bg-[linear-gradient(180deg,#E3F0C7_0%,#F2F7E6_100%)]">
-                {selectedItem.images[0] ? (
-                  <img
-                    src={selectedItem.images[0].url}
-                    alt={selectedItem.title}
-                    className="h-[220px] w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-[220px] items-center justify-center text-center text-[#446B16]">
-                    <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em]">No image yet</p>
-                      <p className="mt-3 text-3xl font-bold tracking-[-0.03em]">{selectedItem.title}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-[2rem] font-semibold tracking-[-0.04em] text-slate-950">{selectedItem.title}</h2>
-                  <p className="mt-1 text-sm leading-6 text-slate-500">{formatFoundItemLocationSummary(selectedItem)}</p>
-                </div>
-                <FoundItemStatusBadge status={selectedItem.status} />
-              </div>
-
-              <div className="grid grid-cols-3 gap-2">
-                <div className="rounded-2xl bg-[#F3F5EE] px-3 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Weight</p>
-                  <p className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-slate-950">{selectedItem.weightKg ?? 0} kg</p>
-                </div>
-                <div className="rounded-2xl bg-[#F3F5EE] px-3 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">CO2e</p>
-                  <p className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-slate-950">{selectedItem.estimatedCo2eKg} kg</p>
-                </div>
-                <div className="rounded-2xl bg-[#F3F5EE] px-3 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Distance</p>
-                  <p className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-slate-950">{formatDistance(selectedDistanceKm)}</p>
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-[#F7FAF1] px-4 py-4 text-sm leading-7 text-slate-600">
-                <p className="italic">“{selectedItem.description}”</p>
-              </div>
-
-              <div className="flex items-center justify-between gap-3 text-sm text-slate-500">
-                <span>{formatFoundItemAttribution(selectedItem)}</span>
-                {isLocating ? <span className="font-medium text-[#446B16]">Tracking live location…</span> : null}
-              </div>
-
-              {selectedItemOwnPost ? (
-                <Link
-                  to="/found-items/my-posts"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#111611] px-5 py-4 text-base font-semibold text-white transition hover:bg-[#1B231B]"
-                >
-                  Open my posts
-                  <ArrowRight size={16} />
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#111611] px-5 py-4 text-base font-semibold text-white transition hover:bg-[#1B231B] disabled:cursor-not-allowed disabled:bg-slate-300"
-                  disabled={
-                    isClaimingId === selectedItem.id ||
-                    selectedItem.status !== 'available' ||
-                    selectedItemClaimed
-                  }
-                  onClick={() => {
-                    void handleClaim()
-                  }}
-                >
-                  {selectedItemClaimed
-                    ? 'Interest sent'
-                    : isClaimingId === selectedItem.id
-                      ? 'Sending...'
-                      : 'Rescue this'}
-                  <ArrowRight size={16} />
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="flex h-full min-h-[420px] flex-col items-center justify-center rounded-[24px] bg-[#F7FAF1] px-6 text-center">
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">No spots yet</p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-slate-950">Nothing matches this view</h2>
-              <p className="mt-3 max-w-[240px] text-sm leading-6 text-slate-500">
-                Switch filters or refresh the board to pull in more nearby finds.
-              </p>
-            </div>
-          )}
-
-          <div className="mt-4 grid grid-cols-3 gap-2 rounded-[22px] bg-[#F8FAFC] p-3 text-center">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Live</p>
-              <p className="mt-1 text-xl font-semibold tracking-[-0.03em] text-slate-950">{liveCount}</p>
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Claimed</p>
-              <p className="mt-1 text-xl font-semibold tracking-[-0.03em] text-slate-950">{claimedCount}</p>
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Rescued</p>
-              <p className="mt-1 text-xl font-semibold tracking-[-0.03em] text-slate-950">{rescuedCount}</p>
-            </div>
-          </div>
+        <aside className="relative z-10 hidden rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm md:block lg:p-5">
+          <SelectedItemDetails
+            item={selectedItem}
+            distanceKm={selectedDistanceKm}
+            isOwnPost={selectedItemOwnPost}
+            isLocating={isLocating}
+            isClaiming={Boolean(selectedItem && isClaimingId === selectedItem.id)}
+            isClaimed={selectedItemClaimed}
+            onClaim={() => {
+              void handleClaim()
+            }}
+          />
         </aside>
       </div>
+
+      <Modal
+        isOpen={isMobileViewport && isMobileItemModalOpen && Boolean(selectedItem)}
+        onClose={() => setIsMobileItemModalOpen(false)}
+        containerClassName="max-w-[420px] rounded-[28px]"
+        contentClassName="max-h-[calc(100vh-3.5rem)] overflow-y-auto p-4"
+      >
+        <SelectedItemDetails
+          item={selectedItem}
+          distanceKm={selectedDistanceKm}
+          isOwnPost={selectedItemOwnPost}
+          isLocating={isLocating}
+          isClaiming={Boolean(selectedItem && isClaimingId === selectedItem.id)}
+          isClaimed={selectedItemClaimed}
+          onClaim={() => {
+            void handleClaim()
+          }}
+        />
+      </Modal>
     </div>
   )
 }
