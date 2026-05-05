@@ -7,6 +7,7 @@ import {
   foundItemCategories,
   foundItemStatuses,
   type CreateFoundItemPayload,
+  type FoundItemCatalogEntry,
   type FoundItem,
   type FoundItemCategory,
   type FoundItemClaim,
@@ -24,6 +25,11 @@ interface ActorSummary {
 interface FoundItemsResponse {
   readonly items: FoundItem[]
   readonly pagination: PaginationMeta
+}
+
+interface FoundItemCatalogResponse {
+  readonly supportedCategories: FoundItemCategory[]
+  readonly entries: FoundItemCatalogEntry[]
 }
 
 type FoundItemClaimStatus = FoundItemClaim['status']
@@ -84,6 +90,26 @@ function normalizeFoundItemImage(value: unknown): FoundItemImage | null {
     url,
     thumbnailUrl: readString(record.thumbnailUrl) ?? url,
     altText: readString(record.altText),
+  }
+}
+
+function normalizeFoundItemCatalogEntry(value: unknown): FoundItemCatalogEntry | null {
+  const record = asRecord(value)
+  const sourceCategory = readString(record?.sourceCategory)
+  const subcategory = readString(record?.subcategory)
+  const item = readString(record?.item)
+
+  if (!sourceCategory || !subcategory || !item) {
+    return null
+  }
+
+  return {
+    sourceCategory,
+    subcategory,
+    item,
+    typicalWeightKg: readNumber(record?.typicalWeightKg) ?? 0,
+    estimatedCo2eKg: readNumber(record?.estimatedCo2eKg) ?? 0,
+    impactPoints: readNumber(record?.impactPoints) ?? 0,
   }
 }
 
@@ -284,6 +310,31 @@ export async function fetchMyFoundPosts(
   return unwrapFoundItemsResponse(unwrapApiData<unknown>(response), page, safeLimit)
 }
 
+export async function fetchFoundItemCatalog(
+  category?: FoundItemCategory,
+  search?: string,
+  limit: number = 8,
+): Promise<FoundItemCatalogResponse> {
+  const query = toQueryString({
+    category,
+    search: search?.trim() || undefined,
+    limit,
+  })
+  const response = await apiRequest<unknown>(`/found-items/catalog${query}`)
+  const record = asRecord(unwrapApiData<unknown>(response))
+
+  return {
+    supportedCategories: Array.isArray(record?.supportedCategories)
+      ? record.supportedCategories.filter((entry): entry is FoundItemCategory => foundItemCategorySet.has(entry as FoundItemCategory))
+      : [],
+    entries: Array.isArray(record?.entries)
+      ? record.entries
+          .map((entry) => normalizeFoundItemCatalogEntry(entry))
+          .filter((entry): entry is FoundItemCatalogEntry => entry !== null)
+      : [],
+  }
+}
+
 export async function createFoundItem(
   payload: CreateFoundItemPayload,
   _poster?: ActorSummary,
@@ -297,6 +348,7 @@ export async function createFoundItem(
       condition: payload.condition?.trim() || undefined,
       weightKg: payload.weightKg,
       isFlyTipped: payload.isFlyTipped,
+      carbonCatalogSelection: payload.carbonCatalogSelection,
       images: payload.images.map((image) => ({
         url: image.url,
         altText: image.altText?.trim() || payload.title.trim(),

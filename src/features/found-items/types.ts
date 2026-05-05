@@ -70,6 +70,21 @@ export interface FoundItemClaim {
   readonly createdAt: string
 }
 
+export interface FoundItemCarbonCatalogSelection {
+  readonly sourceCategory?: string
+  readonly subcategory?: string
+  readonly item: string
+}
+
+export interface FoundItemCatalogEntry {
+  readonly sourceCategory: string
+  readonly subcategory: string
+  readonly item: string
+  readonly typicalWeightKg: number
+  readonly estimatedCo2eKg: number
+  readonly impactPoints: number
+}
+
 export interface CreateFoundItemPayload {
   readonly title: string
   readonly description: string
@@ -77,6 +92,7 @@ export interface CreateFoundItemPayload {
   readonly condition?: string
   readonly weightKg?: number
   readonly isFlyTipped?: boolean
+  readonly carbonCatalogSelection?: FoundItemCarbonCatalogSelection
   readonly images: readonly {
     readonly url: string
     readonly altText?: string

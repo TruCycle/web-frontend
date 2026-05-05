@@ -16,9 +16,14 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { createFoundItem, uploadFoundItemImage } from '../api/foundItemsApi'
+import { createFoundItem, fetchFoundItemCatalog, uploadFoundItemImage } from '../api/foundItemsApi'
 import { foundItemCategories } from '../types'
-import type { CreateFoundItemPayload, FoundItem, FoundItemCategory } from '../types'
+import type {
+  CreateFoundItemPayload,
+  FoundItem,
+  FoundItemCatalogEntry,
+  FoundItemCategory,
+} from '../types'
 import { CameraCapture } from './components/CameraCapture'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
@@ -45,58 +50,40 @@ const categoryMeta: Record<
   FoundItemCategory,
   {
     readonly label: string
-    readonly suggestedTitle: string
-    readonly defaultWeightKg: number
-    readonly impactFactor: number
+    readonly searchPlaceholder: string
   }
 > = {
   furniture: {
     label: 'Furniture',
-    suggestedTitle: 'Armchair',
-    defaultWeightKg: 25,
-    impactFactor: 3.44,
+    searchPlaceholder: 'Search catalog, e.g. Armchair',
   },
   electronics: {
     label: 'Electronics',
-    suggestedTitle: 'TV',
-    defaultWeightKg: 12,
-    impactFactor: 5.1,
+    searchPlaceholder: 'Search catalog, e.g. TV',
   },
   clothing: {
     label: 'Clothing',
-    suggestedTitle: 'Clothing bundle',
-    defaultWeightKg: 6,
-    impactFactor: 2.2,
+    searchPlaceholder: 'Catalog coverage coming soon',
   },
   books: {
     label: 'Books',
-    suggestedTitle: 'Book stack',
-    defaultWeightKg: 14,
-    impactFactor: 1.8,
+    searchPlaceholder: 'Catalog coverage coming soon',
   },
   appliances: {
     label: 'Appliances',
-    suggestedTitle: 'Washing machine',
-    defaultWeightKg: 35,
-    impactFactor: 4.2,
+    searchPlaceholder: 'Search catalog, e.g. Washing machine',
   },
   outdoor: {
     label: 'Outdoor',
-    suggestedTitle: 'Garden chair',
-    defaultWeightKg: 18,
-    impactFactor: 3,
+    searchPlaceholder: 'Search catalog, e.g. Bicycle',
   },
   toys: {
     label: 'Toys',
-    suggestedTitle: 'Toy box',
-    defaultWeightKg: 8,
-    impactFactor: 2.6,
+    searchPlaceholder: 'Catalog coverage coming soon',
   },
   other: {
     label: 'Other',
-    suggestedTitle: 'Found item',
-    defaultWeightKg: 15,
-    impactFactor: 2.8,
+    searchPlaceholder: 'Search catalog, e.g. Exercise bike',
   },
 }
 
@@ -119,8 +106,27 @@ function formatPostcode(value: string): string {
   return value.trim().toUpperCase()
 }
 
-function estimateCo2e(category: FoundItemCategory, weightKg: number): number {
-  return Math.max(12, Math.round(weightKg * categoryMeta[category].impactFactor))
+function scaleCatalogMetric(metric: number, typicalWeightKg: number, resolvedWeightKg: number): number {
+  if (!(typicalWeightKg > 0)) {
+    return Math.max(0, Math.round(metric))
+  }
+
+  return Math.max(0, Math.round((metric / typicalWeightKg) * resolvedWeightKg))
+}
+
+function isSameCatalogEntry(
+  left: FoundItemCatalogEntry | null,
+  right: FoundItemCatalogEntry,
+): boolean {
+  if (!left) {
+    return false
+  }
+
+  return (
+    left.sourceCategory === right.sourceCategory &&
+    left.subcategory === right.subcategory &&
+    left.item === right.item
+  )
 }
 
 function buildDescription(
@@ -259,12 +265,14 @@ export default function PostFoundItemPage() {
   const { success, error, info } = useToast()
   const [step, setStep] = useState<PostStep>('capture')
   const [category, setCategory] = useState<FoundItemCategory>('furniture')
-  const [itemName, setItemName] = useState(categoryMeta.furniture.suggestedTitle)
-  const [hasEditedName, setHasEditedName] = useState(false)
-  const [estimatedWeightKg, setEstimatedWeightKg] = useState(
-    String(categoryMeta.furniture.defaultWeightKg),
-  )
+  const [itemName, setItemName] = useState('')
+  const [estimatedWeightKg, setEstimatedWeightKg] = useState('')
   const [hasEditedWeight, setHasEditedWeight] = useState(false)
+  const [catalogEntries, setCatalogEntries] = useState<FoundItemCatalogEntry[]>([])
+  const [selectedCatalogEntry, setSelectedCatalogEntry] = useState<FoundItemCatalogEntry | null>(null)
+  const [supportedCatalogCategories, setSupportedCatalogCategories] = useState<FoundItemCategory[]>([])
+  const [isLoadingCatalog, setIsLoadingCatalog] = useState(false)
+  const [catalogError, setCatalogError] = useState<string | null>(null)
   const [isFlyTipped, setIsFlyTipped] = useState(false)
   const [notes, setNotes] = useState('')
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -288,16 +296,57 @@ export default function PostFoundItemPage() {
   )
 
   useEffect(() => {
-    if (!hasEditedName) {
-      setItemName(categoryMeta[category].suggestedTitle)
+    let isMounted = true
+
+    const loadCatalog = async () => {
+      try {
+        setIsLoadingCatalog(true)
+        setCatalogError(null)
+        const response = await fetchFoundItemCatalog(category, itemName, 8)
+        if (!isMounted) {
+          return
+        }
+
+        setSupportedCatalogCategories(response.supportedCategories)
+        setCatalogEntries(response.entries)
+        setSelectedCatalogEntry((currentEntry) => {
+          if (currentEntry && response.entries.some((entry) => isSameCatalogEntry(currentEntry, entry))) {
+            return currentEntry
+          }
+
+          return response.entries[0] ?? null
+        })
+
+        if (response.entries.length === 0) {
+          setCatalogError('No carbon catalog matches yet. Try another search or supported category.')
+        }
+      } catch {
+        if (!isMounted) {
+          return
+        }
+
+        setCatalogEntries([])
+        setSelectedCatalogEntry(null)
+        setCatalogError('Unable to load the carbon catalog right now.')
+      } finally {
+        if (isMounted) {
+          setIsLoadingCatalog(false)
+        }
+      }
     }
-  }, [category, hasEditedName])
+
+    void loadCatalog()
+
+    return () => {
+      isMounted = false
+    }
+  }, [category, itemName])
 
   useEffect(() => {
-    if (!hasEditedWeight) {
-      setEstimatedWeightKg(String(categoryMeta[category].defaultWeightKg))
+    if (!hasEditedWeight && selectedCatalogEntry) {
+      setEstimatedWeightKg(String(selectedCatalogEntry.typicalWeightKg))
     }
-  }, [category, hasEditedWeight])
+  }, [hasEditedWeight, selectedCatalogEntry])
 
   useEffect(() => {
     return () => {
@@ -359,15 +408,41 @@ export default function PostFoundItemPage() {
 
   const safeWeightKg = useMemo(() => {
     const parsed = Number(estimatedWeightKg)
+    const fallbackWeightKg = selectedCatalogEntry?.typicalWeightKg ?? 0
     if (!Number.isFinite(parsed) || parsed <= 0) {
-      return categoryMeta[category].defaultWeightKg
+      return fallbackWeightKg
     }
 
-    return Math.round(parsed)
-  }, [category, estimatedWeightKg])
+    return Math.round(parsed * 10) / 10
+  }, [estimatedWeightKg, selectedCatalogEntry?.typicalWeightKg])
 
-  const title = itemName.trim() || categoryMeta[category].suggestedTitle
-  const co2e = useMemo(() => estimateCo2e(category, safeWeightKg), [category, safeWeightKg])
+  const title = selectedCatalogEntry?.item ?? (itemName.trim() || 'Found item')
+  const co2e = useMemo(() => {
+    if (!selectedCatalogEntry) {
+      return 0
+    }
+
+    return scaleCatalogMetric(
+      selectedCatalogEntry.estimatedCo2eKg,
+      selectedCatalogEntry.typicalWeightKg,
+      safeWeightKg,
+    )
+  }, [safeWeightKg, selectedCatalogEntry])
+  const previewImpactPoints = useMemo(() => {
+    if (!selectedCatalogEntry) {
+      return 0
+    }
+
+    return scaleCatalogMetric(
+      selectedCatalogEntry.impactPoints,
+      selectedCatalogEntry.typicalWeightKg,
+      safeWeightKg,
+    )
+  }, [safeWeightKg, selectedCatalogEntry])
+  const supportedCatalogCategorySet = useMemo(
+    () => new Set(supportedCatalogCategories),
+    [supportedCatalogCategories],
+  )
   const cameraStatusLabel = locationError
     ? 'Location needed'
     : isLocating
@@ -405,10 +480,12 @@ export default function PostFoundItemPage() {
   const resetDraft = useCallback(() => {
     setStep('capture')
     setCategory('furniture')
-    setItemName(categoryMeta.furniture.suggestedTitle)
-    setHasEditedName(false)
-    setEstimatedWeightKg(String(categoryMeta.furniture.defaultWeightKg))
+    setItemName('')
+    setEstimatedWeightKg('')
     setHasEditedWeight(false)
+    setCatalogEntries([])
+    setSelectedCatalogEntry(null)
+    setCatalogError(null)
     setIsFlyTipped(false)
     setNotes('')
     setUploadedImageUrl('')
@@ -424,6 +501,11 @@ export default function PostFoundItemPage() {
       return
     }
 
+    if (!selectedCatalogEntry) {
+      error('Choose a catalog match', 'Select a carbon catalog item before you continue.')
+      return
+    }
+
     if (!adjustedLocation) {
       error('Location missing', 'Allow GPS access before you continue.')
       return
@@ -433,7 +515,7 @@ export default function PostFoundItemPage() {
   }
 
   const handleSubmit = async () => {
-    if (!adjustedLocation || !uploadedImageUrl) {
+    if (!adjustedLocation || !uploadedImageUrl || !selectedCatalogEntry) {
       return
     }
 
@@ -444,6 +526,11 @@ export default function PostFoundItemPage() {
       condition: isFlyTipped ? 'Fly-tipped' : undefined,
       weightKg: safeWeightKg,
       isFlyTipped,
+      carbonCatalogSelection: {
+        sourceCategory: selectedCatalogEntry.sourceCategory,
+        subcategory: selectedCatalogEntry.subcategory,
+        item: selectedCatalogEntry.item,
+      },
       images: [{ url: uploadedImageUrl, altText: title }],
       location: {
         latitude: adjustedLocation.latitude,
@@ -653,15 +740,12 @@ export default function PostFoundItemPage() {
             ) : null}
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700">Item name</span>
+              <span className="text-sm font-semibold text-slate-700">Catalog search</span>
               <input
                 className="h-14 w-full rounded-[18px] border border-slate-200 px-4 text-lg text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
                 value={itemName}
-                onChange={(event) => {
-                  setHasEditedName(true)
-                  setItemName(event.target.value)
-                }}
-                placeholder="Armchair"
+                onChange={(event) => setItemName(event.target.value)}
+                placeholder={categoryMeta[category].searchPlaceholder}
               />
             </label>
 
@@ -671,10 +755,20 @@ export default function PostFoundItemPage() {
                 <select
                   className="h-14 w-full appearance-none rounded-[18px] border border-slate-200 bg-white px-4 pr-12 text-lg text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
                   value={category}
-                  onChange={(event) => setCategory(event.target.value as FoundItemCategory)}
+                  onChange={(event) => {
+                    setCategory(event.target.value as FoundItemCategory)
+                    setItemName('')
+                    setSelectedCatalogEntry(null)
+                    setCatalogError(null)
+                    setHasEditedWeight(false)
+                  }}
                 >
                   {foundItemCategories.map((itemCategory) => (
-                    <option key={itemCategory} value={itemCategory}>
+                    <option
+                      key={itemCategory}
+                      value={itemCategory}
+                      disabled={supportedCatalogCategories.length > 0 && !supportedCatalogCategorySet.has(itemCategory)}
+                    >
                       {categoryMeta[itemCategory].label}
                     </option>
                   ))}
@@ -684,8 +778,65 @@ export default function PostFoundItemPage() {
                   className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 rotate-90 text-slate-400"
                 />
               </div>
-              <p className="text-sm text-slate-500">WEEE support adjusts automatically by category.</p>
+              <p className="text-sm text-slate-500">Only categories with carbon catalog coverage can be posted from this flow.</p>
             </label>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-semibold text-slate-700">Catalog matches</span>
+                {isLoadingCatalog ? (
+                  <span className="inline-flex items-center gap-2 text-xs text-slate-500">
+                    <LoaderCircle size={12} className="animate-spin" />
+                    Loading
+                  </span>
+                ) : null}
+              </div>
+
+              {catalogError ? <p className="text-sm text-amber-700">{catalogError}</p> : null}
+
+              <div className="grid gap-2">
+                {catalogEntries.map((entry) => {
+                  const isSelected = isSameCatalogEntry(selectedCatalogEntry, entry)
+
+                  return (
+                    <button
+                      key={`${entry.sourceCategory}-${entry.subcategory}-${entry.item}`}
+                      type="button"
+                      className={classNames(
+                        'rounded-[18px] border px-4 py-3 text-left transition',
+                        isSelected
+                          ? 'border-[#87C15F] bg-[#F4FAEA] shadow-sm'
+                          : 'border-slate-200 bg-white hover:border-[#D7E8C2] hover:bg-[#FAFCF6]',
+                      )}
+                      onClick={() => {
+                        setSelectedCatalogEntry(entry)
+                        setItemName(entry.item)
+                        setHasEditedWeight(false)
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-slate-950">{entry.item}</p>
+                          <p className="mt-1 text-sm text-slate-500">
+                            {entry.sourceCategory} · {entry.subcategory}
+                          </p>
+                        </div>
+                        <div className="text-right text-sm text-slate-500">
+                          <p className="font-semibold text-[#55741D]">{entry.impactPoints} pts</p>
+                          <p>{entry.estimatedCo2eKg} kg CO2e</p>
+                        </div>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {selectedCatalogEntry ? (
+                <p className="text-sm text-slate-500">
+                  Selected profile: {selectedCatalogEntry.item} · typical weight {selectedCatalogEntry.typicalWeightKg} kg
+                </p>
+              ) : null}
+            </div>
 
             <label className="block space-y-2">
               <span className="text-sm font-semibold text-slate-700">Estimated weight</span>
@@ -698,13 +849,13 @@ export default function PostFoundItemPage() {
                     setHasEditedWeight(true)
                     setEstimatedWeightKg(event.target.value.replace(/[^\d.]/g, ''))
                   }}
-                  placeholder="25"
+                  placeholder={selectedCatalogEntry ? String(selectedCatalogEntry.typicalWeightKg) : '0'}
                 />
                 <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg text-slate-400">
                   kg
                 </span>
               </div>
-              <p className="text-sm text-slate-500">Auto-filled from category · tap to override</p>
+              <p className="text-sm text-slate-500">Auto-filled from the selected catalog match · tap to override</p>
             </label>
 
             <button
@@ -776,23 +927,39 @@ export default function PostFoundItemPage() {
               <p className="text-lg text-slate-500">
                 {safeWeightKg} kg · {defaultPostcode}
               </p>
+              {selectedCatalogEntry ? (
+                <p className="mt-2 text-sm text-slate-500">
+                  {selectedCatalogEntry.sourceCategory} · {selectedCatalogEntry.subcategory}
+                </p>
+              ) : null}
             </div>
 
             <div className="rounded-[24px] bg-[linear-gradient(90deg,#F4F8EA_0%,#EEF6DE_100%)] px-5 py-5 text-slate-950">
               <p className="text-[0.82rem] font-bold uppercase tracking-[0.18em] text-[#55741D]">
-                Draft estimate
+                Catalog-backed preview
               </p>
-              <div className="mt-4 flex items-end gap-2">
-                <span className="text-[3.35rem] font-bold leading-none tracking-[-0.05em]">{co2e}</span>
-                <span className="pb-2 text-3xl text-slate-700">kg CO2e</span>
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-500">CO2e saved</p>
+                  <div className="mt-2 flex items-end gap-2">
+                    <span className="text-[2.6rem] font-bold leading-none tracking-[-0.05em]">{co2e}</span>
+                    <span className="pb-1 text-xl text-slate-700">kg</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-500">Impact score</p>
+                  <div className="mt-2 flex items-end gap-2">
+                    <span className="text-[2.6rem] font-bold leading-none tracking-[-0.05em] text-[#3A7618]">{previewImpactPoints}</span>
+                    <span className="pb-1 text-xl text-slate-700">pts</span>
+                  </div>
+                </div>
               </div>
-              <p className="mt-2 text-lg text-slate-700">based on your draft title, category and weight</p>
+              <p className="mt-2 text-lg text-slate-700">based on the selected carbon catalog profile and weight</p>
 
               <div className="mt-5 h-px bg-slate-300/70" />
 
               <p className="mt-4 text-sm leading-6 text-slate-600">
-                Final impact score and live board values are confirmed after the backend matches this
-                post to the carbon catalog.
+                This preview is calculated from the exact catalog row that will be submitted with your post.
               </p>
             </div>
 
