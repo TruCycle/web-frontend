@@ -1,6 +1,7 @@
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { LandingDashboardSection } from '@/features/home/ui/components/LandingDashboardSection'
 import { LandingFooter } from '@/features/home/ui/components/LandingFooter'
+import { LandingFoundItemsSection } from '@/features/home/ui/components/LandingFoundItemsSection'
 import { LandingHero } from '@/features/home/ui/components/LandingHero'
 import { LandingHowItWorks } from '@/features/home/ui/components/LandingHowItWorks'
 import { LandingNavbar } from '@/features/home/ui/components/LandingNavbar'
@@ -16,6 +17,7 @@ export default function HomePage() {
       <LandingNavbar isAuthenticated={isAuthenticated} primaryCtaLabel={primaryCtaLabel} primaryCtaTo={primaryCtaTo} />
       <LandingHero isAuthenticated={isAuthenticated} primaryCtaLabel={primaryCtaLabel} primaryCtaTo={primaryCtaTo} />
       <LandingDashboardSection />
+      <LandingFoundItemsSection isAuthenticated={isAuthenticated} />
       <LandingHowItWorks />
       <LandingWhyItWorks />
       <LandingFooter isAuthenticated={isAuthenticated} primaryCtaLabel={primaryCtaLabel} primaryCtaTo={primaryCtaTo} />

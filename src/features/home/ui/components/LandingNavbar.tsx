@@ -18,6 +18,9 @@ export function LandingNavbar({ isAuthenticated, primaryCtaLabel, primaryCtaTo }
         </Link>
 
         <div className="hidden items-center gap-8 text-sm font-medium text-tc-app-slate500 md:flex">
+          <a className="transition-colors hover:text-slate-950" href="#found-items">
+            Found Items
+          </a>
           <a className="transition-colors hover:text-slate-950" href="#how">
             How it works
           </a>
