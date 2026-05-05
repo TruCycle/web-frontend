@@ -7,42 +7,27 @@ type LandingFoundItemsSectionProps = {
 
 const foundItemHighlights = [
   {
-    description: 'Open nearby curb alerts with photo-first cards, postcode context, and distance at a glance.',
+    description: 'See nearby finds fast.',
     icon: MapPinned,
     title: 'Local board',
   },
   {
-    description: 'Every post carries catalog-backed CO2 and impact-point estimates before it goes live.',
+    description: 'Real CO2 and point previews.',
     icon: Leaf,
     title: 'Real impact preview',
   },
   {
-    description: 'Send pickup notes, track requests, and flag suspicious posts without leaving the flow.',
+    description: 'Request, track, and report in one flow.',
     icon: ShieldCheck,
     title: 'Safer handoff tools',
   },
 ] as const
 
-const boardDetails = [
-  {
-    label: 'Board status',
-    value: 'Available, claimed, or reported',
-  },
-  {
-    label: 'Pickup flow',
-    value: 'Request with a note and keep claim state visible',
-  },
-  {
-    label: 'Impact model',
-    value: 'Catalog-backed CO2e and points scaled by weight',
-  },
-] as const
-
 export function LandingFoundItemsSection({ isAuthenticated }: LandingFoundItemsSectionProps) {
   const primaryCtaTo = isAuthenticated ? '/found-items' : '/signup'
-  const primaryCtaLabel = isAuthenticated ? 'Open found items board' : 'Start rescuing items'
+  const primaryCtaLabel = isAuthenticated ? 'Open board' : 'Start rescuing'
   const secondaryCtaTo = isAuthenticated ? '/map' : '/login'
-  const secondaryCtaLabel = isAuthenticated ? 'View live rescue map' : 'Log in to view the board'
+  const secondaryCtaLabel = isAuthenticated ? 'Open map' : 'Log in'
 
   return (
     <section className="relative overflow-hidden px-6 py-24" id="found-items">
@@ -62,7 +47,7 @@ export function LandingFoundItemsSection({ isAuthenticated }: LandingFoundItemsS
           </h2>
 
           <p className="tc-landing-fade-up tc-landing-delay-2 mt-6 max-w-xl text-lg leading-8 text-slate-600">
-            TruCycle&apos;s found-items board turns curbside discoveries into a structured rescue flow with map context, pickup requests, and impact estimates that match the backend carbon catalog.
+            Spot local finds, request pickup, and see the impact before anything goes live.
           </p>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
@@ -107,7 +92,7 @@ export function LandingFoundItemsSection({ isAuthenticated }: LandingFoundItemsS
                   Board preview
                 </p>
                 <h3 className="mt-2 text-3xl font-bold tracking-[-0.04em] text-slate-950">
-                  Armchair on Morland Road
+                  Morland Road armchair
                 </h3>
                 <p className="mt-2 text-base text-slate-500">0.8 km away · Barking riverside</p>
               </div>
@@ -128,17 +113,8 @@ export function LandingFoundItemsSection({ isAuthenticated }: LandingFoundItemsS
               </div>
               <div className="rounded-[1.4rem] bg-slate-950 px-4 py-4 text-white">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Post flow</p>
-                <p className="mt-2 text-xl font-semibold tracking-[-0.03em]">Photo, map pin, catalog match</p>
+                <p className="mt-2 text-xl font-semibold tracking-[-0.03em]">Photo, pin, match</p>
               </div>
-            </div>
-
-            <div className="mt-6 space-y-3 rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-5">
-              {boardDetails.map((detail) => (
-                <div className="flex flex-col gap-1 border-b border-slate-200/80 pb-3 last:border-b-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between" key={detail.label}>
-                  <span className="text-sm font-semibold text-slate-700">{detail.label}</span>
-                  <span className="text-sm text-slate-500">{detail.value}</span>
-                </div>
-              ))}
             </div>
           </div>
         </div>

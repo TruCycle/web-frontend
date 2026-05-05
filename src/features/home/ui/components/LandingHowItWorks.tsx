@@ -26,13 +26,13 @@ const steps = [
 
 export function LandingHowItWorks() {
   return (
-    <section className="px-6 py-24" id="how">
+    <section className="bg-[#0d2018] px-6 py-24" id="how">
       <div className="mx-auto max-w-7xl">
         <div className="mb-16 max-w-2xl">
-          <span className="tc-landing-fade-up text-sm font-semibold uppercase tracking-[0.2em] text-tc-shell-bg">
+          <span className="tc-landing-fade-up text-sm font-semibold uppercase tracking-[0.2em] text-tc-shell-accent">
             How it works
           </span>
-          <h2 className="tc-landing-fade-up tc-landing-delay-1 mt-3 text-4xl font-bold tracking-[-0.04em] text-slate-950 sm:text-5xl">
+          <h2 className="tc-landing-fade-up tc-landing-delay-1 mt-3 text-4xl font-bold tracking-[-0.04em] text-white sm:text-5xl">
             Three steps.
             <br />
             Zero friction.
@@ -58,7 +58,7 @@ export function LandingHowItWorks() {
 
               {index < steps.length - 1 ? (
                 <div className="absolute -right-3 top-1/2 z-10 hidden -translate-y-1/2 md:flex">
-                  <ArrowDown className="h-5 w-5 -rotate-90 text-slate-300" />
+                  <ArrowDown className="h-5 w-5 -rotate-90 text-white/28" />
                 </div>
               ) : null}
             </div>
