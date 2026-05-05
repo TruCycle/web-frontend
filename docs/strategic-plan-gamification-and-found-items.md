@@ -48,7 +48,7 @@ The gamification system introduces engagement mechanics to encourage consistent 
 - **Badges**: Achievement markers for specific milestones
 - **Points/XP**: Quantifiable progress tied to actions
 - **Levels**: Progression tiers based on accumulated points
-- **Leaderboards**: Community rankings (optional, privacy-aware)
+- **Community Board**: Postcode and local spotter rankings derived from found-item activity
 
 ### 1.2 User Stories
 
@@ -165,13 +165,25 @@ export interface UserBadge {
   readonly isNew: boolean
 }
 
-export interface LeaderboardEntry {
-  readonly rank: number
+export type CommunityBoardWindow = 'week' | 'month' | 'all'
+
+export interface CommunityBoardPostcodeEntry {
+  readonly postcode: string
+  readonly spots: number
+  readonly rescues: number
+  readonly activeSpots: number
+  readonly totalCo2eKg: number
+  readonly impactPoints: number
+}
+
+export interface CommunityBoardSpotterEntry {
   readonly userId: string
-  readonly displayName: string
-  readonly avatarUrl: string | null
-  readonly totalPoints: number
-  readonly level: number
+  readonly name: string
+  readonly postcode: string | null
+  readonly spotsPosted: number
+  readonly rescues: number
+  readonly totalCo2eKg: number
+  readonly impactPoints: number
 }
 
 export interface PointTransaction {
@@ -283,15 +295,28 @@ Response:
   - transactions: PointTransaction[]
   - pagination: { page, limit, total }
 
-# Get leaderboard (optional feature)
-GET /api/gamification/leaderboard
+# Get community board rankings
+GET /api/gamification/community-board
 Query Params:
-  - scope: 'global' | 'local' | 'friends'
-  - period: 'all_time' | 'monthly' | 'weekly'
-  - limit: number
+  - window: 'week' | 'month' | 'all'
 Response:
-  - entries: LeaderboardEntry[]
-  - currentUserRank: number
+  - postcodes: CommunityBoardPostcodeEntry[]
+  - localSpotters: CommunityBoardSpotterEntry[]
+  - currentUser: { areaRank, localSpotterRank, impactPoints, spotsPosted, totalCo2eKg }
+
+# Get found-item impact summary for My Impact
+GET /api/gamification/impact/found-items
+Response:
+  - spotsPosted: number
+  - liveSpots: number
+  - rescuedSpots: number
+  - reportedSpots: number
+  - totalCo2eKg: number
+  - totalImpactPoints: number
+  - topArea: string | null
+  - userArea: string | null
+  - currentMonthAreaRank: number | null
+  - recentPosts: FoundItemImpactRecentPost[]
 
 # Mark badge notification as seen
 POST /api/gamification/badges/:badgeId/seen
@@ -515,13 +540,12 @@ src/features/found-items/
 ├── ui/
 │   ├── components/
 │   │   ├── FoundItemCard.tsx        # Card for browsing view
-│   │   ├── FoundItemDetails.tsx     # Full item details view
-│   │   ├── PostFoundItemForm.tsx    # Form for posting new items
+│   │   ├── FoundItemDetailsPanel.tsx # Modal/details view with claim/report actions
 │   │   ├── CameraCapture.tsx        # Camera interface for photos
-│   │   ├── LocationPicker.tsx       # Map/location input
-│   │   ├── FoundItemsFilter.tsx     # Filter controls
+│   │   ├── FoundItemsFilterBar.tsx  # Filter controls
 │   │   └── FoundItemStatusBadge.tsx # Status indicator
 │   ├── FoundItemsPage.tsx           # Main browse page
+│   ├── FoundItemsMapPage.tsx        # Live map and rescue view
 │   ├── PostFoundItemPage.tsx        # Post new item page
 │   └── MyFoundPostsPage.tsx         # User's posted items
 └── utils/
@@ -781,13 +805,9 @@ Response:
   - success: boolean
 
 # Upload image for found item
-POST /api/found-items/upload
-Content-Type: multipart/form-data
-Body:
-  - image: File
-Response:
-  - url: string
-  - thumbnailUrl: string
+# Current implementation uploads directly from the frontend to Cloudinary.
+# No backend /api/found-items/upload endpoint is currently shipped.
+# The frontend stores the resulting URL in the found-item create payload.
 ```
 
 ### 2.6 Frontend Implementation
@@ -906,18 +926,8 @@ export async function uploadFoundItemImage(file: File): Promise<{
   url: string
   thumbnailUrl: string
 }> {
-  const formData = new FormData()
-  formData.append('image', file)
-  
-  const response = await fetch('/api/found-items/upload', {
-    method: 'POST',
-    body: formData,
-    // Note: Don't set Content-Type header - browser sets it with boundary
-  })
-  
-  if (!response.ok) {
-    throw new Error('Image upload failed')
-  }
+  // Current implementation uploads directly to Cloudinary using
+  // browser-safe VITE_* configuration values.
   
   return response.json()
 }
@@ -1236,20 +1246,20 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
 
 #### Phase 2: Camera & Image Upload (Week 3)
 - [ ] CameraCapture component with permissions handling
-- [ ] Image upload integration with Cloudinary or similar
+- [x] Direct Cloudinary upload from the mobile found-item post flow
 - [ ] Image preview and editing (crop/rotate)
 - [ ] Multiple image support
 
 #### Phase 3: Posting Flow (Week 4)
 - [ ] PostFoundItemForm component
 - [ ] Location detection (GPS) with fallback to manual entry
-- [ ] LocationPicker with map integration (optional)
+- [x] Drag-to-adjust location preview in the mobile post flow
 - [ ] Form validation and error handling
 
 #### Phase 4: Browse & Details (Week 5)
 - [ ] FoundItemsPage with filters
 - [ ] FoundItemCard and grid layout
-- [ ] FoundItemDetails modal/page
+- [x] FoundItemDetailsPanel modal with claim, cancel and report actions
 - [ ] Claim/interest functionality
 
 #### Phase 5: My Posts Management (Week 6)
@@ -1291,9 +1301,9 @@ Add new navigation items to the app shell:
   badge: unreadFoundItemsCount // optional
 },
 {
-  label: 'Achievements',
+  label: 'My Impact',
   icon: TrophyIcon,
-  path: '/achievements',
+  path: '/impact',
 }
 ```
 

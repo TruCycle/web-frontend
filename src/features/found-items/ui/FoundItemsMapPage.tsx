@@ -6,11 +6,14 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CircleMarker, MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
 import {
+  cancelFoundItemClaim,
   claimFoundItem,
   fetchFoundItemById,
   fetchFoundItems,
+  reportFoundItem,
 } from '../api/foundItemsApi'
 import type { FoundItem, FoundItemStatus } from '../types'
+import { useFoundItemDetails } from '../hooks/useFoundItemDetails'
 import { FoundItemStatusBadge } from './components/FoundItemStatusBadge'
 import {
   formatFoundItemAttribution,
@@ -203,8 +206,14 @@ interface SelectedItemDetailsProps {
   readonly isOwnPost: boolean
   readonly isLocating: boolean
   readonly isClaiming: boolean
-  readonly isClaimed: boolean
-  readonly onClaim: () => void
+  readonly isLoadingDetails: boolean
+  readonly isCancelling: boolean
+  readonly isReporting: boolean
+  readonly viewerHasActiveClaim: boolean
+  readonly detailsError: string | null
+  readonly onClaim: (message?: string) => void
+  readonly onCancelClaim: () => void
+  readonly onReport: (reason: string, details?: string) => void
 }
 
 function SelectedItemDetails({
@@ -213,9 +222,25 @@ function SelectedItemDetails({
   isOwnPost,
   isLocating,
   isClaiming,
-  isClaimed,
+  isLoadingDetails,
+  isCancelling,
+  isReporting,
+  viewerHasActiveClaim,
+  detailsError,
   onClaim,
+  onCancelClaim,
+  onReport,
 }: SelectedItemDetailsProps) {
+  const [claimMessage, setClaimMessage] = useState('')
+  const [reportReason, setReportReason] = useState('')
+  const [reportDetails, setReportDetails] = useState('')
+
+  useEffect(() => {
+    setClaimMessage('')
+    setReportReason('')
+    setReportDetails('')
+  }, [item?.id])
+
   if (!item) {
     return (
       <div className="flex h-full min-h-[420px] flex-col items-center justify-center rounded-[24px] bg-[#F7FAF1] px-6 text-center">
@@ -277,6 +302,9 @@ function SelectedItemDetails({
         {isLocating ? <span className="font-medium text-[#446B16]">Tracking live location…</span> : null}
       </div>
 
+      {isLoadingDetails ? <p className="text-xs text-slate-400">Loading request status…</p> : null}
+      {detailsError ? <p className="text-xs text-rose-600">{detailsError}</p> : null}
+
       {isOwnPost ? (
         <Link
           to="/found-items/my-posts"
@@ -286,17 +314,83 @@ function SelectedItemDetails({
           <ArrowRight size={16} />
         </Link>
       ) : (
-        <button
-          type="button"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#111611] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#1B231B] disabled:cursor-not-allowed disabled:bg-slate-300"
-          disabled={isClaiming || item.status !== 'available' || isClaimed}
-          onClick={() => {
-            onClaim()
-          }}
-        >
-          {isClaimed ? 'Interest sent' : isClaiming ? 'Sending...' : 'Rescue this'}
-          <ArrowRight size={16} />
-        </button>
+        <div className="space-y-3 rounded-[24px] border border-slate-200 bg-white p-4">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900">Pickup note</h3>
+            <p className="mt-1 text-xs leading-5 text-slate-500">
+              {viewerHasActiveClaim
+                ? 'Your request is already live for this spot.'
+                : 'Add a short note for the poster before you send your request.'}
+            </p>
+          </div>
+
+          <textarea
+            value={claimMessage}
+            onChange={(event) => setClaimMessage(event.target.value)}
+            disabled={viewerHasActiveClaim}
+            className="min-h-[88px] w-full rounded-[16px] border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA] disabled:cursor-not-allowed disabled:bg-slate-100"
+            placeholder="Can collect this today after work. Happy to confirm by message."
+          />
+
+          {!viewerHasActiveClaim ? (
+            <button
+              type="button"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#111611] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#1B231B] disabled:cursor-not-allowed disabled:bg-slate-300"
+              disabled={isClaiming || item.status !== 'available'}
+              onClick={() => {
+                onClaim(claimMessage)
+              }}
+            >
+              {isClaiming ? 'Sending...' : 'Send pickup request'}
+              <ArrowRight size={16} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400"
+              disabled={isCancelling || item.status === 'picked_up' || item.status === 'reported'}
+              onClick={onCancelClaim}
+            >
+              {isCancelling ? 'Cancelling...' : 'Cancel request'}
+            </button>
+          )}
+
+          {item.status !== 'reported' ? (
+            <div className="space-y-3 rounded-[20px] bg-[#F8FAFC] p-3.5">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Report this spot</h3>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  Flag misleading, unsafe or duplicate posts for review.
+                </p>
+              </div>
+
+              <input
+                value={reportReason}
+                onChange={(event) => setReportReason(event.target.value)}
+                className="h-11 w-full rounded-[14px] border border-slate-200 px-3 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
+                placeholder="Reason for reporting"
+              />
+
+              <textarea
+                value={reportDetails}
+                onChange={(event) => setReportDetails(event.target.value)}
+                className="min-h-[80px] w-full rounded-[14px] border border-slate-200 px-3 py-3 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
+                placeholder="Extra details (optional)"
+              />
+
+              <button
+                type="button"
+                className="inline-flex w-full items-center justify-center rounded-full bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-rose-300"
+                disabled={isReporting || !reportReason.trim()}
+                onClick={() => {
+                  onReport(reportReason, reportDetails)
+                }}
+              >
+                {isReporting ? 'Sending report...' : 'Send report'}
+              </button>
+            </div>
+          ) : null}
+        </div>
       )}
     </div>
   )
@@ -314,13 +408,21 @@ export default function FoundItemsMapPage() {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(highlightId || null)
   const [mapFilter, setMapFilter] = useState<MapFilter>('all')
   const [isClaimingId, setIsClaimingId] = useState<string | null>(null)
-  const [claimedItemIds, setClaimedItemIds] = useState<string[]>([])
+  const [isCancellingId, setIsCancellingId] = useState<string | null>(null)
+  const [isReportingId, setIsReportingId] = useState<string | null>(null)
   const [liveLocation, setLiveLocation] = useState<GeoPoint | null>(null)
   const [isLocating, setIsLocating] = useState(true)
   const [locationError, setLocationError] = useState<string | null>(null)
   const [focusMode, setFocusMode] = useState<FocusMode>(highlightId ? 'selected' : 'me')
   const [focusRequestKey, setFocusRequestKey] = useState(0)
   const [isMobileItemModalOpen, setIsMobileItemModalOpen] = useState(Boolean(highlightId))
+  const {
+    item: detailedSelectedItem,
+    viewerClaim,
+    isLoading: isLoadingDetails,
+    error: detailsError,
+    refresh: refreshDetails,
+  } = useFoundItemDetails(selectedItemId, user?.id)
 
   const actor = {
     id: user?.id ?? 'current-user',
@@ -457,9 +559,12 @@ export default function FoundItemsMapPage() {
 
   const selectedItem =
     nearbyItems.find((entry) => entry.item.id === selectedItemId)?.item ?? nearbyItems[0]?.item ?? null
+  const selectedItemForPanel = detailedSelectedItem ?? selectedItem
   const selectedDistanceKm = selectedItem ? readDistanceKm(selectedItem, liveLocation) : null
   const selectedItemOwnPost = selectedItem ? selectedItem.poster.id === user?.id : false
-  const selectedItemClaimed = selectedItem ? claimedItemIds.includes(selectedItem.id) : false
+  const selectedItemClaimed = Boolean(
+    viewerClaim && (viewerClaim.status === 'pending' || viewerClaim.status === 'acknowledged'),
+  )
   const selectedPoint = selectedItem ? toGeoPoint(selectedItem) : null
   const focusPoint =
     focusMode === 'selected' && selectedPoint
@@ -476,23 +581,54 @@ export default function FoundItemsMapPage() {
     }
   }, [selectedItem])
 
-  const handleClaim = async () => {
+  const handleClaim = async (message?: string) => {
     if (!selectedItem || selectedItemOwnPost || selectedItem.status !== 'available') {
       return
     }
 
     try {
       setIsClaimingId(selectedItem.id)
-      await claimFoundItem(selectedItem.id, actor)
-      setClaimedItemIds((currentIds) =>
-        currentIds.includes(selectedItem.id) ? currentIds : [...currentIds, selectedItem.id],
-      )
+      await claimFoundItem(selectedItem.id, actor, message)
       success('Interest sent', 'The poster can now see your request.')
-      await loadBoard()
+      await Promise.all([loadBoard(), refreshDetails()])
     } catch {
       error('Unable to send request', 'Please try again in a moment.')
     } finally {
       setIsClaimingId(null)
+    }
+  }
+
+  const handleCancelClaim = async () => {
+    if (!selectedItem) {
+      return
+    }
+
+    try {
+      setIsCancellingId(selectedItem.id)
+      await cancelFoundItemClaim(selectedItem.id, user?.id)
+      success('Request cancelled', 'This spot is back on your board as available.')
+      await Promise.all([loadBoard(), refreshDetails()])
+    } catch {
+      error('Unable to cancel request', 'Please try again in a moment.')
+    } finally {
+      setIsCancellingId(null)
+    }
+  }
+
+  const handleReport = async (reason: string, details?: string) => {
+    if (!selectedItem) {
+      return
+    }
+
+    try {
+      setIsReportingId(selectedItem.id)
+      await reportFoundItem(selectedItem.id, reason, details)
+      success('Report sent', 'We have flagged this spot for review.')
+      await Promise.all([loadBoard(), refreshDetails()])
+    } catch {
+      error('Unable to send report', 'Please try again in a moment.')
+    } finally {
+      setIsReportingId(null)
     }
   }
 
@@ -623,14 +759,24 @@ export default function FoundItemsMapPage() {
 
         <aside className="relative z-10 hidden rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm md:block lg:p-5">
           <SelectedItemDetails
-            item={selectedItem}
+            item={selectedItemForPanel}
             distanceKm={selectedDistanceKm}
             isOwnPost={selectedItemOwnPost}
             isLocating={isLocating}
             isClaiming={Boolean(selectedItem && isClaimingId === selectedItem.id)}
-            isClaimed={selectedItemClaimed}
-            onClaim={() => {
-              void handleClaim()
+            isLoadingDetails={isLoadingDetails}
+            isCancelling={Boolean(selectedItem && isCancellingId === selectedItem.id)}
+            isReporting={Boolean(selectedItem && isReportingId === selectedItem.id)}
+            viewerHasActiveClaim={selectedItemClaimed}
+            detailsError={detailsError}
+            onClaim={(message) => {
+              void handleClaim(message)
+            }}
+            onCancelClaim={() => {
+              void handleCancelClaim()
+            }}
+            onReport={(reason, details) => {
+              void handleReport(reason, details)
             }}
           />
         </aside>
@@ -643,14 +789,24 @@ export default function FoundItemsMapPage() {
         contentClassName="max-h-[calc(100vh-3.5rem)] overflow-y-auto p-4"
       >
         <SelectedItemDetails
-          item={selectedItem}
+          item={selectedItemForPanel}
           distanceKm={selectedDistanceKm}
           isOwnPost={selectedItemOwnPost}
           isLocating={isLocating}
           isClaiming={Boolean(selectedItem && isClaimingId === selectedItem.id)}
-          isClaimed={selectedItemClaimed}
-          onClaim={() => {
-            void handleClaim()
+          isLoadingDetails={isLoadingDetails}
+          isCancelling={Boolean(selectedItem && isCancellingId === selectedItem.id)}
+          isReporting={Boolean(selectedItem && isReportingId === selectedItem.id)}
+          viewerHasActiveClaim={selectedItemClaimed}
+          detailsError={detailsError}
+          onClaim={(message) => {
+            void handleClaim(message)
+          }}
+          onCancelClaim={() => {
+            void handleCancelClaim()
+          }}
+          onReport={(reason, details) => {
+            void handleReport(reason, details)
           }}
         />
       </Modal>

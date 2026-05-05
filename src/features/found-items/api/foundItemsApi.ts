@@ -252,7 +252,7 @@ export async function fetchFoundItems(
 export async function fetchFoundItemById(
   id: string,
   _viewerId?: string,
-): Promise<{ item: FoundItem; claims: FoundItemClaim[] }> {
+): Promise<{ item: FoundItem; claims: FoundItemClaim[]; viewerClaim: FoundItemClaim | null }> {
   const response = await apiRequest<unknown>(`/found-items/${encodeURIComponent(id.trim())}`)
   const record = asRecord(unwrapApiData<unknown>(response))
 
@@ -263,6 +263,7 @@ export async function fetchFoundItemById(
           .map((entry) => normalizeFoundItemClaim(entry))
           .filter((entry): entry is FoundItemClaim => entry !== null)
       : [],
+    viewerClaim: normalizeFoundItemClaim(record?.viewerClaim),
   }
 }
 

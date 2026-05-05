@@ -5,6 +5,7 @@ import type { FoundItem, FoundItemClaim } from '../types'
 interface UseFoundItemDetailsResult {
   readonly item: FoundItem | null
   readonly claims: FoundItemClaim[]
+  readonly viewerClaim: FoundItemClaim | null
   readonly isLoading: boolean
   readonly error: string | null
   readonly refresh: () => Promise<void>
@@ -16,6 +17,7 @@ export function useFoundItemDetails(
 ): UseFoundItemDetailsResult {
   const [item, setItem] = useState<FoundItem | null>(null)
   const [claims, setClaims] = useState<FoundItemClaim[]>([])
+  const [viewerClaim, setViewerClaim] = useState<FoundItemClaim | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -23,6 +25,7 @@ export function useFoundItemDetails(
     if (!itemId) {
       setItem(null)
       setClaims([])
+      setViewerClaim(null)
       return
     }
 
@@ -32,6 +35,7 @@ export function useFoundItemDetails(
       const response = await fetchFoundItemById(itemId, viewerId)
       setItem(response.item)
       setClaims(response.claims)
+      setViewerClaim(response.viewerClaim)
     } catch {
       setError('Unable to load that item right now.')
     } finally {
@@ -46,6 +50,7 @@ export function useFoundItemDetails(
   return {
     item,
     claims,
+    viewerClaim,
     isLoading,
     error,
     refresh,

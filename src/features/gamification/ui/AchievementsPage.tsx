@@ -23,6 +23,26 @@ function formatDate(value: string): string {
       })
 }
 
+function formatFoundItemStatus(status: string): string {
+  return status.replace(/_/g, ' ')
+}
+
+function statusPillClassName(status: string): string {
+  if (status === 'picked_up') {
+    return 'bg-emerald-50 text-emerald-700'
+  }
+
+  if (status === 'claimed') {
+    return 'bg-amber-50 text-amber-700'
+  }
+
+  if (status === 'reported') {
+    return 'bg-rose-50 text-rose-700'
+  }
+
+  return 'bg-slate-100 text-slate-600'
+}
+
 interface ImpactMetricCardProps {
   readonly title: string
   readonly value: ReactNode
@@ -78,6 +98,7 @@ export default function AchievementsPage() {
   const {
     summary: foundItemImpact,
     isLoading: isLoadingFoundItemImpact,
+    error: foundItemImpactError,
   } = useFoundItemImpact()
   const [transactions, setTransactions] = useState<PointTransaction[]>([])
 
@@ -178,6 +199,108 @@ export default function AchievementsPage() {
 
         {progressError ? <p className="text-sm text-rose-600">{progressError}</p> : null}
         {streakError ? <p className="text-sm text-rose-600">{streakError}</p> : null}
+      </section>
+
+      <section className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-semibold text-slate-900">Found-item impact</h2>
+            <p className="text-sm text-slate-500">Live totals from the spots you have posted.</p>
+          </div>
+          {foundItemImpact?.topArea ? (
+            <span className="rounded-full bg-[#F4F9E8] px-3 py-1 text-sm font-medium text-[#55741D]">
+              Top area {foundItemImpact.topArea}
+            </span>
+          ) : null}
+        </div>
+
+        {foundItemImpactError ? <p className="text-sm text-rose-600">{foundItemImpactError}</p> : null}
+        {isLoadingFoundItemImpact ? <p className="text-sm text-slate-500">Loading found-item impact...</p> : null}
+
+        {!isLoadingFoundItemImpact && foundItemImpact ? (
+          <>
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Spots posted</p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{foundItemImpact.spotsPosted}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Rescued</p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{foundItemImpact.rescuedSpots}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">CO2e saved</p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{foundItemImpact.totalCo2eKg}</p>
+                <p className="mt-1 text-sm text-slate-500">kg CO2e</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Impact score</p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{foundItemImpact.totalImpactPoints}</p>
+                <p className="mt-1 text-sm text-slate-500">community pts</p>
+              </div>
+            </div>
+
+            <div className="grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)]">
+              <div className="rounded-2xl border border-slate-200 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="font-semibold text-slate-900">Recent spots</h3>
+                    <p className="text-sm text-slate-500">Latest found-item activity on your board.</p>
+                  </div>
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  {foundItemImpact.recentPosts.length > 0 ? (
+                    foundItemImpact.recentPosts.map((post) => (
+                      <div key={post.id} className="rounded-2xl bg-slate-50 px-4 py-4">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <p className="font-semibold text-slate-900">{post.title}</p>
+                            <p className="mt-1 text-sm text-slate-500">
+                              {post.postcode} · {formatDate(post.postedAt)}
+                            </p>
+                          </div>
+                          <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusPillClassName(post.status)}`}>
+                            {formatFoundItemStatus(post.status)}
+                          </span>
+                        </div>
+
+                        <div className="mt-3 flex flex-wrap gap-4 text-sm text-slate-500">
+                          <span>{post.estimatedCo2eKg} kg CO2e</span>
+                          <span>{post.impactPoints} pts</span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-500">No found-item activity yet.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-[linear-gradient(135deg,#F8FCEB_0%,#F4F9E8_100%)] p-4">
+                <h3 className="font-semibold text-slate-900">Area momentum</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  {foundItemImpact.userArea
+                    ? `Your found-item activity is currently mapped to ${foundItemImpact.userArea}.`
+                    : 'Add a postcode to unlock area ranking on the community board.'}
+                </p>
+
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl bg-white px-4 py-4 shadow-sm">
+                    <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Live spots</p>
+                    <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{foundItemImpact.liveSpots}</p>
+                  </div>
+                  <div className="rounded-2xl bg-white px-4 py-4 shadow-sm">
+                    <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Area rank</p>
+                    <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
+                      {foundItemImpact.currentMonthAreaRank ? `#${foundItemImpact.currentMonthAreaRank}` : '—'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : null}
       </section>
 
       <section className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">

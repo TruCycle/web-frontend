@@ -368,8 +368,6 @@ export default function PostFoundItemPage() {
 
   const title = itemName.trim() || categoryMeta[category].suggestedTitle
   const co2e = useMemo(() => estimateCo2e(category, safeWeightKg), [category, safeWeightKg])
-  const pointsNow = Math.max(10, Math.round(co2e * 0.3))
-  const rescueBonus = Math.max(18, Math.round(co2e * 0.7))
   const cameraStatusLabel = locationError
     ? 'Location needed'
     : isLocating
@@ -516,6 +514,8 @@ export default function PostFoundItemPage() {
   if (step === 'success') {
     const postedTitle = createdItem?.title ?? title
     const postedPostcode = createdItem?.location.postcode ?? defaultPostcode
+    const postedEstimatedCo2eKg = createdItem?.estimatedCo2eKg ?? co2e
+    const postedImpactPoints = createdItem?.impactPoints ?? 0
 
     return (
       <div className="min-h-[100dvh] bg-[linear-gradient(180deg,#F4F9E8_0%,#F8FBF0_100%)] px-4 pb-10 pt-16 text-center text-slate-900">
@@ -537,12 +537,36 @@ export default function PostFoundItemPage() {
             Spot posted
           </p>
           <h1 className="mt-3 text-[2.4rem] font-bold leading-[1.02] tracking-[-0.03em] text-[#111611]">
-            You just earned
-            <span className="block text-[#4B7B1D]">+{pointsNow} points</span>
+            Board impact confirmed
           </h1>
-          <p className="mt-4 max-w-[300px] text-base leading-7 text-slate-700">
-            {postedTitle} is now live in {postedPostcode}. Another {rescueBonus} points are waiting
-            once someone rescues it.
+          <p className="mt-4 max-w-[320px] text-base leading-7 text-slate-700">
+            {postedTitle} is now live in {postedPostcode}. It adds verified impact to your local
+            board and feeds into My Impact.
+          </p>
+
+          <div className="mt-10 grid w-full grid-cols-2 gap-3 text-left">
+            <div className="rounded-[24px] bg-white px-4 py-4 shadow-sm">
+              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                Impact score
+              </p>
+              <p className="mt-2 text-[2rem] font-bold leading-none tracking-[-0.04em] text-[#3A7618]">
+                {postedImpactPoints}
+              </p>
+              <p className="mt-1 text-sm text-slate-500">community pts</p>
+            </div>
+            <div className="rounded-[24px] bg-white px-4 py-4 shadow-sm">
+              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                CO2e saved
+              </p>
+              <p className="mt-2 text-[2rem] font-bold leading-none tracking-[-0.04em] text-[#111611]">
+                {postedEstimatedCo2eKg}
+              </p>
+              <p className="mt-1 text-sm text-slate-500">kg CO2e</p>
+            </div>
+          </div>
+
+          <p className="mt-5 max-w-[320px] text-sm leading-6 text-slate-500">
+            Posting also counts toward your badges, streaks and community board standing.
           </p>
 
           <div className="mt-16 w-full space-y-4">
@@ -756,33 +780,20 @@ export default function PostFoundItemPage() {
 
             <div className="rounded-[24px] bg-[linear-gradient(90deg,#F4F8EA_0%,#EEF6DE_100%)] px-5 py-5 text-slate-950">
               <p className="text-[0.82rem] font-bold uppercase tracking-[0.18em] text-[#55741D]">
-                You&apos;re about to save
+                Draft estimate
               </p>
               <div className="mt-4 flex items-end gap-2">
                 <span className="text-[3.35rem] font-bold leading-none tracking-[-0.05em]">{co2e}</span>
                 <span className="pb-2 text-3xl text-slate-700">kg CO2e</span>
               </div>
-              <p className="mt-2 text-lg text-slate-700">from London landfill</p>
+              <p className="mt-2 text-lg text-slate-700">based on your draft title, category and weight</p>
 
               <div className="mt-5 h-px bg-slate-300/70" />
 
-              <div className="mt-4 flex items-end justify-between gap-4">
-                <div>
-                  <p className="text-base text-slate-500">Now</p>
-                  <p className="text-[2.1rem] font-bold leading-none tracking-[-0.04em] text-[#3A7618]">
-                    +{pointsNow} pts
-                  </p>
-                  <p className="text-sm text-slate-500">spot posted (30%)</p>
-                </div>
-
-                <div className="text-right">
-                  <p className="text-base text-slate-500">If rescued</p>
-                  <p className="text-[2.1rem] font-bold leading-none tracking-[-0.04em] text-[#3A7618]">
-                    +{rescueBonus} pts
-                  </p>
-                  <p className="text-sm text-slate-500">bonus (70%)</p>
-                </div>
-              </div>
+              <p className="mt-4 text-sm leading-6 text-slate-600">
+                Final impact score and live board values are confirmed after the backend matches this
+                post to the carbon catalog.
+              </p>
             </div>
 
             <p className="pt-2 text-center text-sm leading-6 text-slate-500">

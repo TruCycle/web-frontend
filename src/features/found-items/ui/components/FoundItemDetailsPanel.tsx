@@ -1,3 +1,4 @@
+import { useEffect, useState, type ReactNode } from 'react'
 import { Clock3, Flag, MapPin, Scale, Sparkles, Users } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
 import { Modal } from '@/shared/ui/modal/Modal'
@@ -13,7 +14,7 @@ function StatTile({
 }: {
   readonly label: string
   readonly value: string
-  readonly icon: React.ReactNode
+  readonly icon: ReactNode
 }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5">
@@ -35,10 +36,15 @@ interface FoundItemDetailsPanelProps {
   readonly onClose: () => void
   readonly item: FoundItem | null
   readonly claims: FoundItemClaim[]
+  readonly viewerClaim?: FoundItemClaim | null
   readonly currentUserId?: string
   readonly isLoading?: boolean
   readonly isClaiming?: boolean
-  readonly onClaim?: (itemId: string) => void
+  readonly isCancelling?: boolean
+  readonly isReporting?: boolean
+  readonly onClaim?: (itemId: string, message?: string) => void
+  readonly onCancelClaim?: (itemId: string) => void
+  readonly onReport?: (itemId: string, reason: string, details?: string) => void
 }
 
 export function FoundItemDetailsPanel({
@@ -46,11 +52,26 @@ export function FoundItemDetailsPanel({
   onClose,
   item,
   claims,
+  viewerClaim = null,
   currentUserId,
   isLoading = false,
   isClaiming = false,
+  isCancelling = false,
+  isReporting = false,
   onClaim,
+  onCancelClaim,
+  onReport,
 }: FoundItemDetailsPanelProps) {
+  const [claimMessage, setClaimMessage] = useState('')
+  const [reportReason, setReportReason] = useState('')
+  const [reportDetails, setReportDetails] = useState('')
+
+  useEffect(() => {
+    setClaimMessage(viewerClaim?.message ?? '')
+    setReportReason('')
+    setReportDetails('')
+  }, [item?.id, viewerClaim?.id, viewerClaim?.message])
+
   if (!isOpen) {
     return null
   }
@@ -59,6 +80,8 @@ export function FoundItemDetailsPanel({
   const isOwnPost = item ? currentUserId === item.poster.id : false
   const isClosed =
     item?.status === 'picked_up' || item?.status === 'expired' || item?.status === 'reported'
+  const hasActiveViewerClaim =
+    viewerClaim !== null && (viewerClaim.status === 'pending' || viewerClaim.status === 'acknowledged')
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} containerClassName="max-w-[860px]">
@@ -160,20 +183,92 @@ export function FoundItemDetailsPanel({
                 </div>
 
                 {!isOwnPost ? (
-                  <Button
-                    variant="primary"
-                    className="w-full"
-                    disabled={isClaiming || isClosed || item.status === 'claimed'}
-                    onClick={() => {
-                      onClaim?.(item.id)
-                    }}
-                  >
-                    {item.status === 'claimed'
-                      ? 'Interest sent'
-                      : isClaiming
-                        ? 'Sending...'
-                        : 'I’ll Pick This Up'}
-                  </Button>
+                  <div className="space-y-4 rounded-[24px] border border-slate-200 bg-[#F8FAFC] p-4">
+                    <div>
+                      <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        Pickup note
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-slate-500">
+                        {hasActiveViewerClaim
+                          ? 'Your request is live. You can cancel it here while the spot is still open.'
+                          : 'Add a short note so the poster knows what you need before pickup.'}
+                      </p>
+                    </div>
+
+                    <textarea
+                      value={claimMessage}
+                      onChange={(event) => setClaimMessage(event.target.value)}
+                      disabled={hasActiveViewerClaim}
+                      className="min-h-[104px] w-full rounded-[18px] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA] disabled:cursor-not-allowed disabled:bg-slate-100"
+                      placeholder="Interested in picking this up today. Happy to message before I head over."
+                    />
+
+                    {!hasActiveViewerClaim ? (
+                      <Button
+                        variant="primary"
+                        className="w-full"
+                        disabled={isClaiming || isClosed || item.status === 'claimed'}
+                        onClick={() => {
+                          onClaim?.(item.id, claimMessage)
+                        }}
+                      >
+                        {item.status === 'claimed'
+                          ? 'Interest sent'
+                          : isClaiming
+                            ? 'Sending...'
+                            : 'Send pickup request'}
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="secondary"
+                        className="w-full"
+                        disabled={isCancelling || isClosed}
+                        onClick={() => {
+                          onCancelClaim?.(item.id)
+                        }}
+                      >
+                        {isCancelling ? 'Cancelling...' : 'Cancel request'}
+                      </Button>
+                    )}
+
+                    {item.status !== 'reported' ? (
+                      <div className="space-y-3 rounded-[20px] border border-slate-200 bg-white p-4">
+                        <div>
+                          <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+                            Report this post
+                          </h3>
+                          <p className="mt-2 text-sm leading-6 text-slate-500">
+                            Flag unsafe, misleading or duplicate spots so they can be reviewed.
+                          </p>
+                        </div>
+
+                        <input
+                          value={reportReason}
+                          onChange={(event) => setReportReason(event.target.value)}
+                          className="h-12 w-full rounded-[16px] border border-slate-200 px-4 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
+                          placeholder="Reason for reporting"
+                        />
+
+                        <textarea
+                          value={reportDetails}
+                          onChange={(event) => setReportDetails(event.target.value)}
+                          className="min-h-[96px] w-full rounded-[16px] border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
+                          placeholder="Extra details (optional)"
+                        />
+
+                        <Button
+                          variant="danger"
+                          className="w-full"
+                          disabled={isReporting || !reportReason.trim() || isClosed}
+                          onClick={() => {
+                            onReport?.(item.id, reportReason, reportDetails)
+                          }}
+                        >
+                          {isReporting ? 'Sending report...' : 'Send report'}
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
                 ) : null}
               </div>
             </div>
