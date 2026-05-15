@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Sparkles } from 'lucide-react'
 import { useCommunityBoard } from '../hooks/useCommunityBoard'
 import {
   communityBoardWindows,
@@ -32,55 +31,55 @@ export default function CommunityBoardPage() {
             </p>
           </div>
 
-          <div className="inline-flex flex-wrap gap-2 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
-            {([
-              { key: 'community', label: 'Community' },
-              { key: 'individual', label: 'Individual' },
-            ] as const).map((tab) => {
-              const isActive = tab.key === activeTab
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  aria-pressed={isActive}
-                  onClick={() => setActiveTab(tab.key)}
-                  className={
-                    isActive
-                      ? 'rounded-full bg-tc-app-primary px-4 py-2 text-sm font-semibold text-tc-app-text shadow-sm transition'
-                      : 'rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100'
-                  }
-                >
-                  {tab.label}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {activeTab === 'community' ? (
-          <div className="flex justify-end">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="inline-flex flex-wrap gap-2 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
-              {communityBoardWindows.map((entry) => {
-                const isActive = entry.key === activeWindow
+              {([
+                { key: 'community', label: 'Community' },
+                { key: 'individual', label: 'Individual' },
+              ] as const).map((tab) => {
+                const isActive = tab.key === activeTab
                 return (
                   <button
-                    key={entry.key}
+                    key={tab.key}
                     type="button"
                     aria-pressed={isActive}
-                    onClick={() => setActiveWindow(entry.key)}
+                    onClick={() => setActiveTab(tab.key)}
                     className={
                       isActive
                         ? 'rounded-full bg-tc-app-primary px-4 py-2 text-sm font-semibold text-tc-app-text shadow-sm transition'
                         : 'rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100'
                     }
                   >
-                    {entry.label}
+                    {tab.label}
                   </button>
                 )
               })}
             </div>
+
+            {activeTab === 'community' ? (
+              <div className="inline-flex flex-wrap gap-2 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
+                {communityBoardWindows.map((entry) => {
+                  const isActive = entry.key === activeWindow
+                  return (
+                    <button
+                      key={entry.key}
+                      type="button"
+                      aria-pressed={isActive}
+                      onClick={() => setActiveWindow(entry.key)}
+                      className={
+                        isActive
+                          ? 'rounded-full bg-tc-app-primary px-4 py-2 text-sm font-semibold text-tc-app-text shadow-sm transition'
+                          : 'rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100'
+                      }
+                    >
+                      {entry.label}
+                    </button>
+                  )
+                })}
+              </div>
+            ) : null}
           </div>
-        ) : null}
+        </div>
       </div>
 
       {activeTab === 'individual' ? <IndividualLeaderboard /> : null}
@@ -114,34 +113,6 @@ export default function CommunityBoardPage() {
           <div className="mb-5">
             <h2 className="text-xl font-semibold text-slate-900">Top spotters in {localArea}</h2>
             <p className="text-sm text-slate-500">Impact score {activeDescriptor}</p>
-          </div>
-
-          <div className="mb-4 rounded-2xl bg-[linear-gradient(135deg,#F4F9E8_0%,#EEF6DE_100%)] px-4 py-4">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#55741D]">Your standing</p>
-                <p className="mt-2 text-sm text-slate-600">
-                  {board?.currentUser.areaRank ? `Area rank #${board.currentUser.areaRank}` : 'Rank appears once activity lands in your area.'}
-                </p>
-              </div>
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 text-[#55741D] shadow-sm">
-                <Sparkles size={18} />
-              </span>
-            </div>
-            <div className="mt-4 flex items-end justify-between gap-4">
-              <div>
-                <p className="text-3xl font-semibold tracking-[-0.03em] text-slate-950">
-                  {board?.currentUser.impactPoints ?? 0}
-                </p>
-                <p className="text-sm text-slate-500">impact pts</p>
-              </div>
-              <div className="text-right">
-                <p className="text-3xl font-semibold tracking-[-0.03em] text-slate-950">
-                  {board?.currentUser.spotsPosted ?? 0}
-                </p>
-                <p className="text-sm text-slate-500">spots posted</p>
-              </div>
-            </div>
           </div>
 
           <div className="space-y-1.5">

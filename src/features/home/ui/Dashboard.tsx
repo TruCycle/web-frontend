@@ -29,12 +29,9 @@ import { useBadges } from '@/features/gamification/hooks/useBadges'
 import { LevelBadge } from '@/features/gamification/ui/components/LevelBadge'
 import { ProgressBar } from '@/features/gamification/ui/components/ProgressBar'
 import { StreakIndicator } from '@/features/gamification/ui/components/StreakIndicator'
-import { useFoundItems } from '@/features/found-items/hooks/useFoundItems'
-import { FoundItemStatusBadge } from '@/features/found-items/ui/components/FoundItemStatusBadge'
 import { RescueTicker } from '@/features/gamification/ui/components/RescueTicker'
 import { useIntentSwitch } from '@/shared/hooks/useIntentSwitch'
 import { Camera, PlusCircle, Truck } from 'lucide-react'
-import { formatRelativeTime } from '@/shared/utils/formatRelativeTime'
 
 function statColor(index: number): string {
   if (index === 0) return 'bg-tc-app-primary/10'
@@ -93,14 +90,7 @@ export default function Dashboard() {
     earnedBadges,
     isLoading: isLoadingBadges,
   } = useBadges('earned')
-  const {
-    items: foundItems,
-    isLoading: isLoadingFoundItems,
-  } = useFoundItems({
-    status: 'available',
-    sortBy: 'nearest',
-    maxDistance: 5,
-  })
+
 
   const handleClaimItem = async (itemId: string) => {
     try {
@@ -347,69 +337,6 @@ export default function Dashboard() {
             />
           </section>
 
-          <section className="space-y-4 rounded-xl bg-white p-5">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-semibold text-tc-app-secondary">Found Nearby</h2>
-                <p className="text-sm text-slate-500">Found items near you</p>
-              </div>
-              <Link
-                to="/found-items"
-                className="inline-flex items-center gap-1 text-sm font-medium text-tc-app-secondary transition hover:underline"
-              >
-                Open <ChevronRight size={16} />
-              </Link>
-            </div>
-
-            <div className="space-y-3">
-              {isLoadingFoundItems ? <p className="text-sm text-slate-500">Loading board...</p> : null}
-              {!isLoadingFoundItems
-                ? foundItems.slice(0, 2).map((item) => (
-                    <div key={item.id} className="flex gap-3 rounded-xl border border-slate-200 p-3">
-                      {item.images[0] ? (
-                        <img
-                          src={item.images[0].thumbnailUrl || item.images[0].url}
-                          alt={item.title}
-                          className="h-20 w-20 rounded-xl object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-slate-100 text-xs text-slate-500">
-                          No image
-                        </div>
-                      )}
-                      <div className="min-w-0 flex-1 space-y-2">
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <p className="font-semibold text-slate-900">{item.title}</p>
-                            <p className="text-sm text-slate-500">{item.location.neighborhood || item.location.postcode}</p>
-                          </div>
-                          <FoundItemStatusBadge status={item.status} />
-                        </div>
-                        <div className="flex items-center justify-between gap-3 text-xs text-slate-400">
-                          <span>{formatRelativeTime(item.postedAt)}</span>
-                          <span>{item.location.approximateDistance?.toFixed(1) ?? '-'} km</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                : null}
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <Link
-                to="/found-items/post"
-                className="inline-flex items-center rounded-xl bg-tc-action-primary px-4 py-3 text-sm font-medium text-tc-action-primaryText transition hover:bg-tc-action-primaryHover"
-              >
-                Post Item
-              </Link>
-              <Link
-                to="/found-items/my-posts"
-                className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-              >
-                My Posts
-              </Link>
-            </div>
-          </section>
         </div>
       ) : null}
 
