@@ -4,6 +4,10 @@ export interface UserProgress {
   readonly currentLevel: number
   readonly pointsToNextLevel: number
   readonly levelProgressPercent: number
+  readonly tier?: string
+  readonly nextTier?: string | null
+  readonly pointsToNextTier?: number
+  readonly tierProgressPercent?: number
 }
 
 export interface Streak {
@@ -14,6 +18,7 @@ export interface Streak {
   readonly streakType: 'daily' | 'weekly'
   readonly isActive: boolean
   readonly expiresAt: string | null
+  readonly bonusMultiplier?: number
 }
 
 export type BadgeCategory =
@@ -109,4 +114,23 @@ export interface FoundItemImpactSummary {
   readonly userArea: string | null
   readonly currentMonthAreaRank: number | null
   readonly recentPosts: FoundItemImpactRecentPost[]
+}
+
+export interface IndividualLeaderboardEntry {
+  readonly rank: number
+  readonly userId: string
+  readonly name: string
+  readonly postcode: string | null
+  readonly totalPoints: number
+  readonly currentLevel: number
+  readonly tier: string
+  readonly isCurrentUser: boolean
+}
+
+export interface IndividualLeaderboard {
+  readonly entries: IndividualLeaderboardEntry[]
+  readonly total: number
+  readonly limit: number
+  readonly offset: number
+  readonly currentUser: IndividualLeaderboardEntry | null
 }

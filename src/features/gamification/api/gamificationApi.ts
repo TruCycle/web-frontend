@@ -8,6 +8,8 @@ import type {
   CommunityBoardSnapshot,
   CommunityBoardWindow,
   FoundItemImpactSummary,
+  IndividualLeaderboard,
+  IndividualLeaderboardEntry,
   PointTransaction,
   Streak,
   UserBadge,
@@ -67,6 +69,10 @@ function normalizeUserProgress(value: unknown): UserProgress | null {
     currentLevel: readNumber(record.currentLevel) ?? 1,
     pointsToNextLevel: readNumber(record.pointsToNextLevel) ?? 0,
     levelProgressPercent: readNumber(record.levelProgressPercent) ?? 0,
+    tier: readString(record.tier),
+    nextTier: readString(record.nextTier) ?? null,
+    pointsToNextTier: readNumber(record.pointsToNextTier) ?? 0,
+    tierProgressPercent: readNumber(record.tierProgressPercent) ?? 0,
   }
 }
 
@@ -90,6 +96,7 @@ function normalizeStreak(value: unknown): Streak | null {
     streakType,
     isActive: Boolean(record.isActive),
     expiresAt: readString(record.expiresAt),
+    bonusMultiplier: readNumber(record.bonusMultiplier) ?? 1,
   }
 }
 
