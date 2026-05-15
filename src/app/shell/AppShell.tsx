@@ -12,8 +12,6 @@ import {
   User,
   LogOut,
   X,
-  Map as MapIcon,
-  MapPin,
   Trophy,
   Camera,
   Compass,
@@ -23,6 +21,7 @@ import { useNotifications } from '@/features/notifications/hooks/useNotification
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import logo from '@/assets/logo.svg'
 import { useUserRole } from '@/shared/context/useUserRole'
+import { IntentFab } from '@/shared/ui/fab/IntentFab'
 
 const DashboardIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -75,7 +74,7 @@ export function AppShell({ children }: AppShellProps) {
 
     setRole(nextRole)
     if (nextRole === 'spotter') {
-      navigate('/nearby')
+      navigate('/map')
     } else {
       navigate('/dashboard')
     }
@@ -204,18 +203,16 @@ export function AppShell({ children }: AppShellProps) {
           <DashboardIcon />
           <span>Dashboard</span>
         </NavLink>
-        <NavLink className={navLinkClassName} to="/found-items" onClick={onSidebarNavigate}>
-          <MapPin size={20} />
-          <span>Found Items</span>
-        </NavLink>
         <NavLink className={navLinkClassName} to="/map" onClick={onSidebarNavigate}>
-          <MapIcon size={20} />
-          <span>Map</span>
+          <Compass size={20} />
+          <span>Nearby</span>
         </NavLink>
-        <NavLink className={navLinkClassName} to="/impact" onClick={onSidebarNavigate}>
-          <Trophy size={20} />
-          <span>My Impact</span>
-        </NavLink>
+        {role !== 'spotter' ? (
+          <NavLink className={navLinkClassName} to="/impact" onClick={onSidebarNavigate}>
+            <Trophy size={20} />
+            <span>My Impact</span>
+          </NavLink>
+        ) : null}
       </div>
 
       <div className="-mx-4 my-4 h-px bg-tc-shell-divider" />
@@ -227,13 +224,13 @@ export function AppShell({ children }: AppShellProps) {
               <Camera size={20} />
               <span>Spot an item</span>
             </NavLink>
-            <NavLink className={navLinkClassName} to="/nearby" onClick={onSidebarNavigate}>
-              <Compass size={20} />
-              <span>Nearby</span>
-            </NavLink>
             <NavLink className={navLinkClassName} to="/found-items/my-posts" onClick={onSidebarNavigate}>
               <FileText size={20} />
               <span>My Spots</span>
+            </NavLink>
+            <NavLink className={navLinkClassName} to="/impact" onClick={onSidebarNavigate}>
+              <Trophy size={20} />
+              <span>My Impact</span>
             </NavLink>
           </>
         ) : role === 'collector' ? (
@@ -259,28 +256,30 @@ export function AppShell({ children }: AppShellProps) {
             </NavLink>
           </>
         )}
-        <NavLink className={navLinkClassName} to="/messages" onClick={onSidebarNavigate}>
-          {({ isActive }) => (
-            <>
-              <div className="relative flex items-center justify-center">
-                <MessageIcon />
-                {unreadMessagesCount > 0 && (
-                  <span
-                    className={classNames(
-                      'absolute -right-1.5 top-0 inline-flex h-4 min-w-4 items-center justify-center rounded-full border-[1.5px] px-1 text-[0.55rem] font-bold leading-none',
-                      isActive
-                        ? 'border-tc-shell-active bg-tc-shell-accent text-tc-shell-roleActiveText'
-                        : 'border-tc-shell-bg bg-tc-shell-notify text-white',
-                    )}
-                  >
-                    {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
-                  </span>
-                )}
-              </div>
-              <span>Messages</span>
-            </>
-          )}
-        </NavLink>
+        {role !== 'spotter' ? (
+          <NavLink className={navLinkClassName} to="/messages" onClick={onSidebarNavigate}>
+            {({ isActive }) => (
+              <>
+                <div className="relative flex items-center justify-center">
+                  <MessageIcon />
+                  {unreadMessagesCount > 0 && (
+                    <span
+                      className={classNames(
+                        'absolute -right-1.5 top-0 inline-flex h-4 min-w-4 items-center justify-center rounded-full border-[1.5px] px-1 text-[0.55rem] font-bold leading-none',
+                        isActive
+                          ? 'border-tc-shell-active bg-tc-shell-accent text-tc-shell-roleActiveText'
+                          : 'border-tc-shell-bg bg-tc-shell-notify text-white',
+                      )}
+                    >
+                      {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                    </span>
+                  )}
+                </div>
+                <span>Messages</span>
+              </>
+            )}
+          </NavLink>
+        ) : null}
       </div>
 
       <div className="-mx-4 my-4 h-px bg-tc-shell-divider" />
@@ -523,6 +522,7 @@ export function AppShell({ children }: AppShellProps) {
           {children}
         </div>
       </main>
+      <IntentFab />
     </div>
   )
 }

@@ -58,7 +58,7 @@ function intentToCta(
       ? '/found-items/post'
       : target === 'donor'
       ? '/listings'
-      : '/nearby'
+      : '/map'
     : '/signup'
 
   if (target === 'spotter') return { to: baseTo, label: 'Spot an item' }

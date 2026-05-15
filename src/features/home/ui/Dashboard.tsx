@@ -30,8 +30,6 @@ import { LevelBadge } from '@/features/gamification/ui/components/LevelBadge'
 import { ProgressBar } from '@/features/gamification/ui/components/ProgressBar'
 import { StreakIndicator } from '@/features/gamification/ui/components/StreakIndicator'
 import { RescueTicker } from '@/features/gamification/ui/components/RescueTicker'
-import { useIntentSwitch } from '@/shared/hooks/useIntentSwitch'
-import { Camera, PlusCircle, Truck } from 'lucide-react'
 
 function statColor(index: number): string {
   if (index === 0) return 'bg-tc-app-primary/10'
@@ -45,7 +43,6 @@ export default function Dashboard() {
   const { success, error } = useToast()
   const { user } = useAuthSession()
   const { role } = useUserRole()
-  const { runWithRole } = useIntentSwitch()
   const isDonorMode = role === 'donor'
   const showStats = location.pathname === '/dashboard'
   const [isSuccessOpen, setIsSuccessOpen] = useState(false)
@@ -178,48 +175,6 @@ export default function Dashboard() {
         {isDonorMode ? (
           <NewItemButton onClick={() => setIsListItemDialogOpen(true)} />
         ) : null}
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-3">
-        <button
-          type="button"
-          onClick={() => runWithRole('spotter', { path: '/found-items/post' })}
-          className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-[linear-gradient(135deg,#F4F9E8_0%,#EEF6DE_100%)] px-4 py-4 text-left shadow-sm transition hover:shadow-md"
-        >
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-emerald-700">
-            <Camera size={20} />
-          </span>
-          <span className="flex-1">
-            <span className="block text-sm font-semibold text-emerald-900">Spot</span>
-            <span className="block text-xs text-emerald-800/80">Snap a found item nearby</span>
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => runWithRole('donor', { path: '/listings' })}
-          className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-[linear-gradient(135deg,#FFF7DA_0%,#FFEFB8_100%)] px-4 py-4 text-left shadow-sm transition hover:shadow-md"
-        >
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-amber-700">
-            <PlusCircle size={20} />
-          </span>
-          <span className="flex-1">
-            <span className="block text-sm font-semibold text-amber-900">List</span>
-            <span className="block text-xs text-amber-800/80">Donate something you no longer need</span>
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => runWithRole('collector', { path: '/nearby' })}
-          className="flex items-center gap-3 rounded-2xl border border-sky-200 bg-[linear-gradient(135deg,#E6F4FB_0%,#D6ECF8_100%)] px-4 py-4 text-left shadow-sm transition hover:shadow-md"
-        >
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-sky-700">
-            <Truck size={20} />
-          </span>
-          <span className="flex-1">
-            <span className="block text-sm font-semibold text-sky-900">Rescue</span>
-            <span className="block text-xs text-sky-800/80">See nearby pickups ready to collect</span>
-          </span>
-        </button>
       </div>
 
       {showStats ? (

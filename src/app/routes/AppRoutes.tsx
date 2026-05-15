@@ -36,7 +36,6 @@ const FoundItemsPage = lazy(() => import('@/features/found-items/ui/FoundItemsPa
 const FoundItemsMapPage = lazy(() => import('@/features/found-items/ui/FoundItemsMapPage'))
 const PostFoundItemPage = lazy(() => import('@/features/found-items/ui/PostFoundItemPage'))
 const MyFoundPostsPage = lazy(() => import('@/features/found-items/ui/MyFoundPostsPage'))
-const NearbyPage = lazy(() => import('@/features/found-items/ui/NearbyPage'))
 
 function ShellLayout() {
   return (
@@ -124,7 +123,6 @@ export function AppRoutes() {
           <Route path="/collected" element={<CollectedItemsPage />} />
           <Route path="/listings" element={<YourListingsPage />} />
           <Route path="/map" element={<FoundItemsMapPage />} />
-          <Route path="/nearby" element={<NearbyPage />} />
           <Route path="/found-items" element={<FoundItemsPage />} />
           <Route path="/found-items/post" element={<PostFoundItemPage />} />
           <Route path="/found-items/my-posts" element={<MyFoundPostsPage />} />
