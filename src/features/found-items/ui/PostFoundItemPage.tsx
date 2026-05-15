@@ -17,7 +17,10 @@ import {
 } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { createFoundItem, fetchFoundItemCatalog, uploadFoundItemImage } from '../api/foundItemsApi'
+import { classifyImageFile, warmUpClassifier } from '../lib/imageClassifier'
+import { pickConfidentHint, type CatalogHint } from '../lib/labelToCatalog'
 import { foundItemCategories } from '../types'
+import { RescueShareCard } from './components/RescueShareCard'
 import type {
   CreateFoundItemPayload,
   FoundItem,
@@ -284,6 +287,8 @@ export default function PostFoundItemPage() {
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [createdItem, setCreatedItem] = useState<FoundItem | null>(null)
+  const [smartHint, setSmartHint] = useState<CatalogHint | null>(null)
+  const [isClassifying, setIsClassifying] = useState(false)
 
   const defaultPostcode = formatPostcode(user?.postcode?.trim() || env.defaultSearchPostcode)
   const actor = useMemo(
@@ -463,6 +468,30 @@ export default function PostFoundItemPage() {
     async (file: File) => {
       setNextPreviewUrl(URL.createObjectURL(file))
 
+      // Smart pre-fill: classify in parallel with the Cloudinary upload so we
+      // don't add latency. The hint is applied to the form state when ready.
+      const classifyTask = env.enableSmartSpot
+        ? (async () => {
+            try {
+              setIsClassifying(true)
+              const predictions = await classifyImageFile(file)
+              const hint = pickConfidentHint(predictions)
+              if (hint) {
+                setSmartHint(hint)
+                setCategory(hint.category)
+                if (hint.keyword) {
+                  setItemName(hint.keyword)
+                }
+                info('Smart pre-fill applied', `Detected ${hint.displayLabel} \u2014 tap to change.`)
+              }
+            } catch {
+              // Silent: smart pre-fill is a nice-to-have, never block posting.
+            } finally {
+              setIsClassifying(false)
+            }
+          })()
+        : Promise.resolve()
+
       try {
         setIsUploadingImage(true)
         const uploadedImage = await uploadFoundItemImage(file)
@@ -472,9 +501,10 @@ export default function PostFoundItemPage() {
         error('Upload failed', 'Retake the photo or try uploading it again.')
       } finally {
         setIsUploadingImage(false)
+        await classifyTask
       }
     },
-    [error, setNextPreviewUrl],
+    [error, info, setNextPreviewUrl],
   )
 
   const resetDraft = useCallback(() => {
@@ -492,6 +522,7 @@ export default function PostFoundItemPage() {
     setCreatedItem(null)
     setPinPosition(defaultPinPosition)
     setNextPreviewUrl(null)
+    setSmartHint(null)
     requestLiveLocation()
   }, [requestLiveLocation, setNextPreviewUrl])
 
@@ -552,18 +583,73 @@ export default function PostFoundItemPage() {
     }
   }
 
+  const shareCardRef = useRef<HTMLDivElement | null>(null)
+  const [isPreparingShare, setIsPreparingShare] = useState(false)
+
   const handleShare = async () => {
     const item = createdItem
-    const shareText = `${item?.title ?? title} is now live in ${item?.location.postcode ?? defaultPostcode}. Rescue it on TruCycle.`
+    const shareTitle = item?.title ?? title
+    const sharePostcode = item?.location.postcode ?? defaultPostcode
+    const shareText = `${shareTitle} is now live in ${sharePostcode}. Rescue it on TruCycle.`
     const shareUrl = `${window.location.origin}/found-items`
 
+    setIsPreparingShare(true)
     try {
-      if (typeof navigator.share === 'function') {
-        await navigator.share({
-          title: 'TruCycle rescue spot',
+      // Try to render the branded card to a PNG file we can share.
+      let pngFile: File | null = null
+      const cardNode = shareCardRef.current
+      if (cardNode) {
+        try {
+          const { toBlob } = await import('html-to-image')
+          const blob = await toBlob(cardNode, {
+            cacheBust: true,
+            pixelRatio: 1,
+            backgroundColor: '#0F1F08',
+          })
+          if (blob) {
+            pngFile = new File([blob], `trucycle-rescue-${item?.id ?? 'spot'}.png`, {
+              type: 'image/png',
+            })
+          }
+        } catch {
+          // Fall through to text-only share.
+        }
+      }
+
+      const shareNavigator = navigator as Navigator & {
+        canShare?: (data: ShareData & { files?: File[] }) => boolean
+      }
+
+      if (
+        pngFile &&
+        typeof shareNavigator.share === 'function' &&
+        typeof shareNavigator.canShare === 'function' &&
+        shareNavigator.canShare({ files: [pngFile] })
+      ) {
+        await shareNavigator.share({
+          title: 'TruCycle rescue',
           text: shareText,
           url: shareUrl,
+          files: [pngFile],
         })
+        return
+      }
+
+      if (typeof navigator.share === 'function') {
+        await navigator.share({ title: 'TruCycle rescue spot', text: shareText, url: shareUrl })
+        return
+      }
+
+      if (pngFile && typeof window !== 'undefined') {
+        const objectUrl = URL.createObjectURL(pngFile)
+        const anchor = document.createElement('a')
+        anchor.href = objectUrl
+        anchor.download = pngFile.name
+        document.body.appendChild(anchor)
+        anchor.click()
+        document.body.removeChild(anchor)
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1500)
+        info('Card downloaded', 'Share the saved image anywhere.')
         return
       }
 
@@ -572,12 +658,13 @@ export default function PostFoundItemPage() {
         info('Copied to clipboard', 'The share message is ready to paste.')
         return
       }
+
+      info('Share ready', shareText)
     } catch {
       error('Share cancelled', 'The spot is still live on the board.')
-      return
+    } finally {
+      setIsPreparingShare(false)
     }
-
-    info('Share ready', shareText)
   }
 
   if (!isMobileViewport) {
@@ -585,6 +672,11 @@ export default function PostFoundItemPage() {
   }
 
   if (step === 'capture') {
+    if (env.enableSmartSpot) {
+      // Kick off model download while the user is framing their shot so the
+      // classifier is hot by the time they tap capture.
+      warmUpClassifier()
+    }
     return (
       <CameraCapture
         variant="immersive"
@@ -606,6 +698,23 @@ export default function PostFoundItemPage() {
 
     return (
       <div className="min-h-[100dvh] bg-[linear-gradient(180deg,#F4F9E8_0%,#F8FBF0_100%)] px-4 pb-10 pt-16 text-center text-slate-900">
+        {/* Off-screen rescue card used to render a PNG for sharing. */}
+        <div
+          aria-hidden
+          style={{ position: 'fixed', left: -10000, top: 0, pointerEvents: 'none', opacity: 0 }}
+        >
+          <RescueShareCard
+            ref={shareCardRef}
+            data={{
+              title: postedTitle,
+              imageUrl: createdItem?.images?.[0]?.url ?? uploadedImageUrl,
+              postcode: postedPostcode,
+              co2eKg: Number(postedEstimatedCo2eKg) || 0,
+              impactPoints: Number(postedImpactPoints) || 0,
+              rescuerName: actor?.name ?? 'a TruCycle spotter',
+            }}
+          />
+        </div>
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           {confettiPieces.map((piece) => (
             <span
@@ -659,13 +768,18 @@ export default function PostFoundItemPage() {
           <div className="mt-16 w-full space-y-4">
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#111611] px-5 py-4 text-base font-semibold text-white transition hover:bg-[#1B231B]"
+              disabled={isPreparingShare}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#111611] px-5 py-4 text-base font-semibold text-white transition hover:bg-[#1B231B] disabled:opacity-60"
               onClick={() => {
                 void handleShare()
               }}
             >
-              <Share2 size={16} />
-              Share this rescue
+              {isPreparingShare ? (
+                <LoaderCircle size={16} className="animate-spin" />
+              ) : (
+                <Share2 size={16} />
+              )}
+              {isPreparingShare ? 'Preparing card…' : 'Share this rescue'}
             </button>
 
             <button
@@ -780,6 +894,34 @@ export default function PostFoundItemPage() {
               </div>
               <p className="text-sm text-slate-500">Only categories with carbon catalog coverage can be posted from this flow.</p>
             </label>
+
+            {(isClassifying || smartHint) && env.enableSmartSpot ? (
+              <div className="flex items-center justify-between gap-3 rounded-[18px] border border-[#D7E8C2] bg-[#F4FAEA] px-4 py-3 text-sm text-[#3A5C12]">
+                {isClassifying ? (
+                  <span className="inline-flex items-center gap-2">
+                    <LoaderCircle size={14} className="animate-spin" />
+                    Detecting item...
+                  </span>
+                ) : smartHint ? (
+                  <>
+                    <span>
+                      <span className="font-semibold">Auto-detected:</span>{' '}
+                      {smartHint.displayLabel}
+                      <span className="ml-2 text-xs text-[#55741D]">
+                        {Math.round(smartHint.confidence * 100)}% confident
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      className="text-xs font-semibold text-[#3A5C12] underline-offset-4 hover:underline"
+                      onClick={() => setSmartHint(null)}
+                    >
+                      Change
+                    </button>
+                  </>
+                ) : null}
+              </div>
+            ) : null}
 
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-3">

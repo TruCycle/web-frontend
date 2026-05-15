@@ -12,7 +12,8 @@ import {
   fetchFoundItems,
   reportFoundItem,
 } from '../api/foundItemsApi'
-import type { FoundItem, FoundItemStatus } from '../types'
+import type { FoundItem, FoundItemCategory, FoundItemStatus } from '../types'
+import { foundItemCategories } from '../types'
 import { useFoundItemDetails } from '../hooks/useFoundItemDetails'
 import { FoundItemStatusBadge } from './components/FoundItemStatusBadge'
 import {
@@ -26,7 +27,19 @@ import { useToast } from '@/shared/ui/toast/useToast'
 import { classNames } from '@/shared/utils/classNames'
 
 type MapFilter = 'all' | 'available' | 'fly_tipped'
+type CategoryFilter = 'all' | FoundItemCategory
 type FocusMode = 'me' | 'selected'
+
+const categoryFilterMeta: Record<FoundItemCategory, string> = {
+  furniture: 'Furniture',
+  electronics: 'Electronics',
+  clothing: 'Clothing',
+  books: 'Books',
+  appliances: 'Appliances',
+  outdoor: 'Outdoor',
+  toys: 'Toys',
+  other: 'Other',
+}
 
 interface GeoPoint {
   readonly latitude: number
@@ -407,6 +420,7 @@ export default function FoundItemsMapPage() {
   const [itemsError, setItemsError] = useState<string | null>(null)
   const [selectedItemId, setSelectedItemId] = useState<string | null>(highlightId || null)
   const [mapFilter, setMapFilter] = useState<MapFilter>('all')
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
   const [isClaimingId, setIsClaimingId] = useState<string | null>(null)
   const [isCancellingId, setIsCancellingId] = useState<string | null>(null)
   const [isReportingId, setIsReportingId] = useState<string | null>(null)
@@ -439,6 +453,7 @@ export default function FoundItemsMapPage() {
         {
           postcode: user?.postcode?.trim() || undefined,
           sortBy: user?.postcode ? 'nearest' : 'newest',
+          category: categoryFilter === 'all' ? undefined : categoryFilter,
         },
         1,
         50,
@@ -463,7 +478,7 @@ export default function FoundItemsMapPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [highlightId, user?.id, user?.postcode])
+  }, [highlightId, user?.id, user?.postcode, categoryFilter])
 
   useEffect(() => {
     void loadBoard()
@@ -645,10 +660,27 @@ export default function FoundItemsMapPage() {
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.38fr)_340px] 2xl:grid-cols-[minmax(0,1.26fr)_360px]">
         <div className="min-w-0 space-y-2">
           <div className="relative isolate overflow-hidden rounded-[30px] border border-[#E4E8D8] bg-[#EEF3E6] shadow-sm">
-            <div className="absolute left-4 top-4 z-[700] flex items-center gap-1 rounded-full bg-white/95 p-1 shadow-[0_12px_30px_rgba(148,163,184,0.16)] backdrop-blur">
-              <FilterChip isActive={mapFilter === 'all'} label="All" onClick={() => setMapFilter('all')} />
-              <FilterChip isActive={mapFilter === 'available'} label="Live" onClick={() => setMapFilter('available')} />
-              <FilterChip isActive={mapFilter === 'fly_tipped'} label="Fly-tipped" onClick={() => setMapFilter('fly_tipped')} />
+            <div className="absolute left-4 top-4 z-[700] flex max-w-[calc(100%-7rem)] flex-col items-start gap-2">
+              <div className="inline-flex items-center gap-1 rounded-full bg-white/95 p-1 shadow-[0_12px_30px_rgba(148,163,184,0.16)] backdrop-blur">
+                <FilterChip isActive={mapFilter === 'all'} label="All" onClick={() => setMapFilter('all')} />
+                <FilterChip isActive={mapFilter === 'available'} label="Live" onClick={() => setMapFilter('available')} />
+                <FilterChip isActive={mapFilter === 'fly_tipped'} label="Fly-tipped" onClick={() => setMapFilter('fly_tipped')} />
+              </div>
+              <div className="inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full bg-white/95 p-1 shadow-[0_12px_30px_rgba(148,163,184,0.16)] backdrop-blur">
+                <FilterChip
+                  isActive={categoryFilter === 'all'}
+                  label="All categories"
+                  onClick={() => setCategoryFilter('all')}
+                />
+                {foundItemCategories.map((cat) => (
+                  <FilterChip
+                    key={cat}
+                    isActive={categoryFilter === cat}
+                    label={categoryFilterMeta[cat]}
+                    onClick={() => setCategoryFilter(cat)}
+                  />
+                ))}
+              </div>
             </div>
 
             <button

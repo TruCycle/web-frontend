@@ -15,6 +15,8 @@ import {
   Map as MapIcon,
   MapPin,
   Trophy,
+  Camera,
+  Compass,
 } from 'lucide-react'
 import { useMessageAlerts } from '@/features/messaging/hooks/useMessageAlerts'
 import { useNotifications } from '@/features/notifications/hooks/useNotifications'
@@ -65,14 +67,18 @@ export function AppShell({ children }: AppShellProps) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement | null>(null)
 
-  function onRoleChange(nextRole: 'collector' | 'donor') {
+  function onRoleChange(nextRole: 'spotter' | 'collector' | 'donor') {
     if (role === nextRole) {
       setIsMobileSidebarOpen(false)
       return
     }
 
     setRole(nextRole)
-    navigate('/dashboard')
+    if (nextRole === 'spotter') {
+      navigate('/nearby')
+    } else {
+      navigate('/dashboard')
+    }
   }
 
   useEffect(() => {
@@ -215,7 +221,22 @@ export function AppShell({ children }: AppShellProps) {
       <div className="-mx-4 my-4 h-px bg-tc-shell-divider" />
 
       <div className="flex flex-col gap-1">
-        {role === 'collector' ? (
+        {role === 'spotter' ? (
+          <>
+            <NavLink className={navLinkClassName} to="/found-items/post" onClick={onSidebarNavigate}>
+              <Camera size={20} />
+              <span>Spot an item</span>
+            </NavLink>
+            <NavLink className={navLinkClassName} to="/nearby" onClick={onSidebarNavigate}>
+              <Compass size={20} />
+              <span>Nearby</span>
+            </NavLink>
+            <NavLink className={navLinkClassName} to="/found-items/my-posts" onClick={onSidebarNavigate}>
+              <FileText size={20} />
+              <span>My Spots</span>
+            </NavLink>
+          </>
+        ) : role === 'collector' ? (
           <>
             <NavLink className={navLinkClassName} to="/browse" onClick={onSidebarNavigate}>
               <FileText size={20} />
@@ -297,7 +318,21 @@ export function AppShell({ children }: AppShellProps) {
         <div className="flex h-[50px] w-fit items-center gap-1 rounded-[10px] border border-tc-shell-accent bg-tc-shell-toggle p-1">
           <button
             className={classNames(
-              'h-full flex-1 rounded-[5px] px-4 text-[0.85rem] font-bold transition',
+              'h-full flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
+              role === 'spotter'
+                ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
+                : 'bg-transparent text-tc-shell-roleText',
+            )}
+            onClick={() => {
+              onRoleChange('spotter')
+              onSidebarNavigate()
+            }}
+          >
+            Spotter
+          </button>
+          <button
+            className={classNames(
+              'h-full flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
               role === 'collector'
                 ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
                 : 'bg-transparent text-tc-shell-roleText',
@@ -311,7 +346,7 @@ export function AppShell({ children }: AppShellProps) {
           </button>
           <button
             className={classNames(
-              'h-full flex-1 rounded-[5px] px-4 text-[0.85rem] font-bold transition',
+              'h-full flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
               role === 'donor'
                 ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
                 : 'bg-transparent text-tc-shell-roleText',

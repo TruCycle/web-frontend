@@ -1,6 +1,11 @@
 import { ArrowRight, Sparkles } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import heroImg from '@/assets/images/hero-abstract.jpg'
+import bagShoeImg from '@/assets/images/bag-shoe.jpg'
+import bookPlannerImg from '@/assets/images/book-planner.jpg'
+import ipadImg from '@/assets/images/ipad.jpg'
+import scentedCandleImg from '@/assets/images/scented-candle.jpg'
 
 type LandingHeroProps = {
   readonly isAuthenticated: boolean
@@ -10,15 +15,110 @@ type LandingHeroProps = {
 
 const statPills = [
   { value: '10s', label: 'to list an item' },
-  { value: '2 roles', label: 'donor & collector' },
+  { value: '3 roles', label: 'spotter, collector, donor' },
   { value: '0 fees', label: 'always free' },
 ] as const
 
-export function LandingHero({ isAuthenticated, primaryCtaTo }: LandingHeroProps) {
+const heroImages: readonly string[] = [
+  heroImg,
+  bagShoeImg,
+  bookPlannerImg,
+  ipadImg,
+  scentedCandleImg,
+]
+
+const ROTATION_INTERVAL_MS = 6000
+
+type IntentCta = {
+  readonly to: string
+  readonly label: string
+}
+
+function getPersistedRole(): 'spotter' | 'collector' | 'donor' | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = window.localStorage.getItem('tc.activeRole')
+    if (raw === 'spotter' || raw === 'collector' || raw === 'donor') return raw
+  } catch {
+    // ignore
+  }
+  return null
+}
+
+function intentToCta(
+  intent: string | null,
+  persistedRole: 'spotter' | 'collector' | 'donor' | null,
+  isAuthenticated: boolean,
+): IntentCta | null {
+  const target = intent ?? persistedRole
+  if (!target) return null
+
+  const baseTo = isAuthenticated
+    ? target === 'spotter'
+      ? '/found-items/post'
+      : target === 'donor'
+      ? '/listings'
+      : '/nearby'
+    : '/signup'
+
+  if (target === 'spotter') return { to: baseTo, label: 'Spot an item' }
+  if (target === 'donor') return { to: baseTo, label: 'List an item' }
+  if (target === 'collector') return { to: baseTo, label: 'Start rescuing' }
+  return null
+}
+
+export function LandingHero({ isAuthenticated, primaryCtaTo, primaryCtaLabel }: LandingHeroProps) {
+  const [searchParams] = useSearchParams()
+  const [activeImage, setActiveImage] = useState(0)
+  const [reduceMotion, setReduceMotion] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const update = () => setReduceMotion(media.matches)
+    update()
+    media.addEventListener?.('change', update)
+    return () => media.removeEventListener?.('change', update)
+  }, [])
+
+  useEffect(() => {
+    if (reduceMotion || heroImages.length <= 1) return
+    const id = window.setInterval(() => {
+      setActiveImage((current) => (current + 1) % heroImages.length)
+    }, ROTATION_INTERVAL_MS)
+    return () => window.clearInterval(id)
+  }, [reduceMotion])
+
+  // Lazy-decode all but the first image after mount so the first paint stays fast.
+  useEffect(() => {
+    heroImages.slice(1).forEach((src) => {
+      const img = new Image()
+      img.src = src
+    })
+  }, [])
+
+  const intentCta = useMemo(
+    () => intentToCta(searchParams.get('intent'), getPersistedRole(), isAuthenticated),
+    [isAuthenticated, searchParams],
+  )
+
+  const ctaTo = intentCta?.to ?? primaryCtaTo
+  const ctaLabel = intentCta?.label ?? (isAuthenticated ? 'Open your dashboard' : primaryCtaLabel || 'Start rescuing')
+
   return (
-    <section className="relative overflow-hidden px-6 pb-24 pt-32 sm:pb-28 sm:pt-36">
+    <section className="relative flex min-h-[100svh] items-center overflow-hidden px-6 pb-16 pt-28 sm:pb-24 sm:pt-32">
       <div className="absolute inset-0 -z-10">
-        <img alt="" className="h-full w-full object-cover opacity-25" src={heroImg} />
+        {heroImages.map((src, index) => (
+          <img
+            key={src}
+            alt=""
+            aria-hidden
+            src={src}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1500ms] ease-in-out ${
+              index === activeImage ? 'opacity-25' : 'opacity-0'
+            }`}
+          />
+        ))}
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(248,250,252,0.5)_0%,rgba(248,250,252,0.82)_38%,#f8fafc_100%)]" />
       </div>
 
@@ -45,9 +145,9 @@ export function LandingHero({ isAuthenticated, primaryCtaTo }: LandingHeroProps)
         <div className="tc-landing-fade-up tc-landing-delay-3 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
             className="inline-flex items-center justify-center gap-2 rounded-full bg-tc-shell-accent px-8 py-3.5 text-base font-semibold text-tc-shell-roleActiveText no-underline shadow-[0_18px_40px_rgba(164,245,166,0.32)] transition duration-200 hover:-translate-y-0.5 hover:bg-tc-action-primaryHover"
-            to={primaryCtaTo}
+            to={ctaTo}
           >
-            {isAuthenticated ? 'Open your dashboard' : 'Start exchanging'}
+            {ctaLabel}
             <ArrowRight className="h-4 w-4" />
           </Link>
           <a

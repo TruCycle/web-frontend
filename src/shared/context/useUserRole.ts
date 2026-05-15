@@ -1,10 +1,12 @@
 import { createContext, useContext } from 'react'
 
-export type UserRole = 'collector' | 'donor'
+export type UserRole = 'spotter' | 'collector' | 'donor'
 
 interface UserRoleContextType {
   role: UserRole
   isDonorMode: boolean
+  isSpotterMode: boolean
+  isCollectorMode: boolean
   setRole: (role: UserRole) => void
   toggleRole: () => void
 }

@@ -31,6 +31,7 @@ import { ProgressBar } from '@/features/gamification/ui/components/ProgressBar'
 import { StreakIndicator } from '@/features/gamification/ui/components/StreakIndicator'
 import { useFoundItems } from '@/features/found-items/hooks/useFoundItems'
 import { FoundItemStatusBadge } from '@/features/found-items/ui/components/FoundItemStatusBadge'
+import { RescueTicker } from '@/features/gamification/ui/components/RescueTicker'
 import { formatRelativeTime } from '@/shared/utils/formatRelativeTime'
 
 function statColor(index: number): string {
@@ -285,6 +286,20 @@ export default function Dashboard() {
             >
               View All <ChevronRight size={16} />
             </Link>
+          </section>
+
+          <section className="space-y-4 rounded-xl bg-white p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold text-tc-app-secondary">Live rescue ticker</h2>
+                <p className="text-sm text-slate-500">Real-time community saves</p>
+              </div>
+            </div>
+            <RescueTicker
+              onItemClick={(event) => {
+                window.location.href = `/map?highlight=${encodeURIComponent(event.id)}`
+              }}
+            />
           </section>
 
           <section className="space-y-4 rounded-xl bg-white p-5">
