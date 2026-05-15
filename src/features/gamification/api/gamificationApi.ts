@@ -69,7 +69,7 @@ function normalizeUserProgress(value: unknown): UserProgress | null {
     currentLevel: readNumber(record.currentLevel) ?? 1,
     pointsToNextLevel: readNumber(record.pointsToNextLevel) ?? 0,
     levelProgressPercent: readNumber(record.levelProgressPercent) ?? 0,
-    tier: readString(record.tier),
+    tier: readString(record.tier) ?? undefined,
     nextTier: readString(record.nextTier) ?? null,
     pointsToNextTier: readNumber(record.pointsToNextTier) ?? 0,
     tierProgressPercent: readNumber(record.tierProgressPercent) ?? 0,
@@ -398,4 +398,41 @@ export async function markBadgeSeen(badgeId: string): Promise<void> {
   await apiRequest<void>(`/gamification/badges/${encodeURIComponent(badgeId.trim())}/seen`, {
     method: 'POST',
   })
+}
+
+function normalizeIndividualEntry(value: unknown): IndividualLeaderboardEntry | null {
+  const record = asRecord(value)
+  if (!record) return null
+  const userId = readString(record.userId)
+  if (!userId) return null
+  return {
+    rank: readNumber(record.rank) ?? 0,
+    userId,
+    name: readString(record.name) ?? 'TruCycle member',
+    postcode: readString(record.postcode) ?? null,
+    totalPoints: readNumber(record.totalPoints) ?? 0,
+    currentLevel: readNumber(record.currentLevel) ?? 1,
+    tier: readString(record.tier) ?? 'Seedling',
+    isCurrentUser: Boolean(record.isCurrentUser),
+  }
+}
+
+export async function fetchIndividualLeaderboard(
+  options: { limit?: number; offset?: number } = {},
+): Promise<IndividualLeaderboard> {
+  const query = toQueryString({ limit: options.limit, offset: options.offset })
+  const response = await apiRequest<unknown>(`/gamification/leaderboard/individual${query}`)
+  const record = asRecord(unwrapApiData<unknown>(response))
+  const entries = Array.isArray(record?.entries)
+    ? record.entries
+        .map((entry) => normalizeIndividualEntry(entry))
+        .filter((entry): entry is IndividualLeaderboardEntry => entry !== null)
+    : []
+  return {
+    entries,
+    total: readNumber(record?.total) ?? entries.length,
+    limit: readNumber(record?.limit) ?? entries.length,
+    offset: readNumber(record?.offset) ?? 0,
+    currentUser: normalizeIndividualEntry(record?.currentUser),
+  }
 }

@@ -7,8 +7,12 @@ import {
 } from './communityBoardData'
 import type { CommunityBoardWindow } from '../types'
 import { CommunityBoardPostcodeList } from './components/CommunityBoardPostcodeList'
+import { IndividualLeaderboard } from './components/IndividualLeaderboard'
+
+type LeaderboardTab = 'community' | 'individual'
 
 export default function CommunityBoardPage() {
+  const [activeTab, setActiveTab] = useState<LeaderboardTab>('community')
   const [activeWindow, setActiveWindow] = useState<CommunityBoardWindow>('month')
   const { board, isLoading, error } = useCommunityBoard(activeWindow)
   const activeDescriptor =
@@ -20,36 +24,67 @@ export default function CommunityBoardPage() {
       <div className="space-y-2">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Community Board</h1>
+            <h1 className="text-3xl font-bold text-slate-900">Leaderboard</h1>
             <p className="text-slate-500">
-              Which London postcodes are rescuing the most {activeDescriptor}.
+              {activeTab === 'community'
+                ? `Which London postcodes are rescuing the most ${activeDescriptor}.`
+                : 'Top individual spotters across TruCycle, ranked by lifetime points.'}
             </p>
           </div>
 
           <div className="inline-flex flex-wrap gap-2 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
-            {communityBoardWindows.map((entry) => {
-              const isActive = entry.key === activeWindow
-
+            {([
+              { key: 'community', label: 'Community' },
+              { key: 'individual', label: 'Individual' },
+            ] as const).map((tab) => {
+              const isActive = tab.key === activeTab
               return (
                 <button
-                  key={entry.key}
+                  key={tab.key}
                   type="button"
                   aria-pressed={isActive}
-                  onClick={() => setActiveWindow(entry.key)}
+                  onClick={() => setActiveTab(tab.key)}
                   className={
                     isActive
                       ? 'rounded-full bg-tc-app-primary px-4 py-2 text-sm font-semibold text-tc-app-text shadow-sm transition'
                       : 'rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100'
                   }
                 >
-                  {entry.label}
+                  {tab.label}
                 </button>
               )
             })}
           </div>
         </div>
+
+        {activeTab === 'community' ? (
+          <div className="flex justify-end">
+            <div className="inline-flex flex-wrap gap-2 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
+              {communityBoardWindows.map((entry) => {
+                const isActive = entry.key === activeWindow
+                return (
+                  <button
+                    key={entry.key}
+                    type="button"
+                    aria-pressed={isActive}
+                    onClick={() => setActiveWindow(entry.key)}
+                    className={
+                      isActive
+                        ? 'rounded-full bg-tc-app-primary px-4 py-2 text-sm font-semibold text-tc-app-text shadow-sm transition'
+                        : 'rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100'
+                    }
+                  >
+                    {entry.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ) : null}
       </div>
 
+      {activeTab === 'individual' ? <IndividualLeaderboard /> : null}
+      {activeTab === 'community' ? (
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.95fr)]">
         <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
@@ -157,6 +192,7 @@ export default function CommunityBoardPage() {
           </div>
         </section>
       </div>
+      ) : null}
     </div>
   )
 }

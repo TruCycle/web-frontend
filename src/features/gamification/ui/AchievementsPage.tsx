@@ -11,6 +11,8 @@ import type { PointTransaction } from '../types'
 import { BadgeGrid } from './components/BadgeGrid'
 import { LevelBadge } from './components/LevelBadge'
 import { ProgressBar } from './components/ProgressBar'
+import { TierBadge } from './components/TierBadge'
+import { CarbonLedgerPanel } from './components/CarbonLedgerPanel'
 
 function formatDate(value: string): string {
   const date = new Date(value)
@@ -151,7 +153,9 @@ export default function AchievementsPage() {
               <span className="pb-1 text-sm text-white/72">{streakUnitLabel} active</span>
             </div>
           }
-          detail={`Best ${longestStreak} ${streakUnitLabel}`}
+          detail={`Best ${longestStreak} ${streakUnitLabel}${
+            primaryStreak && (primaryStreak.bonusMultiplier ?? 1) > 1 ? ' · +5% bonus active' : ''
+          }`}
           icon={<Flame size={20} className="text-amber-300" />}
           accentClassName="bg-amber-400/35"
         />
@@ -189,6 +193,15 @@ export default function AchievementsPage() {
           </div>
           {progress ? <LevelBadge progress={progress} /> : null}
         </div>
+
+        {progress?.tier ? (
+          <TierBadge
+            tier={progress.tier}
+            nextTier={progress.nextTier ?? null}
+            pointsToNextTier={progress.pointsToNextTier ?? 0}
+            progressPercent={progress.tierProgressPercent ?? 0}
+          />
+        ) : null}
 
         <ProgressBar value={progress?.levelProgressPercent ?? 0} />
 
@@ -302,6 +315,13 @@ export default function AchievementsPage() {
           </>
         ) : null}
       </section>
+
+      {foundItemImpact ? (
+        <CarbonLedgerPanel
+          co2eTotalKg={Number(foundItemImpact.totalCo2eKg) || 0}
+          impactPoints={Number(foundItemImpact.totalImpactPoints) || 0}
+        />
+      ) : null}
 
       <section className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between gap-3">
