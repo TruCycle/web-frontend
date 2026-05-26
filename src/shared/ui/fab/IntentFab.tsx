@@ -129,7 +129,7 @@ export function IntentFab() {
               onFocus={() => setHoverIndex(index)}
               onBlur={() => setHoverIndex((prev) => (prev === index ? null : prev))}
               aria-label={action.label}
-              className={`group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full ${action.surface} ${action.iconColor} shadow-lg ring-4 ${action.ring} transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-offset-2 motion-safe:tc-fab-bob`}
+              className={`group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full ${action.surface} ${action.iconColor} tc-fab-bob shadow-lg ring-4 ${action.ring} transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-offset-2 motion-reduce:animate-none`}
               style={{ animationDelay: `${index * 0.25}s` }}
             >
               <Icon size={22} strokeWidth={2.25} />
