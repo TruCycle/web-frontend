@@ -35,16 +35,16 @@ export function getInitials(name: string): string {
 
 export function rankPillClassName(rank: number): string {
   if (rank === 0) {
-    return 'bg-amber-100 text-amber-700'
+    return 'bg-tc-app-primary text-tc-app-text'
   }
 
   if (rank === 1) {
-    return 'bg-slate-200 text-slate-700'
+    return 'bg-tc-app-canvas text-tc-app-secondary'
   }
 
   if (rank === 2) {
-    return 'bg-orange-100 text-orange-700'
+    return 'bg-tc-app-primary/25 text-tc-app-text'
   }
 
-  return 'bg-slate-100 text-slate-500'
+  return 'bg-tc-app-canvas text-tc-app-slate500'
 }

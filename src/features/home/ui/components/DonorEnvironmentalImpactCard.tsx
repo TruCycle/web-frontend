@@ -80,11 +80,11 @@ export function DonorEnvironmentalImpactCard() {
   return (
     <section className="rounded-xl bg-white p-5">
       <div className="mb-4 flex items-start justify-between gap-3">
-        <h2 className="text-lg font-bold text-[#4B5563]">Your Environmental Impact</h2>
+        <h2 className="text-lg font-bold text-tc-app-secondary">Your Environmental Impact</h2>
         <div className="relative">
           <button
             type="button"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[#12121270] hover:bg-slate-100"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-tc-app-secondary/60 hover:bg-tc-app-canvas"
             onClick={() => setIsRangeMenuOpen((current) => !current)}
             aria-label="Open impact range options"
           >
@@ -92,13 +92,13 @@ export function DonorEnvironmentalImpactCard() {
           </button>
           {isRangeMenuOpen ? (
             <div className="absolute right-0 top-[calc(100%+0.35rem)] z-10 min-w-[110px] rounded-lg border border-slate-200 bg-white p-1 shadow-md">
-              <button className="w-full rounded-md px-2.5 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50">
+              <button className="w-full rounded-md px-2.5 py-1.5 text-left text-sm text-tc-app-secondary hover:bg-tc-app-canvas">
                 Last 7 days
               </button>
-              <button className="w-full rounded-md px-2.5 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50">
+              <button className="w-full rounded-md px-2.5 py-1.5 text-left text-sm text-tc-app-secondary hover:bg-tc-app-canvas">
                 Last 30 days
               </button>
-              <button className="w-full rounded-md px-2.5 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50">
+              <button className="w-full rounded-md px-2.5 py-1.5 text-left text-sm text-tc-app-secondary hover:bg-tc-app-canvas">
                 Last 1 year
               </button>
             </div>
@@ -109,15 +109,15 @@ export function DonorEnvironmentalImpactCard() {
       <svg viewBox={`0 0 ${chart.width} ${chart.height}`} className="h-auto w-full">
         <defs>
           <linearGradient id="donor-impact-area-fill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#34D399" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="#34D399" stopOpacity="0.03" />
+            <stop offset="0%" stopColor="#A4F5A6" stopOpacity="0.22" />
+            <stop offset="100%" stopColor="#A4F5A6" stopOpacity="0.04" />
           </linearGradient>
           <linearGradient id="donor-impact-line-stroke" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#74FF78" />
+            <stop offset="0%" stopColor="#95E69E" />
             <stop offset="100%" stopColor="#15A119" />
           </linearGradient>
           <filter id="donor-impact-line-shadow" x="-10%" y="-20%" width="120%" height="150%">
-            <feDropShadow dx="0" dy="4" stdDeviation="2" floodColor="#605BFF" floodOpacity="0.17" />
+            <feDropShadow dx="0" dy="4" stdDeviation="2" floodColor="#A4F5A6" floodOpacity="0.18" />
           </filter>
         </defs>
 
@@ -125,12 +125,12 @@ export function DonorEnvironmentalImpactCard() {
           const y = chart.padding.top + ((100 - tickValue) / 100) * chart.innerHeight
           return (
             <g key={`tick-${tickValue}`}>
-              <line x1={chart.padding.left} y1={y} x2={chart.width - chart.padding.right} y2={y} stroke="#E5E7EB" />
+              <line x1={chart.padding.left} y1={y} x2={chart.width - chart.padding.right} y2={y} stroke="#E2E8F0" />
               <text
                 x={chart.padding.left - 18}
                 y={y + 3}
                 textAnchor="end"
-                className="fill-[#12121270] text-sm"
+                className="fill-[#12121299] text-sm"
               >
                 {tickValue}
               </text>
@@ -145,7 +145,7 @@ export function DonorEnvironmentalImpactCard() {
           y1={chart.junePoint.y}
           x2={chart.junePoint.x}
           y2={chart.baselineY}
-          stroke="#9AE6B4"
+          stroke="#A4F5A6"
           strokeDasharray="3 6"
         />
 
@@ -167,7 +167,7 @@ export function DonorEnvironmentalImpactCard() {
               cy={point.y}
               r={5}
               fill="#FFFFFF"
-              stroke="#7EDC95"
+              stroke="#A4F5A6"
               strokeWidth={3}
             />
           ) : null,
@@ -181,7 +181,7 @@ export function DonorEnvironmentalImpactCard() {
               x={x}
               y={chart.height - 10}
               textAnchor="middle"
-              className="fill-[#12121270] text-xs"
+              className="fill-[#12121299] text-xs"
             >
               {label}
             </text>

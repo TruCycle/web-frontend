@@ -3,12 +3,12 @@ import { useIndividualLeaderboard } from '../../hooks/useIndividualLeaderboard'
 import { getInitials } from '../communityBoardData'
 
 const tierColor: Record<string, string> = {
-  Seedling: 'bg-emerald-50 text-emerald-700',
-  Sprout: 'bg-emerald-100 text-emerald-700',
-  Sapling: 'bg-lime-100 text-lime-800',
-  Grove: 'bg-amber-100 text-amber-800',
-  Forest: 'bg-orange-100 text-orange-800',
-  Canopy: 'bg-rose-100 text-rose-800',
+  Seedling: 'bg-tc-app-canvas text-tc-app-secondary',
+  Sprout: 'bg-[#ECFBEA] text-tc-app-text',
+  Sapling: 'bg-[#DFF7DD] text-tc-app-text',
+  Grove: 'bg-[#CFF3CD] text-tc-app-text',
+  Forest: 'bg-[#BCEFB8] text-tc-app-text',
+  Canopy: 'bg-tc-app-primary text-tc-app-text',
 }
 
 export function IndividualLeaderboard() {
@@ -24,15 +24,15 @@ export function IndividualLeaderboard() {
       </div>
 
       {board?.currentUser ? (
-        <div className="mb-4 rounded-2xl bg-[linear-gradient(135deg,#F4F9E8_0%,#EEF6DE_100%)] px-4 py-4">
+        <div className="mb-4 rounded-2xl bg-[linear-gradient(135deg,rgba(164,245,166,0.20)_0%,rgba(248,250,252,1)_100%)] px-4 py-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#55741D]">Your rank</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-tc-app-text">Your rank</p>
               <p className="mt-2 text-sm text-slate-600">
                 Global #{board.currentUser.rank.toLocaleString()} · {board.currentUser.tier}
               </p>
             </div>
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 text-[#55741D] shadow-sm">
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-tc-app-primary/18 text-tc-app-text shadow-sm">
               <Sparkles size={18} />
             </span>
           </div>
@@ -65,19 +65,19 @@ export function IndividualLeaderboard() {
                   key={entry.userId}
                   className={
                     entry.isCurrentUser
-                      ? 'flex items-center gap-3 rounded-2xl bg-[#F1F9EA] px-4 py-4'
+                      ? 'flex items-center gap-3 rounded-2xl bg-tc-app-primary/15 px-4 py-4'
                       : 'flex items-center gap-3 rounded-2xl px-4 py-4 transition hover:bg-slate-50'
                   }
                 >
                   <span className="w-9 text-sm font-semibold text-slate-500">#{entry.rank}</span>
-                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#E5F5D7] text-sm font-semibold text-[#3A7A28]">
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-tc-app-primary/20 text-sm font-semibold text-tc-app-text">
                     {getInitials(entry.name)}
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-semibold text-slate-900">{entry.name}</p>
                       {entry.isCurrentUser ? (
-                        <span className="text-[0.72rem] font-semibold uppercase tracking-wide text-[#1A7F37]">You</span>
+                        <span className="text-[0.72rem] font-semibold uppercase tracking-wide text-tc-auth-link">You</span>
                       ) : null}
                       <span className={`rounded-full px-2 py-0.5 text-[0.7rem] font-semibold ${tierClass}`}>
                         {entry.tier}

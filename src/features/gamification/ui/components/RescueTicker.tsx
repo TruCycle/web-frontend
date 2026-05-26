@@ -22,9 +22,9 @@ export function RescueTicker({ onItemClick }: RescueTickerProps) {
 
   if (events.length === 0) {
     return (
-      <div className="rounded-[20px] border border-dashed border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
+      <div className="rounded-[20px] border border-dashed border-tc-app-primary/30 bg-tc-app-canvas px-4 py-3 text-sm text-tc-app-slate500">
         <span className="inline-flex items-center gap-2">
-          <Sparkles size={14} className="text-[#3A7618]" />
+          <Sparkles size={14} className="text-tc-shell-accent" />
           Live rescues will appear here as the community spots and saves items.
         </span>
       </div>
@@ -33,10 +33,10 @@ export function RescueTicker({ onItemClick }: RescueTickerProps) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-tc-app-slate500">
         <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#34DA45] opacity-60" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-[#34DA45]" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-tc-shell-accent opacity-60" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-tc-shell-accent" />
         </span>
         Live rescues
       </div>
@@ -50,7 +50,7 @@ export function RescueTicker({ onItemClick }: RescueTickerProps) {
                 onClick={() => onItemClick?.(event)}
                 className={classNames(
                   'tc-rescue-ticker-row flex w-full items-center justify-between gap-3 rounded-[16px] border bg-white px-3 py-2 text-left text-sm transition hover:-translate-y-0.5 hover:shadow-sm',
-                  isFlyTip ? 'border-rose-200 bg-rose-50/40' : 'border-[#D7E8C2]',
+                  isFlyTip ? 'border-rose-200 bg-rose-50/40' : 'border-tc-app-primary/25 bg-tc-app-canvas/40',
                   index === 0 ? 'tc-rescue-ticker-pop' : '',
                 )}
               >
@@ -58,7 +58,7 @@ export function RescueTicker({ onItemClick }: RescueTickerProps) {
                   {isFlyTip ? (
                     <AlertTriangle size={16} className="shrink-0 text-rose-500" />
                   ) : (
-                    <Leaf size={16} className="shrink-0 text-[#3A7618]" />
+                    <Leaf size={16} className="shrink-0 text-tc-auth-link" />
                   )}
                   <span className="truncate font-medium text-slate-900">
                     {isFlyTip ? 'Fly-tip reported' : 'Rescued'}: {event.title}

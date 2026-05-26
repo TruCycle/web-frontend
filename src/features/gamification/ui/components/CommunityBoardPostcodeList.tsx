@@ -21,7 +21,7 @@ export function CommunityBoardPostcodeList({
             key={entry.postcode}
             className={
               isActiveArea
-                ? 'grid grid-cols-[46px_minmax(0,1fr)_110px_82px] gap-4 rounded-2xl bg-[#F1F9EA] px-4 py-4'
+                ? 'grid grid-cols-[46px_minmax(0,1fr)_110px_82px] gap-4 rounded-2xl bg-tc-app-primary/15 px-4 py-4'
                 : 'grid grid-cols-[46px_minmax(0,1fr)_110px_82px] gap-4 rounded-2xl px-4 py-4 transition hover:bg-slate-50'
             }
           >
@@ -37,7 +37,7 @@ export function CommunityBoardPostcodeList({
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-lg font-semibold text-slate-900">{entry.postcode}</p>
                 {isActiveArea ? (
-                  <span className="rounded-full bg-[#D8F2C9] px-2 py-0.5 text-[0.7rem] font-semibold uppercase tracking-wide text-[#1A7F37]">
+                  <span className="rounded-full bg-tc-app-primary/25 px-2 py-0.5 text-[0.7rem] font-semibold uppercase tracking-wide text-tc-auth-link">
                     You
                   </span>
                 ) : null}
@@ -53,7 +53,7 @@ export function CommunityBoardPostcodeList({
             </div>
 
             <div className="text-right">
-              <p className="text-lg font-semibold text-[#55741D]">{entry.impactPoints}</p>
+              <p className="text-lg font-semibold text-tc-app-text">{entry.impactPoints}</p>
               <p className="text-xs uppercase tracking-[0.18em] text-slate-400">pts</p>
             </div>
           </div>

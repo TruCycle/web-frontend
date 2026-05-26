@@ -234,7 +234,7 @@ export default function Dashboard() {
               {userProgress ? <LevelBadge progress={userProgress} /> : null}
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#F8FAFC] p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-tc-app-canvas p-4">
               <div>
                 <p className="text-sm text-slate-500">Streak</p>
                 {primaryStreak ? <StreakIndicator streak={primaryStreak} size="lg" /> : <p className="text-sm text-slate-400">-</p>}
@@ -262,7 +262,7 @@ export default function Dashboard() {
                 earnedBadges.slice(0, 3).map((entry) => (
                   <span
                     key={entry.badge.id}
-                    className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700"
+                    className="inline-flex items-center rounded-full border border-tc-app-primary/25 bg-tc-app-primary/10 px-3 py-1.5 text-sm font-medium text-tc-app-text shadow-sm"
                   >
                     {entry.badge.name}
                   </span>
@@ -372,14 +372,14 @@ export default function Dashboard() {
               <input
                 type="text"
                 placeholder="Search by category, location or keyword"
-                className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-tc-app-secondary outline-none placeholder:text-tc-app-secondary/70 focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+                className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-tc-app-secondary outline-none placeholder:text-tc-app-secondary/70 focus:border-tc-app-primary focus:ring-4 focus:ring-tc-app-primary/20"
                 value={filters.search}
                 onChange={(event) => updateSearch(event.target.value)}
               />
             </div>
             <button
               type="button"
-              className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-300 px-4 text-sm font-medium text-tc-app-secondary transition hover:bg-slate-50"
+              className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-300 px-4 text-sm font-medium text-tc-app-secondary transition hover:bg-tc-app-canvas"
               onClick={() => {
                 if (isFiltersOpen) {
                   clearFilters()
@@ -417,7 +417,7 @@ export default function Dashboard() {
                     value={selectedCategoryFilterValue}
                     options={categoryFilterOptions}
                     onChange={updateCategory}
-                    buttonClassName="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary"
+                    buttonClassName="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary focus:border-tc-app-primary focus:ring-4 focus:ring-tc-app-primary/20"
                   />
                 </div>
 
@@ -430,7 +430,7 @@ export default function Dashboard() {
                     value={selectedConditionFilterValue}
                     options={conditionFilterOptions}
                     onChange={updateCondition}
-                    buttonClassName="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary"
+                    buttonClassName="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary focus:border-tc-app-primary focus:ring-4 focus:ring-tc-app-primary/20"
                   />
                 </div>
 
@@ -442,7 +442,7 @@ export default function Dashboard() {
                     id="browse-filter-location"
                     type="text"
                     placeholder="Enter location or postal code"
-                    className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary outline-none placeholder:text-tc-app-secondary/70 focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+                    className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary outline-none placeholder:text-tc-app-secondary/70 focus:border-tc-app-primary focus:ring-4 focus:ring-tc-app-primary/20"
                     value={filters.location}
                     onChange={(event) => updateLocation(event.target.value)}
                   />
@@ -451,13 +451,13 @@ export default function Dashboard() {
             </div>
           ) : null}
 
-          <div className="flex gap-2 overflow-x-auto rounded-md bg-[#E2E8F040] p-1">
+          <div className="flex gap-2 overflow-x-auto rounded-md bg-tc-app-canvas/80 p-1">
             {categories.map((category) => (
               <button
                 key={category}
                 className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition ${category === filters.category
-                    ? 'bg-white text-tc-app-text'
-                    : 'bg-transparent text-tc-app-secondary hover:bg-slate-200'
+                    ? 'bg-white text-tc-app-text ring-1 ring-tc-app-primary/20 shadow-sm'
+                    : 'bg-transparent text-tc-app-secondary hover:bg-white/80'
                   }`}
                 onClick={() => updateCategory(category)}
               >

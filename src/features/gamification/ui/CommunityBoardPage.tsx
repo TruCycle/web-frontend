@@ -47,7 +47,7 @@ export default function CommunityBoardPage() {
                     className={
                       isActive
                         ? 'rounded-full bg-tc-app-primary px-4 py-2 text-sm font-semibold text-tc-app-text shadow-sm transition'
-                        : 'rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100'
+                        : 'rounded-full px-4 py-2 text-sm font-medium text-tc-app-slate500 transition hover:bg-tc-app-canvas'
                     }
                   >
                     {tab.label}
@@ -69,7 +69,7 @@ export default function CommunityBoardPage() {
                       className={
                         isActive
                           ? 'rounded-full bg-tc-app-primary px-4 py-2 text-sm font-semibold text-tc-app-text shadow-sm transition'
-                          : 'rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100'
+                          : 'rounded-full px-4 py-2 text-sm font-medium text-tc-app-slate500 transition hover:bg-tc-app-canvas'
                       }
                     >
                       {entry.label}
@@ -126,13 +126,13 @@ export default function CommunityBoardPage() {
                     key={`${entry.userId}-${activeWindow}`}
                     className={
                       isCurrentUser
-                        ? 'flex items-center gap-3 rounded-2xl bg-[#F1F9EA] px-4 py-4'
+                        ? 'flex items-center gap-3 rounded-2xl bg-tc-app-primary/15 px-4 py-4'
                         : 'flex items-center gap-3 rounded-2xl px-4 py-4 transition hover:bg-slate-50'
                     }
                   >
                     <span className="w-9 text-sm font-semibold text-slate-500">#{index + 1}</span>
 
-                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#E5F5D7] text-sm font-semibold text-[#3A7A28]">
+                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-tc-app-primary/20 text-sm font-semibold text-tc-app-text">
                       {getInitials(entry.name)}
                     </span>
 
@@ -140,7 +140,7 @@ export default function CommunityBoardPage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-semibold text-slate-900">{entry.name}</p>
                         {isCurrentUser ? (
-                          <span className="text-[0.72rem] font-semibold uppercase tracking-wide text-[#1A7F37]">
+                          <span className="text-[0.72rem] font-semibold uppercase tracking-wide text-tc-auth-link">
                             You
                           </span>
                         ) : null}

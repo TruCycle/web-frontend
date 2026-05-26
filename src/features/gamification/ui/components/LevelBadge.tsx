@@ -6,7 +6,7 @@ interface LevelBadgeProps {
 
 export function LevelBadge({ progress }: LevelBadgeProps) {
   return (
-    <div className="inline-flex items-center rounded-full bg-[#E9FCE8] px-3 py-1 text-sm font-semibold text-[#14532D]">
+    <div className="inline-flex items-center rounded-full bg-tc-app-primary/18 px-3 py-1 text-sm font-semibold text-tc-app-text ring-1 ring-tc-app-primary/30">
       Level {progress.currentLevel}
     </div>
   )

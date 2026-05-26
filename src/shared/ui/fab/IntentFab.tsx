@@ -7,7 +7,8 @@ type IntentAction = {
   key: string
   label: string
   icon: typeof Camera
-  gradient: string
+  surface: string
+  iconColor: string
   ring: string
   hideOn: (pathname: string) => boolean
   onClick: () => void
@@ -26,8 +27,9 @@ export function IntentFab() {
       key: 'spot',
       label: 'Spot an item',
       icon: Camera,
-      gradient: 'from-emerald-400 to-lime-500',
-      ring: 'ring-emerald-300/50',
+      surface: 'bg-tc-app-primary',
+      iconColor: 'text-tc-app-text',
+      ring: 'ring-tc-app-primary/35',
       hideOn: (p) => p.startsWith('/found-items/post'),
       onClick: () => runWithRole('spotter', { path: '/found-items/post' }),
     },
@@ -35,8 +37,9 @@ export function IntentFab() {
       key: 'list',
       label: 'List an item',
       icon: PlusCircle,
-      gradient: 'from-amber-400 to-orange-500',
-      ring: 'ring-amber-300/50',
+      surface: 'bg-tc-auth-link',
+      iconColor: 'text-white',
+      ring: 'ring-tc-auth-link/25',
       hideOn: (p) => p.startsWith('/listings'),
       onClick: () => runWithRole('donor', { path: '/listings' }),
     },
@@ -44,8 +47,9 @@ export function IntentFab() {
       key: 'rescue',
       label: 'Rescue an item',
       icon: Truck,
-      gradient: 'from-sky-400 to-indigo-500',
-      ring: 'ring-sky-300/50',
+      surface: 'bg-tc-shell-bg',
+      iconColor: 'text-white',
+      ring: 'ring-tc-shell-divider',
       hideOn: (p) => p.startsWith('/map'),
       onClick: () => runWithRole('collector', { path: '/map' }),
     },
@@ -125,7 +129,7 @@ export function IntentFab() {
               onFocus={() => setHoverIndex(index)}
               onBlur={() => setHoverIndex((prev) => (prev === index ? null : prev))}
               aria-label={action.label}
-              className={`group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br ${action.gradient} text-white shadow-lg ring-4 ${action.ring} transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-offset-2 motion-safe:tc-fab-bob`}
+              className={`group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full ${action.surface} ${action.iconColor} shadow-lg ring-4 ${action.ring} transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-offset-2 motion-safe:tc-fab-bob`}
               style={{ animationDelay: `${index * 0.25}s` }}
             >
               <Icon size={22} strokeWidth={2.25} />
