@@ -153,7 +153,7 @@ export default {
         '"suggested_category" (one of: "Furniture", "Kitchenware", "Books + media", "Kids + baby", "Garden + tools", "Tech shelf", "Clothing", "Other"), ' +
         '"notes" (one short sentence, no backslashes).'
 
-      const response = await env.AI.run(MODEL, {
+      const inferenceInput = {
         messages: [
           { role: 'system', content: systemPrompt },
           {
@@ -165,7 +165,22 @@ export default {
           },
         ],
         max_tokens: 350,
-      })
+      }
+
+      let response
+      try {
+        response = await env.AI.run(MODEL, inferenceInput)
+      } catch (firstErr) {
+        // Error 5016 — model requires a one-time license agreement.
+        // Send the literal prompt 'agree' then retry the real request.
+        if (String(firstErr).includes('5016')) {
+          console.log('Accepting Llama 3.2 Vision license agreement (error 5016)…')
+          await env.AI.run(MODEL, { prompt: 'agree' })
+          response = await env.AI.run(MODEL, inferenceInput)
+        } else {
+          throw firstErr
+        }
+      }
 
       // Llama 3.2 Vision returns { response: "..." }
       const rawText =
