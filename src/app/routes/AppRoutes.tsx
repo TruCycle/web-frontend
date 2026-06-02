@@ -36,6 +36,7 @@ const FoundItemsPage = lazy(() => import('@/features/found-items/ui/FoundItemsPa
 const FoundItemsMapPage = lazy(() => import('@/features/found-items/ui/FoundItemsMapPage'))
 const PostFoundItemPage = lazy(() => import('@/features/found-items/ui/PostFoundItemPage'))
 const MyFoundPostsPage = lazy(() => import('@/features/found-items/ui/MyFoundPostsPage'))
+const InternalVisionPage = lazy(() => import('@/features/internal/ui/InternalVisionPage'))
 
 function ShellLayout() {
   return (
@@ -94,6 +95,14 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route
+        path="/internal/vision"
+        element={
+          <Suspense fallback={<LoadingState variant="page" label="" />}>
+            <InternalVisionPage />
+          </Suspense>
+        }
+      />
       <Route path="/cookies" element={<CookiesPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
