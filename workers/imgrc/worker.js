@@ -142,24 +142,30 @@ export default {
 
     // ── Run inference ───────────────────────────────────────────────────────
     try {
-      // Cloudflare's llama-3.2-11b-vision-instruct binding accepts the flat
-      // { prompt, image } shape — NOT the messages[] / content array format.
-      // Baking the instruction into the prompt is the only supported path.
-      const fullPrompt =
-        '[INST] You are an item analysis AI for TruCycle UK. ' +
-        'Respond with ONLY a raw JSON object — no markdown, no code fences, no extra text. ' +
-        'Use plain ASCII characters; no backslashes inside string values. ' +
-        'Required keys: ' +
-        '"item_type" (string, e.g. "sofa"), ' +
-        '"condition" (one of: "Excellent", "Good", "Fair", "Poor"), ' +
-        '"reusable" (boolean), ' +
-        '"suggested_category" (one of: "Furniture", "Kitchenware", "Books + media", "Kids + baby", "Garden + tools", "Tech shelf", "Clothing", "Other"), ' +
-        '"notes" (one short sentence). ' +
-        userPrompt + ' [/INST]'
-
+      // Per Cloudflare docs: messages[] is the correct format for this model.
+      // The image is passed as a SEPARATE top-level field alongside messages[],
+      // NOT nested inside the content array. The output key is { response: "..." }.
       const inferenceInput = {
-        prompt: fullPrompt,
-        image: imageArray,
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are an item analysis AI for TruCycle UK. ' +
+              'Respond with ONLY a raw JSON object — no markdown, no code fences, no extra text. ' +
+              'Use plain ASCII only; no backslashes inside string values. ' +
+              'Required keys: ' +
+              '"item_type" (string, e.g. "sofa"), ' +
+              '"condition" (one of: "Excellent", "Good", "Fair", "Poor"), ' +
+              '"reusable" (boolean), ' +
+              '"suggested_category" (one of: "Furniture", "Kitchenware", "Books + media", "Kids + baby", "Garden + tools", "Tech shelf", "Clothing", "Other"), ' +
+              '"notes" (one short sentence, no backslashes).',
+          },
+          {
+            role: 'user',
+            content: userPrompt,
+          },
+        ],
+        image: imageArray,  // top-level, not nested in content
         max_tokens: 350,
       }
 
@@ -178,9 +184,8 @@ export default {
         }
       }
 
-      // Flat-input binding returns { description: "..." } or { response: "..." }
+      // Docs confirm output schema: { response: string }
       const rawText =
-        response?.description ??
         response?.response ??
         response?.choices?.[0]?.message?.content ??
         (typeof response === 'string' ? response : '')
