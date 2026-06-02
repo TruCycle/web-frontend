@@ -434,7 +434,7 @@ function VisionTool() {
 
           {/* ── Right panel ── */}
           <div className="lg:col-span-7">
-            <div className="flex min-h-[500px] flex-col rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex min-h-[680px] flex-col rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm">
 
               {/* Panel header */}
               <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
