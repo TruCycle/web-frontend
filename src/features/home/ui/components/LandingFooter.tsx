@@ -11,9 +11,7 @@ type SocialLink = {
   readonly label: string
 }
 
-type LandingFooterProps = {
-  readonly postItemTo: string
-}
+
 
 function XIcon(props: SVGProps<SVGSVGElement>) {
   return (
@@ -64,7 +62,7 @@ const socialLinks: readonly SocialLink[] = [
   },
 ] as const
 
-export function LandingFooter({ postItemTo }: LandingFooterProps) {
+export function LandingFooter() {
   return (
     <footer className="bg-[#0B3322] px-6 py-14 text-white sm:py-16">
       <div className="mx-auto max-w-7xl">
@@ -82,12 +80,6 @@ export function LandingFooter({ postItemTo }: LandingFooterProps) {
               families.
             </p>
 
-            <Link
-              className="inline-flex rounded-full bg-tc-shell-accent px-6 py-3 text-base font-extrabold text-[#0B3322] no-underline transition-transform duration-200 hover:-translate-y-0.5"
-              to={postItemTo}
-            >
-              Post something free -&gt;
-            </Link>
           </div>
 
           <div className="flex flex-col gap-4 lg:items-end">

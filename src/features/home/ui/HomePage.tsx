@@ -16,6 +16,7 @@ export default function HomePage() {
   const impactTo = isAuthenticated ? '/impact' : '/signup'
   const partnerTo = isAuthenticated ? '/partner/onboard' : '/signup'
   const postItemTo = isAuthenticated ? '/listings' : '/signup?intent=donor'
+  const spotTo = isAuthenticated ? '/found-items/post' : '/signup?intent=spotter'
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#F7FBF4] text-tc-app-text">
@@ -33,9 +34,9 @@ export default function HomePage() {
         partnerTo={partnerTo}
       />
       <LandingTestimonialsSection />
-      <LandingCtaSection browseTo={browseTo} postItemTo={postItemTo} />
+      <LandingCtaSection browseTo={browseTo} postItemTo={postItemTo} spotTo={spotTo} />
       <LandingFaqSection />
-      <LandingFooter postItemTo={postItemTo} />
+      <LandingFooter />
     </main>
   )
 }

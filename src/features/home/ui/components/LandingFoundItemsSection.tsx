@@ -67,7 +67,7 @@ export function LandingFoundItemsSection({ isAuthenticated }: LandingFoundItemsS
 
           <div className="tc-landing-fade-up tc-landing-delay-3 mt-10 flex flex-col gap-3 sm:flex-row">
             <Link
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-tc-shell-accent px-8 py-3.5 text-base font-semibold text-tc-shell-roleActiveText no-underline shadow-[0_18px_40px_rgba(164,245,166,0.28)] transition duration-200 hover:-translate-y-0.5 hover:bg-tc-action-primaryHover"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-tc-shell-accent px-8 py-3.5 text-base font-semibold text-tc-shell-roleActiveText no-underline shadow-[0_18px_40px_rgba(164,245,166,0.28)] transition duration-200 hover:-translate-y-0.5 hover:bg-tc-shell-accentHover"
               to={primaryCtaTo}
             >
               {primaryCtaLabel}

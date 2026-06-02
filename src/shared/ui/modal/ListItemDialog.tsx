@@ -821,7 +821,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
                 className={classNames(
                   'flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold',
                   locationType === 'address'
-                    ? 'border-lime-500 bg-lime-500 text-white'
+                    ? 'border-[#0D3B24] bg-[#0D3B24] text-white'
                     : 'border-slate-200 bg-white text-slate-700',
                 )}
                 onClick={() => setLocationType('address')}
@@ -838,7 +838,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
                 className={classNames(
                   'flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold',
                   locationType === 'shop'
-                    ? 'border-lime-500 bg-lime-500 text-white'
+                    ? 'border-[#0D3B24] bg-[#0D3B24] text-white'
                     : 'border-slate-200 bg-white text-slate-700',
                 )}
                 onClick={() => setLocationType('shop')}
@@ -948,11 +948,11 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
 
           {submitError ? <p className="text-sm text-rose-600">{submitError}</p> : null}
 
-          <div className="rounded-xl border border-lime-200 bg-lime-50 p-4">
+          <div className="rounded-xl border border-[#0D3B24]/20 bg-[#0D3B24]/5 p-4">
             <h3 className="text-sm font-bold text-slate-900">Environmental Impact</h3>
             <p className="mt-1 text-sm text-slate-600">
               By listing this item, you're helping reduce electronic waste and saving approximately{' '}
-              <span className="font-extrabold text-lime-700">12kg of CO2</span> from entering the atmosphere.
+              <span className="font-extrabold text-[#0D3B24]">12kg of CO2</span> from entering the atmosphere.
             </p>
           </div>
         </div>

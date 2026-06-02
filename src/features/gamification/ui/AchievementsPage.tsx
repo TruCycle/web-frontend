@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Award, ChevronRight, Flame, Medal, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuthSession } from '@/shared/context/useAuthSession'
@@ -12,6 +12,7 @@ import { BadgeGrid } from './components/BadgeGrid'
 import { LevelTrack } from './components/LevelTrack'
 import { TierBadge } from './components/TierBadge'
 import { CarbonLedgerPanel } from './components/CarbonLedgerPanel'
+import { useConfetti } from '@/shared/hooks/useConfetti'
 
 function formatDate(value: string): string {
   const date = new Date(value)
@@ -80,6 +81,9 @@ export default function AchievementsPage() {
     isLoading: isLoadingFoundItemImpact,
   } = useFoundItemImpact()
   const [transactions, setTransactions] = useState<PointTransaction[]>([])
+  const { fireMilestone } = useConfetti()
+  const prevLevelRef = useRef<number | null>(null)
+  const confettiFiredRef = useRef(false)
 
   useEffect(() => {
     let isMounted = true
@@ -94,6 +98,19 @@ export default function AchievementsPage() {
       isMounted = false
     }
   }, [])
+
+  // Fire confetti when new badges are present or when the level increments
+  useEffect(() => {
+    if (isLoadingBadges || isLoadingProgress || confettiFiredRef.current) return
+    const hasNewBadge = earnedBadges.some((b) => b.isNew)
+    const currentLevel = progress?.currentLevel ?? null
+    const leveledUp = prevLevelRef.current !== null && currentLevel !== null && currentLevel > prevLevelRef.current
+    if (hasNewBadge || leveledUp) {
+      confettiFiredRef.current = true
+      fireMilestone()
+    }
+    prevLevelRef.current = currentLevel
+  }, [isLoadingBadges, isLoadingProgress, earnedBadges, progress, fireMilestone])
 
   const streakUnitLabel = primaryStreak?.streakType === 'weekly' ? 'weeks' : 'days'
   const currentStreak = isLoadingStreaks ? '-' : primaryStreak?.currentStreak ?? 0

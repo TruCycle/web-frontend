@@ -1,6 +1,6 @@
 import { Leaf } from 'lucide-react'
 
-import heroImg from '@/assets/images/hero-abstract.jpg'
+const heroImg = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&q=80&fit=crop'
 
 const steps = [
   {

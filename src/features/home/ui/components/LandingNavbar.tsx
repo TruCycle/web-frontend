@@ -46,7 +46,7 @@ export function LandingNavbar({ dashboardTo, isAuthenticated, postItemTo }: Land
             </Link>
           ) : null}
           <Link
-            className="inline-flex items-center rounded-full bg-tc-shell-accent px-5 py-2.5 text-base font-extrabold text-[#0B3322] no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-tc-action-primaryHover"
+            className="inline-flex items-center rounded-full bg-tc-shell-accent px-5 py-2.5 text-base font-extrabold text-[#0B3322] no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-tc-shell-accentHover"
             to={isAuthenticated ? dashboardTo : postItemTo}
           >
             {isAuthenticated ? 'Open dashboard' : 'Post an item'}

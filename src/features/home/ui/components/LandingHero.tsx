@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 
-import bagShoeImg from '@/assets/images/bag-shoe.jpg'
-import bookPlannerImg from '@/assets/images/book-planner.jpg'
-import scentedCandleImg from '@/assets/images/scented-candle.jpg'
+const heroImg1 = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=700&q=80&fit=crop'
+const heroImg2 = 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&q=80&fit=crop'
+const heroImg3 = 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80&fit=crop'
 
 type LandingHeroProps = {
   readonly browseTo: string
@@ -71,20 +71,20 @@ export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
 
         <div className="relative mx-auto h-[29rem] w-full max-w-[28rem] lg:h-[31rem] lg:max-w-[29rem]">
           <div className="absolute left-0 top-0 h-[70%] w-[58%] overflow-hidden rounded-[1.9rem] border border-white/70 bg-white shadow-[0_24px_70px_rgba(11,51,34,0.12)]">
-            <img alt="Bag and shoes ready for reuse" className="h-full w-full object-cover" src={bagShoeImg} />
+            <img alt="Furniture ready for reuse" className="h-full w-full object-cover" src={heroImg1} />
           </div>
 
           <div className="absolute right-0 top-10 h-[42%] w-[46%] overflow-hidden rounded-[1.5rem] border border-white/80 bg-white shadow-[0_20px_60px_rgba(11,51,34,0.10)]">
-            <img alt="Books and planner stacked together" className="h-full w-full object-cover" loading="lazy" src={bookPlannerImg} />
+            <img alt="Books ready to rehome" className="h-full w-full object-cover" loading="lazy" src={heroImg2} />
           </div>
 
           <div className="absolute bottom-0 left-[18%] h-[38%] w-[50%] overflow-hidden rounded-[1.65rem] border border-white/80 bg-white shadow-[0_24px_70px_rgba(11,51,34,0.10)]">
-            <img alt="Reusable home item detail" className="h-full w-full object-cover" loading="lazy" src={scentedCandleImg} />
+            <img alt="Kitchenware ready for a new home" className="h-full w-full object-cover" loading="lazy" src={heroImg3} />
           </div>
 
-          <div className="absolute -left-5 top-14 h-24 w-24 rounded-full bg-tc-shell-accent/30 blur-2xl" />
-          <div className="absolute right-4 top-0 h-16 w-16 rounded-full border border-tc-shell-accent/35 bg-[radial-gradient(circle_at_35%_35%,rgba(164,245,166,0.95),rgba(255,156,45,0.42)_58%,rgba(248,250,252,0.16)_100%)] shadow-[0_16px_40px_rgba(164,245,166,0.18)]" />
-          <div className="absolute bottom-10 right-6 h-24 w-24 rounded-full border border-[#FF9C2D33] bg-[radial-gradient(circle_at_35%_35%,rgba(255,156,45,0.78),rgba(164,245,166,0.34)_55%,rgba(248,250,252,0.10)_100%)] shadow-[0_18px_50px_rgba(255,156,45,0.18)] backdrop-blur-sm" />
+          <div className="absolute -left-5 top-14 h-24 w-24 rounded-full bg-[#0D3B24]/20 blur-2xl" />
+          <div className="absolute right-4 top-0 h-16 w-16 rounded-full border border-[#A4F5A6]/40 bg-[radial-gradient(circle_at_35%_35%,rgba(164,245,166,0.90),rgba(13,59,36,0.50)_60%,rgba(164,245,166,0.08)_100%)] shadow-[0_16px_40px_rgba(13,59,36,0.14)]" />
+          <div className="absolute bottom-10 right-6 h-24 w-24 rounded-full border border-[#D4A84B]/30 bg-[radial-gradient(circle_at_35%_35%,rgba(212,168,75,0.75),rgba(13,59,36,0.40)_55%,rgba(212,168,75,0.08)_100%)] shadow-[0_18px_50px_rgba(212,168,75,0.15)] backdrop-blur-sm" />
         </div>
       </div>
     </section>

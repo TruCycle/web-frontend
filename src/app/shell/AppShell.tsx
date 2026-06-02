@@ -13,6 +13,7 @@ import {
   LogOut,
   X,
   Trophy,
+  Medal,
   Camera,
   Compass,
 } from 'lucide-react'
@@ -206,6 +207,10 @@ export function AppShell({ children }: AppShellProps) {
         <NavLink className={navLinkClassName} to="/map" onClick={onSidebarNavigate}>
           <Compass size={20} />
           <span>Nearby</span>
+        </NavLink>
+        <NavLink className={navLinkClassName} to="/community-board" onClick={onSidebarNavigate}>
+          <Medal size={20} />
+          <span>Leaderboard</span>
         </NavLink>
         {role !== 'spotter' ? (
           <NavLink className={navLinkClassName} to="/impact" onClick={onSidebarNavigate}>

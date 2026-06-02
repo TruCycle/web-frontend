@@ -53,7 +53,7 @@ export function LegalPageLayout({
               </Link>
             ) : null}
             <Link
-              className="inline-flex items-center gap-1.5 rounded-full bg-tc-shell-accent px-5 py-2.5 text-sm font-semibold text-tc-shell-roleActiveText no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-tc-action-primaryHover"
+              className="inline-flex items-center gap-1.5 rounded-full bg-tc-shell-accent px-5 py-2.5 text-sm font-semibold text-tc-shell-roleActiveText no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-tc-shell-accentHover"
               to={primaryCtaTo}
             >
               {primaryCtaLabel}
@@ -105,7 +105,7 @@ export function LegalPageLayout({
               Join your local community on TruCycle. It&apos;s free, fast, and designed for people who&apos;d rather act than scroll.
             </p>
             <Link
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-tc-shell-accent px-8 py-4 text-base font-semibold text-tc-shell-roleActiveText no-underline shadow-[0_18px_40px_rgba(164,245,166,0.32)] transition duration-200 hover:-translate-y-0.5 hover:bg-tc-action-primaryHover"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-tc-shell-accent px-8 py-4 text-base font-semibold text-tc-shell-roleActiveText no-underline shadow-[0_18px_40px_rgba(164,245,166,0.32)] transition duration-200 hover:-translate-y-0.5 hover:bg-tc-shell-accentHover"
               to={primaryCtaTo}
             >
               {isAuthenticated ? primaryCtaLabel : 'Create your account'}

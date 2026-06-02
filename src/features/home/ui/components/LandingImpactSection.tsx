@@ -44,7 +44,7 @@ export function LandingImpactSection({ browseTo, impactTo, partnerTo }: LandingI
 
           <div className="flex flex-col gap-3 pt-2 sm:flex-row">
             <Link
-              className="inline-flex items-center justify-center rounded-full bg-tc-shell-accent px-6 py-3 text-base font-bold text-[#0B3322] no-underline transition-transform duration-200 hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center rounded-full bg-[#0D3B24] px-6 py-3 text-base font-bold text-white no-underline transition-transform duration-200 hover:-translate-y-0.5"
               to={impactTo}
             >
               Read the impact report -&gt;

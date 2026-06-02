@@ -34,6 +34,7 @@ import { env } from '@/shared/lib/config/env'
 import { Button } from '@/shared/ui/button/Button'
 import { useToast } from '@/shared/ui/toast/useToast'
 import { classNames } from '@/shared/utils/classNames'
+import { useConfetti } from '@/shared/hooks/useConfetti'
 
 type PostStep = 'capture' | 'details' | 'review' | 'success'
 
@@ -267,6 +268,11 @@ export default function PostFoundItemPage() {
   const { user } = useAuthSession()
   const { success, error, info } = useToast()
   const [step, setStep] = useState<PostStep>('capture')
+  const { fireMilestone } = useConfetti()
+  useEffect(() => {
+    if (step === 'success') fireMilestone()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step])
   const [category, setCategory] = useState<FoundItemCategory>('furniture')
   const [itemName, setItemName] = useState('')
   const [estimatedWeightKg, setEstimatedWeightKg] = useState('')
