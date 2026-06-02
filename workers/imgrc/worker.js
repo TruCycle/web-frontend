@@ -142,28 +142,24 @@ export default {
 
     // ── Run inference ───────────────────────────────────────────────────────
     try {
-      const systemPrompt =
-        'You are an item analysis AI for TruCycle UK. ' +
-        'Respond with ONLY a raw JSON object — no markdown, no code fences, no explanation. ' +
-        'Use straight ASCII characters only; avoid backslashes inside string values. ' +
+      // Cloudflare's llama-3.2-11b-vision-instruct binding accepts the flat
+      // { prompt, image } shape — NOT the messages[] / content array format.
+      // Baking the instruction into the prompt is the only supported path.
+      const fullPrompt =
+        '[INST] You are an item analysis AI for TruCycle UK. ' +
+        'Respond with ONLY a raw JSON object — no markdown, no code fences, no extra text. ' +
+        'Use plain ASCII characters; no backslashes inside string values. ' +
         'Required keys: ' +
         '"item_type" (string, e.g. "sofa"), ' +
         '"condition" (one of: "Excellent", "Good", "Fair", "Poor"), ' +
         '"reusable" (boolean), ' +
         '"suggested_category" (one of: "Furniture", "Kitchenware", "Books + media", "Kids + baby", "Garden + tools", "Tech shelf", "Clothing", "Other"), ' +
-        '"notes" (one short sentence, no backslashes).'
+        '"notes" (one short sentence). ' +
+        userPrompt + ' [/INST]'
 
       const inferenceInput = {
-        messages: [
-          { role: 'system', content: systemPrompt },
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: userPrompt },
-              { type: 'image', image: imageArray },
-            ],
-          },
-        ],
+        prompt: fullPrompt,
+        image: imageArray,
         max_tokens: 350,
       }
 
@@ -182,8 +178,9 @@ export default {
         }
       }
 
-      // Llama 3.2 Vision returns { response: "..." }
+      // Flat-input binding returns { description: "..." } or { response: "..." }
       const rawText =
+        response?.description ??
         response?.response ??
         response?.choices?.[0]?.message?.content ??
         (typeof response === 'string' ? response : '')
