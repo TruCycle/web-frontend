@@ -194,7 +194,7 @@ function VisionTool() {
                 Internal
               </span>
             </div>
-            <p className="text-sm text-white/40">AI item analysis · Gemma 4 · Not indexed</p>
+            <p className="text-sm text-white/40">AI item analysis · LLaVA 1.5 · Not indexed</p>
           </div>
         </div>
 
@@ -277,11 +277,41 @@ function VisionTool() {
           {/* Result */}
           {(result ?? error) ? (
             <div className="border-t border-white/8 px-7 py-6 sm:px-8">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">
-                Result
+              <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/30">
+                Analysis result
               </p>
               {error ? (
                 <p className="text-sm text-red-400">{error}</p>
+              ) : result?.success === false ? (
+                <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4">
+                  <p className="text-sm font-semibold text-red-400">Worker error</p>
+                  <p className="mt-1 text-xs text-red-400/70">{String(result.error)}</p>
+                </div>
+              ) : result?.data ? (
+                <div className="space-y-3">
+                  {Object.entries(result.data as Record<string, unknown>).map(([key, value]) => (
+                    <div key={key} className="flex items-start justify-between gap-4 rounded-xl border border-white/6 bg-[#141414] px-4 py-3">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-white/35">
+                        {key.replace(/_/g, ' ')}
+                      </span>
+                      <span className={`text-right text-sm font-medium ${
+                        value === true ? 'text-[#A4F5A6]' :
+                        value === false ? 'text-red-400' :
+                        value === 'Excellent' ? 'text-[#A4F5A6]' :
+                        value === 'Good' ? 'text-[#D4A84B]' :
+                        value === 'Fair' ? 'text-orange-400' :
+                        value === 'Poor' || value === 'End-of-Life' ? 'text-red-400' :
+                        'text-white'
+                      }`}>
+                        {String(value)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : result?.raw ? (
+                <pre className="overflow-x-auto rounded-xl border border-white/8 bg-[#141414] p-4 text-xs leading-6 text-white/60">
+                  {String(result.raw)}
+                </pre>
               ) : (
                 <pre className="overflow-x-auto rounded-xl border border-white/8 bg-[#141414] p-4 text-xs leading-6 text-[#A4F5A6]">
                   {JSON.stringify(result, null, 2)}
