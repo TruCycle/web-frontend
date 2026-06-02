@@ -13,11 +13,9 @@
  */
 
 const ALLOWED_ORIGINS = [
-  'https://stage.up.railway.app',
+  'https://trucycle-stage.up.railway.app',
   'https://trucycle.co.uk',
-  'https://www.trucycle.co.uk',
-  'http://localhost:5173',
-  'http://localhost:4173',
+  'https://www.trucycle.co.uk'
 ]
 
 const MODEL = '@cf/meta/llama-3.2-11b-vision-instruct'
