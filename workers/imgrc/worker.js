@@ -6,11 +6,10 @@
  *   [ai]
  *   binding = "AI"
  *
- * Model note:
- *   @cf/google/gemma-4-26b-a4b-it is TEXT-ONLY — it cannot accept image inputs.
- *   @cf/unum/uform-gen2-qwen-500m and @cf/llava-hf/llava-1.5-7b-hf are the
- *   vision-capable models available on Workers AI.
- *   We use llava-1.5-7b-hf as the primary; uform-gen2 as a smaller fallback.
+ * Model: @cf/meta/llama-3.2-11b-vision-instruct
+ *   - Proper vision model (unlike Gemma 4 which is text-only)
+ *   - Accepts messages[] + image array
+ *   - Better JSON instruction-following than LLaVA 1.5
  */
 
 const ALLOWED_ORIGINS = [
@@ -21,8 +20,11 @@ const ALLOWED_ORIGINS = [
   'http://localhost:4173',
 ]
 
-// Vision-capable model available on Cloudflare Workers AI
-const MODEL = '@cf/llava-hf/llava-1.5-7b-hf'
+const MODEL = '@cf/meta/llama-3.2-11b-vision-instruct'
+
+// 1.5 MB hard limit — Workers can't resize images and spreading a 3MB
+// Uint8Array into a number[] easily exceeds the thread memory ceiling
+const MAX_BYTES = 1.5 * 1024 * 1024
 
 function corsHeaders(origin) {
   const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]
@@ -39,6 +41,50 @@ function json(data, status = 200, origin = '') {
     status,
     headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
   })
+}
+
+/**
+ * Robust JSON extractor — handles LLaVA/Llama escaping quirks:
+ *   - unescaped backslashes  e.g. "TV\stand"  → "TV\\stand"
+ *   - control characters
+ *   - markdown fences
+ *   - trailing commas
+ *   - text before/after the JSON object
+ */
+function extractJson(raw) {
+  let text = raw.trim()
+
+  // Strip markdown fences
+  if (text.startsWith('```')) {
+    text = text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim()
+  }
+
+  // Slice out the first {...} block
+  const start = text.indexOf('{')
+  const end   = text.lastIndexOf('}')
+  if (start === -1 || end === -1 || end < start) return null
+
+  let candidate = text.slice(start, end + 1)
+
+  // Pass 1 — try as-is
+  try { return JSON.parse(candidate) } catch { /* fall through */ }
+
+  // Pass 2 — fix common model escaping issues
+  candidate = candidate
+    // escape lone backslashes that aren't part of a valid JSON escape sequence
+    .replace(/\\(?!["\\/bfnrtu])/g, '\\\\')
+    // strip ASCII control characters (0x00–0x1F except \t \n \r)
+    .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, '')
+    // trailing commas before } or ]
+    .replace(/,\s*([}\]])/g, '$1')
+
+  try { return JSON.parse(candidate) } catch { /* fall through */ }
+
+  // Pass 3 — aggressively strip everything non-printable and retry
+  candidate = candidate.replace(/[^\x20-\x7E\n\r\t]/g, '')
+  try { return JSON.parse(candidate) } catch { /* fall through */ }
+
+  return null
 }
 
 export default {
@@ -58,8 +104,9 @@ export default {
       return json({ error: 'AI binding not configured' }, 500, origin)
     }
 
+    // ── Parse multipart form ────────────────────────────────────────────────
     let imageArray
-    let userPrompt = 'Analyze this item for Trucycle.'
+    let userPrompt = 'Analyze this item for TruCycle.'
 
     try {
       const formData = await request.formData()
@@ -70,62 +117,75 @@ export default {
         return json({ error: "Missing 'image' file in form data" }, 400, origin)
       }
 
+      const arrayBuffer = await imageFile.arrayBuffer()
+
+      // Reject oversized images before allocation — spreading a 3MB file into
+      // a number[] can exhaust the Worker's memory and crash the thread
+      if (arrayBuffer.byteLength > MAX_BYTES) {
+        return json({
+          error: `Image too large (${(arrayBuffer.byteLength / 1024 / 1024).toFixed(1)} MB). Max 1.5 MB.`,
+          hint: 'Resize or compress the image before uploading.',
+        }, 413, origin)
+      }
+
+      // Array.from is equivalent to spread but slightly more explicit;
+      // the Workers AI SDK requires number[] not TypedArray for image inputs
+      imageArray = Array.from(new Uint8Array(arrayBuffer))
+
       if (customPrompt && typeof customPrompt === 'string' && customPrompt.trim()) {
         userPrompt = customPrompt.trim()
       }
-
-      const arrayBuffer = await imageFile.arrayBuffer()
-      imageArray = [...new Uint8Array(arrayBuffer)]
     } catch (err) {
       console.error('Failed to parse request:', err)
       return json({ error: 'Failed to parse request body', detail: String(err) }, 400, origin)
     }
 
+    // ── Run inference ───────────────────────────────────────────────────────
     try {
-      const systemInstruction =
-        'You are an item analysis AI for Trucycle UK. ' +
-        'Respond ONLY with a raw JSON object — no markdown, no code fences, no extra text. ' +
+      const systemPrompt =
+        'You are an item analysis AI for TruCycle UK. ' +
+        'Respond with ONLY a raw JSON object — no markdown, no code fences, no explanation. ' +
+        'Use straight ASCII characters only; avoid backslashes inside string values. ' +
         'Required keys: ' +
         '"item_type" (string, e.g. "sofa"), ' +
-        '"condition" ("Excellent" | "Good" | "Fair" | "Poor"), ' +
+        '"condition" (one of: "Excellent", "Good", "Fair", "Poor"), ' +
         '"reusable" (boolean), ' +
-        '"suggested_category" (one of: "Furniture","Kitchenware","Books + media","Kids + baby","Garden + tools","Tech shelf","Clothing","Other"), ' +
-        '"notes" (string, one short sentence).'
+        '"suggested_category" (one of: "Furniture", "Kitchenware", "Books + media", "Kids + baby", "Garden + tools", "Tech shelf", "Clothing", "Other"), ' +
+        '"notes" (one short sentence, no backslashes).'
 
-      const fullPrompt = `${systemInstruction}\n\nUser request: ${userPrompt}`
-
-      // LLaVA-1.5 accepts { prompt, image } — flat shape, not messages array
       const response = await env.AI.run(MODEL, {
-        prompt: fullPrompt,
-        image: imageArray,
-        max_tokens: 400,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: userPrompt },
+              { type: 'image', image: imageArray },
+            ],
+          },
+        ],
+        max_tokens: 350,
       })
 
-      // LLaVA returns { description: "..." } or a plain string
-      let rawText =
-        typeof response === 'string'
-          ? response
-          : (response?.description ?? response?.result ?? response?.choices?.[0]?.message?.content ?? '')
+      // Llama 3.2 Vision returns { response: "..." }
+      const rawText =
+        response?.response ??
+        response?.choices?.[0]?.message?.content ??
+        (typeof response === 'string' ? response : '')
 
       if (!rawText) {
-        throw new Error('AI returned an empty response')
+        throw new Error('Model returned an empty response')
       }
 
-      // Strip markdown fences if the model wraps its output anyway
-      let clean = rawText.trim()
-      if (clean.startsWith('```')) {
-        clean = clean.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim()
+      const parsed = extractJson(rawText)
+
+      if (parsed) {
+        return json({ success: true, data: parsed }, 200, origin)
       }
 
-      // Extract the first JSON object from the response even if there's surrounding text
-      const jsonMatch = clean.match(/\{[\s\S]*\}/)
-      if (!jsonMatch) {
-        // Return raw text if no JSON found — still useful for debugging
-        return json({ success: true, raw: rawText, data: null }, 200, origin)
-      }
+      // Could not extract JSON — return raw text so the UI can still show it
+      return json({ success: true, data: null, raw: rawText }, 200, origin)
 
-      const parsed = JSON.parse(jsonMatch[0])
-      return json({ success: true, data: parsed }, 200, origin)
     } catch (err) {
       console.error('AI inference error:', err)
       return json({ success: false, error: String(err), model: MODEL }, 500, origin)

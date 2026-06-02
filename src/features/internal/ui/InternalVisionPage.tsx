@@ -143,6 +143,10 @@ function VisionTool() {
   const [error, setError] = useState<string | null>(null)
 
   const handleFile = (file: File) => {
+    if (file.size > 1.5 * 1024 * 1024) {
+      setError(`Image too large (${(file.size / 1024 / 1024).toFixed(1)} MB) — max 1.5 MB. Compress or resize first.`)
+      return
+    }
     setImage(file)
     setResult(null)
     setError(null)
@@ -194,7 +198,7 @@ function VisionTool() {
                 Internal
               </span>
             </div>
-            <p className="text-sm text-white/40">AI item analysis · LLaVA 1.5 · Not indexed</p>
+            <p className="text-sm text-white/40">AI item analysis · Llama 3.2 Vision · Not indexed</p>
           </div>
         </div>
 
@@ -229,6 +233,7 @@ function VisionTool() {
                     <p className="text-sm text-white/35">
                       Drag & drop or <span className="text-[#A4F5A6]">browse</span>
                     </p>
+                    <p className="text-xs text-white/20">Max 1.5 MB</p>
                   </>
                 )}
                 <input
