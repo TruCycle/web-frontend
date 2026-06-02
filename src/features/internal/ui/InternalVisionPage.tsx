@@ -434,7 +434,7 @@ function VisionTool() {
 
           {/* ── Right panel ── */}
           <div className="lg:col-span-7">
-            <div className="flex min-h-[680px] flex-col rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex min-h-[500px] flex-col rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm">
 
               {/* Panel header */}
               <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
@@ -549,7 +549,7 @@ function VisionTool() {
                   <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
                     <p className="text-xs font-semibold text-amber-700">Model returned plain text — JSON extraction failed</p>
                   </div>
-                  <pre className="max-h-48 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-xs leading-6 text-slate-500">
+                  <pre className="min-h-[260px] overflow-y-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-xs leading-7 text-slate-600">
                     {response.raw}
                   </pre>
                 </div>
