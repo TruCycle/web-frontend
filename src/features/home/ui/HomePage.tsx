@@ -8,8 +8,10 @@ import { LandingNavbar } from '@/features/home/ui/components/LandingNavbar'
 import { LandingTestimonialsSection } from '@/features/home/ui/components/LandingTestimonialsSection'
 import { LandingWhatWeTakeSection } from '@/features/home/ui/components/LandingWhatWeTakeSection'
 import { useAuthSession } from '@/shared/context/useAuthSession'
+import { usePageMeta } from '@/shared/hooks/usePageMeta'
 
 export default function HomePage() {
+  usePageMeta({ canonicalPath: '/' })
   const { isAuthenticated } = useAuthSession()
   const browseTo = isAuthenticated ? '/browse' : '/signup?intent=collector'
   const dashboardTo = isAuthenticated ? '/dashboard' : '/login'

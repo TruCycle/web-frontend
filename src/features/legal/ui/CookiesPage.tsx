@@ -1,4 +1,5 @@
 import { LegalPageLayout } from '@/features/legal/ui/LegalPageLayout'
+import { usePageMeta } from '@/shared/hooks/usePageMeta'
 
 const cookieSections = [
   {
@@ -16,6 +17,13 @@ const cookieSections = [
 ] as const
 
 export default function CookiesPage() {
+  usePageMeta({
+    title: 'Cookie Policy — TruCycle',
+    description:
+      'How TruCycle uses cookies and similar technologies, and how your choices affect optional tracking.',
+    canonicalPath: '/cookies',
+  })
+
   return (
     <LegalPageLayout
       eyebrow="Cookies"

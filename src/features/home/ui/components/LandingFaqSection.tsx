@@ -1,5 +1,5 @@
 import { Plus, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 type FaqItem = {
   readonly answer: string
@@ -36,6 +36,31 @@ const faqItems: readonly FaqItem[] = [
 
 export function LandingFaqSection() {
   const [openIndex, setOpenIndex] = useState(0)
+
+  useEffect(() => {
+    const faqSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqItems.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.answer,
+        },
+      })),
+    }
+
+    const script = document.createElement('script')
+    script.type = 'application/ld+json'
+    script.dataset.seo = 'faq-schema'
+    script.textContent = JSON.stringify(faqSchema)
+    document.head.appendChild(script)
+
+    return () => {
+      script.remove()
+    }
+  }, [])
 
   return (
     <section className="bg-[#F7FBF4] px-6 py-20 sm:py-24" id="faq">

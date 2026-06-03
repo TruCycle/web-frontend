@@ -1,4 +1,5 @@
 import { LegalPageLayout } from '@/features/legal/ui/LegalPageLayout'
+import { usePageMeta } from '@/shared/hooks/usePageMeta'
 
 const termsSections = [
   {
@@ -16,6 +17,13 @@ const termsSections = [
 ] as const
 
 export default function TermsPage() {
+  usePageMeta({
+    title: 'Terms of Use — TruCycle',
+    description:
+      'The core rules for using TruCycle and participating in listings, messaging, and item exchanges.',
+    canonicalPath: '/terms',
+  })
+
   return (
     <LegalPageLayout
       eyebrow="Terms"

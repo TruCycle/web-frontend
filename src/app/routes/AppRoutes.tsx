@@ -37,6 +37,7 @@ const FoundItemsMapPage = lazy(() => import('@/features/found-items/ui/FoundItem
 const PostFoundItemPage = lazy(() => import('@/features/found-items/ui/PostFoundItemPage'))
 const MyFoundPostsPage = lazy(() => import('@/features/found-items/ui/MyFoundPostsPage'))
 const InternalVisionPage = lazy(() => import('@/features/internal/ui/InternalVisionPage'))
+const NotFoundPage = lazy(() => import('@/features/home/ui/NotFoundPage'))
 
 function ShellLayout() {
   return (
@@ -150,7 +151,7 @@ export function AppRoutes() {
           <Route path="/support/:viewRole" element={<Navigate replace to="/support" />} />
         </Route>
       </Route>
-      <Route path="*" element={<Navigate replace to="/" />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

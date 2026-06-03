@@ -1,7 +1,8 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Search, ChevronRight, SlidersHorizontal, X } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
+import { usePageMeta } from '@/shared/hooks/usePageMeta'
 import collectedItemsIcon from '@/assets/icons/collected-items-icon.svg'
 import exchangeIcon from '@/assets/icons/exchange-icon.svg'
 import sizeIcon from '@/assets/icons/size-icon.svg'
@@ -39,6 +40,12 @@ function statColor(index: number): string {
 }
 
 export default function Dashboard() {
+  usePageMeta({
+    title: 'Dashboard — TruCycle',
+    description: 'Your TruCycle dashboard. Track your impact, manage listings, and browse available items.',
+    noIndex: true,
+  })
+
   const location = useLocation()
   const { success, error } = useToast()
   const { user } = useAuthSession()
