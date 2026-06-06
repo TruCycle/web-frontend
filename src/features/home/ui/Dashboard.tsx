@@ -1,7 +1,8 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Search, ChevronRight, SlidersHorizontal, X } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
+import { usePageMeta } from '@/shared/hooks/usePageMeta'
 import collectedItemsIcon from '@/assets/icons/collected-items-icon.svg'
 import exchangeIcon from '@/assets/icons/exchange-icon.svg'
 import sizeIcon from '@/assets/icons/size-icon.svg'
@@ -23,6 +24,13 @@ import { useAuthSession } from '@/shared/context/useAuthSession'
 import type { BrowseItem } from '@/features/items/types'
 import type { DonorListingItem } from '@/features/listings/types'
 import { NewItemButton } from '@/shared/ui/button/NewItemButton'
+import { useUserProgress } from '@/features/gamification/hooks/useUserProgress'
+import { useStreaks } from '@/features/gamification/hooks/useStreaks'
+import { useBadges } from '@/features/gamification/hooks/useBadges'
+import { LevelBadge } from '@/features/gamification/ui/components/LevelBadge'
+import { ProgressBar } from '@/features/gamification/ui/components/ProgressBar'
+import { StreakIndicator } from '@/features/gamification/ui/components/StreakIndicator'
+import { RescueTicker } from '@/features/gamification/ui/components/RescueTicker'
 
 function statColor(index: number): string {
   if (index === 0) return 'bg-tc-app-primary/10'
@@ -32,6 +40,12 @@ function statColor(index: number): string {
 }
 
 export default function Dashboard() {
+  usePageMeta({
+    title: 'Dashboard — TruCycle',
+    description: 'Your TruCycle dashboard. Track your impact, manage listings, and browse available items.',
+    noIndex: true,
+  })
+
   const location = useLocation()
   const { success, error } = useToast()
   const { user } = useAuthSession()
@@ -69,6 +83,18 @@ export default function Dashboard() {
     removingId,
     removeListing,
   } = useDonorListings(isDonorMode)
+  const {
+    progress: userProgress,
+    isLoading: isLoadingProgress,
+  } = useUserProgress()
+  const {
+    primaryStreak,
+  } = useStreaks()
+  const {
+    earnedBadges,
+    isLoading: isLoadingBadges,
+  } = useBadges('earned')
+
 
   const handleClaimItem = async (itemId: string) => {
     try {
@@ -204,6 +230,78 @@ export default function Dashboard() {
         </div>
       ) : null}
 
+      {showStats ? (
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+          <section className="space-y-4 rounded-xl bg-white p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold text-tc-app-secondary">My Impact</h2>
+                <p className="text-sm text-slate-500">Current pace</p>
+              </div>
+              {userProgress ? <LevelBadge progress={userProgress} /> : null}
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-tc-app-canvas p-4">
+              <div>
+                <p className="text-sm text-slate-500">Streak</p>
+                {primaryStreak ? <StreakIndicator streak={primaryStreak} size="lg" /> : <p className="text-sm text-slate-400">-</p>}
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-slate-500">Points</p>
+                <p className="text-2xl font-bold text-slate-900">
+                  {isLoadingProgress ? '-' : userProgress?.totalPoints ?? 0}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3 text-sm text-slate-500">
+                <span>Level progress</span>
+                <span>{isLoadingProgress ? '-' : `${userProgress?.pointsToNextLevel ?? 0} pts left`}</span>
+              </div>
+              <ProgressBar value={userProgress?.levelProgressPercent ?? 0} />
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {isLoadingBadges ? (
+                <p className="text-sm text-slate-500">Loading badges...</p>
+              ) : (
+                earnedBadges.slice(0, 3).map((entry) => (
+                  <span
+                    key={entry.badge.id}
+                    className="inline-flex items-center rounded-full border border-tc-app-primary/25 bg-tc-app-primary/10 px-3 py-1.5 text-sm font-medium text-tc-app-text shadow-sm"
+                  >
+                    {entry.badge.name}
+                  </span>
+                ))
+              )}
+            </div>
+
+            <Link
+              to="/impact"
+              className="inline-flex items-center gap-1 text-sm font-medium text-tc-app-secondary transition hover:underline"
+            >
+              View All <ChevronRight size={16} />
+            </Link>
+          </section>
+
+          <section className="space-y-4 rounded-xl bg-white p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold text-tc-app-secondary">Live rescue ticker</h2>
+                <p className="text-sm text-slate-500">Real-time community saves</p>
+              </div>
+            </div>
+            <RescueTicker
+              onItemClick={(event) => {
+                window.location.href = `/map?highlight=${encodeURIComponent(event.id)}`
+              }}
+            />
+          </section>
+
+        </div>
+      ) : null}
+
       {isDonorMode && showStats ? (
         <>
           <DonorEnvironmentalImpactCard />
@@ -281,14 +379,14 @@ export default function Dashboard() {
               <input
                 type="text"
                 placeholder="Search by category, location or keyword"
-                className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-tc-app-secondary outline-none placeholder:text-tc-app-secondary/70 focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+                className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-tc-app-secondary outline-none placeholder:text-tc-app-secondary/70 focus:border-tc-app-primary focus:ring-4 focus:ring-tc-app-primary/20"
                 value={filters.search}
                 onChange={(event) => updateSearch(event.target.value)}
               />
             </div>
             <button
               type="button"
-              className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-300 px-4 text-sm font-medium text-tc-app-secondary transition hover:bg-slate-50"
+              className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-300 px-4 text-sm font-medium text-tc-app-secondary transition hover:bg-tc-app-canvas"
               onClick={() => {
                 if (isFiltersOpen) {
                   clearFilters()
@@ -326,7 +424,7 @@ export default function Dashboard() {
                     value={selectedCategoryFilterValue}
                     options={categoryFilterOptions}
                     onChange={updateCategory}
-                    buttonClassName="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary"
+                    buttonClassName="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary focus:border-tc-app-primary focus:ring-4 focus:ring-tc-app-primary/20"
                   />
                 </div>
 
@@ -339,7 +437,7 @@ export default function Dashboard() {
                     value={selectedConditionFilterValue}
                     options={conditionFilterOptions}
                     onChange={updateCondition}
-                    buttonClassName="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary"
+                    buttonClassName="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary focus:border-tc-app-primary focus:ring-4 focus:ring-tc-app-primary/20"
                   />
                 </div>
 
@@ -351,7 +449,7 @@ export default function Dashboard() {
                     id="browse-filter-location"
                     type="text"
                     placeholder="Enter location or postal code"
-                    className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary outline-none placeholder:text-tc-app-secondary/70 focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+                    className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary outline-none placeholder:text-tc-app-secondary/70 focus:border-tc-app-primary focus:ring-4 focus:ring-tc-app-primary/20"
                     value={filters.location}
                     onChange={(event) => updateLocation(event.target.value)}
                   />
@@ -360,13 +458,13 @@ export default function Dashboard() {
             </div>
           ) : null}
 
-          <div className="flex gap-2 overflow-x-auto rounded-md bg-[#E2E8F040] p-1">
+          <div className="flex gap-2 overflow-x-auto rounded-md bg-tc-app-canvas/80 p-1">
             {categories.map((category) => (
               <button
                 key={category}
                 className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition ${category === filters.category
-                    ? 'bg-white text-tc-app-text'
-                    : 'bg-transparent text-tc-app-secondary hover:bg-slate-200'
+                    ? 'bg-white text-tc-app-text ring-1 ring-tc-app-primary/20 shadow-sm'
+                    : 'bg-transparent text-tc-app-secondary hover:bg-white/80'
                   }`}
                 onClick={() => updateCategory(category)}
               >

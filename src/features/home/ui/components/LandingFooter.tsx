@@ -1,19 +1,17 @@
 import type { ComponentType, SVGProps } from 'react'
 
-import { ArrowRight, Facebook, Instagram, Linkedin, Recycle, Youtube } from 'lucide-react'
+import { Facebook, Instagram, Linkedin, Youtube } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-type LandingFooterProps = {
-  readonly isAuthenticated: boolean
-  readonly primaryCtaTo: string
-  readonly primaryCtaLabel: string
-}
+import logoSrc from '@/assets/logo.svg'
 
 type SocialLink = {
-  readonly label: string
   readonly href: string
   readonly Icon: ComponentType<SVGProps<SVGSVGElement>>
+  readonly label: string
 }
+
+
 
 function XIcon(props: SVGProps<SVGSVGElement>) {
   return (
@@ -64,63 +62,64 @@ const socialLinks: readonly SocialLink[] = [
   },
 ] as const
 
-export function LandingFooter({ isAuthenticated, primaryCtaLabel, primaryCtaTo }: LandingFooterProps) {
+export function LandingFooter() {
   return (
-    <footer className="relative overflow-hidden px-6 py-24">
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,rgba(164,245,166,0.16)_0%,rgba(248,250,252,0.92)_52%,rgba(164,245,166,0.08)_100%)]" />
-      <div className="absolute inset-x-0 top-0 -z-10 h-40 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.8),transparent_70%)]" />
+    <footer className="bg-[#0B3322] px-6 py-14 text-white sm:py-16">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-12 lg:grid-cols-[310px_minmax(0,1fr)] lg:gap-[4.375rem]">
+          <div className="space-y-[1.125rem]">
+            <Link className="flex items-center gap-3 no-underline" to="/">
+              <img alt="TruCycle" className="h-9 w-9 rounded-full" src={logoSrc} />
+              <span className="text-[1.75rem] font-normal tracking-[-0.04em] text-white">
+                TruCycle
+              </span>
+            </Link>
 
-      <div className="mx-auto max-w-3xl text-center">
-        <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-[1.2rem] bg-tc-shell-bg text-white shadow-[0_14px_30px_rgba(35,35,35,0.14)]">
-          <Recycle className="h-7 w-7" />
-        </div>
-        <h2 className="tc-landing-fade-up text-4xl font-bold tracking-[-0.04em] text-slate-950 sm:text-5xl">
-          Start moving things forward.
-        </h2>
-        <p className="tc-landing-fade-up tc-landing-delay-1 mx-auto mb-8 mt-4 max-w-xl text-lg leading-8 text-slate-600">
-          Join your local community on TruCycle. It&apos;s free, fast, and designed for people who&apos;d rather act than scroll.
-        </p>
-        <Link
-          className="tc-landing-fade-up tc-landing-delay-2 inline-flex items-center justify-center gap-2 rounded-full bg-tc-shell-accent px-8 py-4 text-base font-semibold text-tc-shell-roleActiveText no-underline shadow-[0_18px_40px_rgba(164,245,166,0.32)] transition duration-200 hover:-translate-y-0.5 hover:bg-tc-action-primaryHover"
-          to={primaryCtaTo}
-        >
-          {isAuthenticated ? primaryCtaLabel : 'Create your account'}
-          <ArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
+            <p className="max-w-[19rem] text-base leading-7 text-[#E8F6EE]">
+              Neighbour-to-neighbour reuse for London homes, studios, flats, and
+              families.
+            </p>
 
-      <div className="mx-auto mt-20 flex max-w-7xl flex-col gap-8 border-t border-slate-900/10 pt-8 text-sm text-slate-500">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">Follow us</p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            {socialLinks.map(({ label, href, Icon }) => (
-              <a
-                key={label}
-                aria-label={label}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-700 transition duration-200 hover:-translate-y-0.5 hover:text-slate-950"
-                href={href}
-                rel="noreferrer"
-                target="_blank"
-                title={label}
-              >
-                <Icon className="h-4 w-4" />
-              </a>
-            ))}
+          </div>
+
+          <div className="flex flex-col gap-4 lg:items-end">
+            <p className="text-base font-semibold tracking-[0.02em] text-[#E8F6EE] lg:text-right">
+              Follow us on all social platforms
+            </p>
+
+            <div className="flex flex-wrap gap-3 lg:justify-end">
+              {socialLinks.map(({ href, Icon, label }) => (
+                <a
+                  key={label}
+                  aria-label={label}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-[#E8F6EE] transition duration-200 hover:-translate-y-0.5 hover:border-tc-shell-accent hover:text-tc-shell-accent"
+                  href={href}
+                  rel="noreferrer"
+                  target="_blank"
+                  title={label}
+                >
+                  <Icon className="h-4 w-4" />
+                </a>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
-          <span>© {new Date().getFullYear()} TruCycle. All rights reserved.</span>
-          <div className="flex flex-wrap items-center justify-center gap-6">
-            <Link className="no-underline transition-colors hover:text-slate-950" to="/privacy">
-              Privacy
-            </Link>
-            <Link className="no-underline transition-colors hover:text-slate-950" to="/terms">
-              Terms
-            </Link>
-            <Link className="no-underline transition-colors hover:text-slate-950" to={isAuthenticated ? '/dashboard' : '/login'}>
-              {isAuthenticated ? 'Dashboard' : 'Log in'}
-            </Link>
+        <div className="mt-14 space-y-4">
+          <div className="h-px w-full bg-white/15" />
+          <div className="flex flex-col gap-4 text-sm font-medium tracking-[0.04em] text-[#E8F6EE] sm:flex-row sm:items-center sm:justify-between">
+            <span>{new Date().getFullYear()} TruCycle. Free neighbour-to-neighbour handovers.</span>
+            <div className="flex flex-wrap gap-5">
+              <Link className="text-[#E8F6EE] no-underline" to="/privacy">
+                Privacy
+              </Link>
+              <Link className="text-[#E8F6EE] no-underline" to="/terms">
+                Terms
+              </Link>
+              <a className="text-[#E8F6EE] no-underline" href="mailto:hello@trucycle.co.uk?subject=Accessibility">
+                Accessibility
+              </a>
+            </div>
           </div>
         </div>
       </div>

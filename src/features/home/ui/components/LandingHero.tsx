@@ -1,81 +1,90 @@
-import { ArrowRight, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import heroImg from '@/assets/images/hero-abstract.jpg'
+
+const heroImg1 = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=700&q=80&fit=crop'
+const heroImg2 = 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&q=80&fit=crop'
+const heroImg3 = 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80&fit=crop'
 
 type LandingHeroProps = {
-  readonly isAuthenticated: boolean
-  readonly primaryCtaTo: string
-  readonly primaryCtaLabel: string
+  readonly browseTo: string
+  readonly postItemTo: string
 }
 
-const statPills = [
-  { value: '10s', label: 'to list an item' },
-  { value: '2 roles', label: 'donor & collector' },
-  { value: '0 fees', label: 'always free' },
+const metrics = [
+  { value: '12,400+', label: 'Items rehomed' },
+  { value: '2,180', label: 'Active givers' },
+  { value: '38 tons', label: 'Diverted from landfill' },
 ] as const
 
-export function LandingHero({ isAuthenticated, primaryCtaTo }: LandingHeroProps) {
+export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
   return (
-    <section className="relative overflow-hidden px-6 pb-24 pt-32 sm:pb-28 sm:pt-36">
-      <div className="absolute inset-0 -z-10">
-        <img alt="" className="h-full w-full object-cover opacity-25" src={heroImg} />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(248,250,252,0.5)_0%,rgba(248,250,252,0.82)_38%,#f8fafc_100%)]" />
-      </div>
+    <section className="relative overflow-hidden px-6 pb-20 pt-32 sm:pb-24 sm:pt-36 lg:pt-40">
+      <div className="absolute inset-x-0 top-0 -z-10 h-[28rem] bg-[radial-gradient(circle_at_18%_22%,rgba(164,245,166,0.25),transparent_42%),radial-gradient(circle_at_78%_18%,rgba(11,51,34,0.08),transparent_32%)]" />
+      <div className="absolute left-1/2 top-24 -z-10 h-64 w-64 -translate-x-1/2 rounded-full bg-tc-shell-accent/20 blur-3xl" />
 
-      <div className="absolute left-1/2 top-20 -z-10 h-[24rem] w-[24rem] -translate-x-1/2 rounded-full bg-tc-shell-accent/25 blur-3xl" />
+      <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[440px_minmax(0,1fr)] lg:items-center lg:gap-10">
+        <div className="max-w-[27.5rem]">
+          <p className="text-sm font-bold tracking-[0.04em] text-[#172033]">
+            Free - London &amp; surrounding areas
+          </p>
 
-      <div className="mx-auto max-w-7xl">
-        <div className="tc-landing-fade-up mb-8 flex justify-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-tc-shell-accent/40 bg-white/72 px-4 py-2 text-sm font-medium text-tc-shell-bg shadow-sm backdrop-blur">
-            <Sparkles className="h-4 w-4 text-tc-shell-accent" />
-            Local exchange, reimagined
-          </span>
-        </div>
+          <h1 className="mt-6 text-[clamp(3.35rem,8vw,5.5rem)] font-normal leading-[0.92] tracking-[-0.06em] text-[#0B3322]">
+            <span className="block">Your clutter is</span>
+            <span className="block">someone&apos;s</span>
+            <span className="block text-[#172033]">treasure.</span>
+          </h1>
 
-        <h1 className="tc-landing-fade-up tc-landing-delay-1 text-center text-[clamp(3.5rem,10vw,7rem)] font-extrabold leading-[0.92] tracking-[-0.06em] text-slate-950">
-          Give more.
-          <br />
-          <span className="text-tc-shell-accent">Waste less.</span>
-        </h1>
+          <div className="mt-8 space-y-1.5 text-base leading-8 text-[#121212B3] sm:text-[1.02rem]">
+            <p>List the things you no longer need. Neighbours collect them, free.</p>
+            <p>No skips, no landfill, no faff - just stuff finding new homes.</p>
+          </div>
 
-        <p className="tc-landing-fade-up tc-landing-delay-2 mx-auto mb-10 mt-6 max-w-2xl text-center text-lg leading-8 text-slate-600 sm:text-xl">
-          The simplest way to exchange items with people near you. No feeds. No clutter. Just things moving forward.
-        </p>
-
-        <div className="tc-landing-fade-up tc-landing-delay-3 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-tc-shell-accent px-8 py-3.5 text-base font-semibold text-tc-shell-roleActiveText no-underline shadow-[0_18px_40px_rgba(164,245,166,0.32)] transition duration-200 hover:-translate-y-0.5 hover:bg-tc-action-primaryHover"
-            to={primaryCtaTo}
-          >
-            {isAuthenticated ? 'Open your dashboard' : 'Start exchanging'}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-          <a
-            className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-slate-900/10 bg-white/45 px-8 py-3.5 text-base font-medium text-slate-700 transition-colors hover:bg-white/80"
-            href="#how"
-          >
-            See how it works
-          </a>
-        </div>
-
-        {!isAuthenticated ? (
-          <div className="tc-landing-fade-up tc-landing-delay-4 mt-4 flex justify-center">
-            <Link className="text-sm font-medium text-slate-600 no-underline transition-colors hover:text-slate-950" to="/login">
-              Already have an account? Log in
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+            <Link
+              className="inline-flex items-center justify-center rounded-full bg-[#0B3322] px-6 py-3 text-base font-bold text-white no-underline shadow-[0_18px_40px_rgba(11,51,34,0.18)] transition-transform duration-200 hover:-translate-y-0.5"
+              to={postItemTo}
+            >
+              Post an item -&gt;
+            </Link>
+            <Link
+              className="inline-flex items-center justify-center rounded-full border border-[#0B33221A] bg-[#F8FCF7] px-6 py-3 text-base font-bold text-[#0B3322] no-underline transition-colors duration-200 hover:bg-white"
+              to={browseTo}
+            >
+              Browse free items
             </Link>
           </div>
-        ) : null}
 
-        <div className="mt-16 flex flex-wrap justify-center gap-4">
-          {statPills.map((stat, index) => (
-            <div
-              key={stat.value}
-              className={`tc-landing-card flex items-center gap-3 rounded-[1.35rem] border border-white/70 bg-white/80 px-5 py-3 shadow-[0_14px_30px_rgba(15,23,42,0.08)] backdrop-blur ${index === 0 ? 'tc-landing-delay-1' : index === 1 ? 'tc-landing-delay-2' : 'tc-landing-delay-3'}`}
-            >
-              <span className="text-2xl font-bold tracking-[-0.04em] text-tc-shell-bg">{stat.value}</span>
-              <span className="text-sm text-slate-500">{stat.label}</span>
-            </div>
-          ))}
+          <div className="mt-10 h-px w-full max-w-[25.625rem] bg-[#CBD5E1]" />
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            {metrics.map((metric) => (
+              <div className="max-w-[7rem]" key={metric.label}>
+                <p className="text-[1.7rem] font-normal leading-none tracking-[-0.05em] text-[#0B3322]">
+                  {metric.value}
+                </p>
+                <p className="mt-2 text-sm font-medium tracking-[0.02em] text-[#121212B3]">
+                  {metric.label}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative mx-auto h-[29rem] w-full max-w-[28rem] lg:h-[31rem] lg:max-w-[29rem]">
+          <div className="absolute left-0 top-0 h-[70%] w-[58%] overflow-hidden rounded-[1.9rem] border border-white/70 bg-white shadow-[0_24px_70px_rgba(11,51,34,0.12)]">
+            <img alt="Furniture ready for reuse" className="h-full w-full object-cover" src={heroImg1} />
+          </div>
+
+          <div className="absolute right-0 top-10 h-[42%] w-[46%] overflow-hidden rounded-[1.5rem] border border-white/80 bg-white shadow-[0_20px_60px_rgba(11,51,34,0.10)]">
+            <img alt="Books ready to rehome" className="h-full w-full object-cover" loading="lazy" src={heroImg2} />
+          </div>
+
+          <div className="absolute bottom-0 left-[18%] h-[38%] w-[50%] overflow-hidden rounded-[1.65rem] border border-white/80 bg-white shadow-[0_24px_70px_rgba(11,51,34,0.10)]">
+            <img alt="Kitchenware ready for a new home" className="h-full w-full object-cover" loading="lazy" src={heroImg3} />
+          </div>
+
+          <div className="absolute -left-5 top-14 h-24 w-24 rounded-full bg-[#0D3B24]/20 blur-2xl" />
+          <div className="absolute right-4 top-0 h-16 w-16 rounded-full border border-[#A4F5A6]/40 bg-[radial-gradient(circle_at_35%_35%,rgba(164,245,166,0.90),rgba(13,59,36,0.50)_60%,rgba(164,245,166,0.08)_100%)] shadow-[0_16px_40px_rgba(13,59,36,0.14)]" />
+          <div className="absolute bottom-10 right-6 h-24 w-24 rounded-full border border-[#D4A84B]/30 bg-[radial-gradient(circle_at_35%_35%,rgba(212,168,75,0.75),rgba(13,59,36,0.40)_55%,rgba(212,168,75,0.08)_100%)] shadow-[0_18px_50px_rgba(212,168,75,0.15)] backdrop-blur-sm" />
         </div>
       </div>
     </section>

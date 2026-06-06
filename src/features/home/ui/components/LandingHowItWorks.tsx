@@ -1,68 +1,84 @@
-import { ArrowDown, HandshakeIcon, Radar, Upload } from 'lucide-react'
+import { Leaf } from 'lucide-react'
+
+const heroImg = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&q=80&fit=crop'
 
 const steps = [
   {
-    colorClassName: 'bg-tc-shell-accent/20 text-tc-shell-bg',
-    description: 'Snap a photo, pick a category, and your item is live in seconds.',
-    icon: Upload,
+    badge: '2 min list',
+    description: 'Post a clear photo and one honest note about condition.',
     number: '01',
-    title: 'List it',
+    title: 'Offer',
   },
   {
-    colorClassName: 'bg-tc-shell-bg/10 text-tc-shell-bg',
-    description: 'People nearby see what\'s available first, so exchange stays truly local.',
-    icon: Radar,
+    badge: 'Local only',
+    description: 'Choose a nearby neighbour and agree a simple pickup window.',
     number: '02',
-    title: 'Get matched',
+    title: 'Match',
   },
   {
-    colorClassName: 'bg-tc-app-canvas text-tc-shell-bg',
-    description: 'Agree on a time, exchange the item, and let status updates keep things clear.',
-    icon: HandshakeIcon,
+    badge: 'Zero waste',
+    description: 'Leave it on the porch, meet at the lobby, or pass it on in person.',
     number: '03',
-    title: 'Hand it off',
+    title: 'Handoff',
   },
 ] as const
 
 export function LandingHowItWorks() {
   return (
-    <section className="px-6 py-24" id="how">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-16 max-w-2xl">
-          <span className="tc-landing-fade-up text-sm font-semibold uppercase tracking-[0.2em] text-tc-shell-bg">
-            How it works
-          </span>
-          <h2 className="tc-landing-fade-up tc-landing-delay-1 mt-3 text-4xl font-bold tracking-[-0.04em] text-slate-950 sm:text-5xl">
-            Three steps.
-            <br />
-            Zero friction.
+    <section className="bg-[#F3F8F4] px-6 py-20 sm:py-24" id="how">
+      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[310px_minmax(0,1fr)] lg:gap-9">
+        <div className="flex max-w-[19.5rem] flex-col justify-center">
+          <p className="text-sm font-bold tracking-[0.04em] text-[#172033]">
+            The local loop
+          </p>
+          <h2 className="mt-5 text-[clamp(2.6rem,4.7vw,3.6rem)] font-light leading-[0.95] tracking-[-0.05em] text-[#0B3322]">
+            <span className="block">Clear a shelf,</span>
+            <span className="block">pass it on</span>
+            <span className="block">next door.</span>
           </h2>
+          <p className="mt-6 text-[1.05rem] leading-8 text-[#121212B3]">
+            TruCycle turns the middle of a move, a tidy-up, or a finished project
+            into a calm handoff between neighbours.
+          </p>
+
+          <div className="mt-8 inline-flex w-fit items-center gap-2 rounded-lg border border-[#CBD5E1] bg-white px-4 py-2.5 text-sm font-semibold tracking-[0.04em] text-[#0B3322]">
+            <Leaf className="h-4 w-4 text-[#172033]" />
+            Ready for a second use
+          </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          {steps.map((step, index) => (
-            <div className="group relative" key={step.number}>
-              <div
-                className={`tc-landing-card flex h-full flex-col gap-5 rounded-[1.8rem] border border-slate-200 bg-white p-8 shadow-none ring-1 ring-slate-100/80 backdrop-blur transition-shadow duration-300 hover:shadow-[0_12px_30px_rgba(15,23,42,0.08)] ${index === 0 ? 'tc-landing-delay-1' : index === 1 ? 'tc-landing-delay-2' : 'tc-landing-delay-3'}`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${step.colorClassName}`}>
-                    <step.icon className="h-5 w-5" />
-                  </div>
-                  <span className="text-5xl font-bold tracking-[-0.06em] text-slate-900/5">{step.number}</span>
-                </div>
-
-                <h3 className="text-xl font-bold tracking-[-0.03em] text-slate-950">{step.title}</h3>
-                <p className="text-base leading-7 text-slate-600">{step.description}</p>
-              </div>
-
-              {index < steps.length - 1 ? (
-                <div className="absolute -right-3 top-1/2 z-10 hidden -translate-y-1/2 md:flex">
-                  <ArrowDown className="h-5 w-5 -rotate-90 text-slate-300" />
-                </div>
-              ) : null}
+        <div className="space-y-[1.125rem]">
+          <div className="relative overflow-hidden rounded-[1rem] shadow-[0_18px_54px_rgba(11,51,34,0.08)]">
+            <img
+              alt="Items arranged and ready to pass on"
+              className="h-56 w-full object-cover"
+              loading="lazy"
+              src={heroImg}
+            />
+            <div className="absolute inset-x-0 bottom-0 bg-[#0B3322B8] px-5 py-4 text-base font-semibold text-white">
+              Objects stay useful when the handoff is close, specific, and easy.
             </div>
-          ))}
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-3">
+            {steps.map((step) => (
+              <article
+                className="flex h-full flex-col gap-3 rounded-[1rem] border border-[#CBD5E1] bg-white p-4 shadow-[0_14px_38px_rgba(11,51,34,0.05)]"
+                key={step.number}
+              >
+                <p className="text-base font-medium tracking-[0.04em] text-[#172033]">
+                  {step.number}
+                </p>
+                <h3 className="text-[1.45rem] font-light leading-none tracking-[-0.04em] text-[#0B3322]">
+                  {step.title}
+                </h3>
+                <p className="text-base leading-8 text-[#121212B3]">{step.description}</p>
+                <div className="mt-auto inline-flex w-fit rounded-md bg-[#F3F8F4] px-3 py-1.5 text-sm font-bold tracking-[0.04em] text-[#172033]">
+                  {step.badge}
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
     </section>

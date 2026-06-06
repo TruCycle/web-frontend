@@ -1,0 +1,27 @@
+{
+  "name": "TruCycle",
+  "short_name": "TruCycle",
+  "description": "Free neighbour-to-neighbour item exchange across London and the UK.",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#0B3322",
+  "background_color": "#F7FBF4",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/og-image.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

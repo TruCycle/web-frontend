@@ -1,4 +1,5 @@
 import { LegalPageLayout } from '@/features/legal/ui/LegalPageLayout'
+import { usePageMeta } from '@/shared/hooks/usePageMeta'
 
 const privacySections = [
   {
@@ -16,6 +17,13 @@ const privacySections = [
 ] as const
 
 export default function PrivacyPage() {
+  usePageMeta({
+    title: 'Privacy Policy — TruCycle',
+    description:
+      'Learn how TruCycle handles your information, what we collect, and how we protect your data.',
+    canonicalPath: '/privacy',
+  })
+
   return (
     <LegalPageLayout
       eyebrow="Privacy"

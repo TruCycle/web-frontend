@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, Mail, MessageCircle, Phone, Search } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { classNames } from '@/shared/utils/classNames'
+import { usePageMeta } from '@/shared/hooks/usePageMeta'
 
 interface FaqItem {
   readonly id: string
@@ -211,6 +212,13 @@ const supportContent: SupportContent = {
 }
 
 export default function SupportFaqPage() {
+  usePageMeta({
+    title: 'Support & FAQ — TruCycle',
+    description:
+      'Find answers to common questions about TruCycle, from account setup to item exchanges and safety.',
+    noIndex: true,
+  })
+
   const { viewRole } = useParams<{ readonly viewRole?: string }>()
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')

@@ -12,12 +12,17 @@ import {
   User,
   LogOut,
   X,
+  Trophy,
+  Medal,
+  Camera,
+  Compass,
 } from 'lucide-react'
 import { useMessageAlerts } from '@/features/messaging/hooks/useMessageAlerts'
 import { useNotifications } from '@/features/notifications/hooks/useNotifications'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import logo from '@/assets/logo.svg'
 import { useUserRole } from '@/shared/context/useUserRole'
+import { IntentFab } from '@/shared/ui/fab/IntentFab'
 
 const DashboardIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -62,14 +67,18 @@ export function AppShell({ children }: AppShellProps) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement | null>(null)
 
-  function onRoleChange(nextRole: 'collector' | 'donor') {
+  function onRoleChange(nextRole: 'spotter' | 'collector' | 'donor') {
     if (role === nextRole) {
       setIsMobileSidebarOpen(false)
       return
     }
 
     setRole(nextRole)
-    navigate('/dashboard')
+    if (nextRole === 'spotter') {
+      navigate('/map')
+    } else {
+      navigate('/dashboard')
+    }
   }
 
   useEffect(() => {
@@ -119,6 +128,7 @@ export function AppShell({ children }: AppShellProps) {
   const isPartnerArea =
     isPartnerUser &&
     location.pathname.startsWith('/partner')
+  const isFoundItemsPostRoute = location.pathname === '/found-items/post'
   const profileShopAction = isPartnerUser
     ? isPartnerArea
       ? { label: 'Back to Marketplace', path: '/dashboard' }
@@ -194,7 +204,41 @@ export function AppShell({ children }: AppShellProps) {
           <DashboardIcon />
           <span>Dashboard</span>
         </NavLink>
-        {role === 'collector' ? (
+        <NavLink className={navLinkClassName} to="/map" onClick={onSidebarNavigate}>
+          <Compass size={20} />
+          <span>Nearby</span>
+        </NavLink>
+        <NavLink className={navLinkClassName} to="/community-board" onClick={onSidebarNavigate}>
+          <Medal size={20} />
+          <span>Leaderboard</span>
+        </NavLink>
+        {role !== 'spotter' ? (
+          <NavLink className={navLinkClassName} to="/impact" onClick={onSidebarNavigate}>
+            <Trophy size={20} />
+            <span>My Impact</span>
+          </NavLink>
+        ) : null}
+      </div>
+
+      <div className="-mx-4 my-4 h-px bg-tc-shell-divider" />
+
+      <div className="flex flex-col gap-1">
+        {role === 'spotter' ? (
+          <>
+            <NavLink className={navLinkClassName} to="/found-items/post" onClick={onSidebarNavigate}>
+              <Camera size={20} />
+              <span>Spot an item</span>
+            </NavLink>
+            <NavLink className={navLinkClassName} to="/found-items/my-posts" onClick={onSidebarNavigate}>
+              <FileText size={20} />
+              <span>My Spots</span>
+            </NavLink>
+            <NavLink className={navLinkClassName} to="/impact" onClick={onSidebarNavigate}>
+              <Trophy size={20} />
+              <span>My Impact</span>
+            </NavLink>
+          </>
+        ) : role === 'collector' ? (
           <>
             <NavLink className={navLinkClassName} to="/browse" onClick={onSidebarNavigate}>
               <FileText size={20} />
@@ -217,28 +261,30 @@ export function AppShell({ children }: AppShellProps) {
             </NavLink>
           </>
         )}
-        <NavLink className={navLinkClassName} to="/messages" onClick={onSidebarNavigate}>
-          {({ isActive }) => (
-            <>
-              <div className="relative flex items-center justify-center">
-                <MessageIcon />
-                {unreadMessagesCount > 0 && (
-                  <span
-                    className={classNames(
-                      'absolute -right-1.5 top-0 inline-flex h-4 min-w-4 items-center justify-center rounded-full border-[1.5px] px-1 text-[0.55rem] font-bold leading-none',
-                      isActive
-                        ? 'border-tc-shell-active bg-tc-shell-accent text-tc-shell-roleActiveText'
-                        : 'border-tc-shell-bg bg-tc-shell-notify text-white',
-                    )}
-                  >
-                    {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
-                  </span>
-                )}
-              </div>
-              <span>Messages</span>
-            </>
-          )}
-        </NavLink>
+        {role !== 'spotter' ? (
+          <NavLink className={navLinkClassName} to="/messages" onClick={onSidebarNavigate}>
+            {({ isActive }) => (
+              <>
+                <div className="relative flex items-center justify-center">
+                  <MessageIcon />
+                  {unreadMessagesCount > 0 && (
+                    <span
+                      className={classNames(
+                        'absolute -right-1.5 top-0 inline-flex h-4 min-w-4 items-center justify-center rounded-full border-[1.5px] px-1 text-[0.55rem] font-bold leading-none',
+                        isActive
+                          ? 'border-tc-shell-active bg-tc-shell-accent text-tc-shell-roleActiveText'
+                          : 'border-tc-shell-bg bg-tc-shell-notify text-white',
+                      )}
+                    >
+                      {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                    </span>
+                  )}
+                </div>
+                <span>Messages</span>
+              </>
+            )}
+          </NavLink>
+        ) : null}
       </div>
 
       <div className="-mx-4 my-4 h-px bg-tc-shell-divider" />
@@ -276,7 +322,21 @@ export function AppShell({ children }: AppShellProps) {
         <div className="flex h-[50px] w-fit items-center gap-1 rounded-[10px] border border-tc-shell-accent bg-tc-shell-toggle p-1">
           <button
             className={classNames(
-              'h-full flex-1 rounded-[5px] px-4 text-[0.85rem] font-bold transition',
+              'h-full flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
+              role === 'spotter'
+                ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
+                : 'bg-transparent text-tc-shell-roleText',
+            )}
+            onClick={() => {
+              onRoleChange('spotter')
+              onSidebarNavigate()
+            }}
+          >
+            Spotter
+          </button>
+          <button
+            className={classNames(
+              'h-full flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
               role === 'collector'
                 ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
                 : 'bg-transparent text-tc-shell-roleText',
@@ -290,7 +350,7 @@ export function AppShell({ children }: AppShellProps) {
           </button>
           <button
             className={classNames(
-              'h-full flex-1 rounded-[5px] px-4 text-[0.85rem] font-bold transition',
+              'h-full flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
               role === 'donor'
                 ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
                 : 'bg-transparent text-tc-shell-roleText',
@@ -308,7 +368,12 @@ export function AppShell({ children }: AppShellProps) {
   )
 
   return (
-    <div className="flex min-h-screen bg-tc-app-canvas text-tc-app-text max-md:flex-col max-md:p-2">
+    <div
+      className={classNames(
+        'flex min-h-screen bg-tc-app-canvas text-tc-app-text max-md:flex-col',
+        isFoundItemsPostRoute ? 'max-md:p-0' : 'max-md:p-2',
+      )}
+    >
       <aside className="sticky top-4 z-10 my-4 ml-4 mr-0 flex h-[calc(100vh-2rem)] w-[250px] shrink-0 flex-col rounded-[25px] bg-tc-shell-bg px-4 py-5 max-[1024px]:w-[220px] max-md:hidden">
         <div className="px-3 pb-4 pt-2">
           <Link className="flex items-center gap-3 no-underline" to="/">
@@ -354,8 +419,18 @@ export function AppShell({ children }: AppShellProps) {
         </>
       ) : null}
 
-      <main className="flex h-screen flex-1 flex-col overflow-x-hidden bg-transparent max-md:h-auto max-md:rounded-2xl">
-        <header className="sticky top-0 z-[100] flex h-[72px] w-full items-center justify-end border-b border-tc-header-border bg-[#FFFFFF] px-6 shadow-none max-md:justify-between max-md:px-4">
+      <main
+        className={classNames(
+          'flex h-screen flex-1 flex-col overflow-x-hidden bg-transparent max-md:h-auto max-md:rounded-2xl',
+          isFoundItemsPostRoute && 'max-md:h-[100dvh] max-md:rounded-none',
+        )}
+      >
+        <header
+          className={classNames(
+            'sticky top-0 z-[100] flex h-[72px] w-full items-center justify-end border-b border-tc-header-border bg-[#FFFFFF] px-6 shadow-none max-md:justify-between max-md:px-4',
+            isFoundItemsPostRoute && 'max-md:hidden',
+          )}
+        >
           <div className="hidden items-center gap-2 max-md:flex">
             <button
               type="button"
@@ -443,8 +518,16 @@ export function AppShell({ children }: AppShellProps) {
             </div>
           </div>
         </header>
-        <div className="flex-1 overflow-y-auto px-8 pb-8 pt-6 max-md:px-4 max-md:pb-6">{children}</div>
+        <div
+          className={classNames(
+            'flex-1 overflow-y-auto px-8 pb-8 pt-6 max-md:px-4 max-md:pb-6',
+            isFoundItemsPostRoute && 'max-md:px-0 max-md:pb-0 max-md:pt-0',
+          )}
+        >
+          {children}
+        </div>
       </main>
+      <IntentFab />
     </div>
   )
 }

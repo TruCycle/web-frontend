@@ -188,6 +188,20 @@ p {
   }
 }
 
+@keyframes tcImpactGlowDrift {
+
+  0%,
+  100% {
+    opacity: 0.48;
+    transform: translate3d(-18%, -10%, 0) scale(0.96);
+  }
+
+  50% {
+    opacity: 0.82;
+    transform: translate3d(24%, 16%, 0) scale(1.14);
+  }
+}
+
 .tc-landing-fade-up,
 .tc-landing-card {
   opacity: 0;
@@ -237,16 +251,35 @@ p {
   animation: tcSoftPulse 4.4s ease-in-out infinite;
 }
 
+.animate-impact-glow {
+  animation: tcImpactGlowDrift 10s ease-in-out infinite;
+}
+
+.animate-impact-glow-delayed {
+  animation: tcImpactGlowDrift 13s ease-in-out -3.8s infinite reverse;
+}
+
 @media (prefers-reduced-motion: reduce) {
 
   .tc-landing-fade-up,
   .tc-landing-card,
   .tc-loading-logo-flipper,
   .tc-shimmer-block,
+  .tc-fab-bob,
   .animate-float,
-  .animate-pulse-soft {
+  .animate-pulse-soft,
+  .animate-impact-glow,
+  .animate-impact-glow-delayed {
     animation: none !important;
     opacity: 1;
     transform: none;
   }
+}
+@keyframes fab-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.tc-fab-bob {
+  animation: fab-bob 3s ease-in-out infinite;
 }

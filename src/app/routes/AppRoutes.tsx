@@ -30,6 +30,14 @@ const PartnerOnboardPage = lazy(
   () => import('@/features/partner-onboarding/ui/PartnerOnboardPage'),
 )
 const SupportFaqPage = lazy(() => import('@/features/support/ui/SupportFaqPage'))
+const AchievementsPage = lazy(() => import('@/features/gamification/ui/AchievementsPage'))
+const CommunityBoardPage = lazy(() => import('@/features/gamification/ui/CommunityBoardPage'))
+const FoundItemsPage = lazy(() => import('@/features/found-items/ui/FoundItemsPage'))
+const FoundItemsMapPage = lazy(() => import('@/features/found-items/ui/FoundItemsMapPage'))
+const PostFoundItemPage = lazy(() => import('@/features/found-items/ui/PostFoundItemPage'))
+const MyFoundPostsPage = lazy(() => import('@/features/found-items/ui/MyFoundPostsPage'))
+const InternalVisionPage = lazy(() => import('@/features/internal/ui/InternalVisionPage'))
+const NotFoundPage = lazy(() => import('@/features/home/ui/NotFoundPage'))
 
 function ShellLayout() {
   return (
@@ -88,6 +96,14 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route
+        path="/internal/vision"
+        element={
+          <Suspense fallback={<LoadingState variant="page" label="" />}>
+            <InternalVisionPage />
+          </Suspense>
+        }
+      />
       <Route path="/cookies" element={<CookiesPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
@@ -111,8 +127,15 @@ export function AppRoutes() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/messages" element={<MessagingPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/impact" element={<AchievementsPage />} />
+          <Route path="/achievements" element={<Navigate replace to="/impact" />} />
+          <Route path="/community-board" element={<CommunityBoardPage />} />
           <Route path="/collected" element={<CollectedItemsPage />} />
           <Route path="/listings" element={<YourListingsPage />} />
+          <Route path="/map" element={<FoundItemsMapPage />} />
+          <Route path="/found-items" element={<FoundItemsPage />} />
+          <Route path="/found-items/post" element={<PostFoundItemPage />} />
+          <Route path="/found-items/my-posts" element={<MyFoundPostsPage />} />
           <Route path="/selected" element={<CollectedItemsPage />} />
           <Route path="/shops" element={<PartnerShopsPage />} />
           <Route path="/partner-shops" element={<Navigate replace to="/shops" />} />
@@ -128,7 +151,7 @@ export function AppRoutes() {
           <Route path="/support/:viewRole" element={<Navigate replace to="/support" />} />
         </Route>
       </Route>
-      <Route path="*" element={<Navigate replace to="/" />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

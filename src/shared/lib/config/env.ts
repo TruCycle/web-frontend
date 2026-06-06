@@ -8,6 +8,15 @@ const cloudinaryFolder = import.meta.env.VITE_CLOUDINARY_FOLDER?.trim() || ''
 const googleAnalyticsMeasurementId = import.meta.env.VITE_GA_MEASUREMENT_ID?.trim() || ''
 const metaPixelId = import.meta.env.VITE_META_PIXEL_ID?.trim() || ''
 
+const parseFlag = (value: string | undefined, fallback: boolean): boolean => {
+  if (value == null) return fallback
+  const normalised = value.trim().toLowerCase()
+  if (['0', 'false', 'no', 'off', ''].includes(normalised)) return false
+  return true
+}
+
+const enableSmartSpot = parseFlag(import.meta.env.VITE_ENABLE_SMART_SPOT, true)
+
 export const env = {
   apiBaseUrl,
   websocketUrl,
@@ -17,4 +26,5 @@ export const env = {
   cloudinaryFolder,
   googleAnalyticsMeasurementId,
   metaPixelId,
+  enableSmartSpot,
 } as const

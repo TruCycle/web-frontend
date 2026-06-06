@@ -1,0 +1,3895 @@
+{
+  "version": "2.11",
+  "children": [
+    {
+      "type": "frame",
+      "id": "UsBTh",
+      "x": 0,
+      "y": 0,
+      "name": "TruCycle landing page",
+      "clip": true,
+      "width": 1080,
+      "fill": "$bg",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "Ym3gv",
+          "name": "01 Hero",
+          "clip": true,
+          "width": "fill_container",
+          "height": 590,
+          "fill": "$bg",
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Hl7tq",
+              "x": 110,
+              "y": 62,
+              "name": "Hero copy column",
+              "width": 440,
+              "height": 462,
+              "layout": "vertical",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "yOT88",
+                  "fill": "$forest",
+                  "content": "FREE - LONDON & SURROUNDING AREAS",
+                  "lineHeight": 1.1,
+                  "fontFamily": "$font-mono",
+                  "fontSize": 8,
+                  "fontWeight": "700",
+                  "letterSpacing": 1.4
+                },
+                {
+                  "type": "frame",
+                  "id": "eP1AO",
+                  "name": "Hero headline",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "KVke8",
+                      "fill": "$deep-green",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Your clutter is",
+                      "lineHeight": 1.05,
+                      "fontFamily": "$font-heading",
+                      "fontSize": 56,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "qz9VF",
+                      "fill": "$deep-green",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "someone's",
+                      "lineHeight": 1.05,
+                      "fontFamily": "$font-heading",
+                      "fontSize": 56,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ikL0H",
+                      "fill": "$forest",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "treasure.",
+                      "lineHeight": 1.05,
+                      "fontFamily": "$font-heading",
+                      "fontSize": 56,
+                      "fontWeight": "normal",
+                      "fontStyle": "Italic"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "I1ujSo",
+                  "name": "Hero body copy",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "N7Igk",
+                      "fill": "$muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "List the things you no longer need. Neighbours collect them, free.",
+                      "lineHeight": 1.55,
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Sb0fO",
+                      "fill": "$muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "No skips, no landfill, no faff - just stuff finding new homes.",
+                      "lineHeight": 1.55,
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "EOGlO",
+                  "name": "Hero actions",
+                  "height": 40,
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Co6Cm",
+                      "width": 115,
+                      "height": 40,
+                      "fill": "$deep-green",
+                      "cornerRadius": 24,
+                      "gap": 8,
+                      "padding": [
+                        0,
+                        18
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "XDaLR",
+                          "fill": "$white",
+                          "content": "Post an item ->",
+                          "fontFamily": "$font-body",
+                          "fontSize": 11,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "bcxLY",
+                      "width": 130,
+                      "height": 40,
+                      "fill": "#F8FCF7",
+                      "cornerRadius": 24,
+                      "gap": 8,
+                      "padding": [
+                        0,
+                        18
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "eG8WV",
+                          "fill": "$deep-green",
+                          "content": "Browse free items",
+                          "fontFamily": "$font-body",
+                          "fontSize": 11,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "rectangle",
+                  "id": "zOTp6",
+                  "fill": "$line",
+                  "width": 410,
+                  "height": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "ZzS5S",
+                  "width": 410,
+                  "height": 70,
+                  "gap": 25,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "phliR",
+                      "width": 110,
+                      "height": 60,
+                      "layout": "vertical",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "FKgdP",
+                          "fill": "$deep-green",
+                          "content": "12,400+",
+                          "lineHeight": 1,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 24,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "A0uEiI",
+                          "fill": "$muted",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Items rehomed",
+                          "lineHeight": 1.2,
+                          "fontFamily": "$font-body",
+                          "fontSize": 8,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "n7OwP",
+                      "width": 110,
+                      "height": 60,
+                      "layout": "vertical",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "uIjlC",
+                          "fill": "$deep-green",
+                          "content": "2,180",
+                          "lineHeight": 1,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 24,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "bCHPq",
+                          "fill": "$muted",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Active givers",
+                          "lineHeight": 1.2,
+                          "fontFamily": "$font-body",
+                          "fontSize": 8,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "qWTVs",
+                      "width": 110,
+                      "height": 60,
+                      "layout": "vertical",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Xb6lK",
+                          "fill": "$deep-green",
+                          "content": "38tons",
+                          "lineHeight": 1,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 24,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "EjfS2",
+                          "fill": "$muted",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Diverted from landfill",
+                          "lineHeight": 1.2,
+                          "fontFamily": "$font-body",
+                          "fontSize": 8,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "nTEzJ",
+              "x": 558,
+              "y": 40,
+              "name": "Hero item collage",
+              "width": 406,
+              "height": 420,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "KlX3R",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Hero sofa photo",
+                  "metadata": {
+                    "type": "unsplash",
+                    "username": "melloophotography",
+                    "link": "https://unsplash.com/@melloophotography",
+                    "author": "Melloo"
+                  },
+                  "clip": true,
+                  "width": 258,
+                  "height": 316,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "https://images.unsplash.com/photo-1729086832640-4cbb0f7d24f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3Nzk3NDI3NTh8&ixlib=rb-4.1.0&q=80&w=1080",
+                    "mode": "fill"
+                  },
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ElfHF",
+                      "x": 20,
+                      "y": 270,
+                      "width": 130,
+                      "height": 40,
+                      "fill": "#FFFFFFEE",
+                      "cornerRadius": 7,
+                      "padding": [
+                        0,
+                        10
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Fx1xj",
+                          "fill": "$deep-green",
+                          "content": "Cream sofa",
+                          "fontFamily": "$font-body",
+                          "fontSize": 8,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "UaXKc",
+                  "x": 212,
+                  "y": 33,
+                  "name": "Hero books photo",
+                  "metadata": {
+                    "type": "unsplash",
+                    "username": "cristina_gottardi",
+                    "link": "https://unsplash.com/@cristina_gottardi",
+                    "author": "Cristina Gottardi"
+                  },
+                  "clip": true,
+                  "width": 194,
+                  "height": 190,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "https://images.unsplash.com/photo-1526285759904-71d1170ed2ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3Nzk3NDI3NTl8&ixlib=rb-4.1.0&q=80&w=1080",
+                    "mode": "fill"
+                  },
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0B332233",
+                    "offset": {
+                      "x": 0,
+                      "y": 18
+                    },
+                    "blur": 35
+                  },
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "X9gsjK",
+                      "x": 10,
+                      "y": 143,
+                      "width": 164,
+                      "height": 40,
+                      "fill": "#FFFFFFEE",
+                      "cornerRadius": 7,
+                      "padding": [
+                        0,
+                        10
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ZJaUm",
+                          "fill": "$deep-green",
+                          "content": "Hardback books · 24",
+                          "fontFamily": "$font-body",
+                          "fontSize": 8,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "K2Fctw",
+                          "fill": "$forest",
+                          "content": "FREE",
+                          "fontFamily": "$font-mono",
+                          "fontSize": 7,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "fJMWH",
+                  "x": 76,
+                  "y": 254,
+                  "name": "Hero chair photo",
+                  "metadata": {
+                    "type": "unsplash",
+                    "username": "silverkblack",
+                    "link": "https://unsplash.com/@silverkblack",
+                    "author": "Vitaly Gariev"
+                  },
+                  "clip": true,
+                  "width": 216,
+                  "height": 166,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "https://images.unsplash.com/photo-1758523669019-bc52c51454a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3Nzk3NDI3NjB8&ixlib=rb-4.1.0&q=80&w=1080",
+                    "mode": "fill"
+                  },
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0B332226",
+                    "offset": {
+                      "x": 0,
+                      "y": 24
+                    },
+                    "blur": 45
+                  },
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "uJ4we",
+                      "x": 8,
+                      "y": 122,
+                      "width": 198,
+                      "height": 36,
+                      "fill": "#FFFFFFEE",
+                      "cornerRadius": 7,
+                      "padding": [
+                        0,
+                        10
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "bjtoA",
+                          "fill": "$deep-green",
+                          "content": "Vintage oak chair",
+                          "fontFamily": "$font-body",
+                          "fontSize": 8,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "OQ2bn",
+                          "fill": "$forest",
+                          "content": "LIVE",
+                          "fontFamily": "$font-mono",
+                          "fontSize": 7,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "M4d7C",
+          "name": "03 How it works",
+          "clip": true,
+          "width": "fill_container",
+          "height": 540,
+          "fill": "$pale-mint",
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Wxvs7",
+              "x": 110,
+              "y": 76,
+              "name": "Education content",
+              "width": 850,
+              "height": 426,
+              "gap": 36,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "LuBwJ",
+                  "name": "Education intro",
+                  "width": 310,
+                  "height": "fill_container",
+                  "layout": "vertical",
+                  "gap": 14,
+                  "justifyContent": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "PZOm0",
+                      "fill": "$forest",
+                      "content": "THE LOCAL LOOP",
+                      "fontFamily": "$font-mono",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ZXatY",
+                      "name": "Education headline",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "kTO4W",
+                          "fill": "$deep-green",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Clear a shelf,",
+                          "lineHeight": 0.96,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 46,
+                          "fontWeight": "300"
+                        },
+                        {
+                          "type": "text",
+                          "id": "djKPd",
+                          "fill": "$deep-green",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "pass it on",
+                          "lineHeight": 0.96,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 46,
+                          "fontWeight": "300",
+                          "fontStyle": "italic"
+                        },
+                        {
+                          "type": "text",
+                          "id": "LMa91",
+                          "fill": "$deep-green",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "next door.",
+                          "lineHeight": 0.96,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 46,
+                          "fontWeight": "300"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "DKiln",
+                      "fill": "$muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "TruCycle turns the middle of a move, a tidy-up, or a finished project into a calm handoff between neighbours.",
+                      "lineHeight": 1.4,
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "x2qOWI",
+                      "name": "Education note",
+                      "fill": "$white",
+                      "cornerRadius": 4,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "$line"
+                      },
+                      "gap": 10,
+                      "padding": [
+                        9,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "EGgEP",
+                          "width": 15,
+                          "height": 15,
+                          "iconFontName": "leaf",
+                          "iconFontFamily": "lucide",
+                          "fill": "$forest"
+                        },
+                        {
+                          "type": "text",
+                          "id": "kqvPN",
+                          "fill": "$deep-green",
+                          "content": "READY FOR A SECOND USE",
+                          "fontFamily": "$font-mono",
+                          "fontSize": 11,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "v3Zqfw",
+                  "name": "Education steps and photo",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "layout": "vertical",
+                  "gap": 18,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "G295S",
+                      "name": "Neighbour handoff photo",
+                      "metadata": {
+                        "type": "unsplash",
+                        "username": "nordwood",
+                        "link": "https://unsplash.com/@nordwood",
+                        "author": "NordWood Themes"
+                      },
+                      "clip": true,
+                      "width": "fill_container",
+                      "height": 178,
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1513106021000-168e5f56609d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3Nzk3NDI4NDF8&ixlib=rb-4.1.0&q=80&w=1080",
+                        "mode": "fill"
+                      },
+                      "cornerRadius": 4,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "baWdK",
+                          "x": 0,
+                          "y": 118,
+                          "fill": "#0B3322B8",
+                          "width": 504,
+                          "height": 60
+                        },
+                        {
+                          "type": "text",
+                          "id": "gi6cx",
+                          "x": 18,
+                          "y": 139,
+                          "fill": "$white",
+                          "content": "Objects stay useful when the handoff is close, specific, and easy.",
+                          "fontFamily": "$font-body",
+                          "fontSize": 12,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "F4npc",
+                      "name": "Three step cards",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "nwfRk",
+                          "name": "Step 01",
+                          "width": "fill_container",
+                          "fill": "$white",
+                          "cornerRadius": 4,
+                          "stroke": {
+                            "thickness": 1,
+                            "fill": "$line"
+                          },
+                          "layout": "vertical",
+                          "gap": 7,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "mnnx3",
+                              "fill": "$forest",
+                              "content": "01",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "YCRT9",
+                              "fill": "$deep-green",
+                              "content": "Offer",
+                              "lineHeight": 1,
+                              "fontFamily": "$font-heading",
+                              "fontSize": 22,
+                              "fontWeight": "300"
+                            },
+                            {
+                              "type": "text",
+                              "id": "bwJ0m",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Post a clear photo and one honest note about condition.",
+                              "lineHeight": 1.35,
+                              "fontFamily": "$font-body",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "a1nJa",
+                              "name": "Step badge",
+                              "fill": "$pale-mint",
+                              "cornerRadius": 4,
+                              "gap": 6,
+                              "padding": [
+                                6,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "DCTt2",
+                                  "fill": "$deep-green",
+                                  "content": "2 MIN LIST",
+                                  "fontFamily": "$font-mono",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ZMvnt",
+                          "name": "Step 02",
+                          "width": "fill_container",
+                          "fill": "$white",
+                          "cornerRadius": 4,
+                          "stroke": {
+                            "thickness": 1,
+                            "fill": "$line"
+                          },
+                          "layout": "vertical",
+                          "gap": 7,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "nGxOT",
+                              "fill": "$forest",
+                              "content": "02",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "B8Gtm",
+                              "fill": "$deep-green",
+                              "content": "Match",
+                              "lineHeight": 1,
+                              "fontFamily": "$font-heading",
+                              "fontSize": 22,
+                              "fontWeight": "300"
+                            },
+                            {
+                              "type": "text",
+                              "id": "z0X6kW",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Choose a nearby neighbour and agree a simple pickup window.",
+                              "lineHeight": 1.35,
+                              "fontFamily": "$font-body",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "R1XZKf",
+                              "name": "Step badge",
+                              "fill": "$pale-mint",
+                              "cornerRadius": 4,
+                              "gap": 6,
+                              "padding": [
+                                6,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "trYkH",
+                                  "fill": "$deep-green",
+                                  "content": "LOCAL ONLY",
+                                  "fontFamily": "$font-mono",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "oXylC",
+                          "name": "Step 03",
+                          "width": "fill_container",
+                          "fill": "$white",
+                          "cornerRadius": 4,
+                          "stroke": {
+                            "thickness": 1,
+                            "fill": "$line"
+                          },
+                          "layout": "vertical",
+                          "gap": 7,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "kyUzn",
+                              "fill": "$forest",
+                              "content": "03",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Sobqg",
+                              "fill": "$deep-green",
+                              "content": "Handoff",
+                              "lineHeight": 1,
+                              "fontFamily": "$font-heading",
+                              "fontSize": 22,
+                              "fontWeight": "300"
+                            },
+                            {
+                              "type": "text",
+                              "id": "G5Z1pQ",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Leave it on the porch, meet at the lobby, or pass it on in person.",
+                              "lineHeight": 1.35,
+                              "fontFamily": "$font-body",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "afUK9",
+                              "name": "Step badge",
+                              "fill": "$pale-mint",
+                              "cornerRadius": 4,
+                              "gap": 6,
+                              "padding": [
+                                6,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "bMaAU",
+                                  "fill": "$deep-green",
+                                  "content": "ZERO WASTE",
+                                  "fontFamily": "$font-mono",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Ov71P",
+          "name": "04 What we take",
+          "clip": true,
+          "width": "fill_container",
+          "height": 760,
+          "fill": "$bg",
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "eRkt3",
+              "x": 110,
+              "y": 60,
+              "name": "Catalog editorial header",
+              "width": 850,
+              "height": 160,
+              "gap": 32,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "HMF2J",
+                  "name": "Catalog intro",
+                  "width": 460,
+                  "height": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "lL9Qb",
+                      "fill": "$forest",
+                      "content": "WHAT FINDS A HOME",
+                      "fontFamily": "$font-mono",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "l43NB",
+                      "name": "Catalog headline",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "E8jul",
+                          "fill": "$deep-green",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Useful pieces, waiting",
+                          "lineHeight": 0.96,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 42,
+                          "fontWeight": "300"
+                        },
+                        {
+                          "type": "text",
+                          "id": "j2w0H",
+                          "fill": "$deep-green",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "for another home.",
+                          "lineHeight": 0.96,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 42,
+                          "fontWeight": "300",
+                          "fontStyle": "italic"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "mDQkY",
+                      "fill": "$muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "A small catalog keeps offers specific: show the object, choose a category, and add the pickup detail that makes saying yes easy.",
+                      "lineHeight": 1.35,
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "UPXOC",
+                  "name": "Catalog rules panel",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "$dark-card",
+                  "cornerRadius": 4,
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": [
+                    18,
+                    22
+                  ],
+                  "justifyContent": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "aNUyS",
+                      "name": "Rule row",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "UCPP8",
+                          "fill": "$soft-mint",
+                          "content": "LIST WITH LIGHT",
+                          "fontFamily": "$font-mono",
+                          "fontSize": 10,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Kni8p",
+                          "fill": "$white",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Natural-light photos help neighbours judge size and condition.",
+                          "lineHeight": 1.38,
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "gU6MC",
+                      "name": "Rule row",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "S5NNzQ",
+                          "fill": "$soft-mint",
+                          "content": "KEEP IT PRACTICAL",
+                          "fontFamily": "$font-mono",
+                          "fontSize": 10,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "text",
+                          "id": "yE2BI",
+                          "fill": "$white",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "No sales, no holds, no mystery bags. Clear handoffs only.",
+                          "lineHeight": 1.38,
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ygMOd",
+              "x": 110,
+              "y": 258,
+              "name": "Reusable categories grid",
+              "width": 850,
+              "height": 436,
+              "layout": "vertical",
+              "gap": 18,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "S862Z",
+                  "name": "Catalog row 1",
+                  "width": "fill_container",
+                  "height": 209,
+                  "gap": 18,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "XhIkF",
+                      "name": "Category Furniture",
+                      "clip": true,
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "fill": "$white",
+                      "cornerRadius": 4,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "$line"
+                      },
+                      "layout": "vertical",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "BI8FK",
+                          "name": "Furniture photo",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "thommilkovic",
+                            "link": "https://unsplash.com/@thommilkovic",
+                            "author": "Thom Milkovic"
+                          },
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 112,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1634883312578-8c4599041904?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3Nzk3NDM1NDh8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "aeOup",
+                              "x": 12,
+                              "y": 12,
+                              "name": "Listing badge",
+                              "fill": "#F7FBF4E6",
+                              "cornerRadius": 4,
+                              "padding": [
+                                6,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "UhZiE",
+                                  "fill": "$deep-green",
+                                  "content": "32 LISTINGS",
+                                  "fontFamily": "$font-mono",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "nLwAJ",
+                          "name": "Category copy",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": [
+                            14,
+                            16,
+                            16,
+                            16
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "byV65",
+                              "name": "Category title row",
+                              "width": "fill_container",
+                              "gap": 12,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "L0Tkd",
+                                  "fill": "$deep-green",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Furniture",
+                                  "lineHeight": 1,
+                                  "fontFamily": "$font-heading",
+                                  "fontSize": 24,
+                                  "fontWeight": "300"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "BHz6G",
+                                  "name": "Condition badge",
+                                  "fill": "$pale-mint",
+                                  "cornerRadius": 4,
+                                  "padding": [
+                                    5,
+                                    7
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "i5kmS",
+                                      "fill": "$forest",
+                                      "content": "PORCH PICKUP",
+                                      "fontFamily": "$font-mono",
+                                      "fontSize": 9,
+                                      "fontWeight": "500"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "KwKjj",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Chairs, side tables, shelves, lamps.",
+                              "lineHeight": 1.34,
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "MYEqr",
+                      "name": "Category Kitchenware",
+                      "clip": true,
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "fill": "$white",
+                      "cornerRadius": 4,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "$line"
+                      },
+                      "layout": "vertical",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Bddg6",
+                          "name": "Kitchenware photo",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "fotoinshadows",
+                            "link": "https://unsplash.com/@fotoinshadows",
+                            "author": "Monika Borys"
+                          },
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 112,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1715690999466-6a23493fc4e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3Nzk3NDM1NDl8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "nQ2K3",
+                              "x": 12,
+                              "y": 12,
+                              "name": "Listing badge",
+                              "fill": "#F7FBF4E6",
+                              "cornerRadius": 4,
+                              "padding": [
+                                6,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "nzItZ",
+                                  "fill": "$deep-green",
+                                  "content": "18 LISTINGS",
+                                  "fontFamily": "$font-mono",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "TPYNM",
+                          "name": "Category copy",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": [
+                            14,
+                            16,
+                            16,
+                            16
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "BHNzE",
+                              "name": "Category title row",
+                              "width": "fill_container",
+                              "gap": 12,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "J0YUj",
+                                  "fill": "$deep-green",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Kitchenware",
+                                  "lineHeight": 1,
+                                  "fontFamily": "$font-heading",
+                                  "fontSize": 24,
+                                  "fontWeight": "300"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "eXOAo",
+                                  "name": "Condition badge",
+                                  "fill": "$pale-mint",
+                                  "cornerRadius": 4,
+                                  "padding": [
+                                    5,
+                                    7
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "YaeJF",
+                                      "fill": "$forest",
+                                      "content": "CLEAN + READY",
+                                      "fontFamily": "$font-mono",
+                                      "fontSize": 9,
+                                      "fontWeight": "500"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "QVfTD",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Mugs, pans, small appliances, jars.",
+                              "lineHeight": 1.34,
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "dfbOf",
+                      "name": "Category Books + media",
+                      "clip": true,
+                      "width": "fill_container",
+                      "height": 209,
+                      "fill": "$white",
+                      "cornerRadius": 4,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "$line"
+                      },
+                      "layout": "vertical",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "tj0Nd",
+                          "name": "Books + media photo",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "isabellagong",
+                            "link": "https://unsplash.com/@isabellagong",
+                            "author": "Isabella Gong"
+                          },
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 112,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1769313973845-e3694c8e93d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3Nzk3NDM1NTB8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "V96pj",
+                              "x": 12,
+                              "y": 12,
+                              "name": "Listing badge",
+                              "fill": "#F7FBF4E6",
+                              "cornerRadius": 4,
+                              "padding": [
+                                6,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "e8R9ID",
+                                  "fill": "$deep-green",
+                                  "content": "41 LISTINGS",
+                                  "fontFamily": "$font-mono",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "I8M1tb",
+                          "name": "Category copy",
+                          "width": "fill_container",
+                          "height": 97,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": [
+                            14,
+                            16,
+                            16,
+                            16
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "Oyzrg",
+                              "name": "Category title row",
+                              "width": "fill_container",
+                              "gap": 12,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "dxBGu",
+                                  "fill": "$deep-green",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Books + media",
+                                  "lineHeight": 1,
+                                  "fontFamily": "$font-heading",
+                                  "fontSize": 24,
+                                  "fontWeight": "300"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "f7duW",
+                                  "name": "Condition badge",
+                                  "fill": "$pale-mint",
+                                  "cornerRadius": 4,
+                                  "padding": [
+                                    5,
+                                    7
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "UDzC2",
+                                      "fill": "$forest",
+                                      "content": "BUNDLE FRIENDLY",
+                                      "fontFamily": "$font-mono",
+                                      "fontSize": 9,
+                                      "fontWeight": "500"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "otRMO",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Books, records, games, art supplies.",
+                              "lineHeight": 1.34,
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "q6lTpO",
+                  "name": "Catalog row 2",
+                  "width": "fill_container",
+                  "height": 209,
+                  "gap": 18,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "j4mg9",
+                      "name": "Category Kids + baby",
+                      "clip": true,
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "fill": "$white",
+                      "cornerRadius": 4,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "$line"
+                      },
+                      "layout": "vertical",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "C2Man",
+                          "name": "Kids + baby photo",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "fertroulik",
+                            "link": "https://unsplash.com/@fertroulik",
+                            "author": "Fer Troulik"
+                          },
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 112,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1767350231527-56417cfdc246?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3Nzk3NDM1NTB8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "jjriy",
+                              "x": 12,
+                              "y": 12,
+                              "name": "Listing badge",
+                              "fill": "#F7FBF4E6",
+                              "cornerRadius": 4,
+                              "padding": [
+                                6,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "GbFxY",
+                                  "fill": "$deep-green",
+                                  "content": "26 LISTINGS",
+                                  "fontFamily": "$font-mono",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "C8K4A1",
+                          "name": "Category copy",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": [
+                            14,
+                            16,
+                            16,
+                            16
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "r8faCJ",
+                              "name": "Category title row",
+                              "width": "fill_container",
+                              "gap": 12,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "z4r01",
+                                  "fill": "$deep-green",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Kids + baby",
+                                  "lineHeight": 1,
+                                  "fontFamily": "$font-heading",
+                                  "fontSize": 24,
+                                  "fontWeight": "300"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "g7GuZ",
+                                  "name": "Condition badge",
+                                  "fill": "$pale-mint",
+                                  "cornerRadius": 4,
+                                  "padding": [
+                                    5,
+                                    7
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "jso3G",
+                                      "fill": "$forest",
+                                      "content": "CHECK SIZES",
+                                      "fontFamily": "$font-mono",
+                                      "fontSize": 9,
+                                      "fontWeight": "500"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "T7y3B",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Toys, carriers, clothes, nursery extras.",
+                              "lineHeight": 1.34,
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "j27URk",
+                      "name": "Category Garden + tools",
+                      "clip": true,
+                      "width": "fill_container",
+                      "height": 209,
+                      "fill": "$white",
+                      "cornerRadius": 4,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "$line"
+                      },
+                      "layout": "vertical",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "lTR4s",
+                          "name": "Garden + tools photo",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "gidlark",
+                            "link": "https://unsplash.com/@gidlark",
+                            "author": "Олександр К"
+                          },
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 112,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1735456686652-59414cf6fd8e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3Nzk3NDM1NTF8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "s5zJNV",
+                              "x": 12,
+                              "y": 12,
+                              "name": "Listing badge",
+                              "fill": "#F7FBF4E6",
+                              "cornerRadius": 4,
+                              "padding": [
+                                6,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "f8loe",
+                                  "fill": "$deep-green",
+                                  "content": "14 LISTINGS",
+                                  "fontFamily": "$font-mono",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "K4eILs",
+                          "name": "Category copy",
+                          "width": "fill_container",
+                          "height": 97,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": [
+                            14,
+                            16,
+                            16,
+                            16
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "EEBly",
+                              "name": "Category title row",
+                              "width": "fill_container",
+                              "gap": 12,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "ekbHE",
+                                  "fill": "$deep-green",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Garden + tools",
+                                  "lineHeight": 1,
+                                  "fontFamily": "$font-heading",
+                                  "fontSize": 24,
+                                  "fontWeight": "300"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "GRzzz",
+                                  "name": "Condition badge",
+                                  "fill": "$pale-mint",
+                                  "cornerRadius": 4,
+                                  "padding": [
+                                    5,
+                                    7
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "q4dZk",
+                                      "fill": "$forest",
+                                      "content": "OUTDOOR PICKUP",
+                                      "fontFamily": "$font-mono",
+                                      "fontSize": 9,
+                                      "fontWeight": "500"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "xh9Ox",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Planters, hand tools, hardware, timber.",
+                              "lineHeight": 1.34,
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "eLJbf",
+                      "name": "Category Tech shelf",
+                      "clip": true,
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "fill": "$white",
+                      "cornerRadius": 4,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "$line"
+                      },
+                      "layout": "vertical",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "V4K82",
+                          "name": "Tech shelf photo",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "surface",
+                            "link": "https://unsplash.com/@surface",
+                            "author": "Surface"
+                          },
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 112,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3Nzk3NDM1NTJ8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "W0nIa5",
+                              "x": 12,
+                              "y": 12,
+                              "name": "Listing badge",
+                              "fill": "#F7FBF4E6",
+                              "cornerRadius": 4,
+                              "padding": [
+                                6,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "D3CDq",
+                                  "fill": "$deep-green",
+                                  "content": "9 LISTINGS",
+                                  "fontFamily": "$font-mono",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "GMlrH",
+                          "name": "Category copy",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": [
+                            14,
+                            16,
+                            16,
+                            16
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "cGRv4",
+                              "name": "Category title row",
+                              "width": "fill_container",
+                              "gap": 12,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "gKky0",
+                                  "fill": "$deep-green",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Tech shelf",
+                                  "lineHeight": 1,
+                                  "fontFamily": "$font-heading",
+                                  "fontSize": 24,
+                                  "fontWeight": "300"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "cOOvz",
+                                  "name": "Condition badge",
+                                  "fill": "$pale-mint",
+                                  "cornerRadius": 4,
+                                  "padding": [
+                                    5,
+                                    7
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "dGzgK",
+                                      "fill": "$forest",
+                                      "content": "POWER CHECKED",
+                                      "fontFamily": "$font-mono",
+                                      "fontSize": 9,
+                                      "fontWeight": "500"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "yJAmy",
+                              "fill": "$muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Cables, speakers, monitors, chargers.",
+                              "lineHeight": 1.34,
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Zp7VS",
+              "x": 110,
+              "y": 710,
+              "name": "Catalog footnote",
+              "width": 850,
+              "height": 30,
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "BqisB",
+                  "fill": "#D7E3D5",
+                  "width": 42,
+                  "height": 1
+                },
+                {
+                  "type": "text",
+                  "id": "PD55J",
+                  "fill": "$muted",
+                  "content": "Small categories make browsing feel like a neighbour's shelf, not a marketplace.",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 10,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "fQ5Ex",
+          "name": "05 Impact",
+          "clip": true,
+          "width": "fill_container",
+          "height": 470,
+          "fill": "$deep-green",
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "gD6hV",
+              "x": 110,
+              "y": 76,
+              "name": "Impact structured content",
+              "width": 850,
+              "height": 338,
+              "gap": 50,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Hi8JT",
+                  "name": "Impact copy column",
+                  "width": 405,
+                  "height": "fill_container",
+                  "layout": "vertical",
+                  "gap": 18,
+                  "justifyContent": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "WQHq5",
+                      "fill": "$mint",
+                      "content": "WHY IT MATTERS",
+                      "lineHeight": 1.05,
+                      "fontFamily": "$font-mono",
+                      "fontSize": 8,
+                      "fontWeight": "700",
+                      "letterSpacing": 1.3
+                    },
+                    {
+                      "type": "frame",
+                      "id": "tpwLO",
+                      "name": "Impact headline",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "iZK8P",
+                          "fill": "$white",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Every item rehomed",
+                          "lineHeight": 1.05,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 38,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "yP4D1",
+                          "name": "Impact headline middle row",
+                          "width": "fill_container",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "T8ZaT",
+                              "fill": "$white",
+                              "content": "is one",
+                              "lineHeight": 1.05,
+                              "fontFamily": "$font-heading",
+                              "fontSize": 38,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "LLWfd",
+                              "fill": "$mint",
+                              "content": "not in the",
+                              "lineHeight": 1.05,
+                              "fontFamily": "$font-heading",
+                              "fontSize": 38,
+                              "fontWeight": "normal",
+                              "fontStyle": "Italic"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "vyQMK",
+                          "fill": "$mint",
+                          "content": "ground.",
+                          "lineHeight": 1.05,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 38,
+                          "fontWeight": "normal",
+                          "fontStyle": "Italic"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "Z9DRO",
+                      "fill": "#C9D8CF",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "London chucks more than 3 million tonnes of stuff into landfill each year. A lot of it is perfectly usable furniture, white goods and household kit. TruCycle moves those things sideways - neighbour to neighbour - instead of down.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "hTjak",
+                      "name": "Impact actions",
+                      "height": 40,
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "ZOGQe",
+                          "width": 172,
+                          "height": 40,
+                          "fill": "$mint",
+                          "cornerRadius": 22,
+                          "padding": [
+                            0,
+                            18
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "oVTKu",
+                              "fill": "$deep-green",
+                              "content": "Read the impact report ->",
+                              "fontFamily": "$font-body",
+                              "fontSize": 11,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "FTUiu",
+                          "width": 118,
+                          "height": 40,
+                          "fill": "#00000000",
+                          "cornerRadius": 22,
+                          "stroke": {
+                            "thickness": 1,
+                            "fill": "#FFFFFF35"
+                          },
+                          "padding": [
+                            0,
+                            18
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "CqkO9",
+                              "fill": "$white",
+                              "content": "Partner with us",
+                              "fontFamily": "$font-body",
+                              "fontSize": 11,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "JIkF0",
+                  "name": "Impact metric cards",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 14,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "cuuKD",
+                      "width": "fill_container",
+                      "height": 142,
+                      "fill": "$mint",
+                      "cornerRadius": 12,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "WZMyO",
+                          "x": 22,
+                          "y": 23,
+                          "fill": "$deep-green",
+                          "content": "38",
+                          "lineHeight": 0.9,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 62,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "zIJ10",
+                          "x": 124,
+                          "y": 39,
+                          "fill": "$deep-green",
+                          "content": "t",
+                          "lineHeight": 1,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 34,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "byGPH",
+                          "x": 22,
+                          "y": 92,
+                          "fill": "$deep-green",
+                          "textGrowth": "fixed-width",
+                          "width": 330,
+                          "content": "tonnes of household goods diverted from London landfill this year",
+                          "lineHeight": 1.3,
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "wsdbi",
+                      "name": "Impact small metrics",
+                      "width": "fill_container",
+                      "height": 132,
+                      "gap": 14,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "NnmCj",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#163E2D",
+                          "cornerRadius": 12,
+                          "stroke": {
+                            "thickness": 1,
+                            "fill": "#FFFFFF18"
+                          },
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "BNhUy",
+                              "x": 20,
+                              "y": 24,
+                              "fill": "$mint",
+                              "content": "94%",
+                              "lineHeight": 1,
+                              "fontFamily": "$font-heading",
+                              "fontSize": 42,
+                              "fontWeight": "normal",
+                              "fontStyle": "Italic"
+                            },
+                            {
+                              "type": "text",
+                              "id": "PfkkL",
+                              "x": 20,
+                              "y": 78,
+                              "fill": "#CFE1D5",
+                              "textGrowth": "fixed-width",
+                              "width": 160,
+                              "content": "of items collected within 48 hours of listing",
+                              "lineHeight": 1.3,
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "IBj7Z",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#163E2D",
+                          "cornerRadius": 12,
+                          "stroke": {
+                            "thickness": 1,
+                            "fill": "#FFFFFF18"
+                          },
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "rbYZx",
+                              "x": 20,
+                              "y": 24,
+                              "fill": "$mint",
+                              "content": "£0",
+                              "lineHeight": 1,
+                              "fontFamily": "$font-heading",
+                              "fontSize": 42,
+                              "fontWeight": "normal",
+                              "fontStyle": "Italic"
+                            },
+                            {
+                              "type": "text",
+                              "id": "yfljf",
+                              "x": 20,
+                              "y": 78,
+                              "fill": "#CFE1D5",
+                              "textGrowth": "fixed-width",
+                              "width": 160,
+                              "content": "average cost to list - and always will be",
+                              "lineHeight": 1.3,
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "NcM7d",
+          "name": "06 Testimonials",
+          "clip": true,
+          "width": "fill_container",
+          "height": 480,
+          "fill": "$bg",
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "uoOs6",
+              "x": 110,
+              "y": 78,
+              "name": "Testimonials structured content",
+              "width": 850,
+              "height": 360,
+              "layout": "vertical",
+              "gap": 24,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "kYaB2",
+                  "name": "Testimonials header",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Ebgld",
+                      "fill": "$forest",
+                      "content": "NEIGHBOURS, NOT STRANGERS",
+                      "lineHeight": 1.05,
+                      "fontFamily": "$font-mono",
+                      "fontSize": 8,
+                      "fontWeight": "700",
+                      "letterSpacing": 1.3
+                    },
+                    {
+                      "type": "frame",
+                      "id": "rMq4K",
+                      "name": "Testimonials headline",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "l3dxX",
+                          "fill": "$deep-green",
+                          "textGrowth": "fixed-width",
+                          "width": 250,
+                          "content": "Real people,",
+                          "lineHeight": 1.32,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 39,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "E0zA0l",
+                          "fill": "$forest",
+                          "textGrowth": "fixed-width",
+                          "width": 320,
+                          "content": "real handovers.",
+                          "lineHeight": 1.32,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 39,
+                          "fontWeight": "normal",
+                          "fontStyle": "Italic"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "UkWac",
+                  "name": "Testimonial card row",
+                  "width": "fill_container",
+                  "height": 254,
+                  "gap": 17,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "V6ntn",
+                      "width": 271,
+                      "height": 254,
+                      "fill": "$white",
+                      "cornerRadius": 10,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "$line"
+                      },
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "y9k1Ah",
+                          "x": 24,
+                          "y": 24,
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "star",
+                          "iconFontFamily": "lucide",
+                          "fill": "#081D14"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "C7y5aY",
+                          "x": 38,
+                          "y": 24,
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "star",
+                          "iconFontFamily": "lucide",
+                          "fill": "#081D14"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "XVunQ",
+                          "x": 52,
+                          "y": 24,
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "star",
+                          "iconFontFamily": "lucide",
+                          "fill": "#081D14"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "YSXTS",
+                          "x": 66,
+                          "y": 24,
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "star",
+                          "iconFontFamily": "lucide",
+                          "fill": "#081D14"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "i00jp",
+                          "x": 80,
+                          "y": 24,
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "star",
+                          "iconFontFamily": "lucide",
+                          "fill": "#081D14"
+                        },
+                        {
+                          "type": "text",
+                          "id": "a2G8GA",
+                          "x": 24,
+                          "y": 72,
+                          "fill": "$deep-green",
+                          "textGrowth": "fixed-width",
+                          "width": 220,
+                          "content": "We were moving and the council quoted £240 for the sofa. Listed it Saturday - a young couple two streets away picked it up Sunday morning.",
+                          "lineHeight": 1.45,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "GZ9tm",
+                          "x": 24,
+                          "y": 184,
+                          "fill": "$line",
+                          "width": 222,
+                          "height": 1
+                        },
+                        {
+                          "type": "ellipse",
+                          "id": "N4Nl0h",
+                          "x": 22,
+                          "y": 203,
+                          "fill": "#E5F8EC",
+                          "width": 30,
+                          "height": 30
+                        },
+                        {
+                          "type": "text",
+                          "id": "yFwSI",
+                          "x": 30,
+                          "y": 212,
+                          "fill": "$forest",
+                          "content": "MK",
+                          "lineHeight": 1.05,
+                          "fontFamily": "$font-body",
+                          "fontSize": 10,
+                          "fontWeight": "800"
+                        },
+                        {
+                          "type": "text",
+                          "id": "tnhCg",
+                          "x": 60,
+                          "y": 208,
+                          "fill": "$deep-green",
+                          "content": "Mira K.",
+                          "lineHeight": 1.05,
+                          "fontFamily": "$font-body",
+                          "fontSize": 11,
+                          "fontWeight": "800"
+                        },
+                        {
+                          "type": "text",
+                          "id": "c54GRg",
+                          "x": 60,
+                          "y": 225,
+                          "fill": "$muted",
+                          "content": "Hackney · giver",
+                          "lineHeight": 1.05,
+                          "fontFamily": "$font-body",
+                          "fontSize": 9,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "yqI6Y",
+                      "width": 271,
+                      "height": 254,
+                      "fill": "$white",
+                      "cornerRadius": 10,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "$line"
+                      },
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "s3H2sv",
+                          "x": 24,
+                          "y": 24,
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "star",
+                          "iconFontFamily": "lucide",
+                          "fill": "#081D14"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "gbL45",
+                          "x": 38,
+                          "y": 24,
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "star",
+                          "iconFontFamily": "lucide",
+                          "fill": "#081D14"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "DtXt7",
+                          "x": 52,
+                          "y": 24,
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "star",
+                          "iconFontFamily": "lucide",
+                          "fill": "#081D14"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "L4JBco",
+                          "x": 66,
+                          "y": 24,
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "star",
+                          "iconFontFamily": "lucide",
+                          "fill": "#081D14"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "RN7Ln",
+                          "x": 80,
+                          "y": 24,
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "star",
+                          "iconFontFamily": "lucide",
+                          "fill": "#081D14"
+                        },
+                        {
+                          "type": "text",
+                          "id": "m33yhx",
+                          "x": 24,
+                          "y": 72,
+                          "fill": "$deep-green",
+                          "textGrowth": "fixed-width",
+                          "width": 220,
+                          "content": "First flat. Furnished the lounge for nothing - a desk from Tooting, a bookcase from Brixton, a rug from Peckham. Met some nice people on the way.",
+                          "lineHeight": 1.45,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "U9Lr0n",
+                          "x": 24,
+                          "y": 184,
+                          "fill": "$line",
+                          "width": 222,
+                          "height": 1
+                        },
+                        {
+                          "type": "ellipse",
+                          "id": "x73lB5",
+                          "x": 22,
+                          "y": 203,
+                          "fill": "#E5F8EC",
+                          "width": 30,
+                          "height": 30
+                        },
+                        {
+                          "type": "text",
+                          "id": "dz62g",
+                          "x": 30,
+                          "y": 212,
+                          "fill": "$forest",
+                          "content": "JL",
+                          "lineHeight": 1.05,
+                          "fontFamily": "$font-body",
+                          "fontSize": 10,
+                          "fontWeight": "800"
+                        },
+                        {
+                          "type": "text",
+                          "id": "A9TMt",
+                          "x": 60,
+                          "y": 208,
+                          "fill": "$deep-green",
+                          "content": "Jordan L.",
+                          "lineHeight": 1.05,
+                          "fontFamily": "$font-body",
+                          "fontSize": 11,
+                          "fontWeight": "800"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Q94ec",
+                          "x": 60,
+                          "y": 225,
+                          "fill": "$muted",
+                          "content": "Lambeth · taker",
+                          "lineHeight": 1.05,
+                          "fontFamily": "$font-body",
+                          "fontSize": 9,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "fyFyr",
+                      "width": 271,
+                      "height": 254,
+                      "fill": "$white",
+                      "cornerRadius": 10,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "$line"
+                      },
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "MyNK7",
+                          "x": 24,
+                          "y": 24,
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "star",
+                          "iconFontFamily": "lucide",
+                          "fill": "#081D14"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "D0zY8A",
+                          "x": 38,
+                          "y": 24,
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "star",
+                          "iconFontFamily": "lucide",
+                          "fill": "#081D14"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "BEh4n",
+                          "x": 52,
+                          "y": 24,
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "star",
+                          "iconFontFamily": "lucide",
+                          "fill": "#081D14"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "qgiZO",
+                          "x": 66,
+                          "y": 24,
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "star",
+                          "iconFontFamily": "lucide",
+                          "fill": "#081D14"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "OumjR",
+                          "x": 80,
+                          "y": 24,
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "star",
+                          "iconFontFamily": "lucide",
+                          "fill": "#081D14"
+                        },
+                        {
+                          "type": "text",
+                          "id": "JI3u7",
+                          "x": 24,
+                          "y": 72,
+                          "fill": "$deep-green",
+                          "textGrowth": "fixed-width",
+                          "width": 220,
+                          "content": "We've used it three times in our refurb. Better than putting a bookshelf in a skip - and someone always wants it.",
+                          "lineHeight": 1.45,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "bZjVS",
+                          "x": 24,
+                          "y": 184,
+                          "fill": "$line",
+                          "width": 222,
+                          "height": 1
+                        },
+                        {
+                          "type": "ellipse",
+                          "id": "OFKN2",
+                          "x": 22,
+                          "y": 203,
+                          "fill": "#E5F8EC",
+                          "width": 30,
+                          "height": 30
+                        },
+                        {
+                          "type": "text",
+                          "id": "xi3xW",
+                          "x": 30,
+                          "y": 212,
+                          "fill": "$forest",
+                          "content": "SA",
+                          "lineHeight": 1.05,
+                          "fontFamily": "$font-body",
+                          "fontSize": 10,
+                          "fontWeight": "800"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Z0Lq0",
+                          "x": 60,
+                          "y": 208,
+                          "fill": "$deep-green",
+                          "content": "Sam & Amara",
+                          "lineHeight": 1.05,
+                          "fontFamily": "$font-body",
+                          "fontSize": 11,
+                          "fontWeight": "800"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Ze31r",
+                          "x": 60,
+                          "y": 225,
+                          "fill": "$muted",
+                          "content": "Walthamstow · givers",
+                          "lineHeight": 1.05,
+                          "fontFamily": "$font-body",
+                          "fontSize": 9,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "GZgHF",
+          "name": "07 CTA",
+          "clip": true,
+          "width": "fill_container",
+          "height": 385,
+          "fill": "$bg",
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Q5ZZ8",
+              "x": 110,
+              "y": 70,
+              "name": "Final CTA slab",
+              "width": 848,
+              "height": 275,
+              "fill": "$mint",
+              "cornerRadius": 18,
+              "stroke": {
+                "thickness": 1,
+                "fill": "#0B33221F"
+              },
+              "layout": "none",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "TExH4",
+                  "x": 64,
+                  "y": 68,
+                  "name": "CTA structured content",
+                  "width": 720,
+                  "height": 178,
+                  "layout": "vertical",
+                  "gap": 18,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "JbDJs",
+                      "name": "CTA copy group",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "lpt2R",
+                          "fill": "$deep-green",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Got something to rehome?",
+                          "lineHeight": 1.08,
+                          "textAlign": "center",
+                          "fontFamily": "$font-heading",
+                          "fontSize": 44,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "a5NVL",
+                          "fill": "$deep-green",
+                          "textGrowth": "fixed-width",
+                          "width": 560,
+                          "content": "Two minutes. One photo. A neighbour gets what they needed, and the skip stays empty.",
+                          "lineHeight": 1.45,
+                          "textAlign": "center",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "ekDT5",
+                      "fill": "#0B332233",
+                      "width": 58,
+                      "height": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "GfxOe",
+                      "name": "CTA actions",
+                      "height": 42,
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "HAjWp",
+                          "width": 153,
+                          "height": 42,
+                          "fill": "$deep-green",
+                          "cornerRadius": 22,
+                          "padding": [
+                            0,
+                            18
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "BG5Ez",
+                              "fill": "$white",
+                              "content": "Post your first item ->",
+                              "fontFamily": "$font-body",
+                              "fontSize": 11,
+                              "fontWeight": "800"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "rBTw4",
+                          "width": 161,
+                          "height": 42,
+                          "fill": "$soft-mint",
+                          "cornerRadius": 22,
+                          "padding": [
+                            0,
+                            18
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Kvipk",
+                              "fill": "$deep-green",
+                              "content": "Or browse what's local",
+                              "fontFamily": "$font-body",
+                              "fontSize": 11,
+                              "fontWeight": "800"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "NAlC2",
+          "name": "08 FAQ",
+          "clip": true,
+          "width": "fill_container",
+          "height": 680,
+          "fill": "$bg",
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "h87XL",
+              "x": 111,
+              "y": 38,
+              "name": "FAQ intro grouped",
+              "width": 250,
+              "height": 210,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "HifEd",
+                  "x": 0,
+                  "y": 0,
+                  "fill": "$forest",
+                  "content": "COMMON QUESTIONS",
+                  "lineHeight": 1.05,
+                  "fontFamily": "$font-mono",
+                  "fontSize": 8,
+                  "fontWeight": "700",
+                  "letterSpacing": 1.3
+                },
+                {
+                  "type": "text",
+                  "id": "K9nZ99",
+                  "x": 0,
+                  "y": 26,
+                  "fill": "$deep-green",
+                  "textGrowth": "fixed-width",
+                  "width": 250,
+                  "content": "Stuff people",
+                  "lineHeight": 1.25,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 35,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "oUgeV",
+                  "x": 0,
+                  "y": 69,
+                  "fill": "$forest",
+                  "textGrowth": "fixed-width",
+                  "width": 230,
+                  "content": "usually ask.",
+                  "lineHeight": 1.25,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 35,
+                  "fontWeight": "normal",
+                  "fontStyle": "Italic"
+                },
+                {
+                  "type": "text",
+                  "id": "w2m8vP",
+                  "x": 0,
+                  "y": 124,
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": 230,
+                  "content": "Can't see your question? Drop us a note",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "f93Pw",
+                  "x": 0,
+                  "y": 149,
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": 230,
+                  "content": "at hello@trucycle.co.uk and we'll get back",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "K4pNS",
+                  "x": 0,
+                  "y": 174,
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": 180,
+                  "content": "to you within a day.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "iTEtl",
+              "x": 422,
+              "y": 30,
+              "name": "FAQ accordion grouped",
+              "width": 536,
+              "height": 626,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "kJRWr",
+                  "x": 0,
+                  "y": 0,
+                  "fill": "$line",
+                  "width": 536,
+                  "height": 1
+                },
+                {
+                  "type": "text",
+                  "id": "iMTS6",
+                  "x": 0,
+                  "y": 28,
+                  "fill": "$deep-green",
+                  "textGrowth": "fixed-width",
+                  "width": 450,
+                  "content": "Is it really free?",
+                  "lineHeight": 1.15,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "ellipse",
+                  "id": "DPV4W",
+                  "x": 512,
+                  "y": 25,
+                  "fill": "$mint",
+                  "width": 24,
+                  "height": 24
+                },
+                {
+                  "type": "icon_font",
+                  "id": "dg3Z5",
+                  "x": 518,
+                  "y": 31,
+                  "width": 12,
+                  "height": 12,
+                  "iconFontName": "x",
+                  "iconFontFamily": "lucide",
+                  "fill": "$deep-green"
+                },
+                {
+                  "type": "text",
+                  "id": "Z9ZTRs",
+                  "x": 0,
+                  "y": 62,
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": 500,
+                  "content": "Yes - free to list, free to collect, no commission, no premium tier. TruCycle is grant- and partner-funded so money stays out of neighbour-to-neighbour handovers.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "rectangle",
+                  "id": "OeJnE",
+                  "x": 0,
+                  "y": 120,
+                  "fill": "$line",
+                  "width": 536,
+                  "height": 1
+                },
+                {
+                  "type": "text",
+                  "id": "C8z42",
+                  "x": 0,
+                  "y": 152,
+                  "fill": "$deep-green",
+                  "textGrowth": "fixed-width",
+                  "width": 450,
+                  "content": "What can I list?",
+                  "lineHeight": 1.15,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "ellipse",
+                  "id": "W12gP",
+                  "x": 512,
+                  "y": 149,
+                  "fill": "#FBFDFB",
+                  "width": 24,
+                  "height": 24
+                },
+                {
+                  "type": "icon_font",
+                  "id": "GEqKc",
+                  "x": 518,
+                  "y": 155,
+                  "width": 12,
+                  "height": 12,
+                  "iconFontName": "plus",
+                  "iconFontFamily": "lucide",
+                  "fill": "$deep-green"
+                },
+                {
+                  "type": "text",
+                  "id": "Mp4K9",
+                  "x": 0,
+                  "y": 186,
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": 500,
+                  "content": "Anything in usable condition: furniture, white goods, kid's gear, books, bikes, plants, homewares, building materials. No food, clinical waste, or hazardous chemicals.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "rectangle",
+                  "id": "YH0gN",
+                  "x": 0,
+                  "y": 244,
+                  "fill": "$line",
+                  "width": 536,
+                  "height": 1
+                },
+                {
+                  "type": "text",
+                  "id": "kMrgX",
+                  "x": 0,
+                  "y": 276,
+                  "fill": "$deep-green",
+                  "textGrowth": "fixed-width",
+                  "width": 450,
+                  "content": "Where do you operate?",
+                  "lineHeight": 1.15,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "ellipse",
+                  "id": "p7DVQ",
+                  "x": 512,
+                  "y": 273,
+                  "fill": "#FBFDFB",
+                  "width": 24,
+                  "height": 24
+                },
+                {
+                  "type": "icon_font",
+                  "id": "kCtMq",
+                  "x": 518,
+                  "y": 279,
+                  "width": 12,
+                  "height": 12,
+                  "iconFontName": "plus",
+                  "iconFontFamily": "lucide",
+                  "fill": "$deep-green"
+                },
+                {
+                  "type": "text",
+                  "id": "O8mrcf",
+                  "x": 0,
+                  "y": 310,
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": 500,
+                  "content": "Greater London right now, with active pilots in Brighton and Bristol. If you're elsewhere, sign up - we'll let you know when we land near you.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "rectangle",
+                  "id": "wcSAH",
+                  "x": 0,
+                  "y": 368,
+                  "fill": "$line",
+                  "width": 536,
+                  "height": 1
+                },
+                {
+                  "type": "text",
+                  "id": "ECUcp",
+                  "x": 0,
+                  "y": 400,
+                  "fill": "$deep-green",
+                  "textGrowth": "fixed-width",
+                  "width": 450,
+                  "content": "How do collections work?",
+                  "lineHeight": 1.15,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "ellipse",
+                  "id": "oX5o3",
+                  "x": 512,
+                  "y": 397,
+                  "fill": "#FBFDFB",
+                  "width": 24,
+                  "height": 24
+                },
+                {
+                  "type": "icon_font",
+                  "id": "w8y6i3",
+                  "x": 518,
+                  "y": 403,
+                  "width": 12,
+                  "height": 12,
+                  "iconFontName": "plus",
+                  "iconFontFamily": "lucide",
+                  "fill": "$deep-green"
+                },
+                {
+                  "type": "text",
+                  "id": "sl8QM",
+                  "x": 0,
+                  "y": 434,
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": 500,
+                  "content": "You agree a time and place through the app, then the collector comes to you. Most pickups happen within 48 hours of listing.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "rectangle",
+                  "id": "y8c92B",
+                  "x": 0,
+                  "y": 492,
+                  "fill": "$line",
+                  "width": 536,
+                  "height": 1
+                },
+                {
+                  "type": "text",
+                  "id": "kFSwX",
+                  "x": 0,
+                  "y": 524,
+                  "fill": "$deep-green",
+                  "textGrowth": "fixed-width",
+                  "width": 450,
+                  "content": "Is this not just fly-tipping with extra steps?",
+                  "lineHeight": 1.15,
+                  "fontFamily": "$font-heading",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "ellipse",
+                  "id": "k5Z4J",
+                  "x": 512,
+                  "y": 521,
+                  "fill": "#FBFDFB",
+                  "width": 24,
+                  "height": 24
+                },
+                {
+                  "type": "icon_font",
+                  "id": "P6grx",
+                  "x": 518,
+                  "y": 527,
+                  "width": 12,
+                  "height": 12,
+                  "iconFontName": "plus",
+                  "iconFontFamily": "lucide",
+                  "fill": "$deep-green"
+                },
+                {
+                  "type": "text",
+                  "id": "QH4Cm",
+                  "x": 0,
+                  "y": 558,
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": 500,
+                  "content": "The opposite. Items only move between verified accounts to confirmed addresses. We work with London boroughs to reduce fly-tipping through a friction-free alternative.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "rectangle",
+                  "id": "jmTKs",
+                  "x": 0,
+                  "y": 616,
+                  "fill": "$line",
+                  "width": 536,
+                  "height": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "bI00E",
+          "name": "09 Footer",
+          "clip": true,
+          "width": "fill_container",
+          "height": 400,
+          "fill": "$deep-green",
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "nowTU",
+              "x": 110,
+              "y": 54,
+              "name": "Footer structured content",
+              "width": 850,
+              "height": 196,
+              "gap": 70,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "H2uVIC",
+                  "name": "Footer brand column",
+                  "width": 310,
+                  "height": "fill_container",
+                  "layout": "vertical",
+                  "gap": 18,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "AG9Kk",
+                      "name": "Footer logo row",
+                      "width": "fill_container",
+                      "height": 34,
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "KSn1G",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "og-image.png",
+                            "mode": "fill"
+                          },
+                          "width": 34,
+                          "height": 34
+                        },
+                        {
+                          "type": "text",
+                          "id": "xNuRO",
+                          "fill": "$white",
+                          "content": "TruCycle",
+                          "lineHeight": 1,
+                          "fontFamily": "$font-heading",
+                          "fontSize": 28,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "d2jqND",
+                      "fill": "#E8F6EE",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Neighbour-to-neighbour reuse for London homes, studios, flats, and families.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-body",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "fyjX7",
+                      "name": "Footer CTA",
+                      "width": 206,
+                      "height": 38,
+                      "fill": "$mint",
+                      "cornerRadius": 20,
+                      "padding": [
+                        0,
+                        18
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ZznEF",
+                          "fill": "$deep-green",
+                          "content": "Post something free ->",
+                          "fontFamily": "$font-body",
+                          "fontSize": 11,
+                          "fontWeight": "800"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "K6q5mH",
+                  "name": "Footer link columns",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "m208x",
+                      "x": 0,
+                      "y": 0,
+                      "name": "Footer Explore",
+                      "width": 160,
+                      "height": 150,
+                      "layout": "vertical",
+                      "gap": 18,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "lQ3RI",
+                          "fill": "$mint",
+                          "content": "EXPLORE",
+                          "lineHeight": 1.05,
+                          "fontFamily": "$font-mono",
+                          "fontSize": 8,
+                          "fontWeight": "700",
+                          "letterSpacing": 1.2
+                        },
+                        {
+                          "type": "frame",
+                          "id": "UphhC",
+                          "name": "Explore links",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 14,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "J6ruTh",
+                              "fill": "#E8F6EE",
+                              "content": "Post an item",
+                              "lineHeight": 1.05,
+                              "fontFamily": "$font-body",
+                              "fontSize": 11,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "XAqVx",
+                              "fill": "#E8F6EE",
+                              "content": "Browse free items",
+                              "lineHeight": 1.05,
+                              "fontFamily": "$font-body",
+                              "fontSize": 11,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "W4ncf",
+                              "fill": "#E8F6EE",
+                              "content": "How it works",
+                              "lineHeight": 1.05,
+                              "fontFamily": "$font-body",
+                              "fontSize": 11,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "NtuMb",
+                      "x": 270,
+                      "y": 0,
+                      "name": "Footer Social",
+                      "width": 180,
+                      "height": 150,
+                      "layout": "vertical",
+                      "gap": 18,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "F73lX",
+                          "fill": "$mint",
+                          "content": "SOCIAL",
+                          "lineHeight": 1.05,
+                          "fontFamily": "$font-mono",
+                          "fontSize": 8,
+                          "fontWeight": "700",
+                          "letterSpacing": 1.2
+                        },
+                        {
+                          "type": "frame",
+                          "id": "U6D8nK",
+                          "name": "Social icon grid",
+                          "layout": "vertical",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "sob66",
+                              "name": "Social icon row",
+                              "height": 34,
+                              "gap": 12,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "A0f9g",
+                                  "name": "Facebook",
+                                  "width": 34,
+                                  "height": 34,
+                                  "fill": "#E8F6EE1A",
+                                  "cornerRadius": 17,
+                                  "stroke": {
+                                    "thickness": 1,
+                                    "fill": "#E8F6EE33"
+                                  },
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon_font",
+                                      "id": "f600c4",
+                                      "width": 16,
+                                      "height": 16,
+                                      "iconFontName": "facebook-logo",
+                                      "iconFontFamily": "phosphor",
+                                      "fill": "#E8F6EE"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "imw0a",
+                                  "name": "Instagram",
+                                  "width": 34,
+                                  "height": 34,
+                                  "fill": "#E8F6EE1A",
+                                  "cornerRadius": 17,
+                                  "stroke": {
+                                    "thickness": 1,
+                                    "fill": "#E8F6EE33"
+                                  },
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon_font",
+                                      "id": "L1k7Ql",
+                                      "width": 16,
+                                      "height": 16,
+                                      "iconFontName": "instagram-logo",
+                                      "iconFontFamily": "phosphor",
+                                      "fill": "#E8F6EE"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "FEJAt",
+                                  "name": "LinkedIn",
+                                  "width": 34,
+                                  "height": 34,
+                                  "fill": "#E8F6EE1A",
+                                  "cornerRadius": 17,
+                                  "stroke": {
+                                    "thickness": 1,
+                                    "fill": "#E8F6EE33"
+                                  },
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon_font",
+                                      "id": "UrhoI",
+                                      "width": 16,
+                                      "height": 16,
+                                      "iconFontName": "linkedin-logo",
+                                      "iconFontFamily": "phosphor",
+                                      "fill": "#E8F6EE"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "KpySa",
+                              "name": "Social icon row",
+                              "height": 34,
+                              "gap": 12,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "OryFk",
+                                  "name": "Twitter (X)",
+                                  "width": 34,
+                                  "height": 34,
+                                  "fill": "#E8F6EE1A",
+                                  "cornerRadius": 17,
+                                  "stroke": {
+                                    "thickness": 1,
+                                    "fill": "#E8F6EE33"
+                                  },
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon_font",
+                                      "id": "abxHZ",
+                                      "width": 16,
+                                      "height": 16,
+                                      "iconFontName": "twitter-logo",
+                                      "iconFontFamily": "phosphor",
+                                      "fill": "#E8F6EE"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "xk2GC",
+                                  "name": "TikTok",
+                                  "width": 34,
+                                  "height": 34,
+                                  "fill": "#E8F6EE1A",
+                                  "cornerRadius": 17,
+                                  "stroke": {
+                                    "thickness": 1,
+                                    "fill": "#E8F6EE33"
+                                  },
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon_font",
+                                      "id": "M90qp4",
+                                      "width": 16,
+                                      "height": 16,
+                                      "iconFontName": "tiktok-logo",
+                                      "iconFontFamily": "phosphor",
+                                      "fill": "#E8F6EE"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "Sttp1",
+                                  "name": "YouTube",
+                                  "width": 34,
+                                  "height": 34,
+                                  "fill": "#E8F6EE1A",
+                                  "cornerRadius": 17,
+                                  "stroke": {
+                                    "thickness": 1,
+                                    "fill": "#E8F6EE33"
+                                  },
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon_font",
+                                      "id": "imnNR",
+                                      "width": 16,
+                                      "height": 16,
+                                      "iconFontName": "youtube-logo",
+                                      "iconFontFamily": "phosphor",
+                                      "fill": "#E8F6EE"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "P74W4d",
+              "x": 110,
+              "y": 318,
+              "name": "Footer bottom bar",
+              "width": 850,
+              "height": 48,
+              "layout": "vertical",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "hxM0j",
+                  "fill": "#FFFFFF26",
+                  "width": "fill_container",
+                  "height": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "D8UNXY",
+                  "name": "Footer legal row",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "qzPSf",
+                      "fill": "#E8F6EE",
+                      "content": "2026 TruCycle. Free neighbour-to-neighbour handovers.",
+                      "lineHeight": 1.05,
+                      "fontFamily": "$font-mono",
+                      "fontSize": 9,
+                      "fontWeight": "500",
+                      "letterSpacing": 0.6
+                    },
+                    {
+                      "type": "text",
+                      "id": "xHMQ3",
+                      "fill": "#E8F6EE",
+                      "content": "Privacy   Terms   Accessibility",
+                      "lineHeight": 1.05,
+                      "fontFamily": "$font-mono",
+                      "fontSize": 9,
+                      "fontWeight": "500",
+                      "letterSpacing": 0.6
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "bg": {
+      "type": "color",
+      "value": "#F7FBF4"
+    },
+    "dark-card": {
+      "type": "color",
+      "value": "#113A29"
+    },
+    "deep-green": {
+      "type": "color",
+      "value": "#0B3322"
+    },
+    "font-body": {
+      "type": "string",
+      "value": "Inter"
+    },
+    "font-heading": {
+      "type": "string",
+      "value": "Inter"
+    },
+    "font-mono": {
+      "type": "string",
+      "value": "IBM Plex Mono"
+    },
+    "forest": {
+      "type": "color",
+      "value": "#172033"
+    },
+    "line": {
+      "type": "color",
+      "value": "#CBD5E1"
+    },
+    "mint": {
+      "type": "color",
+      "value": "#A4F5A6"
+    },
+    "muted": {
+      "type": "color",
+      "value": "#121212B3"
+    },
+    "pale-mint": {
+      "type": "color",
+      "value": "#F3F8F4"
+    },
+    "soft-mint": {
+      "type": "color",
+      "value": "#8EEA93"
+    },
+    "white": {
+      "type": "color",
+      "value": "#FFFFFF"
+    }
+  }
+}

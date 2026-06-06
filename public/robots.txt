@@ -1,0 +1,27 @@
+# TruCycle robots.txt
+
+User-agent: *
+Allow: /
+Disallow: /browse
+Disallow: /dashboard
+Disallow: /messages
+Disallow: /notifications
+Disallow: /settings
+Disallow: /listings
+Disallow: /collected
+Disallow: /selected
+Disallow: /impact
+Disallow: /achievements
+Disallow: /community-board
+Disallow: /found-items
+Disallow: /map
+Disallow: /partner
+Disallow: /shops
+Disallow: /partner-shops
+Disallow: /internal
+Disallow: /signup
+Disallow: /login
+Disallow: /reset-password
+Disallow: /auth
+
+Sitemap: https://trucycle.co.uk/sitemap.xml
