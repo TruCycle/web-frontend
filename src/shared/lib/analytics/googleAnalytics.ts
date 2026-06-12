@@ -15,8 +15,9 @@ export function initGoogleAnalytics(): void {
   }
 
   window.dataLayer = window.dataLayer || []
-  window.gtag = window.gtag || function gtag(...args: unknown[]) {
-    window.dataLayer?.push(args)
+  window.gtag = window.gtag || function gtag() {
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer?.push(arguments)
   }
 
   if (!document.querySelector(`script[data-analytics="ga4"][src*="${env.googleAnalyticsMeasurementId}"]`)) {
