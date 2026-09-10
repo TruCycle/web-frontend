@@ -3,18 +3,10 @@ import {
   Check,
   ChevronRight,
   LoaderCircle,
-  MapPin,
   Share2,
   Smartphone,
 } from 'lucide-react'
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type PointerEvent as ReactPointerEvent,
-} from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { createFoundItem, fetchFoundItemCatalog, uploadFoundItemImage } from '../api/foundItemsApi'
 import { classifyImageFile, warmUpClassifier } from '../lib/imageClassifier'
@@ -28,6 +20,7 @@ import type {
   FoundItemCategory,
 } from '../types'
 import { CameraCapture } from './components/CameraCapture'
+import { LocationPinMap } from './components/LocationPinMap'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
 import { env } from '@/shared/lib/config/env'
@@ -42,13 +35,6 @@ interface LocationPoint {
   readonly latitude: number
   readonly longitude: number
 }
-
-interface PinPosition {
-  readonly x: number
-  readonly y: number
-}
-
-const defaultPinPosition: PinPosition = { x: 0.5, y: 0.48 }
 
 const categoryMeta: Record<
   FoundItemCategory,
@@ -101,10 +87,6 @@ const confettiPieces = [
   { left: '76%', top: '52%', rotate: 16, color: 'bg-[#9EDB7D]' },
   { left: '32%', top: '31%', rotate: -24, color: 'bg-[#EF5F5F]' },
 ] as const
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max)
-}
 
 function formatPostcode(value: string): string {
   return value.trim().toUpperCase()
@@ -178,90 +160,6 @@ function DesktopOnlyNotice() {
   )
 }
 
-interface LocationPreviewCardProps {
-  readonly postcode: string
-  readonly pinPosition: PinPosition
-  readonly onPinChange: (nextPosition: PinPosition) => void
-}
-
-function LocationPreviewCard({ postcode, pinPosition, onPinChange }: LocationPreviewCardProps) {
-  const surfaceRef = useRef<HTMLDivElement | null>(null)
-  const [activePointerId, setActivePointerId] = useState<number | null>(null)
-
-  const updateFromPointer = useCallback(
-    (clientX: number, clientY: number) => {
-      const surface = surfaceRef.current
-      if (!surface) {
-        return
-      }
-
-      const bounds = surface.getBoundingClientRect()
-      const nextX = clamp((clientX - bounds.left) / bounds.width, 0.18, 0.82)
-      const nextY = clamp((clientY - bounds.top) / bounds.height, 0.22, 0.78)
-      onPinChange({ x: nextX, y: nextY })
-    },
-    [onPinChange],
-  )
-
-  const handlePointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    setActivePointerId(event.pointerId)
-    event.currentTarget.setPointerCapture(event.pointerId)
-    updateFromPointer(event.clientX, event.clientY)
-  }
-
-  const handlePointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (activePointerId !== event.pointerId) {
-      return
-    }
-
-    updateFromPointer(event.clientX, event.clientY)
-  }
-
-  const handlePointerUp = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (activePointerId !== event.pointerId) {
-      return
-    }
-
-    setActivePointerId(null)
-    event.currentTarget.releasePointerCapture(event.pointerId)
-  }
-
-  return (
-    <div
-      ref={surfaceRef}
-      className="relative overflow-hidden rounded-[24px] bg-[#EEF1E6] px-4 pb-4 pt-3"
-    >
-      <div className="absolute inset-x-[-10%] top-[56%] h-3 -translate-y-1/2 rounded-full bg-[#D3D8CC]" />
-      <div className="absolute left-[43%] top-[-12%] h-[140%] w-6 rotate-[10deg] rounded-full bg-[#D7D9CF]" />
-      <div className="absolute left-[19%] top-[18%] h-12 w-24 rounded-full bg-[#DCE8C4]" />
-      <div className="absolute right-[16%] top-[26%] h-10 w-20 rounded-full bg-[#E5E8D8]" />
-
-      <div className="relative flex justify-end">
-        <span className="rounded-full bg-white/90 px-3 py-1 text-[0.72rem] font-medium text-slate-500 shadow-sm">
-          drag pin to adjust
-        </span>
-      </div>
-
-      <button
-        type="button"
-        className="absolute z-10 -translate-x-1/2 -translate-y-full touch-none cursor-grab active:cursor-grabbing"
-        style={{ left: `${pinPosition.x * 100}%`, top: `${pinPosition.y * 100}%` }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-        aria-label="Adjust found item location"
-      >
-        <MapPin size={38} fill="#447D24" className="text-white drop-shadow-[0_8px_16px_rgba(0,0,0,0.25)]" />
-      </button>
-
-      <div className="relative mt-20 rounded-2xl bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm w-fit">
-        {postcode}
-      </div>
-    </div>
-  )
-}
-
 export default function PostFoundItemPage() {
   const navigate = useNavigate()
   const isMobileViewport = useMediaQuery('(max-width: 767px)')
@@ -287,7 +185,10 @@ export default function PostFoundItemPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [uploadedImageUrl, setUploadedImageUrl] = useState('')
   const [liveLocation, setLiveLocation] = useState<LocationPoint | null>(null)
-  const [pinPosition, setPinPosition] = useState<PinPosition>(defaultPinPosition)
+  // The exact spot the item was seen. Seeded from the live GPS fix, then the
+  // user can fine-tune it by dragging the map pin.
+  const [pinnedLocation, setPinnedLocation] = useState<LocationPoint | null>(null)
+  const [hasAdjustedPin, setHasAdjustedPin] = useState(false)
   const [isLocating, setIsLocating] = useState(true)
   const [locationError, setLocationError] = useState<string | null>(null)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
@@ -379,10 +280,13 @@ export default function PostFoundItemPage() {
     setLocationError(null)
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setLiveLocation({
+        const nextLocation = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
-        })
+        }
+        setLiveLocation(nextLocation)
+        // Only follow the live fix while the user hasn't hand-placed the pin.
+        setPinnedLocation((current) => (hasAdjustedPin ? current : nextLocation))
         setIsLocating(false)
       },
       () => {
@@ -396,7 +300,7 @@ export default function PostFoundItemPage() {
         maximumAge: 60000,
       },
     )
-  }, [])
+  }, [hasAdjustedPin])
 
   useEffect(() => {
     if (!isMobileViewport) {
@@ -406,16 +310,14 @@ export default function PostFoundItemPage() {
     requestLiveLocation()
   }, [isMobileViewport, requestLiveLocation])
 
-  const adjustedLocation = useMemo<LocationPoint | null>(() => {
-    if (!liveLocation) {
-      return null
-    }
+  // The pin position is the real GPS spot the item was seen — the live fix by
+  // default, or wherever the user dragged the pin.
+  const adjustedLocation = pinnedLocation ?? liveLocation
 
-    return {
-      latitude: liveLocation.latitude + (0.5 - pinPosition.y) * 0.0018,
-      longitude: liveLocation.longitude + (pinPosition.x - 0.5) * 0.0025,
-    }
-  }, [liveLocation, pinPosition])
+  const handlePinChange = useCallback((next: LocationPoint) => {
+    setHasAdjustedPin(true)
+    setPinnedLocation(next)
+  }, [])
 
   const safeWeightKg = useMemo(() => {
     const parsed = Number(estimatedWeightKg)
@@ -526,7 +428,8 @@ export default function PostFoundItemPage() {
     setNotes('')
     setUploadedImageUrl('')
     setCreatedItem(null)
-    setPinPosition(defaultPinPosition)
+    setPinnedLocation(null)
+    setHasAdjustedPin(false)
     setNextPreviewUrl(null)
     setSmartHint(null)
     requestLiveLocation()
@@ -839,11 +742,25 @@ export default function PostFoundItemPage() {
 
         {step === 'details' ? (
           <>
-            <LocationPreviewCard
-              postcode={defaultPostcode}
-              pinPosition={pinPosition}
-              onPinChange={setPinPosition}
-            />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-semibold text-slate-700">Item location</span>
+                <span className="text-xs text-slate-500">Drag the pin to the exact spot</span>
+              </div>
+              <LocationPinMap
+                liveLocation={liveLocation}
+                value={adjustedLocation}
+                onChange={handlePinChange}
+                heightClassName="h-60"
+              />
+              {adjustedLocation ? (
+                <p className="text-xs text-slate-500">
+                  {defaultPostcode} · {adjustedLocation.latitude.toFixed(5)},{' '}
+                  {adjustedLocation.longitude.toFixed(5)}
+                  {hasAdjustedPin ? ' (adjusted)' : ''}
+                </p>
+              ) : null}
+            </div>
 
             {locationError ? (
               <div className="flex items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">

@@ -11,6 +11,28 @@ interface CameraCaptureProps {
   readonly isBusy?: boolean
 }
 
+// Some mobile cameras (notably Android) start with a non-1 digital zoom or
+// retain the last-used zoom level, which makes the preview look cropped/"zoomed
+// in" and mismatched against the captured frame. Force the track back to its
+// minimum/1x zoom once the stream is live.
+function resetTrackZoom(stream: MediaStream): void {
+  for (const track of stream.getVideoTracks()) {
+    const capabilities =
+      typeof track.getCapabilities === 'function' ? track.getCapabilities() : undefined
+    const zoom = (capabilities as { zoom?: { min?: number } } | undefined)?.zoom
+    if (!zoom) {
+      continue
+    }
+
+    const targetZoom = typeof zoom.min === 'number' ? zoom.min : 1
+    track
+      .applyConstraints({ advanced: [{ zoom: targetZoom } as MediaTrackConstraintSet] })
+      .catch(() => {
+        // Zoom control is best-effort; ignore devices that reject it.
+      })
+  }
+}
+
 export function CameraCapture({
   onCapture,
   onCancel,
@@ -66,6 +88,7 @@ export function CameraCapture({
       streamRef.current = mediaStream
       videoRef.current.srcObject = mediaStream
       await videoRef.current.play()
+      resetTrackZoom(mediaStream)
       setError(null)
     } catch {
       stopCamera()
@@ -88,15 +111,49 @@ export function CameraCapture({
 
     const videoElement = videoRef.current
     const canvasElement = canvasRef.current
-    canvasElement.width = videoElement.videoWidth
-    canvasElement.height = videoElement.videoHeight
+    const sourceWidth = videoElement.videoWidth
+    const sourceHeight = videoElement.videoHeight
+    if (!sourceWidth || !sourceHeight) {
+      return
+    }
+
+    // The preview is rendered with `object-cover`, so the saved photo must be
+    // cropped to the same on-screen aspect ratio — otherwise the capture looks
+    // "zoomed out" (extra sensor area) compared with what the user framed.
+    const displayWidth = videoElement.clientWidth || sourceWidth
+    const displayHeight = videoElement.clientHeight || sourceHeight
+    const displayRatio = displayWidth / displayHeight
+    const sourceRatio = sourceWidth / sourceHeight
+
+    let cropWidth = sourceWidth
+    let cropHeight = sourceHeight
+    if (sourceRatio > displayRatio) {
+      cropWidth = Math.round(sourceHeight * displayRatio)
+    } else {
+      cropHeight = Math.round(sourceWidth / displayRatio)
+    }
+    const cropX = Math.round((sourceWidth - cropWidth) / 2)
+    const cropY = Math.round((sourceHeight - cropHeight) / 2)
+
+    canvasElement.width = cropWidth
+    canvasElement.height = cropHeight
 
     const context = canvasElement.getContext('2d')
     if (!context) {
       return
     }
 
-    context.drawImage(videoElement, 0, 0)
+    context.drawImage(
+      videoElement,
+      cropX,
+      cropY,
+      cropWidth,
+      cropHeight,
+      0,
+      0,
+      cropWidth,
+      cropHeight,
+    )
     canvasElement.toBlob(
       (blob) => {
         if (!blob) {
