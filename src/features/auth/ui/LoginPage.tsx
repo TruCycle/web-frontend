@@ -28,7 +28,7 @@ interface LoginFormValues {
 const initialFormValues: LoginFormValues = {
   email: '',
   password: '',
-  keepLoggedIn: false,
+  keepLoggedIn: true,
 }
 
 export default function LoginPage() {
