@@ -5,6 +5,7 @@ import { ApiError } from '@/shared/types/network'
 import { useToast } from '@/shared/ui/toast/useToast'
 import { classNames } from '@/shared/utils/classNames'
 import { AuthCheckbox } from './components/AuthCheckbox'
+import { GoogleSignInButton } from './components/GoogleSignInButton'
 import { PasswordVisibilityIcon } from './components/PasswordVisibilityIcon'
 import {
   AuthPageFrame,
@@ -178,6 +179,8 @@ export default function LoginPage() {
             'Log in'
           )}
         </button>
+
+        <GoogleSignInButton redirectTo="/dashboard" text="signin_with" />
       </form>
     </AuthPageFrame>
   )

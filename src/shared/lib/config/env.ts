@@ -17,6 +17,7 @@ const parseFlag = (value: string | undefined, fallback: boolean): boolean => {
 
 const enableSmartSpot = parseFlag(import.meta.env.VITE_ENABLE_SMART_SPOT, true)
 const visionWorkerUrl = import.meta.env.VITE_VISION_WORKER_URL?.trim() || ''
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() || ''
 
 export const env = {
   apiBaseUrl,
@@ -29,4 +30,5 @@ export const env = {
   metaPixelId,
   enableSmartSpot,
   visionWorkerUrl,
+  googleClientId,
 } as const

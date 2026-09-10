@@ -6,6 +6,7 @@ import { useAuthSession } from '@/shared/context/useAuthSession'
 import { ApiError } from '@/shared/types/network'
 import { useToast } from '@/shared/ui/toast/useToast'
 import { classNames } from '@/shared/utils/classNames'
+import { GoogleSignInButton } from './components/GoogleSignInButton'
 import { PasswordVisibilityIcon } from './components/PasswordVisibilityIcon'
 import {
   AuthPageFrame,
@@ -309,6 +310,8 @@ export default function SignupPage({
               'Sign Up'
             )}
           </button>
+
+          <GoogleSignInButton redirectTo="/dashboard" text="signup_with" />
         </form>
       )}
     </AuthPageFrame>

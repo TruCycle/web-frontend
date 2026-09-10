@@ -9,6 +9,7 @@ import {
 import {
   getCurrentUser,
   loginUser,
+  loginWithGoogle as loginWithGoogleApi,
   refreshAuthTokens,
   registerUser,
   requestPasswordReset as requestPasswordResetApi,
@@ -201,6 +202,17 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
     [],
   )
 
+  const loginWithGoogle = useCallback(async (idToken: string) => {
+    const { user: nextUser, tokens } = await loginWithGoogleApi(idToken)
+    storeSession({
+      tokens,
+      user: nextUser,
+      persistMode: 'local',
+      keepRefreshToken: Boolean(tokens.refreshToken),
+    })
+    setUser(nextUser)
+  }, [])
+
   const register = useCallback(async (payload: RegisterPayload) => {
     await registerUser(payload)
   }, [])
@@ -254,6 +266,7 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
       isAuthenticated: user !== null,
       isBootstrapping,
       login,
+      loginWithGoogle,
       register,
       verifyEmail,
       upgradeToPartner,
@@ -265,6 +278,7 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
       user,
       isBootstrapping,
       login,
+      loginWithGoogle,
       register,
       verifyEmail,
       upgradeToPartner,
