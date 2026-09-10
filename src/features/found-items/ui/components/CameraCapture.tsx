@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
-import { Camera, LoaderCircle, MapPin, RotateCw, Upload, X } from 'lucide-react'
+import { Camera, Image as ImageIcon, LoaderCircle, MapPin, RotateCw, Upload, X } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
 import { classNames } from '@/shared/utils/classNames'
 
@@ -295,7 +295,21 @@ export function CameraCapture({
               >
                 <span className="h-[58px] w-[58px] rounded-full bg-white shadow-[inset_0_0_0_2px_rgba(8,16,8,0.28)]" />
               </button>
+
+              <button
+                type="button"
+                className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => fileInputRef.current?.click()}
+                aria-label="Upload from gallery"
+                disabled={isBusy}
+              >
+                <ImageIcon size={18} />
+              </button>
             </div>
+
+            <p className="relative z-10 mt-4 text-center text-xs text-white/55">
+              Take a photo or upload one from your gallery
+            </p>
           </>
         )}
 
@@ -349,6 +363,14 @@ export function CameraCapture({
               <Button type="button" variant="secondary" onClick={onSwitchCamera}>
                 <RotateCw size={16} />
                 Flip
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <ImageIcon size={16} />
+                Gallery
               </Button>
               <Button type="button" variant="primary" onClick={capturePhoto}>
                 <Camera size={16} />
