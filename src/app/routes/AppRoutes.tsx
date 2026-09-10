@@ -11,6 +11,7 @@ const PasswordResetPage = lazy(
   () => import('@/features/auth/ui/PasswordResetPage'),
 )
 const HomePage = lazy(() => import('@/features/home/ui/HomePage'))
+const PublicBrowsePage = lazy(() => import('@/features/browse/ui/PublicBrowsePage'))
 const CookiesPage = lazy(() => import('@/features/legal/ui/CookiesPage'))
 const PrivacyPage = lazy(() => import('@/features/legal/ui/PrivacyPage'))
 const TermsPage = lazy(() => import('@/features/legal/ui/TermsPage'))
@@ -64,6 +65,34 @@ function ProtectedShellRoute() {
   return <Outlet />
 }
 
+/**
+ * /browse is public: logged-out visitors get the crawlable public catalogue,
+ * signed-in users get their in-app browse dashboard.
+ */
+function BrowseRoute() {
+  const { isAuthenticated, isBootstrapping } = useAuthSession()
+
+  if (isBootstrapping) {
+    return <LoadingState variant="page" label="Loading" />
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Suspense fallback={<LoadingState variant="page" label="Loading items" />}>
+        <PublicBrowsePage />
+      </Suspense>
+    )
+  }
+
+  return (
+    <AppShell>
+      <Suspense fallback={<LoadingState label="Loading page" />}>
+        <Dashboard />
+      </Suspense>
+    </AppShell>
+  )
+}
+
 function hasPartnerRole(roles: readonly string[] | undefined): boolean {
   if (!roles) {
     return false
@@ -96,6 +125,7 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/browse" element={<BrowseRoute />} />
       <Route
         path="/internal/vision"
         element={
@@ -123,7 +153,6 @@ export function AppRoutes() {
           />
         </Route>
         <Route element={<ShellLayout />}>
-          <Route path="/browse" element={<Dashboard />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/messages" element={<MessagingPage />} />
           <Route path="/dashboard" element={<Dashboard />} />

@@ -13,7 +13,7 @@ import { usePageMeta } from '@/shared/hooks/usePageMeta'
 export default function HomePage() {
   usePageMeta({ canonicalPath: '/' })
   const { isAuthenticated } = useAuthSession()
-  const browseTo = isAuthenticated ? '/browse' : '/signup?intent=collector'
+  const browseTo = '/browse'
   const dashboardTo = isAuthenticated ? '/dashboard' : '/login'
   const impactTo = isAuthenticated ? '/impact' : '/signup'
   const partnerTo = isAuthenticated ? '/partner/onboard' : '/signup'

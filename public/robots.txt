@@ -2,7 +2,7 @@
 
 User-agent: *
 Allow: /
-Disallow: /browse
+Allow: /browse
 Disallow: /dashboard
 Disallow: /messages
 Disallow: /notifications
