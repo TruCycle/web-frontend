@@ -9,8 +9,11 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { createFoundItem, fetchFoundItemCatalog, uploadFoundItemImage } from '../api/foundItemsApi'
-import { classifyImageFile, warmUpClassifier } from '../lib/imageClassifier'
-import { pickConfidentHint, type CatalogHint } from '../lib/labelToCatalog'
+import {
+  classifyImageWithWorker,
+  isVisionWorkerEnabled,
+  type CatalogHint,
+} from '../lib/visionClassifier'
 import { foundItemCategories } from '../types'
 import { RescueShareCard } from './components/RescueShareCard'
 import type {
@@ -376,14 +379,15 @@ export default function PostFoundItemPage() {
     async (file: File) => {
       setNextPreviewUrl(URL.createObjectURL(file))
 
-      // Smart pre-fill: classify in parallel with the Cloudinary upload so we
-      // don't add latency. The hint is applied to the form state when ready.
-      const classifyTask = env.enableSmartSpot
+      // Smart pre-fill: classify via the Cloudflare Vision Worker in parallel
+      // with the Cloudinary upload so we don't add latency. The hint is applied
+      // to the form state when ready.
+      const classifyTask =
+        env.enableSmartSpot && isVisionWorkerEnabled()
         ? (async () => {
             try {
               setIsClassifying(true)
-              const predictions = await classifyImageFile(file)
-              const hint = pickConfidentHint(predictions)
+              const hint = await classifyImageWithWorker(file)
               if (hint) {
                 setSmartHint(hint)
                 setCategory(hint.category)
@@ -581,11 +585,6 @@ export default function PostFoundItemPage() {
   }
 
   if (step === 'capture') {
-    if (env.enableSmartSpot) {
-      // Kick off model download while the user is framing their shot so the
-      // classifier is hot by the time they tap capture.
-      warmUpClassifier()
-    }
     return (
       <CameraCapture
         variant="immersive"

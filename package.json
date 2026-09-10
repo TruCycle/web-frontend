@@ -11,8 +11,6 @@
   },
   "dependencies": {
     "@posthog/react": "^1.10.1",
-    "@tensorflow-models/mobilenet": "^2.1.1",
-    "@tensorflow/tfjs": "^4.22.0",
     "canvas-confetti": "^1.9.4",
     "html-to-image": "^1.11.13",
     "jsqr": "^1.4.0",
