@@ -3,6 +3,7 @@ import {
   Check,
   ChevronRight,
   LoaderCircle,
+  MapPin,
   Share2,
   Smartphone,
 } from 'lucide-react'
@@ -23,7 +24,6 @@ import type {
   FoundItemCategory,
 } from '../types'
 import { CameraCapture } from './components/CameraCapture'
-import { LocationPinMap } from './components/LocationPinMap'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
 import { env } from '@/shared/lib/config/env'
@@ -191,9 +191,10 @@ export default function PostFoundItemPage() {
   // The exact spot the item was seen. Seeded from the live GPS fix, then the
   // user can fine-tune it by dragging the map pin.
   const [pinnedLocation, setPinnedLocation] = useState<LocationPoint | null>(null)
-  const [hasAdjustedPin, setHasAdjustedPin] = useState(false)
   const [isLocating, setIsLocating] = useState(true)
   const [locationError, setLocationError] = useState<string | null>(null)
+  const [identifiedPostcode, setIdentifiedPostcode] = useState<string>('')
+  const [isResolvingPostcode, setIsResolvingPostcode] = useState(false)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [createdItem, setCreatedItem] = useState<FoundItem | null>(null)
@@ -201,6 +202,7 @@ export default function PostFoundItemPage() {
   const [isClassifying, setIsClassifying] = useState(false)
 
   const defaultPostcode = formatPostcode(user?.postcode?.trim() || env.defaultSearchPostcode)
+  const displayPostcode = identifiedPostcode || defaultPostcode
   const actor = useMemo(
     () => ({
       id: user?.id ?? 'current-user',
@@ -288,8 +290,7 @@ export default function PostFoundItemPage() {
           longitude: position.coords.longitude,
         }
         setLiveLocation(nextLocation)
-        // Only follow the live fix while the user hasn't hand-placed the pin.
-        setPinnedLocation((current) => (hasAdjustedPin ? current : nextLocation))
+        setPinnedLocation(nextLocation)
         setIsLocating(false)
       },
       () => {
@@ -303,7 +304,7 @@ export default function PostFoundItemPage() {
         maximumAge: 60000,
       },
     )
-  }, [hasAdjustedPin])
+  }, [])
 
   useEffect(() => {
     if (!isMobileViewport) {
@@ -317,10 +318,44 @@ export default function PostFoundItemPage() {
   // default, or wherever the user dragged the pin.
   const adjustedLocation = pinnedLocation ?? liveLocation
 
-  const handlePinChange = useCallback((next: LocationPoint) => {
-    setHasAdjustedPin(true)
-    setPinnedLocation(next)
-  }, [])
+  useEffect(() => {
+    if (!adjustedLocation) {
+      return
+    }
+
+    let isMounted = true
+    setIsResolvingPostcode(true)
+
+    const resolvePostcode = async () => {
+      try {
+        const response = await fetch(
+          `https://api.postcodes.io/postcodes?lon=${adjustedLocation.longitude}&lat=${adjustedLocation.latitude}&limit=1`,
+        )
+        if (response.ok) {
+          const data = (await response.json()) as {
+            result?: Array<{ postcode?: string }>
+          }
+          const pc = data.result?.[0]?.postcode
+          if (pc && isMounted) {
+            setIdentifiedPostcode(formatPostcode(pc))
+            return
+          }
+        }
+      } catch {
+        // Fall back gracefully
+      } finally {
+        if (isMounted) {
+          setIsResolvingPostcode(false)
+        }
+      }
+    }
+
+    void resolvePostcode()
+
+    return () => {
+      isMounted = false
+    }
+  }, [adjustedLocation])
 
   const safeWeightKg = useMemo(() => {
     const parsed = Number(estimatedWeightKg)
@@ -363,7 +398,7 @@ export default function PostFoundItemPage() {
     ? 'Location needed'
     : isLocating
     ? 'Locking GPS...'
-    : `${defaultPostcode} · GPS locked`
+    : `${displayPostcode} · GPS locked`
 
   const setNextPreviewUrl = useCallback((nextPreviewUrl: string | null) => {
     setPreviewUrl((currentPreviewUrl) => {
@@ -433,9 +468,9 @@ export default function PostFoundItemPage() {
     setUploadedImageUrl('')
     setCreatedItem(null)
     setPinnedLocation(null)
-    setHasAdjustedPin(false)
     setNextPreviewUrl(null)
     setSmartHint(null)
+    setIdentifiedPostcode('')
     requestLiveLocation()
   }, [requestLiveLocation, setNextPreviewUrl])
 
@@ -465,7 +500,7 @@ export default function PostFoundItemPage() {
 
     const payload: CreateFoundItemPayload = {
       title,
-      description: buildDescription(title, safeWeightKg, defaultPostcode, isFlyTipped, notes),
+      description: buildDescription(title, safeWeightKg, displayPostcode, isFlyTipped, notes),
       category,
       condition: isFlyTipped ? 'Fly-tipped' : undefined,
       weightKg: safeWeightKg,
@@ -479,7 +514,7 @@ export default function PostFoundItemPage() {
       location: {
         latitude: adjustedLocation.latitude,
         longitude: adjustedLocation.longitude,
-        postcode: defaultPostcode,
+        postcode: displayPostcode,
       },
     }
 
@@ -502,7 +537,7 @@ export default function PostFoundItemPage() {
   const handleShare = async () => {
     const item = createdItem
     const shareTitle = item?.title ?? title
-    const sharePostcode = item?.location.postcode ?? defaultPostcode
+    const sharePostcode = item?.location.postcode ?? displayPostcode
     const shareText = `${shareTitle} is now live in ${sharePostcode}. Rescue it on TruCycle.`
     const shareUrl = `${window.location.origin}/found-items`
 
@@ -743,21 +778,38 @@ export default function PostFoundItemPage() {
           <>
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-semibold text-slate-700">Item location</span>
-                <span className="text-xs text-slate-500">Drag the pin to the exact spot</span>
+                <span className="text-sm font-semibold text-slate-700">Captured photo</span>
+                <button
+                  type="button"
+                  onClick={() => setStep('capture')}
+                  className="text-xs font-semibold text-[#446B16] transition hover:text-[#29470C] hover:underline"
+                >
+                  Retake photo
+                </button>
               </div>
-              <LocationPinMap
-                liveLocation={liveLocation}
-                value={adjustedLocation}
-                onChange={handlePinChange}
-                heightClassName="h-60"
-              />
+              <div className="relative h-60 w-full overflow-hidden rounded-[22px] border border-slate-200 bg-slate-100 shadow-sm">
+                {previewUrl || uploadedImageUrl ? (
+                  <img
+                    src={previewUrl || uploadedImageUrl}
+                    alt={title || 'Captured item'}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
+                    No preview available
+                  </div>
+                )}
+              </div>
               {adjustedLocation ? (
-                <p className="text-xs text-slate-500">
-                  {defaultPostcode} · {adjustedLocation.latitude.toFixed(5)},{' '}
-                  {adjustedLocation.longitude.toFixed(5)}
-                  {hasAdjustedPin ? ' (adjusted)' : ''}
-                </p>
+                <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                  <MapPin size={14} className="shrink-0 text-[#446B16]" />
+                  <span>
+                    <span className="font-semibold text-slate-800">{displayPostcode}</span>
+                    {' · '}
+                    {adjustedLocation.latitude.toFixed(5)}, {adjustedLocation.longitude.toFixed(5)}
+                    {isResolvingPostcode ? ' (identifying area...)' : ''}
+                  </span>
+                </div>
               ) : null}
             </div>
 
@@ -989,7 +1041,7 @@ export default function PostFoundItemPage() {
             <div>
               <h2 className="mb-1 text-[2rem] font-bold tracking-[-0.03em] text-slate-950">{title}</h2>
               <p className="text-lg text-slate-500">
-                {safeWeightKg} kg · {defaultPostcode}
+                {safeWeightKg} kg · {displayPostcode}
               </p>
               {selectedCatalogEntry ? (
                 <p className="mt-2 text-sm text-slate-500">

@@ -40,7 +40,7 @@ export function IntentFab() {
       surface: 'bg-tc-auth-link',
       iconColor: 'text-white',
       ring: 'ring-tc-auth-link/25',
-      hideOn: (p) => p.startsWith('/listings'),
+      hideOn: (p) => p.startsWith('/listings') || p.startsWith('/found-items/post'),
       onClick: () => runWithRole('donor', { path: '/listings' }),
     },
     {
@@ -50,7 +50,7 @@ export function IntentFab() {
       surface: 'bg-tc-shell-bg',
       iconColor: 'text-white',
       ring: 'ring-tc-shell-divider',
-      hideOn: (p) => p.startsWith('/map'),
+      hideOn: (p) => p.startsWith('/map') || p.startsWith('/found-items/post'),
       onClick: () => runWithRole('collector', { path: '/map' }),
     },
   ]
@@ -103,7 +103,7 @@ export function IntentFab() {
     }
   }, [count])
 
-  if (count === 0) return null
+  if (count === 0 || pathname.startsWith('/found-items/post')) return null
 
   return (
     <div className="pointer-events-none fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3 sm:bottom-8 sm:right-8">
