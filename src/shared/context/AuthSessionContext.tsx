@@ -51,6 +51,8 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(() => getStoredUser())
   const [isBootstrapping, setIsBootstrapping] = useState(true)
   const refreshTimerRef = useRef<number | null>(null)
+  const isRefreshingRef = useRef<boolean>(false)
+  const lastRefreshedAtRef = useRef<number>(0)
 
   const clearRefreshTimer = useCallback(() => {
     if (refreshTimerRef.current === null) {
@@ -62,6 +64,15 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
   }, [])
 
   const tryRefreshStoredSession = useCallback(async (): Promise<boolean> => {
+    // Avoid concurrent or rapid back-to-back refreshes
+    if (isRefreshingRef.current) {
+      return false
+    }
+
+    if (Date.now() - lastRefreshedAtRef.current < 30_000) {
+      return true
+    }
+
     const refreshToken = getStoredRefreshToken()
     const refreshTokenExpiry = getStoredRefreshTokenExpiresAt()
     const persistedUser = getStoredUser()
@@ -78,8 +89,10 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
       return false
     }
 
+    isRefreshingRef.current = true
     try {
       const refreshedSession = await refreshAuthTokens(refreshToken)
+      lastRefreshedAtRef.current = Date.now()
       storeSession({
         tokens: refreshedSession.tokens,
         user: refreshedSession.user,
@@ -91,6 +104,8 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
       return true
     } catch {
       return false
+    } finally {
+      isRefreshingRef.current = false
     }
   }, [])
 
@@ -158,7 +173,8 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
     const refreshLeadMs = hasRefreshToken
       ? Math.min(refreshBeforeExpiryMs, Math.max(0, ttlMs - 30_000))
       : 0
-    const timerDelayMs = ttlMs - refreshLeadMs
+    // Prevent immediate re-execution loops by enforcing a minimum timer delay
+    const timerDelayMs = Math.max(30_000, ttlMs - refreshLeadMs)
 
     const handleTokenWindow = async () => {
       if (!hasRefreshToken) {
@@ -172,11 +188,6 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
         clearSession()
         setUser(null)
       }
-    }
-
-    if (timerDelayMs <= 0) {
-      void handleTokenWindow()
-      return
     }
 
     refreshTimerRef.current = window.setTimeout(() => {
@@ -256,6 +267,8 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
 
   const logout = useCallback(async () => {
     clearRefreshTimer()
+    isRefreshingRef.current = false
+    lastRefreshedAtRef.current = 0
     clearSession()
     setUser(null)
   }, [clearRefreshTimer])
