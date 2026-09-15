@@ -52,6 +52,16 @@ function json(data, status = 200, origin = '') {
  *   - text before/after the JSON object
  */
 function extractJson(raw) {
+  // If Cloudflare AI already parsed it into an object, return it directly
+  if (typeof raw === 'object' && raw !== null) {
+    return raw
+  }
+
+  // Guard against non-string types
+  if (typeof raw !== 'string') {
+    return null
+  }
+
   let text = raw.trim()
 
   // Strip markdown fences
@@ -184,24 +194,29 @@ export default {
         }
       }
 
-      // Docs confirm output schema: { response: string }
-      const rawText =
+      // Output schema: { response: string | object }
+      const rawOutput =
         response?.response ??
+        response?.description ??
         response?.choices?.[0]?.message?.content ??
-        (typeof response === 'string' ? response : '')
+        (typeof response === 'string' ? response : null)
 
-      if (!rawText) {
+      if (!rawOutput) {
         throw new Error('Model returned an empty response')
       }
 
-      const parsed = extractJson(rawText)
+      const parsed = extractJson(rawOutput)
 
       if (parsed) {
         return json({ success: true, data: parsed }, 200, origin)
       }
 
       // Could not extract JSON — return raw text so the UI can still show it
-      return json({ success: true, data: null, raw: rawText }, 200, origin)
+      return json({
+        success: true,
+        data: null,
+        raw: typeof rawOutput === 'string' ? rawOutput : JSON.stringify(rawOutput),
+      }, 200, origin)
 
     } catch (err) {
       console.error('AI inference error:', err)
