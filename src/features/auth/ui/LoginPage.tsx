@@ -1,6 +1,7 @@
 import { type ChangeEvent, type FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthSession } from '@/shared/context/useAuthSession'
+import { useGoogleOneTap } from '@/shared/hooks/useGoogleOneTap'
 import { ApiError } from '@/shared/types/network'
 import { useToast } from '@/shared/ui/toast/useToast'
 import { classNames } from '@/shared/utils/classNames'
@@ -33,6 +34,7 @@ const initialFormValues: LoginFormValues = {
 }
 
 export default function LoginPage() {
+  useGoogleOneTap({ redirectTo: '/dashboard' })
   const [formValues, setFormValues] = useState(initialFormValues)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)

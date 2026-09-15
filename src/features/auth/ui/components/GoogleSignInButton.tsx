@@ -5,61 +5,10 @@ import { env } from '@/shared/lib/config/env'
 import { ApiError } from '@/shared/types/network'
 import { useToast } from '@/shared/ui/toast/useToast'
 
-const GSI_SRC = 'https://accounts.google.com/gsi/client'
-
-interface GoogleCredentialResponse {
-  readonly credential?: string
-}
-
-interface GoogleAccountsId {
-  initialize: (config: {
-    client_id: string
-    callback: (response: GoogleCredentialResponse) => void
-  }) => void
-  renderButton: (
-    parent: HTMLElement,
-    options: Record<string, string | number>,
-  ) => void
-}
-
-declare global {
-  interface Window {
-    google?: {
-      accounts?: {
-        id?: GoogleAccountsId
-      }
-    }
-  }
-}
-
-let scriptPromise: Promise<void> | null = null
-
-function loadGsiScript(): Promise<void> {
-  if (window.google?.accounts?.id) {
-    return Promise.resolve()
-  }
-  if (!scriptPromise) {
-    scriptPromise = new Promise<void>((resolve, reject) => {
-      const existing = document.querySelector<HTMLScriptElement>(`script[src="${GSI_SRC}"]`)
-      if (existing) {
-        existing.addEventListener('load', () => resolve())
-        existing.addEventListener('error', () => reject(new Error('Failed to load Google script')))
-        return
-      }
-      const script = document.createElement('script')
-      script.src = GSI_SRC
-      script.async = true
-      script.defer = true
-      script.onload = () => resolve()
-      script.onerror = () => {
-        scriptPromise = null
-        reject(new Error('Failed to load Google script'))
-      }
-      document.head.appendChild(script)
-    })
-  }
-  return scriptPromise
-}
+import {
+  type GoogleCredentialResponse,
+  loadGsiScript,
+} from '@/shared/lib/google/googleIdentity'
 
 interface GoogleSignInButtonProps {
   /** Where to go after a successful sign-in. Defaults to /dashboard. */

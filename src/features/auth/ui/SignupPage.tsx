@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Mail, RefreshCw } from 'lucide-react'
 import { resendVerificationEmail } from '@/features/auth/api/authApi'
 import { useAuthSession } from '@/shared/context/useAuthSession'
+import { useGoogleOneTap } from '@/shared/hooks/useGoogleOneTap'
 import { ApiError } from '@/shared/types/network'
 import { useToast } from '@/shared/ui/toast/useToast'
 import { classNames } from '@/shared/utils/classNames'
@@ -45,6 +46,7 @@ export default function SignupPage({
   className,
   onSubmitSuccess,
 }: SignupPageProps) {
+  useGoogleOneTap({ redirectTo: '/dashboard', context: 'signup' })
   const [formValues, setFormValues] = useState(initialFormValues)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isRegistering, setIsRegistering] = useState(false)
