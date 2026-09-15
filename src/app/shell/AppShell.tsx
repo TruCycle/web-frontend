@@ -527,7 +527,7 @@ export function AppShell({ children }: AppShellProps) {
           {children}
         </div>
       </main>
-      <IntentFab />
+      {!isFoundItemsPostRoute && <IntentFab />}
     </div>
   )
 }

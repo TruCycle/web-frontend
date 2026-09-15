@@ -1,10 +1,12 @@
 import { type ChangeEvent, type FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthSession } from '@/shared/context/useAuthSession'
+import { useGoogleOneTap } from '@/shared/hooks/useGoogleOneTap'
 import { ApiError } from '@/shared/types/network'
 import { useToast } from '@/shared/ui/toast/useToast'
 import { classNames } from '@/shared/utils/classNames'
 import { AuthCheckbox } from './components/AuthCheckbox'
+import { GoogleSignInButton } from './components/GoogleSignInButton'
 import { PasswordVisibilityIcon } from './components/PasswordVisibilityIcon'
 import {
   AuthPageFrame,
@@ -28,10 +30,11 @@ interface LoginFormValues {
 const initialFormValues: LoginFormValues = {
   email: '',
   password: '',
-  keepLoggedIn: false,
+  keepLoggedIn: true,
 }
 
 export default function LoginPage() {
+  useGoogleOneTap({ redirectTo: '/dashboard' })
   const [formValues, setFormValues] = useState(initialFormValues)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -178,6 +181,8 @@ export default function LoginPage() {
             'Log in'
           )}
         </button>
+
+        <GoogleSignInButton redirectTo="/dashboard" text="signin_with" />
       </form>
     </AuthPageFrame>
   )

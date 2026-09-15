@@ -11,6 +11,9 @@
     content="Give away what you don't need. Collect what you do. TruCycle connects neighbours for free, local item exchange across London and the UK." />
 
   <!-- Canonical & Language -->
+  <meta name="robots" content="index, follow" />
+  <meta name="keywords" content="TruCycle, free local reuse, item exchange, London, UK, give away, collect items, neighbour exchange, upcycling" />
+  <link rel="publisher" href="https://trucycle.co.uk/" />
   <link rel="canonical" href="https://trucycle.co.uk/" />
   <link rel="alternate" hreflang="en-GB" href="https://trucycle.co.uk/" />
 
@@ -37,29 +40,78 @@
     content="Give away what you don't need. Collect what you do. TruCycle connects neighbours for free, local item exchange across London and the UK." />
   <meta name="twitter:image" content="https://trucycle.co.uk/og-image.png" />
 
-  <!-- Structured Data: Organization -->
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="TruCycle — free local reuse" />
+  <meta name="twitter:site" content="@realTruCycle" />
+  <meta name="twitter:image:alt" content="TruCycle — free local reuse" />
+
+  <!-- Structured Data: Organization + WebSite -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "TruCycle",
-      "url": "https://trucycle.co.uk",
-      "logo": "https://trucycle.co.uk/og-image.png",
-      "description": "Free neighbour-to-neighbour item exchange across London and the UK.",
-      "sameAs": [
-        "https://www.facebook.com/share/14a4q94yc1A/",
-        "https://www.instagram.com/realtrucycle",
-        "https://www.linkedin.com/company/tru-cycle/",
-        "https://x.com/realTruCycle",
-        "https://www.tiktok.com/@trucycle",
-        "https://youtube.com/@realtrucycle"
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://trucycle.co.uk/#organization",
+          "name": "TruCycle",
+          "url": "https://trucycle.co.uk",
+          "logo": "https://trucycle.co.uk/og-image.png",
+          "description": "Free neighbour-to-neighbour item exchange across London and the UK.",
+          "sameAs": [
+            "https://www.facebook.com/share/14a4q94yc1A/",
+            "https://www.instagram.com/realtrucycle",
+            "https://www.linkedin.com/company/tru-cycle/",
+            "https://x.com/realTruCycle",
+            "https://www.tiktok.com/@trucycle",
+            "https://youtube.com/@realtrucycle"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://trucycle.co.uk/#website",
+          "url": "https://trucycle.co.uk",
+          "name": "TruCycle",
+          "publisher": { "@id": "https://trucycle.co.uk/#organization" },
+          "inLanguage": "en-GB"
+        }
       ]
     }
   </script>
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!--
+      Crawlable landing fallback. React replaces this on load; it exists so
+      non-JS crawlers and the initial fetch still see the core landing content.
+    -->
+    <noscript>
+      <main>
+        <h1>TruCycle — free local reuse. Your clutter is someone's treasure.</h1>
+        <p>
+          List the things you no longer need and neighbours collect them for
+          free — no skips, no landfill, no faff. Browse free items near you or
+          post an item across London and the UK.
+        </p>
+        <h2>How it works</h2>
+        <ol>
+          <li>Post an item you no longer need with a photo and your area.</li>
+          <li>A neighbour requests it and arranges a free collection.</li>
+          <li>The item finds a new home instead of going to landfill.</li>
+        </ol>
+        <h2>What people give and collect</h2>
+        <p>
+          Furniture, kitchenware, books and media, kids and baby items, garden
+          and tools, tech, and clothing.
+        </p>
+        <p>
+          <a href="https://trucycle.co.uk/signup?intent=donor">Post an item</a> ·
+          <a href="https://trucycle.co.uk/signup?intent=collector">Browse free items</a>
+        </p>
+      </main>
+    </noscript>
+  </div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

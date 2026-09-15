@@ -7,18 +7,14 @@ import {
   Share2,
   Smartphone,
 } from 'lucide-react'
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type PointerEvent as ReactPointerEvent,
-} from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { createFoundItem, fetchFoundItemCatalog, uploadFoundItemImage } from '../api/foundItemsApi'
-import { classifyImageFile, warmUpClassifier } from '../lib/imageClassifier'
-import { pickConfidentHint, type CatalogHint } from '../lib/labelToCatalog'
+import {
+  classifyImageWithWorker,
+  isVisionWorkerEnabled,
+  type CatalogHint,
+} from '../lib/visionClassifier'
 import { foundItemCategories } from '../types'
 import { RescueShareCard } from './components/RescueShareCard'
 import type {
@@ -42,13 +38,6 @@ interface LocationPoint {
   readonly latitude: number
   readonly longitude: number
 }
-
-interface PinPosition {
-  readonly x: number
-  readonly y: number
-}
-
-const defaultPinPosition: PinPosition = { x: 0.5, y: 0.48 }
 
 const categoryMeta: Record<
   FoundItemCategory,
@@ -101,10 +90,6 @@ const confettiPieces = [
   { left: '76%', top: '52%', rotate: 16, color: 'bg-[#9EDB7D]' },
   { left: '32%', top: '31%', rotate: -24, color: 'bg-[#EF5F5F]' },
 ] as const
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max)
-}
 
 function formatPostcode(value: string): string {
   return value.trim().toUpperCase()
@@ -178,90 +163,6 @@ function DesktopOnlyNotice() {
   )
 }
 
-interface LocationPreviewCardProps {
-  readonly postcode: string
-  readonly pinPosition: PinPosition
-  readonly onPinChange: (nextPosition: PinPosition) => void
-}
-
-function LocationPreviewCard({ postcode, pinPosition, onPinChange }: LocationPreviewCardProps) {
-  const surfaceRef = useRef<HTMLDivElement | null>(null)
-  const [activePointerId, setActivePointerId] = useState<number | null>(null)
-
-  const updateFromPointer = useCallback(
-    (clientX: number, clientY: number) => {
-      const surface = surfaceRef.current
-      if (!surface) {
-        return
-      }
-
-      const bounds = surface.getBoundingClientRect()
-      const nextX = clamp((clientX - bounds.left) / bounds.width, 0.18, 0.82)
-      const nextY = clamp((clientY - bounds.top) / bounds.height, 0.22, 0.78)
-      onPinChange({ x: nextX, y: nextY })
-    },
-    [onPinChange],
-  )
-
-  const handlePointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    setActivePointerId(event.pointerId)
-    event.currentTarget.setPointerCapture(event.pointerId)
-    updateFromPointer(event.clientX, event.clientY)
-  }
-
-  const handlePointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (activePointerId !== event.pointerId) {
-      return
-    }
-
-    updateFromPointer(event.clientX, event.clientY)
-  }
-
-  const handlePointerUp = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (activePointerId !== event.pointerId) {
-      return
-    }
-
-    setActivePointerId(null)
-    event.currentTarget.releasePointerCapture(event.pointerId)
-  }
-
-  return (
-    <div
-      ref={surfaceRef}
-      className="relative overflow-hidden rounded-[24px] bg-[#EEF1E6] px-4 pb-4 pt-3"
-    >
-      <div className="absolute inset-x-[-10%] top-[56%] h-3 -translate-y-1/2 rounded-full bg-[#D3D8CC]" />
-      <div className="absolute left-[43%] top-[-12%] h-[140%] w-6 rotate-[10deg] rounded-full bg-[#D7D9CF]" />
-      <div className="absolute left-[19%] top-[18%] h-12 w-24 rounded-full bg-[#DCE8C4]" />
-      <div className="absolute right-[16%] top-[26%] h-10 w-20 rounded-full bg-[#E5E8D8]" />
-
-      <div className="relative flex justify-end">
-        <span className="rounded-full bg-white/90 px-3 py-1 text-[0.72rem] font-medium text-slate-500 shadow-sm">
-          drag pin to adjust
-        </span>
-      </div>
-
-      <button
-        type="button"
-        className="absolute z-10 -translate-x-1/2 -translate-y-full touch-none cursor-grab active:cursor-grabbing"
-        style={{ left: `${pinPosition.x * 100}%`, top: `${pinPosition.y * 100}%` }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-        aria-label="Adjust found item location"
-      >
-        <MapPin size={38} fill="#447D24" className="text-white drop-shadow-[0_8px_16px_rgba(0,0,0,0.25)]" />
-      </button>
-
-      <div className="relative mt-20 rounded-2xl bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm w-fit">
-        {postcode}
-      </div>
-    </div>
-  )
-}
-
 export default function PostFoundItemPage() {
   const navigate = useNavigate()
   const isMobileViewport = useMediaQuery('(max-width: 767px)')
@@ -287,9 +188,13 @@ export default function PostFoundItemPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [uploadedImageUrl, setUploadedImageUrl] = useState('')
   const [liveLocation, setLiveLocation] = useState<LocationPoint | null>(null)
-  const [pinPosition, setPinPosition] = useState<PinPosition>(defaultPinPosition)
+  // The exact spot the item was seen. Seeded from the live GPS fix, then the
+  // user can fine-tune it by dragging the map pin.
+  const [pinnedLocation, setPinnedLocation] = useState<LocationPoint | null>(null)
   const [isLocating, setIsLocating] = useState(true)
   const [locationError, setLocationError] = useState<string | null>(null)
+  const [identifiedPostcode, setIdentifiedPostcode] = useState<string>('')
+  const [isResolvingPostcode, setIsResolvingPostcode] = useState(false)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [createdItem, setCreatedItem] = useState<FoundItem | null>(null)
@@ -297,6 +202,7 @@ export default function PostFoundItemPage() {
   const [isClassifying, setIsClassifying] = useState(false)
 
   const defaultPostcode = formatPostcode(user?.postcode?.trim() || env.defaultSearchPostcode)
+  const displayPostcode = identifiedPostcode || defaultPostcode
   const actor = useMemo(
     () => ({
       id: user?.id ?? 'current-user',
@@ -379,10 +285,12 @@ export default function PostFoundItemPage() {
     setLocationError(null)
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setLiveLocation({
+        const nextLocation = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
-        })
+        }
+        setLiveLocation(nextLocation)
+        setPinnedLocation(nextLocation)
         setIsLocating(false)
       },
       () => {
@@ -406,16 +314,48 @@ export default function PostFoundItemPage() {
     requestLiveLocation()
   }, [isMobileViewport, requestLiveLocation])
 
-  const adjustedLocation = useMemo<LocationPoint | null>(() => {
-    if (!liveLocation) {
-      return null
+  // The pin position is the real GPS spot the item was seen — the live fix by
+  // default, or wherever the user dragged the pin.
+  const adjustedLocation = pinnedLocation ?? liveLocation
+
+  useEffect(() => {
+    if (!adjustedLocation) {
+      return
     }
 
-    return {
-      latitude: liveLocation.latitude + (0.5 - pinPosition.y) * 0.0018,
-      longitude: liveLocation.longitude + (pinPosition.x - 0.5) * 0.0025,
+    let isMounted = true
+    setIsResolvingPostcode(true)
+
+    const resolvePostcode = async () => {
+      try {
+        const response = await fetch(
+          `https://api.postcodes.io/postcodes?lon=${adjustedLocation.longitude}&lat=${adjustedLocation.latitude}&limit=1`,
+        )
+        if (response.ok) {
+          const data = (await response.json()) as {
+            result?: Array<{ postcode?: string }>
+          }
+          const pc = data.result?.[0]?.postcode
+          if (pc && isMounted) {
+            setIdentifiedPostcode(formatPostcode(pc))
+            return
+          }
+        }
+      } catch {
+        // Fall back gracefully
+      } finally {
+        if (isMounted) {
+          setIsResolvingPostcode(false)
+        }
+      }
     }
-  }, [liveLocation, pinPosition])
+
+    void resolvePostcode()
+
+    return () => {
+      isMounted = false
+    }
+  }, [adjustedLocation])
 
   const safeWeightKg = useMemo(() => {
     const parsed = Number(estimatedWeightKg)
@@ -458,7 +398,7 @@ export default function PostFoundItemPage() {
     ? 'Location needed'
     : isLocating
     ? 'Locking GPS...'
-    : `${defaultPostcode} · GPS locked`
+    : `${displayPostcode} · GPS locked`
 
   const setNextPreviewUrl = useCallback((nextPreviewUrl: string | null) => {
     setPreviewUrl((currentPreviewUrl) => {
@@ -474,14 +414,15 @@ export default function PostFoundItemPage() {
     async (file: File) => {
       setNextPreviewUrl(URL.createObjectURL(file))
 
-      // Smart pre-fill: classify in parallel with the Cloudinary upload so we
-      // don't add latency. The hint is applied to the form state when ready.
-      const classifyTask = env.enableSmartSpot
+      // Smart pre-fill: classify via the Cloudflare Vision Worker in parallel
+      // with the Cloudinary upload so we don't add latency. The hint is applied
+      // to the form state when ready.
+      const classifyTask =
+        env.enableSmartSpot && isVisionWorkerEnabled()
         ? (async () => {
             try {
               setIsClassifying(true)
-              const predictions = await classifyImageFile(file)
-              const hint = pickConfidentHint(predictions)
+              const hint = await classifyImageWithWorker(file)
               if (hint) {
                 setSmartHint(hint)
                 setCategory(hint.category)
@@ -526,9 +467,10 @@ export default function PostFoundItemPage() {
     setNotes('')
     setUploadedImageUrl('')
     setCreatedItem(null)
-    setPinPosition(defaultPinPosition)
+    setPinnedLocation(null)
     setNextPreviewUrl(null)
     setSmartHint(null)
+    setIdentifiedPostcode('')
     requestLiveLocation()
   }, [requestLiveLocation, setNextPreviewUrl])
 
@@ -558,7 +500,7 @@ export default function PostFoundItemPage() {
 
     const payload: CreateFoundItemPayload = {
       title,
-      description: buildDescription(title, safeWeightKg, defaultPostcode, isFlyTipped, notes),
+      description: buildDescription(title, safeWeightKg, displayPostcode, isFlyTipped, notes),
       category,
       condition: isFlyTipped ? 'Fly-tipped' : undefined,
       weightKg: safeWeightKg,
@@ -572,7 +514,7 @@ export default function PostFoundItemPage() {
       location: {
         latitude: adjustedLocation.latitude,
         longitude: adjustedLocation.longitude,
-        postcode: defaultPostcode,
+        postcode: displayPostcode,
       },
     }
 
@@ -595,7 +537,7 @@ export default function PostFoundItemPage() {
   const handleShare = async () => {
     const item = createdItem
     const shareTitle = item?.title ?? title
-    const sharePostcode = item?.location.postcode ?? defaultPostcode
+    const sharePostcode = item?.location.postcode ?? displayPostcode
     const shareText = `${shareTitle} is now live in ${sharePostcode}. Rescue it on TruCycle.`
     const shareUrl = `${window.location.origin}/found-items`
 
@@ -678,11 +620,6 @@ export default function PostFoundItemPage() {
   }
 
   if (step === 'capture') {
-    if (env.enableSmartSpot) {
-      // Kick off model download while the user is framing their shot so the
-      // classifier is hot by the time they tap capture.
-      warmUpClassifier()
-    }
     return (
       <CameraCapture
         variant="immersive"
@@ -839,11 +776,42 @@ export default function PostFoundItemPage() {
 
         {step === 'details' ? (
           <>
-            <LocationPreviewCard
-              postcode={defaultPostcode}
-              pinPosition={pinPosition}
-              onPinChange={setPinPosition}
-            />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-semibold text-slate-700">Captured photo</span>
+                <button
+                  type="button"
+                  onClick={() => setStep('capture')}
+                  className="text-xs font-semibold text-[#446B16] transition hover:text-[#29470C] hover:underline"
+                >
+                  Retake photo
+                </button>
+              </div>
+              <div className="relative h-60 w-full overflow-hidden rounded-[22px] border border-slate-200 bg-slate-100 shadow-sm">
+                {previewUrl || uploadedImageUrl ? (
+                  <img
+                    src={previewUrl || uploadedImageUrl}
+                    alt={title || 'Captured item'}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
+                    No preview available
+                  </div>
+                )}
+              </div>
+              {adjustedLocation ? (
+                <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                  <MapPin size={14} className="shrink-0 text-[#446B16]" />
+                  <span>
+                    <span className="font-semibold text-slate-800">{displayPostcode}</span>
+                    {' · '}
+                    {adjustedLocation.latitude.toFixed(5)}, {adjustedLocation.longitude.toFixed(5)}
+                    {isResolvingPostcode ? ' (identifying area...)' : ''}
+                  </span>
+                </div>
+              ) : null}
+            </div>
 
             {locationError ? (
               <div className="flex items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -1073,7 +1041,7 @@ export default function PostFoundItemPage() {
             <div>
               <h2 className="mb-1 text-[2rem] font-bold tracking-[-0.03em] text-slate-950">{title}</h2>
               <p className="text-lg text-slate-500">
-                {safeWeightKg} kg · {defaultPostcode}
+                {safeWeightKg} kg · {displayPostcode}
               </p>
               {selectedCatalogEntry ? (
                 <p className="mt-2 text-sm text-slate-500">

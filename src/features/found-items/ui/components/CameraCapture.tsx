@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
-import { Camera, LoaderCircle, MapPin, RotateCw, Upload, X } from 'lucide-react'
+import { Camera, Image as ImageIcon, LoaderCircle, MapPin, RotateCw, Upload, X } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
 import { classNames } from '@/shared/utils/classNames'
 
@@ -9,6 +9,28 @@ interface CameraCaptureProps {
   readonly variant?: 'card' | 'immersive'
   readonly statusLabel?: string | null
   readonly isBusy?: boolean
+}
+
+// Some mobile cameras (notably Android) start with a non-1 digital zoom or
+// retain the last-used zoom level, which makes the preview look cropped/"zoomed
+// in" and mismatched against the captured frame. Force the track back to its
+// minimum/1x zoom once the stream is live.
+function resetTrackZoom(stream: MediaStream): void {
+  for (const track of stream.getVideoTracks()) {
+    const capabilities =
+      typeof track.getCapabilities === 'function' ? track.getCapabilities() : undefined
+    const zoom = (capabilities as { zoom?: { min?: number } } | undefined)?.zoom
+    if (!zoom) {
+      continue
+    }
+
+    const targetZoom = typeof zoom.min === 'number' ? zoom.min : 1
+    track
+      .applyConstraints({ advanced: [{ zoom: targetZoom } as MediaTrackConstraintSet] })
+      .catch(() => {
+        // Zoom control is best-effort; ignore devices that reject it.
+      })
+  }
 }
 
 export function CameraCapture({
@@ -66,6 +88,7 @@ export function CameraCapture({
       streamRef.current = mediaStream
       videoRef.current.srcObject = mediaStream
       await videoRef.current.play()
+      resetTrackZoom(mediaStream)
       setError(null)
     } catch {
       stopCamera()
@@ -88,15 +111,49 @@ export function CameraCapture({
 
     const videoElement = videoRef.current
     const canvasElement = canvasRef.current
-    canvasElement.width = videoElement.videoWidth
-    canvasElement.height = videoElement.videoHeight
+    const sourceWidth = videoElement.videoWidth
+    const sourceHeight = videoElement.videoHeight
+    if (!sourceWidth || !sourceHeight) {
+      return
+    }
+
+    // The preview is rendered with `object-cover`, so the saved photo must be
+    // cropped to the same on-screen aspect ratio — otherwise the capture looks
+    // "zoomed out" (extra sensor area) compared with what the user framed.
+    const displayWidth = videoElement.clientWidth || sourceWidth
+    const displayHeight = videoElement.clientHeight || sourceHeight
+    const displayRatio = displayWidth / displayHeight
+    const sourceRatio = sourceWidth / sourceHeight
+
+    let cropWidth = sourceWidth
+    let cropHeight = sourceHeight
+    if (sourceRatio > displayRatio) {
+      cropWidth = Math.round(sourceHeight * displayRatio)
+    } else {
+      cropHeight = Math.round(sourceWidth / displayRatio)
+    }
+    const cropX = Math.round((sourceWidth - cropWidth) / 2)
+    const cropY = Math.round((sourceHeight - cropHeight) / 2)
+
+    canvasElement.width = cropWidth
+    canvasElement.height = cropHeight
 
     const context = canvasElement.getContext('2d')
     if (!context) {
       return
     }
 
-    context.drawImage(videoElement, 0, 0)
+    context.drawImage(
+      videoElement,
+      cropX,
+      cropY,
+      cropWidth,
+      cropHeight,
+      0,
+      0,
+      cropWidth,
+      cropHeight,
+    )
     canvasElement.toBlob(
       (blob) => {
         if (!blob) {
@@ -238,7 +295,21 @@ export function CameraCapture({
               >
                 <span className="h-[58px] w-[58px] rounded-full bg-white shadow-[inset_0_0_0_2px_rgba(8,16,8,0.28)]" />
               </button>
+
+              <button
+                type="button"
+                className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => fileInputRef.current?.click()}
+                aria-label="Upload from gallery"
+                disabled={isBusy}
+              >
+                <ImageIcon size={18} />
+              </button>
             </div>
+
+            <p className="relative z-10 mt-4 text-center text-xs text-white/55">
+              Take a photo or upload one from your gallery
+            </p>
           </>
         )}
 
@@ -292,6 +363,14 @@ export function CameraCapture({
               <Button type="button" variant="secondary" onClick={onSwitchCamera}>
                 <RotateCw size={16} />
                 Flip
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <ImageIcon size={16} />
+                Gallery
               </Button>
               <Button type="button" variant="primary" onClick={capturePhoto}>
                 <Camera size={16} />

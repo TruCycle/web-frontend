@@ -8,12 +8,14 @@ import { LandingNavbar } from '@/features/home/ui/components/LandingNavbar'
 import { LandingTestimonialsSection } from '@/features/home/ui/components/LandingTestimonialsSection'
 import { LandingWhatWeTakeSection } from '@/features/home/ui/components/LandingWhatWeTakeSection'
 import { useAuthSession } from '@/shared/context/useAuthSession'
+import { useGoogleOneTap } from '@/shared/hooks/useGoogleOneTap'
 import { usePageMeta } from '@/shared/hooks/usePageMeta'
 
 export default function HomePage() {
   usePageMeta({ canonicalPath: '/' })
   const { isAuthenticated } = useAuthSession()
-  const browseTo = isAuthenticated ? '/browse' : '/signup?intent=collector'
+  useGoogleOneTap({ redirectTo: '/dashboard', disabled: isAuthenticated })
+  const browseTo = '/browse'
   const dashboardTo = isAuthenticated ? '/dashboard' : '/login'
   const impactTo = isAuthenticated ? '/impact' : '/signup'
   const partnerTo = isAuthenticated ? '/partner/onboard' : '/signup'

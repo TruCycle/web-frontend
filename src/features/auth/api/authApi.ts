@@ -98,6 +98,24 @@ export async function loginUser(
   }
 }
 
+export async function loginWithGoogle(
+  idToken: string,
+): Promise<{ user: AuthUser; tokens: AuthTokens }> {
+  const response = await apiRequest<ApiEnvelope<AuthDataWithTokens>, { id_token: string }>(
+    '/auth/google',
+    {
+      method: 'POST',
+      body: { id_token: idToken },
+      includeAuth: false,
+    },
+  )
+
+  return {
+    user: normalizeUser(response.data.user),
+    tokens: mapTokens(response.data),
+  }
+}
+
 export async function getCurrentUser(): Promise<AuthUser> {
   const response = await apiRequest<ApiEnvelope<AuthDataWithoutTokens>>('/auth/me')
   return normalizeUser(response.data.user)
