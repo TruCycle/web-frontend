@@ -9,11 +9,13 @@ type LandingNavbarProps = {
 }
 
 const navLinks = [
+  { to: '/browse', label: 'Browse items' },
+  { href: '#explore-items', label: 'Top categories' },
   { href: '#how', label: 'How it works' },
   { href: '#what-we-take', label: 'What we take' },
   { href: '#impact', label: 'Impact' },
   { href: '#faq', label: 'Questions' },
-] as const
+]
 
 export function LandingNavbar({ dashboardTo, isAuthenticated, postItemTo }: LandingNavbarProps) {
   return (
@@ -25,15 +27,25 @@ export function LandingNavbar({ dashboardTo, isAuthenticated, postItemTo }: Land
         </Link>
 
         <div className="hidden items-center gap-6 lg:flex">
-          {navLinks.map((link) => (
-            <a
-              className="text-sm font-bold tracking-[0.04em] text-[#172033] transition-colors hover:text-[#0B3322]"
-              href={link.href}
-              key={link.label}
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link) =>
+            'to' in link && link.to ? (
+              <Link
+                className="text-sm font-bold tracking-[0.04em] text-[#172033] no-underline transition-colors hover:text-[#0B3322]"
+                to={link.to}
+                key={link.label}
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <a
+                className="text-sm font-bold tracking-[0.04em] text-[#172033] transition-colors hover:text-[#0B3322]"
+                href={link.href}
+                key={link.label}
+              >
+                {link.label}
+              </a>
+            ),
+          )}
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">

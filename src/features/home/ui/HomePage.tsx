@@ -1,5 +1,6 @@
 import { LandingCtaSection } from '@/features/home/ui/components/LandingCtaSection'
 import { LandingFaqSection } from '@/features/home/ui/components/LandingFaqSection'
+import { LandingFeaturedItemsSection } from '@/features/home/ui/components/LandingFeaturedItemsSection'
 import { LandingFooter } from '@/features/home/ui/components/LandingFooter'
 import { LandingHero } from '@/features/home/ui/components/LandingHero'
 import { LandingHowItWorks } from '@/features/home/ui/components/LandingHowItWorks'
@@ -30,6 +31,7 @@ export default function HomePage() {
         postItemTo={postItemTo}
       />
       <LandingHero browseTo={browseTo} postItemTo={postItemTo} />
+      <LandingFeaturedItemsSection />
       <LandingHowItWorks />
       <LandingWhatWeTakeSection />
       <LandingImpactSection

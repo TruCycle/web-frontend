@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom'
+import { type FormEvent, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Search } from 'lucide-react'
 
 const heroImg1 = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=700&q=80&fit=crop'
 const heroImg2 = 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&q=80&fit=crop'
@@ -15,7 +17,22 @@ const metrics = [
   { value: '38 tons', label: 'Diverted from landfill' },
 ] as const
 
+const popularCategories = [
+  { label: '🛋️ Furniture', category: 'Furniture' },
+  { label: '⚡ Tech', category: 'Electronics' },
+  { label: '🍳 Kitchen', category: 'Kitchenware' },
+  { label: '📚 Books', category: 'Books' },
+] as const
+
 export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
+  const [searchTerm, setSearchTerm] = useState('')
+  const navigate = useNavigate()
+
+  function handleSearch(e: FormEvent) {
+    e.preventDefault()
+    const query = searchTerm.trim()
+    navigate(query ? `/browse?search=${encodeURIComponent(query)}` : '/browse')
+  }
   return (
     <section className="relative overflow-hidden px-6 pb-20 pt-32 sm:pb-24 sm:pt-36 lg:pt-40">
       <div className="absolute inset-x-0 top-0 -z-10 h-[28rem] bg-[radial-gradient(circle_at_18%_22%,rgba(164,245,166,0.25),transparent_42%),radial-gradient(circle_at_78%_18%,rgba(11,51,34,0.08),transparent_32%)]" />
@@ -38,7 +55,41 @@ export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
             <p>No skips, no landfill, no faff - just stuff finding new homes.</p>
           </div>
 
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+          {/* Instant Discovery Search Bar */}
+          <form onSubmit={handleSearch} className="mt-8">
+            <div className="relative flex items-center rounded-2xl border border-[#0B332226] bg-white p-1.5 shadow-[0_12px_36px_rgba(11,51,34,0.08)] transition focus-within:border-[#0B3322] focus-within:ring-4 focus-within:ring-[#0B3322]/10">
+              <Search className="ml-3 h-5 w-5 text-slate-400" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search sofas, desk, books, kitchen..."
+                className="w-full bg-transparent px-3 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400 sm:text-base"
+              />
+              <button
+                type="submit"
+                className="inline-flex shrink-0 items-center justify-center rounded-xl bg-[#0B3322] px-4 py-2.5 text-xs font-bold text-white shadow transition hover:bg-[#0D3B24] sm:px-5 sm:text-sm"
+              >
+                Search
+              </button>
+            </div>
+          </form>
+
+          {/* Quick Popular Category Discovery Tags */}
+          <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-slate-600">
+            <span className="font-semibold text-slate-500">Popular:</span>
+            {popularCategories.map((item) => (
+              <Link
+                key={item.category}
+                to={`/browse?category=${encodeURIComponent(item.category)}`}
+                className="rounded-full bg-white/80 px-2.5 py-1 font-medium text-slate-700 shadow-sm transition hover:bg-white hover:text-[#0B3322]"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
               className="inline-flex items-center justify-center rounded-full bg-[#0B3322] px-6 py-3 text-base font-bold text-white no-underline shadow-[0_18px_40px_rgba(11,51,34,0.18)] transition-transform duration-200 hover:-translate-y-0.5"
               to={postItemTo}
