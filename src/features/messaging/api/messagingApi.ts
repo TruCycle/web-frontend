@@ -161,3 +161,17 @@ export async function sendGeneralMessage(
 
   return message
 }
+
+/** A successful response confirms storage only, not recipient delivery/read. */
+export async function sendDirectTextMessage(roomId: string, payload: { readonly clientMessageId: string; readonly text: string }): Promise<RoomMessage> {
+  const response = await apiRequest<unknown, { clientMessageId: string; text: string }>(`/messages/rooms/${encodeURIComponent(roomId)}/messages/text`, {
+    method: 'POST', body: payload,
+  })
+  const data = asRecord(unwrapApiData<unknown>(response))
+  const message = mapMessage(data)
+  if (typeof data?.createdAt !== 'string' || !message || message.id !== payload.clientMessageId || message.roomId !== roomId || message.text !== payload.text ||
+      message.category !== 'direct' || message.direction !== 'outgoing' || !Number.isFinite(Date.parse(message.createdAt))) {
+    throw new Error('The saved message could not be confirmed.')
+  }
+  return message
+}

@@ -16,6 +16,7 @@
     "test:consent": "node --test scripts/analytics-consent.test.mjs",
     "test:session": "node --test scripts/session-recovery.test.mjs",
     "test:socket": "node --test scripts/websocket-auth.test.mjs",
+    "test:messaging": "node --test scripts/messaging-delivery.test.mjs",
     "test:seo": "node --test scripts/seo.test.mjs",
     "test:shops": "node --test scripts/shops-contract.test.mjs",
     "test:location": "node --test scripts/found-location-privacy.test.mjs scripts/items-location-privacy.test.mjs",

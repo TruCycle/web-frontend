@@ -186,7 +186,8 @@ export default function MessagingPage() {
   const lastScrolledRoomIdRef = useRef<string | null>(null)
   const messageListRef = useRef<HTMLDivElement | null>(null)
   const [searchValue, setSearchValue] = useState('')
-  const [inputValue, setInputValue] = useState('')
+  const [drafts, setDrafts] = useState<Record<string, string>>({})
+  const inputValue = activeRoomId ? drafts[activeRoomId] ?? '' : ''
   const [previewImage, setPreviewImage] = useState<{ readonly src: string; readonly alt: string } | null>(null)
   const requestedRoomId = searchParams.get('roomId')
 
@@ -332,8 +333,11 @@ export default function MessagingPage() {
       return
     }
 
-    await sendMessage(messageText)
-    setInputValue('')
+    const roomId = activeRoomId
+    const draft = inputValue
+    if (await sendMessage(messageText)) {
+      if (roomId) setDrafts(current => current[roomId] === draft ? { ...current, [roomId]: '' } : current)
+    }
   }
 
   return (
@@ -622,7 +626,7 @@ export default function MessagingPage() {
             <button
               className="inline-flex h-10 w-10 items-center justify-center rounded-full text-[#121212] hover:bg-slate-100"
               disabled
-              title="Image upload endpoint is available; attachment UI will be wired next."
+              title="Image attachments are unavailable"
             >
               <Paperclip size={20} />
             </button>
@@ -631,9 +635,11 @@ export default function MessagingPage() {
                 type="text"
                 className="h-11 w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
                 placeholder="Type your message..."
+                aria-label="Message"
+                maxLength={4000}
                 value={inputValue}
                 disabled={!activeRoomId || isSending}
-                onChange={(event) => setInputValue(event.target.value)}
+                onChange={(event) => { const value = event.target.value; if (activeRoomId) setDrafts(current => ({ ...current, [activeRoomId]: value })) }}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
                     void handleSendMessage()
@@ -642,6 +648,7 @@ export default function MessagingPage() {
               />
             </div>
             <Button
+              aria-label="Send message"
               className="h-11 w-11 rounded-xl p-0 bg-[#15A119] hover:bg-[#15A119E0]"
               onClick={() => {
                 void handleSendMessage()

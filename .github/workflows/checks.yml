@@ -32,6 +32,7 @@ jobs:
       - run: npm run test:consent
       - run: npm run test:session
       - run: npm run test:socket
+      - run: npm run test:messaging
       - run: npm run test:seo
       - run: npm run test:shops
       - run: npm run test:location

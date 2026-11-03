@@ -2,10 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   fetchActiveRooms,
   fetchRoomMessages,
-  sendGeneralMessage,
+  sendDirectTextMessage,
 } from '@/features/messaging/api/messagingApi'
 import type { ActiveRoom, RoomMessage } from '@/features/messaging/types'
 import { WebSocketClient } from '@/shared/lib/websocket/client'
+import { captureStoredSession, isSameSessionIdentity } from '@/shared/lib/auth/session'
 
 interface MessagingServerEvents extends Record<string, (...args: never[]) => void> {
   'message:new': (message: RoomMessage) => void
@@ -13,10 +14,7 @@ interface MessagingServerEvents extends Record<string, (...args: never[]) => voi
   'room:cleared': (payload: { roomId: string }) => void
   'room:deleted': (payload: { roomId: string }) => void
   'presence:update': (payload: { userId: string; online: boolean }) => void
-}
-
-interface MessagingClientEvents extends Record<string, (...args: never[]) => void> {
-  'message:send': (payload: { roomId: string; text: string }) => void
+  'auth:ready': () => void
 }
 
 function sortRoomsByRecentActivity(rooms: readonly ActiveRoom[]): ActiveRoom[] {
@@ -34,8 +32,15 @@ function mergeMessageIntoRoom(messages: readonly RoomMessage[], next: RoomMessag
 
   return [...messages, next].sort(
     (first, second) =>
-      new Date(first.createdAt).getTime() - new Date(second.createdAt).getTime(),
+      new Date(first.createdAt).getTime() - new Date(second.createdAt).getTime() || first.id.localeCompare(second.id),
   )
+}
+
+function updateRoomPreview(room: ActiveRoom, message: RoomMessage): ActiveRoom {
+  const previous = room.lastMessage
+  if (previous && (Date.parse(previous.createdAt) > Date.parse(message.createdAt) ||
+      (previous.createdAt === message.createdAt && previous.id.localeCompare(message.id) >= 0))) return room
+  return { ...room, lastMessage: message, updatedAt: Date.parse(room.updatedAt) > Date.parse(message.createdAt) ? room.updatedAt : message.createdAt }
 }
 
 export function useMessages() {
@@ -47,12 +52,17 @@ export function useMessages() {
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [sendError, setSendError] = useState<string | null>(null)
   const activeRoomIdRef = useRef<string | null>(null)
   const isPageVisibleRef = useRef<boolean>(true)
+  const sendingRef = useRef(false)
+  const pendingSends = useRef(new Map<string, { text: string; id: string; userId: string }>())
+  const seenMessageIds = useRef(new Set<string>())
+  const roomRevisions = useRef(new Map<string, number>())
 
   const websocketClient = useMemo(
     () =>
-      new WebSocketClient<MessagingServerEvents, MessagingClientEvents>({
+      new WebSocketClient<MessagingServerEvents>({
         namespace: '/messages',
       }),
     [],
@@ -113,13 +123,15 @@ export function useMessages() {
   )
 
   const loadMessagesForRoom = useCallback(async (roomId: string) => {
+    const revision = roomRevisions.current.get(roomId) ?? 0
     try {
       setIsLoadingMessages(true)
       setError(null)
       const response = await fetchRoomMessages(roomId)
+      if ((roomRevisions.current.get(roomId) ?? 0) !== revision) return
       setRoomMessages((currentMessages) => ({
         ...currentMessages,
-        [roomId]: response.messages,
+        [roomId]: response.messages.reduce((merged, message) => mergeMessageIntoRoom(merged, message), currentMessages[roomId] ?? []),
       }))
     } catch {
       setError('Unable to load room history right now.')
@@ -170,6 +182,9 @@ export function useMessages() {
 
   useEffect(() => {
     const handleNewMessage = (message: RoomMessage) => {
+      if (seenMessageIds.current.has(message.id)) return
+      seenMessageIds.current.add(message.id)
+      if (seenMessageIds.current.size > 2000) seenMessageIds.current.delete(seenMessageIds.current.values().next().value!)
       const isIncomingMessage = message.direction === 'incoming'
       const isActiveRoomVisible =
         activeRoomIdRef.current === message.roomId && isPageVisibleRef.current
@@ -185,7 +200,7 @@ export function useMessages() {
         sortRoomsByRecentActivity(
           currentRooms.map((room) =>
             room.id === message.roomId
-              ? { ...room, lastMessage: message, updatedAt: message.createdAt }
+              ? updateRoomPreview(room, message)
               : room,
           ),
         ),
@@ -226,6 +241,8 @@ export function useMessages() {
     }
 
     const handleRoomCleared = (payload: { roomId: string }) => {
+      roomRevisions.current.set(payload.roomId, (roomRevisions.current.get(payload.roomId) ?? 0) + 1)
+      pendingSends.current.delete(payload.roomId)
       setRoomMessages((currentMessages) => ({
         ...currentMessages,
         [payload.roomId]: [],
@@ -238,6 +255,8 @@ export function useMessages() {
     }
 
     const handleRoomDeleted = (payload: { roomId: string }) => {
+      roomRevisions.current.set(payload.roomId, (roomRevisions.current.get(payload.roomId) ?? 0) + 1)
+      pendingSends.current.delete(payload.roomId)
       setRoomMessages((currentMessages) => {
         const remaining = { ...currentMessages }
         delete remaining[payload.roomId]
@@ -270,7 +289,12 @@ export function useMessages() {
       )
     }
 
+    const handleReady = () => {
+      void loadRooms()
+      if (activeRoomIdRef.current) void loadMessagesForRoom(activeRoomIdRef.current)
+    }
     websocketClient.connect()
+    websocketClient.on('auth:ready', handleReady)
     websocketClient.on('message:new', handleNewMessage)
     websocketClient.on('room:activity', handleRoomActivity)
     websocketClient.on('room:cleared', handleRoomCleared)
@@ -278,6 +302,7 @@ export function useMessages() {
     websocketClient.on('presence:update', handlePresenceUpdate)
 
     return () => {
+      websocketClient.off('auth:ready', handleReady)
       websocketClient.off('message:new', handleNewMessage)
       websocketClient.off('room:activity', handleRoomActivity)
       websocketClient.off('room:cleared', handleRoomCleared)
@@ -285,51 +310,55 @@ export function useMessages() {
       websocketClient.off('presence:update', handlePresenceUpdate)
       websocketClient.disconnect()
     }
-  }, [websocketClient])
+  }, [websocketClient, loadRooms, loadMessagesForRoom])
 
   const sendMessage = useCallback(
     async (text: string) => {
       const roomId = activeRoomId
       const message = text.trim()
-      if (!roomId || !message) {
-        return
-      }
-
+      if (!roomId || !message || message.length > 4000 || sendingRef.current) return false
+      const revision = roomRevisions.current.get(roomId) ?? 0
+      sendingRef.current = true
       setIsSending(true)
-      setError(null)
+      setSendError(null)
 
       try {
-        const sentThroughSocket = websocketClient.isConnected && websocketClient.emit('message:send', { roomId, text: message })
-        if (!sentThroughSocket) {
-          const fallbackMessage = await sendGeneralMessage(roomId, { text: message })
+        const capture = captureStoredSession()
+        if (!capture) throw new Error('Sign in is required')
+        let pending = pendingSends.current.get(roomId)
+        if (!pending || pending.text !== message || pending.userId !== capture.session.user.id) {
+          pending = { text: message, id: crypto.randomUUID(), userId: capture.session.user.id }
+          pendingSends.current.set(roomId, pending)
+        }
+        const saved = await sendDirectTextMessage(roomId, { clientMessageId: pending.id, text: message })
+        if (!isSameSessionIdentity(capture) || (roomRevisions.current.get(roomId) ?? 0) !== revision) return false
+        pendingSends.current.delete(roomId)
           setRoomMessages((currentMessages) => ({
             ...currentMessages,
             [roomId]: mergeMessageIntoRoom(
               currentMessages[roomId] ?? [],
-              fallbackMessage,
+              saved,
             ),
           }))
           setRooms((currentRooms) =>
             sortRoomsByRecentActivity(
               currentRooms.map((room) =>
                 room.id === roomId
-                  ? {
-                      ...room,
-                      lastMessage: fallbackMessage,
-                      updatedAt: fallbackMessage.createdAt,
-                    }
+                  ? updateRoomPreview(room, saved)
                   : room,
               ),
             ),
           )
-        }
+        return true
       } catch {
-        setError('Unable to send the message right now.')
+        setSendError('The message could not be confirmed. Your draft is kept. Check the conversation before retrying.')
+        return false
       } finally {
+        sendingRef.current = false
         setIsSending(false)
       }
     },
-    [activeRoomId, websocketClient],
+    [activeRoomId],
   )
 
   const activeRoom = rooms.find((room) => room.id === activeRoomId) ?? null
@@ -343,7 +372,7 @@ export function useMessages() {
     isLoadingRooms,
     isLoadingMessages,
     isSending,
-    error,
+    error: sendError ?? error,
     unreadCountByRoom,
     setActiveRoomId,
     sendMessage,
