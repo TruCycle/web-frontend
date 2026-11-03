@@ -44,7 +44,7 @@ const CATEGORY_OPTIONS = [
 
 export default function PublicBrowsePage() {
   usePageMeta({
-    title: 'Browse free items near you — TruCycle',
+    title: 'Browse free items on TruCycle',
     description:
       'Browse items your neighbours are giving away for free on TruCycle. Furniture, electronics, clothing, books and more across London and the UK.',
     canonicalPath: '/browse',
@@ -117,7 +117,7 @@ export default function PublicBrowsePage() {
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-32">
         <header className="max-w-2xl">
           <h1 className="text-4xl font-bold tracking-[-0.04em] text-[#0B3322] sm:text-5xl">
-            Free items near you
+            {postcode.trim() ? 'Free items near your search area' : 'Free items to reuse'}
           </h1>
           <p className="mt-4 text-lg leading-8 text-slate-600">
             Everything here is being given away for free by neighbours. Browse without an
@@ -264,7 +264,7 @@ export default function PublicBrowsePage() {
               <p className="text-sm text-slate-600">Shared by {selectedItem.ownerName}</p>
               {selectedItem.estimatedCo2SavedKg ? (
                 <p className="text-sm text-emerald-700">
-                  ~{selectedItem.estimatedCo2SavedKg.toFixed(1)} kg CO₂e saved by reusing this
+                  ~{selectedItem.estimatedCo2SavedKg.toFixed(1)} kg CO₂e potential reuse estimate for this
                 </p>
               ) : null}
 

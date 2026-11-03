@@ -10,6 +10,8 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { createFoundItem, fetchFoundItemCatalog, uploadFoundItemImage } from '../api/foundItemsApi'
+import { useSpotPostcode } from '../hooks/useSpotPostcode'
+import { outwardPostcode } from '../lib/foundItemLocation'
 import {
   classifyImageWithWorker,
   isVisionWorkerEnabled,
@@ -91,10 +93,6 @@ const confettiPieces = [
   { left: '32%', top: '31%', rotate: -24, color: 'bg-[#EF5F5F]' },
 ] as const
 
-function formatPostcode(value: string): string {
-  return value.trim().toUpperCase()
-}
-
 function scaleCatalogMetric(metric: number, typicalWeightKg: number, resolvedWeightKg: number): number {
   if (!(typicalWeightKg > 0)) {
     return Math.max(0, Math.round(metric))
@@ -125,10 +123,11 @@ function buildDescription(
   isFlyTipped: boolean,
   notes: string,
 ): string {
-  const parts = [`${title} spotted in ${postcode}.`, `Estimated weight ${weightKg}kg.`]
+  const area = outwardPostcode(postcode)
+  const parts = [`${title} spotted${area ? ` in ${area}` : ''}.`, `Estimated weight ${weightKg}kg.`]
 
   if (isFlyTipped) {
-    parts.push('Marked as fly-tipped so council diversion data can be shared.')
+    parts.push('The poster has marked this item as suspected fly-tipping.')
   }
 
   if (notes.trim()) {
@@ -193,16 +192,13 @@ export default function PostFoundItemPage() {
   const [pinnedLocation, setPinnedLocation] = useState<LocationPoint | null>(null)
   const [isLocating, setIsLocating] = useState(true)
   const [locationError, setLocationError] = useState<string | null>(null)
-  const [identifiedPostcode, setIdentifiedPostcode] = useState<string>('')
-  const [isResolvingPostcode, setIsResolvingPostcode] = useState(false)
+  const locationRequestGenerationRef = useRef(0)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [createdItem, setCreatedItem] = useState<FoundItem | null>(null)
   const [smartHint, setSmartHint] = useState<CatalogHint | null>(null)
   const [isClassifying, setIsClassifying] = useState(false)
 
-  const defaultPostcode = formatPostcode(user?.postcode?.trim() || env.defaultSearchPostcode)
-  const displayPostcode = identifiedPostcode || defaultPostcode
   const actor = useMemo(
     () => ({
       id: user?.id ?? 'current-user',
@@ -274,6 +270,9 @@ export default function PostFoundItemPage() {
   }, [previewUrl])
 
   const requestLiveLocation = useCallback(() => {
+    const generation = ++locationRequestGenerationRef.current
+    setLiveLocation(null)
+    setPinnedLocation(null)
     if (!navigator.geolocation) {
       setLiveLocation(null)
       setIsLocating(false)
@@ -285,6 +284,8 @@ export default function PostFoundItemPage() {
     setLocationError(null)
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        if (generation !== locationRequestGenerationRef.current) return
+        locationRequestGenerationRef.current += 1
         const nextLocation = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
@@ -294,6 +295,8 @@ export default function PostFoundItemPage() {
         setIsLocating(false)
       },
       () => {
+        if (generation !== locationRequestGenerationRef.current) return
+        locationRequestGenerationRef.current += 1
         setLiveLocation(null)
         setIsLocating(false)
         setLocationError('Allow location access to lock the item spot.')
@@ -312,50 +315,17 @@ export default function PostFoundItemPage() {
     }
 
     requestLiveLocation()
+    return () => {
+      // No geolocation cancellation API: invalidate on viewport exit/replay/unmount.
+      locationRequestGenerationRef.current += 1
+    }
   }, [isMobileViewport, requestLiveLocation])
 
   // The pin position is the real GPS spot the item was seen — the live fix by
   // default, or wherever the user dragged the pin.
   const adjustedLocation = pinnedLocation ?? liveLocation
-
-  useEffect(() => {
-    if (!adjustedLocation) {
-      return
-    }
-
-    let isMounted = true
-    setIsResolvingPostcode(true)
-
-    const resolvePostcode = async () => {
-      try {
-        const response = await fetch(
-          `https://api.postcodes.io/postcodes?lon=${adjustedLocation.longitude}&lat=${adjustedLocation.latitude}&limit=1`,
-        )
-        if (response.ok) {
-          const data = (await response.json()) as {
-            result?: Array<{ postcode?: string }>
-          }
-          const pc = data.result?.[0]?.postcode
-          if (pc && isMounted) {
-            setIdentifiedPostcode(formatPostcode(pc))
-            return
-          }
-        }
-      } catch {
-        // Fall back gracefully
-      } finally {
-        if (isMounted) {
-          setIsResolvingPostcode(false)
-        }
-      }
-    }
-
-    void resolvePostcode()
-
-    return () => {
-      isMounted = false
-    }
-  }, [adjustedLocation])
+  const { postcode, status: postcodeStatus, error: postcodeError, retry: retryPostcode } = useSpotPostcode(adjustedLocation)
+  const displayPostcode = postcode ?? (postcodeStatus === 'loading' ? 'Identifying area…' : 'Postcode not resolved')
 
   const safeWeightKg = useMemo(() => {
     const parsed = Number(estimatedWeightKg)
@@ -379,17 +349,6 @@ export default function PostFoundItemPage() {
       safeWeightKg,
     )
   }, [safeWeightKg, selectedCatalogEntry])
-  const previewImpactPoints = useMemo(() => {
-    if (!selectedCatalogEntry) {
-      return 0
-    }
-
-    return scaleCatalogMetric(
-      selectedCatalogEntry.impactPoints,
-      selectedCatalogEntry.typicalWeightKg,
-      safeWeightKg,
-    )
-  }, [safeWeightKg, selectedCatalogEntry])
   const supportedCatalogCategorySet = useMemo(
     () => new Set(supportedCatalogCategories),
     [supportedCatalogCategories],
@@ -398,7 +357,9 @@ export default function PostFoundItemPage() {
     ? 'Location needed'
     : isLocating
     ? 'Locking GPS...'
-    : `${displayPostcode} · GPS locked`
+    : postcodeStatus === 'resolved'
+      ? `${postcode} · GPS locked`
+      : postcodeStatus === 'error' ? 'Postcode lookup needed' : 'Identifying area…'
 
   const setNextPreviewUrl = useCallback((nextPreviewUrl: string | null) => {
     setPreviewUrl((currentPreviewUrl) => {
@@ -470,7 +431,6 @@ export default function PostFoundItemPage() {
     setPinnedLocation(null)
     setNextPreviewUrl(null)
     setSmartHint(null)
-    setIdentifiedPostcode('')
     requestLiveLocation()
   }, [requestLiveLocation, setNextPreviewUrl])
 
@@ -489,6 +449,10 @@ export default function PostFoundItemPage() {
       error('Location missing', 'Allow GPS access before you continue.')
       return
     }
+    if (postcodeStatus !== 'resolved' || !postcode) {
+      error('Postcode needed', 'Resolve the postcode for this pin before continuing.')
+      return
+    }
 
     setStep('review')
   }
@@ -497,10 +461,14 @@ export default function PostFoundItemPage() {
     if (!adjustedLocation || !uploadedImageUrl || !selectedCatalogEntry) {
       return
     }
+    if (postcodeStatus !== 'resolved' || !postcode) {
+      error('Postcode needed', 'Resolve the postcode for this pin before posting.')
+      return
+    }
 
     const payload: CreateFoundItemPayload = {
       title,
-      description: buildDescription(title, safeWeightKg, displayPostcode, isFlyTipped, notes),
+      description: buildDescription(title, safeWeightKg, postcode, isFlyTipped, notes),
       category,
       condition: isFlyTipped ? 'Fly-tipped' : undefined,
       weightKg: safeWeightKg,
@@ -514,7 +482,7 @@ export default function PostFoundItemPage() {
       location: {
         latitude: adjustedLocation.latitude,
         longitude: adjustedLocation.longitude,
-        postcode: displayPostcode,
+        postcode,
       },
     }
 
@@ -537,8 +505,8 @@ export default function PostFoundItemPage() {
   const handleShare = async () => {
     const item = createdItem
     const shareTitle = item?.title ?? title
-    const sharePostcode = item?.location.postcode ?? displayPostcode
-    const shareText = `${shareTitle} is now live in ${sharePostcode}. Rescue it on TruCycle.`
+    const sharePostcode = outwardPostcode(item?.location.postcode ?? postcode)
+    const shareText = `${shareTitle} is now posted${sharePostcode ? ` in ${sharePostcode}` : ''}. See the post on TruCycle.`
     const shareUrl = `${window.location.origin}/found-items`
 
     setIsPreparingShare(true)
@@ -555,7 +523,7 @@ export default function PostFoundItemPage() {
             backgroundColor: '#0F1F08',
           })
           if (blob) {
-            pngFile = new File([blob], `trucycle-rescue-${item?.id ?? 'spot'}.png`, {
+            pngFile = new File([blob], `trucycle-spot-${item?.id ?? 'spot'}.png`, {
               type: 'image/png',
             })
           }
@@ -575,7 +543,7 @@ export default function PostFoundItemPage() {
         shareNavigator.canShare({ files: [pngFile] })
       ) {
         await shareNavigator.share({
-          title: 'TruCycle rescue',
+          title: 'TruCycle spot',
           text: shareText,
           url: shareUrl,
           files: [pngFile],
@@ -584,7 +552,7 @@ export default function PostFoundItemPage() {
       }
 
       if (typeof navigator.share === 'function') {
-        await navigator.share({ title: 'TruCycle rescue spot', text: shareText, url: shareUrl })
+        await navigator.share({ title: 'TruCycle spot', text: shareText, url: shareUrl })
         return
       }
 
@@ -635,7 +603,7 @@ export default function PostFoundItemPage() {
 
   if (step === 'success') {
     const postedTitle = createdItem?.title ?? title
-    const postedPostcode = createdItem?.location.postcode ?? defaultPostcode
+    const postedPostcode = outwardPostcode(createdItem?.location.postcode ?? postcode)
     const postedEstimatedCo2eKg = createdItem?.estimatedCo2eKg ?? co2e
     const postedImpactPoints = createdItem?.impactPoints ?? 0
 
@@ -679,33 +647,13 @@ export default function PostFoundItemPage() {
             Board impact confirmed
           </h1>
           <p className="mt-4 max-w-[320px] text-base leading-7 text-slate-700">
-            {postedTitle} is now live in {postedPostcode}. It adds verified impact to your local
-            board and feeds into My Impact.
+            {postedTitle} is now posted in {postedPostcode}. A post does not confirm that an item has been handed over.
           </p>
 
-          <div className="mt-10 grid w-full grid-cols-2 gap-3 text-left">
-            <div className="rounded-[24px] bg-white px-4 py-4 shadow-sm">
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Impact score
-              </p>
-              <p className="mt-2 text-[2rem] font-bold leading-none tracking-[-0.04em] text-[#3A7618]">
-                {postedImpactPoints}
-              </p>
-              <p className="mt-1 text-sm text-slate-500">community pts</p>
-            </div>
-            <div className="rounded-[24px] bg-white px-4 py-4 shadow-sm">
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                CO2e saved
-              </p>
-              <p className="mt-2 text-[2rem] font-bold leading-none tracking-[-0.04em] text-[#111611]">
-                {postedEstimatedCo2eKg}
-              </p>
-              <p className="mt-1 text-sm text-slate-500">kg CO2e</p>
-            </div>
-          </div>
+          <p className="mt-10 rounded-[24px] bg-white px-4 py-4 text-left text-sm leading-6 text-slate-600">Keep the post up to date if the item is no longer available. Confirm its condition and the owner&apos;s permission before arranging a handover.</p>
 
           <p className="mt-5 max-w-[320px] text-sm leading-6 text-slate-500">
-            Posting also counts toward your badges, streaks and community board standing.
+            You can review your recorded activity in My Impact.
           </p>
 
           <div className="mt-16 w-full space-y-4">
@@ -722,7 +670,7 @@ export default function PostFoundItemPage() {
               ) : (
                 <Share2 size={16} />
               )}
-              {isPreparingShare ? 'Preparing card…' : 'Share this rescue'}
+              {isPreparingShare ? 'Preparing card…' : 'Share this post'}
             </button>
 
             <button
@@ -774,6 +722,18 @@ export default function PostFoundItemPage() {
           </div>
         </div>
 
+        {postcodeStatus === 'loading' ? (
+          <p role="status" className="inline-flex items-center gap-2 text-sm text-slate-500">
+            <LoaderCircle size={14} className="animate-spin" />
+            Identifying postcode for this pin…
+          </p>
+        ) : postcodeStatus === 'error' ? (
+          <div role="alert" className="space-y-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+            <p>{postcodeError}</p>
+            <Button type="button" variant="secondary" onClick={retryPostcode}>Retry postcode</Button>
+          </div>
+        ) : null}
+
         {step === 'details' ? (
           <>
             <div className="space-y-2">
@@ -807,7 +767,6 @@ export default function PostFoundItemPage() {
                     <span className="font-semibold text-slate-800">{displayPostcode}</span>
                     {' · '}
                     {adjustedLocation.latitude.toFixed(5)}, {adjustedLocation.longitude.toFixed(5)}
-                    {isResolvingPostcode ? ' (identifying area...)' : ''}
                   </span>
                 </div>
               ) : null}
@@ -939,7 +898,7 @@ export default function PostFoundItemPage() {
                         </div>
                         <div className="text-right text-sm text-slate-500">
                           <p className="font-semibold text-[#55741D]">{entry.impactPoints} pts</p>
-                          <p>{entry.estimatedCo2eKg} kg CO2e</p>
+                          <p>Item profile</p>
                         </div>
                       </div>
                     </button>
@@ -1001,7 +960,7 @@ export default function PostFoundItemPage() {
               <span>
                 <span className="block text-lg font-semibold text-slate-950">Fly-tipped item</span>
                 <span className="block text-sm text-slate-500">
-                  We&apos;ll share diversion data with the council.
+                  Flag suspected dumping. This does not send a report to your council.
                 </span>
               </span>
             </button>
@@ -1020,7 +979,7 @@ export default function PostFoundItemPage() {
               type="button"
               className="mt-10 inline-flex w-full items-center justify-center rounded-full bg-[#111611] px-5 py-4 text-lg font-semibold text-white transition hover:bg-[#1B231B]"
               onClick={handleContinueToReview}
-              disabled={isUploadingImage}
+              disabled={isUploadingImage || postcodeStatus !== 'resolved' || !postcode}
             >
               Continue
               <ChevronRight size={18} />
@@ -1052,35 +1011,13 @@ export default function PostFoundItemPage() {
 
             <div className="rounded-[24px] bg-[linear-gradient(90deg,#F4F8EA_0%,#EEF6DE_100%)] px-5 py-5 text-slate-950">
               <p className="text-[0.82rem] font-bold uppercase tracking-[0.18em] text-[#55741D]">
-                Catalog-backed preview
+                Before the handover
               </p>
-              <div className="mt-4 grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-500">CO2e saved</p>
-                  <div className="mt-2 flex items-end gap-2">
-                    <span className="text-[2.6rem] font-bold leading-none tracking-[-0.05em]">{co2e}</span>
-                    <span className="pb-1 text-xl text-slate-700">kg</span>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-500">Impact score</p>
-                  <div className="mt-2 flex items-end gap-2">
-                    <span className="text-[2.6rem] font-bold leading-none tracking-[-0.05em] text-[#3A7618]">{previewImpactPoints}</span>
-                    <span className="pb-1 text-xl text-slate-700">pts</span>
-                  </div>
-                </div>
-              </div>
-              <p className="mt-2 text-lg text-slate-700">based on the selected carbon catalog profile and weight</p>
-
-              <div className="mt-5 h-px bg-slate-300/70" />
-
-              <p className="mt-4 text-sm leading-6 text-slate-600">
-                This preview is calculated from the exact catalog row that will be submitted with your post.
-              </p>
+              <p className="mt-3 text-sm leading-6 text-slate-700">Check availability, condition and owner permission. Agree any minor repair with the next owner before the item moves. Posting an item is not a completed handover or a measurement of environmental savings.</p>
             </div>
 
             <p className="pt-2 text-center text-sm leading-6 text-slate-500">
-              By posting, you confirm this item was in a public space.
+              A location does not establish ownership or permission to take an item. For suspected dumping, use the{' '}<a className="underline underline-offset-4" href="https://www.gov.uk/report-flytipping">official reporting guidance</a>.
             </p>
 
             <button
@@ -1089,7 +1026,7 @@ export default function PostFoundItemPage() {
               onClick={() => {
                 void handleSubmit()
               }}
-              disabled={isSubmitting}
+              disabled={isSubmitting || postcodeStatus !== 'resolved' || !postcode}
             >
               {isSubmitting ? (
                 <>

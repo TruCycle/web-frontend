@@ -6,7 +6,6 @@ import type { FoundItemCategory, FoundItemStatus } from '../types'
 import { foundItemCategories } from '../types'
 import { NearbyCard } from './components/NearbyCard'
 import { useAuthSession } from '@/shared/context/useAuthSession'
-import { useIntentSwitch } from '@/shared/hooks/useIntentSwitch'
 import { classNames } from '@/shared/utils/classNames'
 
 type CategoryChip = 'all' | FoundItemCategory
@@ -49,7 +48,6 @@ function Chip({ label, isActive, onClick }: ChipProps) {
 export default function NearbyPage() {
   const { user } = useAuthSession()
   const navigate = useNavigate()
-  const { runWithRole } = useIntentSwitch()
   const [categoryChip, setCategoryChip] = useState<CategoryChip>('all')
   const [statusChip, setStatusChip] = useState<StatusChip>('all')
 
@@ -90,7 +88,7 @@ export default function NearbyPage() {
           </button>
           <button
             type="button"
-            onClick={() => runWithRole('spotter', { path: '/found-items/post' })}
+            onClick={() => navigate('/found-items/post')}
             className="inline-flex items-center gap-2 rounded-full bg-[#111611] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1B231B]"
           >
             <Camera size={14} />
@@ -143,7 +141,7 @@ export default function NearbyPage() {
               key={item.id}
               item={item}
               onClick={() => {
-                runWithRole('collector', { path: `/map?highlight=${encodeURIComponent(item.id)}` })
+                navigate(`/map?highlight=${encodeURIComponent(item.id)}`)
               }}
             />
           ))}

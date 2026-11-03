@@ -97,7 +97,7 @@ export interface FoundItemImpactRecentPost {
   readonly id: string
   readonly title: string
   readonly postcode: string
-  readonly status: 'available' | 'claimed' | 'picked_up' | 'expired' | 'reported'
+  readonly status: 'available' | 'claimed' | 'picked_up' | 'gone' | 'expired' | 'reported'
   readonly estimatedCo2eKg: number
   readonly impactPoints: number
   readonly postedAt: string
@@ -108,7 +108,7 @@ export interface FoundItemImpactSummary {
   readonly liveSpots: number
   readonly rescuedSpots: number
   readonly reportedSpots: number
-  readonly totalCo2eKg: number
+  readonly totalCo2eKg: number | null
   readonly totalImpactPoints: number
   readonly topArea: string | null
   readonly userArea: string | null

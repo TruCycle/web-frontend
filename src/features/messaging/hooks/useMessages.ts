@@ -299,9 +299,8 @@ export function useMessages() {
       setError(null)
 
       try {
-        if (websocketClient.isConnected) {
-          websocketClient.emit('message:send', { roomId, text: message })
-        } else {
+        const sentThroughSocket = websocketClient.isConnected && websocketClient.emit('message:send', { roomId, text: message })
+        if (!sentThroughSocket) {
           const fallbackMessage = await sendGeneralMessage(roomId, { text: message })
           setRoomMessages((currentMessages) => ({
             ...currentMessages,

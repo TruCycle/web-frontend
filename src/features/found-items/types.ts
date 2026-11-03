@@ -3,6 +3,7 @@ export const foundItemStatuses = [
   'claimed',
   'picked_up',
   'expired',
+  'gone',
   'reported',
 ] as const
 
@@ -28,8 +29,9 @@ export interface FoundItemImage {
 }
 
 export interface FoundItemLocation {
-  readonly latitude: number
-  readonly longitude: number
+  readonly latitude: number | null
+  readonly longitude: number | null
+  readonly precision: 'exact' | 'approximate' | 'unavailable'
   readonly address: string | null
   readonly neighborhood: string | null
   readonly postcode: string
@@ -56,6 +58,8 @@ export interface FoundItem {
   }
   readonly postedAt: string
   readonly expiresAt: string | null
+  readonly lastSeenAt?: string | null
+  readonly closedAt?: string | null
   readonly claimCount: number
   readonly viewCount: number
 }
@@ -106,6 +110,7 @@ export interface CreateFoundItemPayload {
 }
 
 export interface FoundItemsFilter {
+  readonly includeRecentClosed?: boolean
   readonly category?: FoundItemCategory
   readonly status?: FoundItemStatus
   readonly maxDistance?: number

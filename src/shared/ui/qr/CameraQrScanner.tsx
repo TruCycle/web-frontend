@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import jsQR from 'jsqr'
 import { classNames } from '@/shared/utils/classNames'
 
@@ -33,29 +33,37 @@ function getBarcodeDetectorConstructor(): BarcodeDetectorConstructor | null {
     : null
 }
 
-export function CameraQrScanner({
+export function CameraQrScanner(props: CameraQrScannerProps) {
+  return <CameraQrScannerSession key={(props.isActive ?? true) ? 'active' : 'inactive'} {...props} />
+}
+
+function CameraQrScannerSession({
   isActive = true,
   onDetected,
   onError,
   className,
 }: CameraQrScannerProps) {
   const [isLive, setIsLive] = useState(false)
-  const [statusMessage, setStatusMessage] = useState<string | null>(null)
+  const [statusMessage, setStatusMessage] = useState<string | null>(() => {
+    if (!isActive) return null
+    return typeof navigator !== 'undefined' && typeof navigator.mediaDevices?.getUserMedia === 'function'
+      ? 'Connecting camera...'
+      : 'Camera access is not available in this browser.'
+  })
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const frameRequestRef = useRef<number | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const isRunningRef = useRef(false)
   const hasScanErrorRef = useRef(false)
+  const generationRef = useRef(0)
   const barcodeDetector = useMemo(() => getBarcodeDetectorConstructor(), [])
+  const notifyDetected = useEffectEvent(onDetected)
+  const notifyError = useEffectEvent((message: string) => onError?.(message))
 
-  const stopScanner = useCallback((options?: { readonly clearStatus?: boolean }) => {
-    const shouldClearStatus = options?.clearStatus ?? true
+  const stopScanner = useCallback(() => {
+    generationRef.current += 1
     isRunningRef.current = false
-    setIsLive(false)
-    if (shouldClearStatus) {
-      setStatusMessage(null)
-    }
     hasScanErrorRef.current = false
 
     if (frameRequestRef.current !== null) {
@@ -110,27 +118,25 @@ export function CameraQrScanner({
     return result?.data?.trim() ?? null
   }, [])
 
-  const startScanner = useCallback(async () => {
+  useEffect(() => {
     if (!isActive) {
       return
     }
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       const message = 'Camera access is not available in this browser.'
-      setStatusMessage(message)
-      onError?.(message)
+      notifyError(message)
       return
     }
 
     isRunningRef.current = true
+    const generation = ++generationRef.current
     hasScanErrorRef.current = false
-    setStatusMessage('Connecting camera...')
 
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
-      })
-      if (!isRunningRef.current) {
+    void navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment' },
+    }).then(async (stream) => {
+      if (!isRunningRef.current || generationRef.current !== generation) {
         stream.getTracks().forEach((track) => track.stop())
         return
       }
@@ -144,7 +150,7 @@ export function CameraQrScanner({
       videoRef.current.srcObject = stream
       await videoRef.current.play()
 
-      if (!isRunningRef.current) {
+      if (!isRunningRef.current || generationRef.current !== generation) {
         stream.getTracks().forEach((track) => track.stop())
         return
       }
@@ -157,7 +163,7 @@ export function CameraQrScanner({
         : null
 
       const scanFrame = async () => {
-        if (!isRunningRef.current || !videoRef.current) {
+        if (!isRunningRef.current || generationRef.current !== generation || !videoRef.current) {
           return
         }
 
@@ -173,18 +179,22 @@ export function CameraQrScanner({
           }
         } catch {
           if (!hasScanErrorRef.current) {
-            if (!isRunningRef.current) {
+            if (!isRunningRef.current || generationRef.current !== generation) {
               return
             }
             const message = 'Unable to scan QR right now. Please try again.'
-            onError?.(message)
+            notifyError(message)
             setStatusMessage(message)
             hasScanErrorRef.current = true
           }
         }
 
+        if (!isRunningRef.current || generationRef.current !== generation) return
+
         if (nextPayload) {
-          onDetected(nextPayload)
+          setIsLive(false)
+          setStatusMessage(null)
+          notifyDetected(nextPayload)
           stopScanner()
           return
         }
@@ -197,8 +207,8 @@ export function CameraQrScanner({
       frameRequestRef.current = window.requestAnimationFrame(() => {
         void scanFrame()
       })
-    } catch (error) {
-      if (!isRunningRef.current) {
+    }).catch((error: unknown) => {
+      if (!isRunningRef.current || generationRef.current !== generation) {
         return
       }
 
@@ -222,23 +232,15 @@ export function CameraQrScanner({
             : errorName === 'NotReadableError' || errorName === 'TrackStartError'
               ? 'Camera is currently unavailable. Close other camera apps and retry.'
               : 'Unable to start camera right now. Please try again.'
-      onError?.(message)
+      notifyError(message)
+      setIsLive(false)
       setStatusMessage(message)
-      stopScanner({ clearStatus: false })
-    }
-  }, [barcodeDetector, decodeWithJsQr, isActive, onDetected, onError, stopScanner])
-
-  useEffect(() => {
-    if (!isActive) {
       stopScanner()
-      return
-    }
-
-    void startScanner()
+    })
     return () => {
       stopScanner()
     }
-  }, [isActive, startScanner, stopScanner])
+  }, [barcodeDetector, decodeWithJsQr, isActive, stopScanner])
 
   return (
     <div

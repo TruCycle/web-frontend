@@ -7,10 +7,9 @@ type StoredTrackingConsent = {
 
 const STORAGE_KEY = 'tc-tracking-consent'
 const REJECT_REPROMPT_INTERVAL_MS = 20 * 24 * 60 * 60 * 1000
-
-function canUseStorage(): boolean {
-  return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
-}
+const CONSENT_CHANGED_EVENT = 'tc:tracking-consent-changed'
+let sessionConsent: StoredTrackingConsent | null = null
+let useSessionChoice = false
 
 function parseStoredTrackingConsent(value: string | null): StoredTrackingConsent | null {
   if (!value) {
@@ -22,7 +21,7 @@ function parseStoredTrackingConsent(value: string | null): StoredTrackingConsent
 
     if (
       (parsed.status === 'accepted' || parsed.status === 'rejected') &&
-      typeof parsed.updatedAt === 'number'
+      typeof parsed.updatedAt === 'number' && Number.isFinite(parsed.updatedAt)
     ) {
       return {
         status: parsed.status,
@@ -37,11 +36,15 @@ function parseStoredTrackingConsent(value: string | null): StoredTrackingConsent
 }
 
 export function getTrackingConsentStatus(now = Date.now()): TrackingConsentStatus {
-  if (!canUseStorage()) {
-    return 'unknown'
+  if (typeof window === 'undefined') return 'unknown'
+  let storedConsent = sessionConsent
+  if (!useSessionChoice) {
+    try {
+      storedConsent = parseStoredTrackingConsent(window.localStorage.getItem(STORAGE_KEY))
+    } catch {
+      // With blocked storage, explicit choices last for this document only.
+    }
   }
-
-  const storedConsent = parseStoredTrackingConsent(window.localStorage.getItem(STORAGE_KEY))
 
   if (!storedConsent) {
     return 'unknown'
@@ -55,7 +58,6 @@ export function getTrackingConsentStatus(now = Date.now()): TrackingConsentStatu
     return 'rejected'
   }
 
-  window.localStorage.removeItem(STORAGE_KEY)
   return 'unknown'
 }
 
@@ -63,14 +65,36 @@ export function setTrackingConsentStatus(
   status: Exclude<TrackingConsentStatus, 'unknown'>,
   now = Date.now(),
 ): void {
-  if (!canUseStorage()) {
-    return
-  }
+  if (typeof window === 'undefined') return
 
   const storedConsent: StoredTrackingConsent = {
     status,
     updatedAt: now,
   }
 
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(storedConsent))
+  sessionConsent = storedConsent
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(storedConsent))
+    useSessionChoice = false
+  } catch {
+    useSessionChoice = true
+    // Keep a session-only explicit choice; never infer consent from an error.
+  }
+  window.dispatchEvent(new Event(CONSENT_CHANGED_EVENT))
+}
+
+export function subscribeTrackingConsent(onChange: () => void): () => void {
+  if (typeof window === 'undefined') return () => {}
+  const onStorage = (event: StorageEvent) => {
+    if (event.key !== STORAGE_KEY && event.key !== null) return
+    sessionConsent = parseStoredTrackingConsent(event.newValue)
+    useSessionChoice = false
+    onChange()
+  }
+  window.addEventListener(CONSENT_CHANGED_EVENT, onChange)
+  window.addEventListener('storage', onStorage)
+  return () => {
+    window.removeEventListener(CONSENT_CHANGED_EVENT, onChange)
+    window.removeEventListener('storage', onStorage)
+  }
 }

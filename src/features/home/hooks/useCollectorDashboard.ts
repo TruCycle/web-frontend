@@ -2,8 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   createItemClaim,
   fetchBrowseItems,
-  fetchImpactMetrics,
-  fetchWalletBalance,
+  fetchCollectedItems,
 } from '@/features/items/api/itemsApi'
 import type { BrowseItem } from '@/features/items/types'
 
@@ -29,8 +28,8 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
   const [error, setError] = useState<string | null>(null)
   const [stats, setStats] = useState({
     itemsCollected: 0,
-    itemsExchanged: 0,
-    totalCo2SavedKg: 0,
+    itemsExchanged: null as number | null,
+    totalCo2SavedKg: null as number | null,
     rewardsEarned: 0,
     rewardsCurrency: '£',
   })
@@ -65,13 +64,14 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
   const loadStats = useCallback(async () => {
     try {
       setIsLoadingStats(true)
-      const [impact, wallet] = await Promise.all([fetchImpactMetrics(), fetchWalletBalance()])
+      // This endpoint is collector-scoped; /items/me/impact is donor-scoped.
+      const completed = await fetchCollectedItems({ claimStatus: 'complete', page: 1, limit: 1 })
       setStats({
-        itemsCollected: impact.itemsDonated + impact.itemsExchanged,
-        itemsExchanged: impact.itemsExchanged,
-        totalCo2SavedKg: impact.totalCo2SavedKg,
-        rewardsEarned: wallet.balance,
-        rewardsCurrency: wallet.currency,
+        itemsCollected: completed.pagination.total,
+        itemsExchanged: null,
+        totalCo2SavedKg: null,
+        rewardsEarned: 0,
+        rewardsCurrency: 'PTS',
       })
     } catch {
       setError('Unable to load your impact metrics right now.')

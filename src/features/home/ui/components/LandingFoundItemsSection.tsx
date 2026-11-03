@@ -12,9 +12,9 @@ const foundItemHighlights = [
     title: 'Local board',
   },
   {
-    description: 'Real CO2 and point previews.',
+    description: 'Check the item details before arranging collection.',
     icon: Leaf,
-    title: 'Real impact preview',
+    title: 'Check before collecting',
   },
   {
     description: 'Request, track, and report in one flow.',
@@ -47,7 +47,7 @@ export function LandingFoundItemsSection({ isAuthenticated }: LandingFoundItemsS
           </h2>
 
           <p className="tc-landing-fade-up tc-landing-delay-2 mt-6 max-w-xl text-lg leading-8 text-slate-600">
-            Spot local finds, request pickup, and see the impact before anything goes live.
+            Spot local finds, check the item details, and confirm permission before collecting.
           </p>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
@@ -89,27 +89,27 @@ export function LandingFoundItemsSection({ isAuthenticated }: LandingFoundItemsS
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-tc-shell-bg/70">
-                  Board preview
+                  Illustrative board example — not a current listing
                 </p>
                 <h3 className="mt-2 text-3xl font-bold tracking-[-0.04em] text-slate-950">
-                  Morland Road armchair
+                  Example armchair
                 </h3>
                 <p className="mt-2 text-base text-slate-500">0.8 km away Â· Barking riverside</p>
               </div>
 
               <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
-                Available
+                Example
               </span>
             </div>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               <div className="rounded-[1.4rem] bg-[#f4faea] px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">CO2e saved</p>
-                <p className="mt-2 text-3xl font-bold tracking-[-0.05em] text-slate-950">12 kg</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Condition</p>
+                <p className="mt-2 text-3xl font-bold tracking-[-0.05em] text-slate-950">Check details</p>
               </div>
               <div className="rounded-[1.4rem] bg-[#eef6de] px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Impact score</p>
-                <p className="mt-2 text-3xl font-bold tracking-[-0.05em] text-[#3A7618]">86 pts</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Collection</p>
+                <p className="mt-2 text-3xl font-bold tracking-[-0.05em] text-[#3A7618]">Agree first</p>
               </div>
               <div className="rounded-[1.4rem] bg-slate-950 px-4 py-4 text-white">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Post flow</p>

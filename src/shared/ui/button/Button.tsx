@@ -28,7 +28,7 @@ export function Button({
   return (
     <button
       className={classNames(
-        'inline-flex items-center tracking-wide justify-center gap-2 rounded-xl px-4 py-3 text-md font-medium transition focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-60',
+        'inline-flex min-h-11 min-w-11 items-center tracking-wide justify-center gap-2 rounded-xl px-4 py-3 text-md font-medium transition focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-60',
         variantClasses,
         className,
       )}

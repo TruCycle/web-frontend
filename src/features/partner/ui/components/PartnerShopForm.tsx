@@ -3,6 +3,7 @@ import { Plus, X } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
 import type { CreatePartnerShopPayload, PartnerShop } from '@/features/partner/types'
 import { classNames } from '@/shared/utils/classNames'
+import { normalizeFullUkPostcode } from '@/shared/utils/fullUkPostcode'
 
 interface PartnerShopFormProps {
   readonly initialShop?: PartnerShop
@@ -108,13 +109,18 @@ export function PartnerShopForm({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (isSubmitting) return
 
     const normalizedName = name.trim()
     const normalizedAddressLine = addressLine.trim()
-    const normalizedPostcode = postcode.trim()
+    const normalizedPostcode = normalizeFullUkPostcode(postcode)
 
-    if (!normalizedName || !normalizedAddressLine || !normalizedPostcode) {
+    if (!normalizedName || !normalizedAddressLine || !postcode.trim()) {
       setValidationError('Shop name, address line, and postcode are required.')
+      return
+    }
+    if (normalizedName.length < 2 || !normalizedPostcode) {
+      setValidationError('Enter a shop name of at least 2 characters and a full UK postcode, for example SW1A 1AA.')
       return
     }
 
@@ -166,6 +172,8 @@ export function PartnerShopForm({
             onChange={(event) => setName(event.currentTarget.value)}
             className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
             placeholder="Enter shop name"
+            minLength={2}
+            maxLength={120}
             required
           />
         </label>
@@ -177,6 +185,8 @@ export function PartnerShopForm({
             onChange={(event) => setPostcode(event.currentTarget.value)}
             className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
             placeholder="SW1A 1AA"
+            autoComplete="postal-code"
+            maxLength={32}
             required
           />
         </label>
@@ -189,6 +199,8 @@ export function PartnerShopForm({
           onChange={(event) => setAddressLine(event.currentTarget.value)}
           className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
           placeholder="Street address or landmark"
+          autoComplete="street-address"
+          maxLength={255}
           required
         />
       </label>

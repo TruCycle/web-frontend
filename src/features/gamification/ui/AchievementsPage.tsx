@@ -161,9 +161,9 @@ export default function AchievementsPage() {
         />
 
         <ImpactMetricCard
-          title="CO2e saved"
-          value={<p className="text-4xl font-semibold tracking-tight text-white">{isLoadingFoundItemImpact ? '-' : foundItemImpact?.totalCo2eKg ?? 0}</p>}
-          detail="kg CO2e"
+          title="Estimated CO2e (picked up)"
+          value={<p className="text-4xl font-semibold tracking-tight text-white">{isLoadingFoundItemImpact ? '-' : foundItemImpact?.totalCo2eKg ?? 'Unavailable'}</p>}
+          detail="kg CO2e - estimates, not measured savings"
           icon={<Award size={20} className="text-cyan-200" />}
           accentClassName="bg-cyan-400/30"
         />
@@ -207,8 +207,8 @@ export default function AchievementsPage() {
 
       {foundItemImpact ? (
         <CarbonLedgerPanel
-          co2eTotalKg={Number(foundItemImpact.totalCo2eKg) || 0}
-          impactPoints={Number(foundItemImpact.totalImpactPoints) || 0}
+          co2eTotalKg={foundItemImpact.totalCo2eKg}
+          impactPoints={progress?.totalPoints ?? null}
         />
       ) : null}
 

@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CheckCircle2, CircleAlert } from 'lucide-react'
-import { Link, Navigate, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
+import { resendVerificationEmail } from '@/features/auth/api/authApi'
 import { useAuthSession } from '@/shared/context/useAuthSession'
+import { RequestTimeoutError } from '@/shared/lib/api/client'
 import { ApiError } from '@/shared/types/network'
 import { classNames } from '@/shared/utils/classNames'
 import {
   AuthPageFrame,
+  authInputClassName,
   authFooterCopyClassName,
   authFooterLinkClassName,
   authLoadingSpinnerClassName,
@@ -18,48 +21,40 @@ export default function VerifyEmailPage() {
   const [searchParams] = useSearchParams()
   const token = useMemo(() => searchParams.get('token')?.trim() ?? '', [searchParams])
   const { verifyEmail } = useAuthSession()
-  const [status, setStatus] = useState<VerificationStatus>('verifying')
-  const [errorMessage, setErrorMessage] = useState('')
+  const [attempt, setAttempt] = useState(0)
+  const [result, setResult] = useState<{ token: string; attempt: number; status: VerificationStatus; message: string } | null>(null)
+  const request = useRef<{ token: string; attempt: number; promise: Promise<void> } | null>(null)
+  const [email, setEmail] = useState('')
+  const [resendState, setResendState] = useState<'idle' | 'sending' | 'requested' | 'error'>('idle')
+  const status = !token ? 'error' : result?.token === token && result.attempt === attempt ? result.status : 'verifying'
+  const errorMessage = !token ? 'This link is missing its verification token. Request a new email below.' : result?.token === token && result.attempt === attempt ? result.message : ''
 
   useEffect(() => {
-    if (!token) {
-      return
+    if (!token) return
+    let current = true
+    // StrictMode repeats effects; reuse this verification attempt.
+    if (!request.current || request.current.token !== token || request.current.attempt !== attempt) {
+      request.current = { token, attempt, promise: verifyEmail(token) }
     }
+    void request.current.promise.then(() => {
+      if (current) setResult({ token, attempt, status: 'success', message: '' })
+    }).catch((caughtError: unknown) => {
+      if (!current) return
+      const transient = caughtError instanceof RequestTimeoutError || caughtError instanceof TypeError || (caughtError instanceof ApiError && (caughtError.statusCode >= 500 || caughtError.statusCode === 0 || caughtError.statusCode === 429))
+      setResult({ token, attempt, status: 'error', message: transient
+        ? 'Verification is temporarily unavailable. Try this link again, or request a fresh email below.'
+        : 'This link could not be verified. It may be invalid or expired. Request a fresh email below.' })
+    })
+    return () => { current = false }
+  }, [token, attempt, verifyEmail])
 
-    let isMounted = true
-
-    async function runVerification() {
-      setStatus('verifying')
-      setErrorMessage('')
-
-      try {
-        await verifyEmail(token)
-        if (!isMounted) {
-          return
-        }
-        setStatus('success')
-      } catch (caughtError) {
-        if (!isMounted) {
-          return
-        }
-        setStatus('error')
-        setErrorMessage(
-          caughtError instanceof ApiError
-            ? caughtError.message
-            : 'We could not verify this email link. It may be invalid or expired.',
-        )
-      }
-    }
-
-    void runVerification()
-
-    return () => {
-      isMounted = false
-    }
-  }, [token, verifyEmail])
-
-  if (!token) {
-    return <Navigate replace to="/signup" />
+  async function resend() {
+    if (!email.trim() || resendState === 'sending') return
+    setResendState('sending')
+    try {
+      await resendVerificationEmail(email.trim())
+      setResendState('requested')
+    } catch { setResendState('error') }
   }
 
   return (
@@ -75,8 +70,8 @@ export default function VerifyEmailPage() {
         status === 'verifying'
           ? 'We are confirming your email and activating your TruCycle account.'
           : status === 'success'
-            ? 'Your account has been verified successfully. You can continue into TruCycle now.'
-            : 'This verification link could not be completed. You can request a new verification email from signup.'
+            ? 'Your email has been verified. Sign in to continue into TruCycle.'
+            : 'This verification link could not be completed. Enter your email below to request a fresh verification link.'
       }
       showcase={{
         avatarLabel: 'TC',
@@ -99,7 +94,7 @@ export default function VerifyEmailPage() {
         </p>
       }
     >
-      <div className="mt-8 grid gap-5">
+      <div className="mt-8 grid gap-5" aria-live="polite">
         <div className="rounded-[0.9rem] border border-tc-auth-inputBorder bg-white p-6 text-center">
           <div className="mx-auto flex max-w-md flex-col items-center gap-4">
             <span
@@ -127,7 +122,7 @@ export default function VerifyEmailPage() {
               </p>
             ) : status === 'success' ? (
               <p className="m-0 text-sm leading-7 text-tc-auth-formText">
-                Verification complete. Your account is active and your session is ready.
+                Verification complete. Sign in to start your session.
               </p>
             ) : (
               <p className="m-0 text-sm leading-7 text-tc-auth-formText">
@@ -138,25 +133,25 @@ export default function VerifyEmailPage() {
         </div>
 
         {status === 'success' ? (
-          <Link className={classNames(authPrimaryButtonClassName, 'no-underline')} to="/dashboard">
-            Continue to dashboard
+          <Link className={classNames(authPrimaryButtonClassName, 'no-underline')} to="/login">
+            Sign in to continue
           </Link>
         ) : null}
 
         {status === 'error' ? (
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Link
-              className={classNames(authPrimaryButtonClassName, 'no-underline sm:flex-1')}
-              to="/signup"
-            >
-              Request a new verification email
-            </Link>
-            <Link
-              className="inline-flex h-[3.05rem] items-center justify-center rounded-[0.55rem] border border-tc-auth-inputBorder bg-white px-4 text-base font-semibold text-tc-auth-formTitle no-underline transition hover:bg-slate-50 sm:flex-1"
-              to="/login"
-            >
-              Go to login
-            </Link>
+          <div className="grid gap-4">
+            {token ? <button className={authPrimaryButtonClassName} type="button" onClick={() => setAttempt((value) => value + 1)}>Try this link again</button> : null}
+            <form className="grid gap-3" onSubmit={(event) => { event.preventDefault(); void resend() }}>
+              <label className="grid gap-2 text-sm font-medium">Email address
+                <input className={authInputClassName} type="email" autoComplete="email" required disabled={resendState === 'sending'} value={email} onChange={(event) => { setEmail(event.target.value); setResendState('idle') }} />
+              </label>
+              <button className={authPrimaryButtonClassName} type="submit" disabled={resendState === 'sending'} aria-busy={resendState === 'sending'}>
+                {resendState === 'sending' ? 'Requesting…' : 'Request a new verification email'}
+              </button>
+              {resendState === 'requested' ? <p role="status">If your account needs verification, an email has been requested. Check your inbox and spam folder. A request does not guarantee delivery.</p> : null}
+              {resendState === 'error' ? <p role="alert">We could not request verification right now. Please try again in a few minutes.</p> : null}
+            </form>
+            <Link className={authFooterLinkClassName} to="/login">Go to login</Link>
           </div>
         ) : null}
       </div>

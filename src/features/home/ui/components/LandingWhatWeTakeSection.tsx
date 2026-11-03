@@ -1,4 +1,5 @@
 import type { ComponentType, SVGProps } from 'react'
+import { ReuseSafetyNotice } from '@/shared/ui/reuse/ReuseSafetyNotice'
 
 import {
   Armchair,
@@ -19,15 +20,15 @@ type Category = {
 
 const categories: readonly Category[] = [
   {
-    badge: 'Porch pickup',
-    description: 'Chairs, side tables, shelves, lamps.',
+    badge: 'Check condition',
+    description: 'Sound tables, shelves and chairs. Upholstered items need their permanent fire-safety label.',
     Icon: Armchair,
     imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop',
     title: 'Furniture',
   },
   {
     badge: 'Clean + ready',
-    description: 'Mugs, pans, small appliances, jars.',
+    description: 'Clean cookware and household items that are safe for their original use.',
     Icon: CookingPot,
     imageUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80&fit=crop',
     title: 'Kitchenware',
@@ -40,22 +41,22 @@ const categories: readonly Category[] = [
     title: 'Books + media',
   },
   {
-    badge: 'Check sizes',
-    description: 'Toys, carriers, clothes, nursery extras.',
+    badge: 'Check safety',
+    description: 'Complete, safe and non-recalled toys and children’s items. No child car seats.',
     Icon: Baby,
     imageUrl: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=600&q=80&fit=crop',
     title: 'Kids + baby',
   },
   {
-    badge: 'Outdoor pickup',
-    description: 'Planters, hand tools, hardware, timber.',
+    badge: 'Complete + safe',
+    description: 'Sound garden furniture and complete hand tools. Describe condition clearly.',
     Icon: Wrench,
     imageUrl: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&q=80&fit=crop',
     title: 'Garden + tools',
   },
   {
-    badge: 'Power checked',
-    description: 'Cables, speakers, monitors, chargers.',
+    badge: 'Working + safe',
+    description: 'Working electrical items with intact plugs, cables and casings. Check for recalls.',
     Icon: MonitorSmartphone,
     imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80&fit=crop',
     title: 'Tech shelf',
@@ -69,14 +70,14 @@ export function LandingWhatWeTakeSection() {
         <div className="grid gap-8 lg:grid-cols-[460px_minmax(0,1fr)] lg:items-center lg:gap-8">
           <div className="max-w-[28.75rem]">
             <p className="text-sm font-bold tracking-[0.04em] text-[#172033]">
-              What finds a home
+              Ideas for things to offer
             </p>
             <h2 className="mt-5 text-[clamp(2.45rem,4.9vw,3.5rem)] font-normal leading-[0.98] tracking-[-0.05em] text-[#0B3322]">
-              <span className="block">Useful pieces, waiting</span>
+              <span className="block">Useful pieces, ready</span>
               <span className="block">for another home.</span>
             </h2>
             <p className="mt-6 max-w-[28rem] text-base leading-8 text-[#121212B3]">
-              A small catalog keeps offers specific: show the object, choose a
+              These categories are examples, not current listings. Show the object, choose a
               category, and add the pickup detail that makes saying yes easy.
             </p>
           </div>
@@ -96,7 +97,7 @@ export function LandingWhatWeTakeSection() {
                   Keep it practical
                 </p>
                 <p className="mt-2 max-w-[18rem] text-base leading-8 text-white">
-                  No sales, no holds, no mystery bags. Clear handoffs only.
+                  Describe what is included and agree collection details directly.
                 </p>
               </div>
             </div>
@@ -131,6 +132,7 @@ export function LandingWhatWeTakeSection() {
             </article>
           ))}
         </div>
+        <div className="mt-8"><ReuseSafetyNotice /></div>
 
         <div className="mt-6 flex items-center gap-3 text-sm font-semibold tracking-[0.04em] text-[#121212B3]">
           <span className="h-px w-10 bg-[#D7E3D5]" />

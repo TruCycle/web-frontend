@@ -246,7 +246,7 @@ function normalizeFoundItemImpactSummary(value: unknown): FoundItemImpactSummary
     liveSpots: readNumber(record.liveSpots) ?? 0,
     rescuedSpots: readNumber(record.rescuedSpots) ?? 0,
     reportedSpots: readNumber(record.reportedSpots) ?? 0,
-    totalCo2eKg: readNumber(record.totalCo2eKg) ?? 0,
+    totalCo2eKg: readNumber(record.totalCo2eKg),
     totalImpactPoints: readNumber(record.totalImpactPoints) ?? 0,
     topArea: readString(record.topArea),
     userArea: readString(record.userArea),
@@ -266,6 +266,7 @@ function normalizeFoundItemImpactSummary(value: unknown): FoundItemImpactSummary
               (status !== 'available' &&
                 status !== 'claimed' &&
                 status !== 'picked_up' &&
+                status !== 'gone' &&
                 status !== 'expired' &&
                 status !== 'reported')
             ) {

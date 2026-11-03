@@ -15,6 +15,9 @@ import {
 import type { FoundItem, FoundItemCategory, FoundItemStatus } from '../types'
 import { foundItemCategories } from '../types'
 import { useFoundItemDetails } from '../hooks/useFoundItemDetails'
+import { foundItemMapPoint, formatApproximateDistance, outwardPostcode } from '../lib/foundItemLocation'
+import { FoundItemLifecycleActions } from './components/FoundItemLifecycleActions'
+import type { FoundItemClaim } from '../types'
 import { FoundItemStatusBadge } from './components/FoundItemStatusBadge'
 import {
   formatFoundItemAttribution,
@@ -51,23 +54,12 @@ const fallbackCenter: GeoPoint = {
   longitude: 0.0812,
 }
 
-function hasMapLocation(item: FoundItem): boolean {
-  return (
-    Number.isFinite(item.location.latitude) &&
-    Number.isFinite(item.location.longitude) &&
-    !(item.location.latitude === 0 && item.location.longitude === 0)
-  )
-}
-
 function isVisibleMapStatus(status: FoundItemStatus): boolean {
-  return status === 'available' || status === 'claimed' || status === 'picked_up'
+  return status === 'available' || status === 'claimed' || status === 'picked_up' || status === 'gone' || status === 'expired'
 }
 
-function toGeoPoint(item: FoundItem): GeoPoint {
-  return {
-    latitude: item.location.latitude,
-    longitude: item.location.longitude,
-  }
+function toGeoPoint(item: FoundItem): GeoPoint | null {
+  return foundItemMapPoint(item.location)
 }
 
 function distanceBetweenPoints(from: GeoPoint, to: GeoPoint): number {
@@ -91,27 +83,16 @@ function distanceBetweenPoints(from: GeoPoint, to: GeoPoint): number {
 }
 
 function readDistanceKm(item: FoundItem, liveLocation: GeoPoint | null): number | null {
-  if (liveLocation && hasMapLocation(item)) {
-    return distanceBetweenPoints(liveLocation, toGeoPoint(item))
+  const point = toGeoPoint(item)
+  if (liveLocation && point) {
+    return distanceBetweenPoints(liveLocation, point)
   }
 
   return item.location.approximateDistance
 }
 
 function formatDistance(distanceKm: number | null): string {
-  if (distanceKm === null || !Number.isFinite(distanceKm)) {
-    return '—'
-  }
-
-  if (distanceKm < 1) {
-    return `${Math.max(50, Math.round(distanceKm * 1000))} m`
-  }
-
-  if (distanceKm < 10) {
-    return `${distanceKm.toFixed(1)} km`
-  }
-
-  return `${Math.round(distanceKm)} km`
+  return formatApproximateDistance(distanceKm)
 }
 
 function markerPalette(status: FoundItemStatus): {
@@ -216,6 +197,9 @@ function FilterChip({
 interface SelectedItemDetailsProps {
   readonly item: FoundItem | null
   readonly distanceKm: number | null
+  readonly currentUserId?: string
+  readonly viewerClaim?: FoundItemClaim | null
+  readonly onLifecycleChange?: () => void
   readonly isOwnPost: boolean
   readonly isLocating: boolean
   readonly isClaiming: boolean
@@ -233,6 +217,9 @@ function SelectedItemDetails({
   item,
   distanceKm,
   isOwnPost,
+  currentUserId,
+  viewerClaim,
+  onLifecycleChange,
   isLocating,
   isClaiming,
   isLoadingDetails,
@@ -247,12 +234,6 @@ function SelectedItemDetails({
   const [claimMessage, setClaimMessage] = useState('')
   const [reportReason, setReportReason] = useState('')
   const [reportDetails, setReportDetails] = useState('')
-
-  useEffect(() => {
-    setClaimMessage('')
-    setReportReason('')
-    setReportDetails('')
-  }, [item?.id])
 
   if (!item) {
     return (
@@ -318,6 +299,7 @@ function SelectedItemDetails({
       {isLoadingDetails ? <p className="text-xs text-slate-400">Loading request status…</p> : null}
       {detailsError ? <p className="text-xs text-rose-600">{detailsError}</p> : null}
 
+      <FoundItemLifecycleActions item={item} currentUserId={currentUserId} viewerClaim={viewerClaim} onChanged={onLifecycleChange} />
       {isOwnPost ? (
         <Link
           to="/found-items/my-posts"
@@ -361,7 +343,7 @@ function SelectedItemDetails({
             <button
               type="button"
               className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400"
-              disabled={isCancelling || item.status === 'picked_up' || item.status === 'reported'}
+              disabled={isCancelling || (item.status !== 'available' && item.status !== 'claimed')}
               onClick={onCancelClaim}
             >
               {isCancelling ? 'Cancelling...' : 'Cancel request'}
@@ -373,16 +355,21 @@ function SelectedItemDetails({
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">Report this spot</h3>
                 <p className="mt-1 text-xs leading-5 text-slate-500">
-                  Flag misleading, unsafe or duplicate posts for review.
+                  Report what you observed. Reports do not confirm pickup or award pickup points.
                 </p>
               </div>
 
-              <input
-                value={reportReason}
-                onChange={(event) => setReportReason(event.target.value)}
-                className="h-11 w-full rounded-[14px] border border-slate-200 px-3 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
-                placeholder="Reason for reporting"
-              />
+              <label className="block text-sm font-medium text-slate-700">Report reason
+                <select aria-label="Report reason" value={reportReason} onChange={(event) => setReportReason(event.target.value)} className="mt-1 h-11 w-full rounded-[14px] border border-slate-200 px-3 text-sm text-slate-900">
+                  <option value="">Choose a reason</option>
+                  <option value="already_gone">Already gone</option>
+                  {viewerHasActiveClaim ? <option value="not_there">Not there when I arrived</option> : null}
+                  <option value="unsafe">Unsafe</option>
+                  <option value="misleading">Misleading</option>
+                  <option value="duplicate">Duplicate</option>
+                  <option value="other">Other</option>
+                </select>
+              </label>
 
               <textarea
                 value={reportDetails}
@@ -444,7 +431,9 @@ export default function FoundItemsMapPage() {
     avatarUrl: null,
   }
 
+  const boardRequest = useRef(0)
   const loadBoard = useCallback(async () => {
+    const requestId = ++boardRequest.current
     setIsLoading(true)
     setItemsError(null)
 
@@ -453,18 +442,26 @@ export default function FoundItemsMapPage() {
         {
           postcode: user?.postcode?.trim() || undefined,
           sortBy: user?.postcode ? 'nearest' : 'newest',
+          maxDistance: user?.postcode ? 5 : undefined,
+          includeRecentClosed: true,
           category: categoryFilter === 'all' ? undefined : categoryFilter,
         },
         1,
         50,
       )
 
-      let nextItems = response.items.filter((item) => hasMapLocation(item) && isVisibleMapStatus(item.status))
+      const allItems = [...response.items]
+      for (let page = 2; page <= response.pagination.totalPages; page += 1) {
+        if (requestId !== boardRequest.current) return
+        const next = await fetchFoundItems({ postcode: user?.postcode?.trim() || undefined, sortBy: user?.postcode ? 'nearest' : 'newest', maxDistance: user?.postcode ? 5 : undefined, includeRecentClosed: true, category: categoryFilter === 'all' ? undefined : categoryFilter }, page, 50)
+        allItems.push(...next.items)
+      }
+      let nextItems = allItems.filter((item) => isVisibleMapStatus(item.status))
 
       if (highlightId) {
         try {
           const highlightResponse = await fetchFoundItemById(highlightId, user?.id)
-          if (!nextItems.some((item) => item.id === highlightResponse.item.id) && hasMapLocation(highlightResponse.item)) {
+          if (!nextItems.some((item) => item.id === highlightResponse.item.id)) {
             nextItems = [highlightResponse.item, ...nextItems]
           }
         } catch {
@@ -472,16 +469,20 @@ export default function FoundItemsMapPage() {
         }
       }
 
+      if (requestId !== boardRequest.current) return
       setItems(nextItems)
     } catch {
+      if (requestId !== boardRequest.current) return
+      setItems([])
       setItemsError('Unable to load the live map right now.')
     } finally {
-      setIsLoading(false)
+      if (requestId === boardRequest.current) setIsLoading(false)
     }
   }, [highlightId, user?.id, user?.postcode, categoryFilter])
 
   useEffect(() => {
     void loadBoard()
+    return () => { boardRequest.current += 1 }
   }, [loadBoard])
 
   useEffect(() => {
@@ -585,10 +586,11 @@ export default function FoundItemsMapPage() {
     focusMode === 'selected' && selectedPoint
       ? selectedPoint
       : liveLocation ?? selectedPoint ?? fallbackCenter
-  const mapZoom = focusMode === 'selected' && selectedPoint ? 16 : liveLocation ? 15 : 13
-  const locationLabel = user?.postcode?.trim()
-    ? `Live spots around ${user.postcode.trim().toUpperCase()} · tap a pin to rescue`
-    : 'Live spots around you · tap a pin to rescue'
+  const mapZoom = focusMode === 'selected' && selectedPoint ? selectedItem?.location.precision === 'exact' ? 16 : 14 : liveLocation ? 15 : 13
+  const userArea = outwardPostcode(user?.postcode)
+  const locationLabel = userArea
+    ? `Spot map around ${userArea} · pins show approximate areas`
+    : 'Spot map · pins show approximate areas'
 
   useEffect(() => {
     if (!selectedItem) {
@@ -732,10 +734,13 @@ export default function FoundItemsMapPage() {
                 </>
               ) : null}
 
-              {nearbyItems.map(({ item }) => (
+              {nearbyItems.flatMap(({ item }) => {
+                const point = toGeoPoint(item)
+                return point ? [{ item, point }] : []
+              }).map(({ item, point }) => (
                 <Marker
                   key={item.id}
-                  position={[item.location.latitude, item.location.longitude]}
+                  position={[point.latitude, point.longitude]}
                   icon={buildMarkerIcon(item, selectedItem?.id === item.id)}
                   eventHandlers={{
                     click: () => {
@@ -787,12 +792,31 @@ export default function FoundItemsMapPage() {
           </div>
 
           <p className="text-xs text-slate-400">Map data © OpenStreetMap contributors</p>
+          {nearbyItems.some(({ item }) => !toGeoPoint(item)) ? (
+            <section className="rounded-2xl border border-slate-200 bg-white p-4">
+              <h2 className="font-semibold text-slate-900">Spots without a map location</h2>
+              <p className="mt-1 text-sm text-slate-500">These spots are still available to view. A map location isn't available for them yet.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {nearbyItems.filter(({ item }) => !toGeoPoint(item)).map(({ item }) => (
+                  <button key={item.id} type="button" className="rounded-lg border border-slate-200 px-3 py-2 text-sm underline"
+                    onClick={() => {
+                      setSelectedItemId(item.id)
+                      if (isMobileViewport) setIsMobileItemModalOpen(true)
+                    }}>{item.title}</button>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </div>
 
         <aside className="relative z-10 hidden rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm md:block lg:p-5">
           <SelectedItemDetails
+            key={selectedItemForPanel?.id ?? 'no-item'}
             item={selectedItemForPanel}
             distanceKm={selectedDistanceKm}
+            currentUserId={user?.id}
+            viewerClaim={viewerClaim}
+            onLifecycleChange={() => { void Promise.all([loadBoard(), refreshDetails()]) }}
             isOwnPost={selectedItemOwnPost}
             isLocating={isLocating}
             isClaiming={Boolean(selectedItem && isClaimingId === selectedItem.id)}
@@ -821,8 +845,12 @@ export default function FoundItemsMapPage() {
         contentClassName="max-h-[calc(100vh-3.5rem)] overflow-y-auto p-4"
       >
         <SelectedItemDetails
+          key={selectedItemForPanel?.id ?? 'no-item'}
           item={selectedItemForPanel}
           distanceKm={selectedDistanceKm}
+          currentUserId={user?.id}
+          viewerClaim={viewerClaim}
+          onLifecycleChange={() => { void Promise.all([loadBoard(), refreshDetails()]) }}
           isOwnPost={selectedItemOwnPost}
           isLocating={isLocating}
           isClaiming={Boolean(selectedItem && isClaimingId === selectedItem.id)}

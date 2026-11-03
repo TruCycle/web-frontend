@@ -9,28 +9,28 @@ type FaqItem = {
 const faqItems: readonly FaqItem[] = [
   {
     answer:
-      'Yes - free to list, free to collect, no commission, no premium tier. TruCycle is grant- and partner-funded so money stays out of neighbour-to-neighbour handovers.',
+      'Items are offered free between neighbours. Agree collection arrangements directly; consider any travel or transport costs before accepting an item.',
     question: 'Is it really free?',
   },
   {
     answer:
-      "Anything in usable condition: furniture, white goods, kid's gear, books, bikes, plants, homewares, building materials. No food, clinical waste, or hazardous chemicals.",
+      "Offer useful items you have the right to give away. Describe their condition and any faults honestly. Check the terms before posting.",
     question: 'What can I list?',
   },
   {
     answer:
-      "Greater London right now, with active pilots in Brighton and Bristol. If you're elsewhere, sign up and we'll let you know when we land near you.",
-    question: 'Where do you operate?',
+      "Browse the current offers to see what is listed. Availability depends on what people have posted; a listing does not guarantee a successful collection.",
+    question: 'How do I find available items?',
   },
   {
     answer:
-      'You agree a time and place through the app, then the collector comes to you. Most pickups happen within 48 hours of listing.',
-    question: 'How do collections work?',
+      'The giver and recipient agree a time and place directly. Check the item details, owner permission, access and transport needs before travelling.',
+    question: 'How does a handover work?',
   },
   {
     answer:
-      'The opposite. Items only move between verified accounts to confirmed addresses. We work with London boroughs to reduce fly-tipping through a friction-free alternative.',
-    question: 'Is this not just fly-tipping with extra steps?',
+      'Only offer items you have permission to give away, and arrange an agreed handoff. A spotted item is a report of something seen, not permission to take it. Check ownership and permission before collecting.',
+    question: 'Can I take a spotted item?',
   },
 ] as const
 
@@ -77,8 +77,7 @@ export function LandingFaqSection() {
             Can&apos;t see your question? Drop us a note at{' '}
             <a className="font-semibold text-[#0B3322]" href="mailto:hello@trucycle.co.uk">
               hello@trucycle.co.uk
-            </a>{' '}
-            and we&apos;ll get back to you within a day.
+            </a>.
           </p>
         </div>
 

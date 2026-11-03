@@ -2,8 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Remains visible on both the light canvas and dark panels, including controls
+   that suppress the browser's default outline. */
+:focus-visible {
+  outline: 3px solid #0b3322 !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 3px #fff !important;
+}
+
+@media (max-width: 639px) {
+  /* Keep modal close controls available while showing validation feedback. */
+  body:has([role="dialog"][aria-modal="true"]) [data-modal-feedback] {
+    top: auto;
+    bottom: 1.25rem;
+  }
+}
+
 @font-face {
   font-family: 'SF Pro';
+  font-display: swap;
   src: url('/fonts/SFPRODISPLAYREGULAR.OTF') format('opentype');
   font-weight: 400;
   font-style: normal;
@@ -11,6 +28,7 @@
 
 @font-face {
   font-family: 'SF Pro';
+  font-display: swap;
   src: url('/fonts/SFPRODISPLAYMEDIUM.OTF') format('opentype');
   font-weight: 500;
   font-style: normal;
@@ -18,6 +36,7 @@
 
 @font-face {
   font-family: 'SF Pro';
+  font-display: swap;
   src: url('/fonts/SFPRODISPLAYBOLD.OTF') format('opentype');
   font-weight: 700;
   font-style: normal;

@@ -107,8 +107,12 @@ export default function Dashboard() {
   }
 
   const donorCo2Saved = useMemo(
-    () =>
-      donorListings.reduce((total, listing) => total + (listing.co2SavedKg ?? 0), 0),
+    () => {
+      const completed = donorListings.filter(listing => listing.status === 'Completed')
+      return completed.some(listing => listing.co2SavedKg === null)
+        ? null
+        : completed.reduce((total, listing) => total + (listing.co2SavedKg ?? 0), 0)
+    },
     [donorListings],
   )
   const dashboardStats = isDonorMode
@@ -116,8 +120,6 @@ export default function Dashboard() {
       itemsCollected: donorListings.length,
       itemsExchanged: donorSummary.completed,
       totalCo2SavedKg: donorCo2Saved,
-      rewardsEarned: donorSummary.claimed,
-      rewardsCurrency: '£',
     }
     : stats
   const shouldShowStatsLoading = isDonorMode ? isLoadingDonorListings : isLoadingStats
@@ -189,26 +191,26 @@ export default function Dashboard() {
           {[
             {
               value: shouldShowStatsLoading ? '-' : String(dashboardStats.itemsCollected),
-              label: isDonorMode ? 'Items Listed' : 'Items Collected',
+              label: isDonorMode ? 'Items listed (this page)' : 'Completed collections',
               icon: collectedItemsIcon,
             },
             {
-              value: shouldShowStatsLoading ? '-' : String(dashboardStats.itemsExchanged),
-              label: 'Exchanged',
+              value: shouldShowStatsLoading ? '-' : dashboardStats.itemsExchanged === null ? 'Unavailable' : String(dashboardStats.itemsExchanged),
+              label: isDonorMode ? 'Completed (this page)' : 'Completed exchanges',
               icon: exchangeIcon,
             },
             {
               value: shouldShowStatsLoading
                 ? '-'
-                : `${dashboardStats.totalCo2SavedKg.toFixed(1)}kg`,
-              label: 'CO2 Saved',
+                : dashboardStats.totalCo2SavedKg === null ? 'Unavailable' : `${dashboardStats.totalCo2SavedKg.toFixed(1)}kg`,
+              label: isDonorMode ? 'Est. CO2e (completed, this page)' : 'Est. CO2e (completed)',
               icon: sizeIcon,
             },
             {
               value: shouldShowStatsLoading
                 ? '-'
-                : `${dashboardStats.rewardsCurrency} ${dashboardStats.rewardsEarned.toFixed(0)}`,
-              label: 'Rewards Earned',
+                : isLoadingProgress ? '-' : userProgress ? `${userProgress.totalPoints} pts` : 'Unavailable',
+              label: 'Earned activity points',
               icon: rewardIcon,
             },
           ].map((item, index) => (

@@ -1,4 +1,6 @@
 import { env } from '@/shared/lib/config/env'
+import { getTrackingConsentStatus } from './trackingConsent'
+import { clearAnalyticsCookies } from './clearAnalyticsCookies'
 
 type MetaPixelFunction = ((...args: unknown[]) => void) & {
   readonly callMethod?: (...args: unknown[]) => void
@@ -17,7 +19,21 @@ declare global {
 
 let isInitialized = false
 
+export function syncMetaPixelConsent(): void {
+  if (typeof window === 'undefined') return
+  if (getTrackingConsentStatus() === 'accepted') {
+    if (isInitialized) window.fbq?.('consent', 'grant')
+    return
+  }
+  if (window.fbq?.queue) window.fbq.queue.length = 0
+  window.fbq?.('consent', 'revoke')
+  document.querySelectorAll('script[data-analytics="meta-pixel"]').forEach((script) => script.remove())
+  clearAnalyticsCookies((name) => name === '_fbp' || name === '_fbc')
+  isInitialized = Boolean(window.fbq?.callMethod)
+}
+
 export function initMetaPixel(): void {
+  if (getTrackingConsentStatus() !== 'accepted') return
   if (isInitialized || !env.metaPixelId || typeof window === 'undefined') {
     return
   }
@@ -43,6 +59,7 @@ export function initMetaPixel(): void {
     window._fbq = fbq
   }
 
+  window.fbq('consent', 'grant')
   if (!document.querySelector('script[data-analytics="meta-pixel"]')) {
     const script = document.createElement('script')
     script.async = true
@@ -56,6 +73,7 @@ export function initMetaPixel(): void {
 }
 
 export function trackMetaPageView(): void {
+  if (getTrackingConsentStatus() !== 'accepted' || !isInitialized) return
   window.fbq?.('track', 'PageView')
 }
 
@@ -63,5 +81,6 @@ export function trackMetaEvent(
   eventName: string,
   params?: Record<string, unknown>,
 ): void {
+  if (getTrackingConsentStatus() !== 'accepted' || !isInitialized) return
   window.fbq?.('track', eventName, params)
 }

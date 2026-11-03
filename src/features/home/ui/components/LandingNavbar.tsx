@@ -10,8 +10,8 @@ type LandingNavbarProps = {
 
 const navLinks = [
   { href: '#how', label: 'How it works' },
-  { href: '#what-we-take', label: 'What we take' },
-  { href: '#impact', label: 'Impact' },
+  { href: '#what-we-take', label: 'What to offer' },
+  { href: '#impact', label: 'Why reuse' },
   { href: '#faq', label: 'Questions' },
 ] as const
 
@@ -19,9 +19,9 @@ export function LandingNavbar({ dashboardTo, isAuthenticated, postItemTo }: Land
   return (
     <nav className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between rounded-full border border-[#0B332212] bg-white/90 px-4 shadow-[0_18px_50px_rgba(11,51,34,0.08)] backdrop-blur-xl sm:px-6">
-        <Link className="inline-flex items-center gap-2.5 no-underline" to="/">
+        <Link className="inline-flex shrink-0 items-center gap-2.5 no-underline" to="/">
           <img alt="TruCycle" className="h-10 w-10 rounded-2xl" src={logoSrc} />
-          <span className="text-lg font-semibold tracking-[-0.03em] text-[#0B3322]">TruCycle</span>
+          <span className="max-[360px]:hidden text-lg font-semibold tracking-[-0.03em] text-[#0B3322]">TruCycle</span>
         </Link>
 
         <div className="hidden items-center gap-6 lg:flex">
@@ -39,14 +39,14 @@ export function LandingNavbar({ dashboardTo, isAuthenticated, postItemTo }: Land
         <div className="flex items-center gap-2 sm:gap-3">
           {!isAuthenticated ? (
             <Link
-              className="hidden rounded-full px-4 py-2.5 text-base font-medium text-[#172033] no-underline transition-colors hover:text-[#0B3322] sm:inline-flex"
+              className="inline-flex whitespace-nowrap rounded-full px-2 py-2.5 sm:px-4 text-base font-medium text-[#172033] no-underline transition-colors hover:text-[#0B3322]"
               to="/login"
             >
               Log in
             </Link>
           ) : null}
           <Link
-            className="inline-flex items-center rounded-full bg-tc-shell-accent px-5 py-2.5 text-base font-extrabold text-[#0B3322] no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-tc-shell-accentHover"
+            className="inline-flex whitespace-nowrap items-center rounded-full bg-tc-shell-accent px-3 py-2.5 text-sm sm:px-5 sm:text-base font-extrabold text-[#0B3322] no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-tc-shell-accentHover"
             to={isAuthenticated ? dashboardTo : postItemTo}
           >
             {isAuthenticated ? 'Open dashboard' : 'Post an item'}

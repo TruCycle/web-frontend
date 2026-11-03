@@ -11,6 +11,10 @@ const privacySections = [
     body: 'We use your information to power listings, support exchanges, secure accounts, improve product performance, and keep core app features working reliably.',
   },
   {
+    title: 'Sharing Item Photos And Descriptions',
+    body: 'Show the item rather than the people or home around it. Keep personal documents, house numbers, vehicle number plates and unnecessary views of home interiors out of photos. Avoid putting private contact or exact address details into public descriptions.',
+  },
+  {
     title: 'How We Protect It',
     body: 'We limit access to your data, use standard security controls, and only keep information for as long as it is needed to provide the service or meet legal obligations.',
   },

@@ -1,10 +1,11 @@
 import { type ChangeEvent, type FormEvent, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { useGoogleOneTap } from '@/shared/hooks/useGoogleOneTap'
 import { ApiError } from '@/shared/types/network'
 import { useToast } from '@/shared/ui/toast/useToast'
 import { classNames } from '@/shared/utils/classNames'
+import { authReturnPath } from '@/shared/lib/auth/returnPath'
 import { AuthCheckbox } from './components/AuthCheckbox'
 import { GoogleSignInButton } from './components/GoogleSignInButton'
 import { PasswordVisibilityIcon } from './components/PasswordVisibilityIcon'
@@ -34,12 +35,15 @@ const initialFormValues: LoginFormValues = {
 }
 
 export default function LoginPage() {
-  useGoogleOneTap({ redirectTo: '/dashboard' })
+  const location = useLocation()
+  const redirectTo = authReturnPath(location.state)
+  const needsSignIn = Boolean(location.state && typeof location.state === 'object' && 'reason' in location.state && location.state.reason === 'sign-in-required')
+  useGoogleOneTap({ redirectTo })
   const [formValues, setFormValues] = useState(initialFormValues)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
-  const { login } = useAuthSession()
+  const { login, signOutNotice, retryServerSignOut, canRetryServerSignOut } = useAuthSession()
   const { success, error } = useToast()
 
   function onInputChange(
@@ -80,7 +84,7 @@ export default function LoginPage() {
         { rememberSession: formValues.keepLoggedIn },
       )
       success('Login successful', 'Welcome back to TruCycle.')
-      navigate('/dashboard')
+      navigate(redirectTo, { replace: true })
     } catch (caughtError) {
       const message =
         caughtError instanceof ApiError
@@ -110,6 +114,11 @@ export default function LoginPage() {
         </p>
       }
     >
+      {needsSignIn && <p role="status" className="mt-4 text-sm">Sign in to continue to your page.</p>}
+      {signOutNotice && <div className="mt-4 rounded-lg border border-slate-300 p-3 text-sm">
+        <p role="status">{signOutNotice}</p>
+        {canRetryServerSignOut && retryServerSignOut && <button type="button" className="mt-2 min-h-11 underline" onClick={() => void retryServerSignOut()}>Retry server sign-out</button>}
+      </div>}
       <form className="mt-8 grid gap-4" onSubmit={onSubmit}>
         <label className={authFieldClassName}>
           <span className={authLabelClassName}>Email Address</span>
@@ -182,7 +191,9 @@ export default function LoginPage() {
           )}
         </button>
 
-        <GoogleSignInButton redirectTo="/dashboard" text="signin_with" />
+        <Link className={authFooterLinkClassName} to="/auth/verify-email">Need a new verification email?</Link>
+
+        <GoogleSignInButton redirectTo={redirectTo} text="signin_with" />
       </form>
     </AuthPageFrame>
   )

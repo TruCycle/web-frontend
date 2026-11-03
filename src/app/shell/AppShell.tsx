@@ -57,6 +57,11 @@ function navLinkClassName({ isActive }: NavLinkRenderProps): string {
 }
 
 export function AppShell({ children }: AppShellProps) {
+  const { user } = useAuthSession()
+  return <AccountShell key={user?.id ?? 'anonymous'}>{children}</AccountShell>
+}
+
+function AccountShell({ children }: AppShellProps) {
   const { unreadCount, isLoading } = useNotifications()
   const { unreadMessagesCount } = useMessageAlerts()
   const { user, logout } = useAuthSession()
@@ -319,10 +324,12 @@ export function AppShell({ children }: AppShellProps) {
       </div>
 
       <div className="mt-auto flex justify-center pb-2 pt-3">
-        <div className="flex h-[50px] w-fit items-center gap-1 rounded-[10px] border border-tc-shell-accent bg-tc-shell-toggle p-1">
+        <div role="group" aria-label="Dashboard mode" className="flex min-h-[52px] w-fit items-center gap-1 rounded-[10px] border border-tc-shell-accent bg-tc-shell-toggle p-1">
           <button
+            type="button"
+            aria-pressed={role === 'spotter'}
             className={classNames(
-              'h-full flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
+              'min-h-11 flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
               role === 'spotter'
                 ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
                 : 'bg-transparent text-tc-shell-roleText',
@@ -335,8 +342,10 @@ export function AppShell({ children }: AppShellProps) {
             Spotter
           </button>
           <button
+            type="button"
+            aria-pressed={role === 'collector'}
             className={classNames(
-              'h-full flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
+              'min-h-11 flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
               role === 'collector'
                 ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
                 : 'bg-transparent text-tc-shell-roleText',
@@ -349,8 +358,10 @@ export function AppShell({ children }: AppShellProps) {
             Collector
           </button>
           <button
+            type="button"
+            aria-pressed={role === 'donor'}
             className={classNames(
-              'h-full flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
+              'min-h-11 flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
               role === 'donor'
                 ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
                 : 'bg-transparent text-tc-shell-roleText',
@@ -421,20 +432,20 @@ export function AppShell({ children }: AppShellProps) {
 
       <main
         className={classNames(
-          'flex h-screen flex-1 flex-col overflow-x-hidden bg-transparent max-md:h-auto max-md:rounded-2xl',
-          isFoundItemsPostRoute && 'max-md:h-[100dvh] max-md:rounded-none',
+          'flex h-screen min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden bg-transparent max-md:flex-none',
+          isFoundItemsPostRoute ? 'max-md:h-[100dvh] max-md:rounded-none' : 'max-md:h-[calc(100dvh-1rem)] max-md:rounded-2xl',
         )}
       >
         <header
           className={classNames(
-            'sticky top-0 z-[100] flex h-[72px] w-full items-center justify-end border-b border-tc-header-border bg-[#FFFFFF] px-6 shadow-none max-md:justify-between max-md:px-4',
+            'sticky top-0 z-[100] flex h-[72px] w-full shrink-0 items-center justify-end border-b border-tc-header-border bg-[#FFFFFF] px-6 shadow-none max-md:justify-between max-md:px-4',
             isFoundItemsPostRoute && 'max-md:hidden',
           )}
         >
           <div className="hidden items-center gap-2 max-md:flex">
             <button
               type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-tc-header-border text-[#334155] transition hover:bg-slate-100"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-tc-header-border text-[#334155] transition hover:bg-slate-100"
               onClick={() => {
                 setIsProfileMenuOpen(false)
                 setIsMobileSidebarOpen(true)
@@ -448,17 +459,17 @@ export function AppShell({ children }: AppShellProps) {
             <span className="text-sm font-semibold text-slate-700">Menu</span>
           </div>
           <div className="flex items-center gap-4">
-            <button className="relative flex items-center justify-center p-2 text-tc-app-text opacity-80 transition hover:opacity-100">
+            <Link to="/notifications" aria-label="Notifications" className="relative flex h-11 w-11 items-center justify-center text-tc-app-text opacity-80 transition hover:opacity-100">
               <BellIcon />
               {!isLoading && unreadCount > 0 && (
                 <span className="absolute right-[3px] top-[6px] inline-block h-2 w-2 rounded-full border-[1.5px] border-white bg-tc-shell-notify" />
               )}
-            </button>
+            </Link>
             <div className="mx-1 h-6 w-px bg-tc-header-divider" />
             <div className="relative" ref={profileMenuRef}>
               <button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-full px-1 py-1 text-tc-app-text transition hover:bg-slate-100"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full px-1 py-1 text-tc-app-text transition hover:bg-slate-100"
                 onClick={() => setIsProfileMenuOpen((current) => !current)}
                 aria-haspopup="menu"
                 aria-expanded={isProfileMenuOpen}
@@ -503,10 +514,10 @@ export function AppShell({ children }: AppShellProps) {
                     type="button"
                     role="menuitem"
                     className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[0.9rem] font-medium text-rose-600 hover:bg-rose-50"
-                    onClick={async () => {
+                    onClick={() => {
                       setIsProfileMenuOpen(false)
                       setRole('collector')
-                      await logout()
+                      void logout()
                       navigate('/login')
                     }}
                   >
@@ -520,14 +531,14 @@ export function AppShell({ children }: AppShellProps) {
         </header>
         <div
           className={classNames(
-            'flex-1 overflow-y-auto px-8 pb-8 pt-6 max-md:px-4 max-md:pb-6',
+            'min-h-0 flex-1 overflow-y-auto px-8 pb-8 pt-6 max-md:px-4 max-md:pb-6',
             isFoundItemsPostRoute && 'max-md:px-0 max-md:pb-0 max-md:pt-0',
           )}
         >
           {children}
         </div>
+        {!isFoundItemsPostRoute && !isPartnerArea && <IntentFab />}
       </main>
-      {!isFoundItemsPostRoute && <IntentFab />}
     </div>
   )
 }

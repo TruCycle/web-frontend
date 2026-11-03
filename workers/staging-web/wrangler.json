@@ -1,0 +1,15 @@
+{
+  "name": "trucycle-web-staging",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [],
+  "main": "index.js",
+  "assets": {
+    "directory": "../../dist-staging",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "html_handling": "none",
+    "not_found_handling": "none"
+  }
+}

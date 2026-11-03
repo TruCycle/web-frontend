@@ -1,0 +1,38 @@
+name: Frontend checks
+
+on:
+  pull_request:
+    branches: [main, stage]
+  push:
+    branches: ['codex/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm install --global npm@11.16.0 --ignore-scripts --no-audit --no-fund
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm run test:staging
+      - run: npm run test:consent
+      - run: npm run test:session
+      - run: npm run test:socket
+      - run: npm run test:seo
+      - run: npm run test:shops
+      - run: npm run test:location
+      - run: npm run lint

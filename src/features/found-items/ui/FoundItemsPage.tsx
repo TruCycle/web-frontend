@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { cancelFoundItemClaim, claimFoundItem, reportFoundItem } from '../api/foundItemsApi'
 import { useFoundItemDetails } from '../hooks/useFoundItemDetails'
@@ -10,9 +10,15 @@ import { useToast } from '@/shared/ui/toast/useToast'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 
 export default function FoundItemsPage() {
+  const [searchParams] = useSearchParams()
+  return searchParams.get('compose') === '1'
+    ? <Navigate replace to="/found-items/post" />
+    : <FoundItemsBoard />
+}
+
+function FoundItemsBoard() {
   const { user } = useAuthSession()
   const { success, error } = useToast()
-  const [searchParams] = useSearchParams()
   const {
     items,
     isLoading,
@@ -20,10 +26,13 @@ export default function FoundItemsPage() {
     filters,
     updateFilters,
     refresh,
+    pagination,
+    loadMore,
   } = useFoundItems({
-    status: 'available',
-    sortBy: 'nearest',
-    maxDistance: 5,
+    includeRecentClosed: true,
+    sortBy: user?.postcode ? 'nearest' : 'newest',
+    maxDistance: user?.postcode ? 5 : undefined,
+    postcode: user?.postcode || undefined,
   })
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
   const [isClaimingId, setIsClaimingId] = useState<string | null>(null)
@@ -38,15 +47,7 @@ export default function FoundItemsPage() {
     refresh: refreshDetails,
   } = useFoundItemDetails(selectedItemId, user?.id)
 
-  if (searchParams.get('compose') === '1') {
-    return <Navigate replace to="/found-items/post" />
-  }
 
-  useEffect(() => {
-    if (user?.postcode) {
-      updateFilters({ postcode: user.postcode })
-    }
-  }, [updateFilters, user?.postcode])
 
   const actor = useMemo(
     () => ({
@@ -145,9 +146,11 @@ export default function FoundItemsPage() {
         </div>
       </div>
 
+      {pagination && pagination.page < pagination.totalPages ? <button disabled={isLoading} onClick={() => { void loadMore() }} className="rounded-xl border px-4 py-3">Load more spots</button> : null}
       <FoundItemDetailsPanel
         isOpen={Boolean(selectedItemId)}
         onClose={() => setSelectedItemId(null)}
+        onLifecycleChange={() => { void Promise.all([refresh(), refreshDetails()]) }}
         item={selectedItem}
         claims={claims}
         viewerClaim={viewerClaim}

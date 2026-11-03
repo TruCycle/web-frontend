@@ -7,8 +7,8 @@ const PAGE_SIZE = 100
 const MAX_PAGES = 50
 
 interface CarbonLedgerPanelProps {
-  readonly co2eTotalKg: number
-  readonly impactPoints: number
+  readonly co2eTotalKg: number | null
+  readonly impactPoints: number | null
 }
 
 export function CarbonLedgerPanel({ co2eTotalKg, impactPoints }: CarbonLedgerPanelProps) {
@@ -35,10 +35,11 @@ export function CarbonLedgerPanel({ co2eTotalKg, impactPoints }: CarbonLedgerPan
           ])
         }
         if (pagination.page >= pagination.totalPages) break
+        if (page === MAX_PAGES) throw new Error('Export exceeds supported size')
       }
 
       const stamp = new Date().toISOString().split('T')[0]
-      downloadCsv(`trucycle-carbon-ledger-${stamp}.csv`, toCsv(rows))
+      downloadCsv(`trucycle-points-ledger-${stamp}.csv`, toCsv(rows))
     } catch {
       setError('Could not export your ledger right now.')
     } finally {
@@ -50,8 +51,8 @@ export function CarbonLedgerPanel({ co2eTotalKg, impactPoints }: CarbonLedgerPan
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900">Carbon ledger</h3>
-          <p className="text-sm text-slate-500">A verifiable record of every action that earned you points.</p>
+          <h3 className="text-lg font-semibold text-slate-900">Points ledger</h3>
+          <p className="text-sm text-slate-500">Your recorded activity points. CO2e is an estimate for items marked picked up.</p>
         </div>
         <button
           type="button"
@@ -65,12 +66,12 @@ export function CarbonLedgerPanel({ co2eTotalKg, impactPoints }: CarbonLedgerPan
       </div>
       <div className="mt-4 grid grid-cols-2 gap-3">
         <div className="rounded-xl bg-emerald-50 px-4 py-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">CO2e total</p>
-          <p className="mt-1 text-2xl font-semibold tracking-tight text-emerald-900">{co2eTotalKg.toFixed(1)} kg</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Estimated CO2e</p>
+          <p className="mt-1 text-2xl font-semibold tracking-tight text-emerald-900">{co2eTotalKg === null ? 'Unavailable' : `${co2eTotalKg.toFixed(1)} kg`}</p>
         </div>
         <div className="rounded-xl bg-amber-50 px-4 py-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">Lifetime impact</p>
-          <p className="mt-1 text-2xl font-semibold tracking-tight text-amber-900">{impactPoints.toLocaleString()} pts</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">Earned activity points</p>
+          <p className="mt-1 text-2xl font-semibold tracking-tight text-amber-900">{impactPoints === null ? 'Unavailable' : `${impactPoints.toLocaleString()} pts`}</p>
         </div>
       </div>
       {error ? <p className="mt-3 text-sm text-rose-600">{error}</p> : null}

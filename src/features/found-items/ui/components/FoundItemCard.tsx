@@ -46,6 +46,7 @@ export function FoundItemCard({ item, isSelected = false, onClick }: FoundItemCa
 
           <p className="text-[0.97rem] text-slate-500">{formatFoundItemLocationSummary(item)}</p>
           <p className="text-[0.97rem] text-slate-500">{formatFoundItemAttribution(item)}</p>
+          <p className="text-xs text-slate-500">{item.lastSeenAt ? `Last seen ${new Date(item.lastSeenAt).toLocaleString()} · ` : 'Last seen not confirmed · '}{item.expiresAt ? `Expiry: ${new Date(item.expiresAt).toLocaleString()}` : 'No expiry scheduled'}</p>
         </div>
 
         <div className="flex shrink-0 items-end justify-between gap-4 sm:block sm:min-w-[126px]">

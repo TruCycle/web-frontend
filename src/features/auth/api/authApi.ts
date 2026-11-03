@@ -4,6 +4,8 @@ import type {
   LoginPayload,
   PartnerOpeningHoursPayload,
   RegisterPayload,
+  RegistrationResult,
+  VerificationDeliveryStatus,
   ResetPasswordPayload,
   UpgradeToPartnerPayload,
 } from '@/features/auth/types'
@@ -38,15 +40,19 @@ interface AuthDataWithTokens {
 }
 
 interface AuthDataWithoutTokens {
+  readonly verificationDelivery?: { readonly status?: unknown }
   readonly user: ApiAuthUser
 }
 
 function normalizeUser(user: ApiAuthUser): AuthUser {
+  if (!user || typeof user.id !== 'string' || !user.id || typeof user.email !== 'string') {
+    throw new Error('Invalid sign-in response. Please retry.')
+  }
   return {
     id: user.id,
     email: user.email,
-    firstName: user.firstName ?? user.first_name ?? '',
-    lastName: user.lastName ?? user.last_name ?? '',
+    firstName: typeof (user.firstName ?? user.first_name) === 'string' ? (user.firstName ?? user.first_name)! : '',
+    lastName: typeof (user.lastName ?? user.last_name) === 'string' ? (user.lastName ?? user.last_name)! : '',
     status: user.status,
     postcode: user.postcode,
     roles: user.roles,
@@ -54,6 +60,9 @@ function normalizeUser(user: ApiAuthUser): AuthUser {
 }
 
 function mapTokens(payload: AuthDataWithTokens): AuthTokens {
+  if (!payload?.tokens || typeof payload.tokens.accessToken !== 'string' || !payload.tokens.accessToken.trim()) {
+    throw new Error('Invalid sign-in response. Please retry.')
+  }
   return {
     accessToken: payload.tokens.accessToken,
     refreshToken: payload.tokens.refreshToken,
@@ -62,7 +71,7 @@ function mapTokens(payload: AuthDataWithTokens): AuthTokens {
   }
 }
 
-export async function registerUser(payload: RegisterPayload): Promise<AuthUser> {
+export async function registerUser(payload: RegisterPayload): Promise<RegistrationResult> {
   const response = await apiRequest<ApiEnvelope<AuthDataWithoutTokens>, {
     first_name: string
     last_name: string
@@ -70,6 +79,9 @@ export async function registerUser(payload: RegisterPayload): Promise<AuthUser> 
     password: string
   }>('/auth/register', {
     method: 'POST',
+    // Registration includes two independently bounded transactional email attempts.
+    timeoutMs: 30_000,
+    includeAuth: false,
     body: {
       first_name: payload.firstName,
       last_name: payload.lastName,
@@ -78,7 +90,10 @@ export async function registerUser(payload: RegisterPayload): Promise<AuthUser> 
     },
   })
 
-  return normalizeUser(response.data.user)
+  const rawStatus = response.data.verificationDelivery?.status
+  const allowed: readonly unknown[] = ['accepted', 'unavailable', 'rejected', 'timeout', 'failed']
+  const status: VerificationDeliveryStatus = allowed.includes(rawStatus) ? rawStatus as VerificationDeliveryStatus : 'unknown'
+  return { user: normalizeUser(response.data.user), verificationDelivery: { status } }
 }
 
 export async function loginUser(
@@ -88,6 +103,7 @@ export async function loginUser(
     '/auth/login',
     {
       method: 'POST',
+      includeAuth: false,
       body: payload,
     },
   )
@@ -116,14 +132,21 @@ export async function loginWithGoogle(
   }
 }
 
-export async function getCurrentUser(): Promise<AuthUser> {
-  const response = await apiRequest<ApiEnvelope<AuthDataWithoutTokens>>('/auth/me')
+export async function getCurrentUser(signal?: AbortSignal): Promise<AuthUser> {
+  const response = await apiRequest<ApiEnvelope<AuthDataWithoutTokens>>('/auth/me', { signal, skipSessionRecovery: true })
   return normalizeUser(response.data.user)
+}
+
+export interface SignOutCredential { readonly refreshToken?: string; readonly accessToken?: string }
+export async function revokeSession(credential: SignOutCredential): Promise<void> {
+  await apiRequest('/auth/logout', { method: 'POST', includeAuth: false, skipSessionRecovery: true,
+    body: credential.refreshToken ? { refresh_token: credential.refreshToken } : { access_token: credential.accessToken } })
 }
 
 export async function requestPasswordReset(email: string): Promise<void> {
   await apiRequest<ApiEnvelope<null>, { email: string }>('/auth/forget-password', {
     method: 'POST',
+    includeAuth: false,
     body: { email },
   })
 }
@@ -131,6 +154,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
 export async function resendVerificationEmail(email: string): Promise<void> {
   await apiRequest<ApiEnvelope<null>, { email: string }>('/auth/resend-verification', {
     method: 'POST',
+    timeoutMs: 15_000,
     body: { email },
     includeAuth: false,
   })
@@ -138,20 +162,18 @@ export async function resendVerificationEmail(email: string): Promise<void> {
 
 export async function verifyEmailToken(
   token: string,
-): Promise<{ user: AuthUser; tokens: AuthTokens }> {
-  const response = await apiRequest<ApiEnvelope<AuthDataWithTokens>, { token: string }>(
+): Promise<void> {
+  const response = await apiRequest<ApiEnvelope<{ verified: boolean }>, { token: string }>(
     '/auth/verify',
     {
       method: 'POST',
-      body: { token },
       includeAuth: false,
+      skipSessionRecovery: true,
+      body: { token },
     },
   )
 
-  return {
-    user: normalizeUser(response.data.user),
-    tokens: mapTokens(response.data),
-  }
+  if (response.data?.verified !== true) throw new Error('Email verification could not be confirmed')
 }
 
 export async function resetPassword(payload: ResetPasswordPayload): Promise<void> {
@@ -159,6 +181,7 @@ export async function resetPassword(payload: ResetPasswordPayload): Promise<void
     '/auth/reset-password',
     {
       method: 'POST',
+      includeAuth: false,
       body: {
         email: payload.email,
         otp: payload.otp,
@@ -256,6 +279,7 @@ export async function upgradeToPartner(
 
 export async function refreshAuthTokens(
   refreshToken: string,
+  signal?: AbortSignal,
 ): Promise<{ user: AuthUser; tokens: AuthTokens }> {
   const response = await apiRequest<ApiEnvelope<RefreshData>, { refresh_token: string }>(
     '/auth/refresh',
@@ -263,16 +287,13 @@ export async function refreshAuthTokens(
       method: 'POST',
       body: { refresh_token: refreshToken },
       includeAuth: false,
+      skipSessionRecovery: true,
+      signal,
     },
   )
 
   return {
     user: normalizeUser(response.data.user),
-    tokens: {
-      accessToken: response.data.tokens.accessToken,
-      refreshToken: response.data.tokens.refreshToken ?? refreshToken,
-      accessTokenExpiry: response.data.tokens.accessTokenExpiry,
-      refreshTokenExpiry: response.data.tokens.refreshTokenExpiry,
-    },
+    tokens: { ...mapTokens(response.data), refreshToken: response.data.tokens.refreshToken ?? refreshToken },
   }
 }

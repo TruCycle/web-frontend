@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { createPortal } from 'react-dom'
 import { classNames } from '@/shared/utils/classNames'
 import { ToastContext, type ShowToastOptions, type ToastTone } from './context'
 
@@ -123,13 +124,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={contextValue}>
       {children}
 
-      <div className="pointer-events-none fixed right-5 top-5 z-[300] flex w-[min(92vw,22rem)] flex-col gap-2">
+      {typeof document !== 'undefined' && createPortal(<div role="region" aria-label="Notifications" data-modal-feedback className="pointer-events-none fixed right-5 top-5 z-[1300] flex w-[min(92vw,22rem)] flex-col gap-2">
         {toasts.map((toast, index) => {
           const resolvedTone = toast.tone === 'error' ? 'danger' : toast.tone
 
           return (
             <article
               key={toast.id}
+              role={toast.tone === 'error' ? 'alert' : 'status'}
+              aria-atomic="true"
               className={classNames(
                 'pointer-events-auto relative overflow-hidden rounded-xl border bg-tc-shell-bg px-4 py-3 text-sm shadow-[0_16px_35px_rgba(0,0,0,0.24)] backdrop-blur-sm animate-[pulse_0.55s_ease-out_1]',
                 index % 2 === 0 ? 'rotate-[0.35deg]' : '-rotate-[0.35deg]',
@@ -143,7 +146,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               <p className="text-sm font-semibold">{toast.title}</p>
               <p className="mt-1 text-xs/5 text-current/90">{toast.message}</p>
               <button
-                className="mt-2 rounded-md border border-current/35 px-2 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.05em] text-current/90 hover:bg-white/10"
+                className="mt-2 min-h-11 min-w-11 rounded-md border border-current/35 px-2 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.05em] text-current/90 hover:bg-white/10"
                 onClick={() => dismissToast(toast.id)}
                 type="button"
               >
@@ -152,7 +155,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             </article>
           )
         })}
-      </div>
+      </div>, document.body)}
     </ToastContext.Provider>
   )
 }

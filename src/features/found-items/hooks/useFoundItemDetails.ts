@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { fetchFoundItemById } from '../api/foundItemsApi'
 import type { FoundItem, FoundItemClaim } from '../types'
 
@@ -20,8 +20,13 @@ export function useFoundItemDetails(
   const [viewerClaim, setViewerClaim] = useState<FoundItemClaim | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const sequence = useRef(0)
+  const [loadedKey, setLoadedKey] = useState<string | null>(null)
+  const currentKey = JSON.stringify([itemId, viewerId])
 
   const refresh = useCallback(async () => {
+    const requestId = ++sequence.current
+    setItem(null); setClaims([]); setViewerClaim(null)
     if (!itemId) {
       setItem(null)
       setClaims([])
@@ -33,24 +38,28 @@ export function useFoundItemDetails(
       setIsLoading(true)
       setError(null)
       const response = await fetchFoundItemById(itemId, viewerId)
+      if (requestId !== sequence.current) return
+      setLoadedKey(JSON.stringify([itemId, viewerId]))
       setItem(response.item)
       setClaims(response.claims)
       setViewerClaim(response.viewerClaim)
     } catch {
+      if (requestId !== sequence.current) return
       setError('Unable to load that item right now.')
     } finally {
-      setIsLoading(false)
+      if (requestId === sequence.current) setIsLoading(false)
     }
   }, [itemId, viewerId])
 
   useEffect(() => {
     void refresh()
+    return () => { sequence.current += 1 }
   }, [refresh])
 
   return {
-    item,
-    claims,
-    viewerClaim,
+    item: loadedKey === currentKey ? item : null,
+    claims: loadedKey === currentKey ? claims : [],
+    viewerClaim: loadedKey === currentKey ? viewerClaim : null,
     isLoading,
     error,
     refresh,

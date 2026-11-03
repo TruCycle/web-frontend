@@ -9,7 +9,7 @@ type TrackingConsentBannerProps = {
 export function TrackingConsentBanner({ onAccept, onReject }: TrackingConsentBannerProps) {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[90] flex justify-center px-4 pb-4 sm:px-6 sm:pb-6">
-      <section className="pointer-events-auto w-full max-w-4xl overflow-hidden rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,rgba(18,18,18,0.96)_0%,rgba(34,34,34,0.94)_100%)] px-5 py-5 text-white shadow-[0_24px_80px_rgba(15,23,42,0.28)] backdrop-blur xl:px-7">
+      <section aria-label="Cookie preferences" className="pointer-events-auto max-h-[calc(100dvh-2rem)] w-full max-w-4xl overflow-y-auto rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,rgba(18,18,18,0.96)_0%,rgba(34,34,34,0.94)_100%)] px-5 py-5 text-white shadow-[0_24px_80px_rgba(15,23,42,0.28)] backdrop-blur xl:px-7">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <h2 className="mb-2 text-xl font-semibold text-white sm:text-2xl">

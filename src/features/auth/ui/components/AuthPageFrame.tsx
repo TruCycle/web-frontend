@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react'
+import { useLocation } from 'react-router-dom'
+import { usePageMeta } from '@/shared/hooks/usePageMeta'
 import logoSrc from '@/assets/logo.svg'
 import checkIconSrc from '@/assets/icons/check.svg'
 import starIconSrc from '@/assets/icons/star.svg'
@@ -57,13 +59,13 @@ function AuthShowcasePanel({
       </div>
 
       <section className="my-auto flex flex-col gap-8">
-        <h1 className="m-0 text-[clamp(2rem,4vw,3.2rem)] leading-[1.1] tracking-[-0.02em] text-tc-auth-heroTitle">
+        <h2 className="m-0 text-[clamp(2rem,4vw,3.2rem)] leading-[1.1] tracking-[-0.02em] text-tc-auth-heroTitle">
           {titlePrefix}
           <br />
           <span className="font-bold tracking-[0.01em] text-tc-auth-heroAccent">
             {titleAccent}
           </span>
-        </h1>
+        </h2>
         <ul className="grid list-none gap-[0.65rem] p-0">
           {benefits.map((benefit) => (
             <li
@@ -80,7 +82,7 @@ function AuthShowcasePanel({
           <div className="flex items-center gap-3">
             {avatarSrc ? (
               <img
-                alt="Sophie, London"
+                alt=""
                 className="h-[50px] w-[50px] rounded-full object-cover"
                 src={avatarSrc}
               />
@@ -132,6 +134,9 @@ export function AuthPageFrame({
   className,
   showcase,
 }: AuthPageFrameProps) {
+  const { pathname } = useLocation()
+  const routeTitle = pathname === '/signup' ? 'Create an account' : pathname === '/reset-password' ? 'Reset your password' : pathname === '/auth/verify-email' ? 'Verify your email' : 'Sign in'
+  usePageMeta({ title: `${routeTitle} — TruCycle`, description: 'Access your TruCycle account securely.', canonicalPath: pathname, noIndex: true })
   return (
     <main
       className={classNames(
@@ -156,9 +161,9 @@ export function AuthPageFrame({
         />
 
         <section className="flex h-full basis-[50%] flex-col overflow-y-auto px-[6rem] py-[5rem] max-[900px]:basis-full max-[900px]:px-[3rem] max-[900px]:pb-[3rem] max-[900px]:pt-[2.4rem] max-sm:px-[2rem] max-sm:pb-8 max-sm:pt-[3rem]">
-          <h2 className="m-0 font-medium text-[clamp(1.7rem,2.4vw,2rem)] text-tc-auth-formTitle">
+          <h1 className="m-0 font-medium text-[clamp(1.7rem,2.4vw,2rem)] text-tc-auth-formTitle">
             {formTitle}
-          </h2>
+          </h1>
           <p className="mt-[0.55rem] text-tc-auth-formText">{formDescription}</p>
           {children}
           {footer}
@@ -171,9 +176,9 @@ export function AuthPageFrame({
 export const authFieldClassName = 'grid gap-2'
 export const authLabelClassName = 'text-tc-auth-label'
 export const authInputClassName =
-  'h-12 w-full rounded-[0.55rem] border border-tc-auth-inputBorder px-[0.95rem] text-[0.95rem] text-tc-app-text transition placeholder:text-tc-auth-inputPlaceholder focus:border-tc-auth-inputFocus focus:outline-none focus:ring-4 focus:ring-tc-auth-inputFocusRing'
+  'h-12 w-full rounded-[0.55rem] border border-tc-auth-inputBorder px-[0.95rem] pr-14 text-[0.95rem] text-tc-app-text transition placeholder:text-tc-auth-inputPlaceholder focus:border-tc-auth-inputFocus focus:outline-none focus:ring-4 focus:ring-tc-auth-inputFocusRing'
 export const authPasswordToggleClassName =
-  'absolute right-[0.6rem] top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-transparent p-0 text-tc-auth-icon focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tc-auth-inputFocus'
+  'absolute right-1 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-transparent p-0 text-tc-auth-icon focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tc-auth-inputFocus'
 export const authPrimaryButtonClassName =
   'inline-flex h-[3.05rem] items-center justify-center gap-2 rounded-[0.55rem] border-0 bg-tc-auth-submit px-4 text-lg font-bold text-tc-auth-submitText transition hover:-translate-y-px hover:brightness-95 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-tc-auth-submitFocus disabled:cursor-not-allowed disabled:opacity-70 max-sm:text-xl'
 export const authInlineMetaClassName =

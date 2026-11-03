@@ -49,12 +49,12 @@ export function CommunityBoardPostcodeList({
 
             <div className="text-right">
               <p className="text-lg font-semibold text-slate-900">{entry.totalCo2eKg} kg</p>
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-400">CO2e</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Est. CO2e</p>
             </div>
 
             <div className="text-right">
               <p className="text-lg font-semibold text-tc-app-text">{entry.impactPoints}</p>
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-400">pts</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-400">score</p>
             </div>
           </div>
         )

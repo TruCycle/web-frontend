@@ -3,9 +3,22 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=22.12.0 <25"
+  },
+  "packageManager": "npm@11.16.0",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "typecheck": "tsc -b",
+    "build:staging": "node scripts/build-staging.mjs",
+    "test:staging": "node --test scripts/build-staging.test.mjs",
+    "test:consent": "node --test scripts/analytics-consent.test.mjs",
+    "test:session": "node --test scripts/session-recovery.test.mjs",
+    "test:socket": "node --test scripts/websocket-auth.test.mjs",
+    "test:seo": "node --test scripts/seo.test.mjs",
+    "test:shops": "node --test scripts/shops-contract.test.mjs",
+    "test:location": "node --test scripts/found-location-privacy.test.mjs scripts/items-location-privacy.test.mjs",
     "build:prerender": "npm run build && node scripts/prerender.mjs",
     "prerender": "node scripts/prerender.mjs",
     "lint": "eslint .",

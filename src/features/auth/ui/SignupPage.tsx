@@ -1,6 +1,7 @@
 import { type ChangeEvent, type FormEvent, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Mail, RefreshCw } from 'lucide-react'
+import type { VerificationDeliveryStatus } from '@/features/auth/types'
 import { resendVerificationEmail } from '@/features/auth/api/authApi'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { useGoogleOneTap } from '@/shared/hooks/useGoogleOneTap'
@@ -25,7 +26,6 @@ interface SignupFormValues {
   readonly fullName: string
   readonly email: string
   readonly password: string
-  readonly postcode: string
   readonly referralCode: string
 }
 
@@ -33,7 +33,6 @@ const initialFormValues: SignupFormValues = {
   fullName: '',
   email: '',
   password: '',
-  postcode: '',
   referralCode: '',
 }
 
@@ -52,6 +51,7 @@ export default function SignupPage({
   const [isRegistering, setIsRegistering] = useState(false)
   const [isResendingVerification, setIsResendingVerification] = useState(false)
   const [verificationEmail, setVerificationEmail] = useState<string | null>(null)
+  const [deliveryStatus, setDeliveryStatus] = useState<VerificationDeliveryStatus>('unknown')
   const { register } = useAuthSession()
   const { success, error } = useToast()
 
@@ -94,15 +94,18 @@ export default function SignupPage({
 
     setIsRegistering(true)
     try {
-      await register({
+      const registration = await register({
         firstName: splitName.firstName,
         lastName: splitName.lastName,
         email: formValues.email.trim(),
         password: formValues.password,
       })
+      setDeliveryStatus(registration.verificationDelivery.status)
       onSubmitSuccess?.()
       setVerificationEmail(formValues.email.trim())
-      success('Account created', 'Check your email to verify your account and complete registration.')
+      success('Account created', registration.verificationDelivery.status === 'accepted'
+        ? 'The email provider accepted your verification request. Check your inbox and spam folder.'
+        : 'Your account was created. Email delivery could not be confirmed. Request another verification email below in a few minutes.')
     } catch (caughtError) {
       const message =
         caughtError instanceof ApiError
@@ -122,7 +125,7 @@ export default function SignupPage({
     setIsResendingVerification(true)
     try {
       await resendVerificationEmail(verificationEmail)
-      success('Verification email sent', 'Check your inbox for a fresh verification link.')
+      success('Verification requested', 'If your account needs verification, an email has been requested. Check your inbox and spam folder; delivery can take a few minutes.')
     } catch (caughtError) {
       const message =
         caughtError instanceof ApiError
@@ -161,12 +164,13 @@ export default function SignupPage({
                 <Mail size={20} />
               </span>
               <div>
-                <p className="m-0 text-sm font-medium text-tc-auth-formText">Verification email sent to</p>
+                <p className="m-0 text-sm font-medium text-tc-auth-formText">Verification requested for</p>
                 <p className="mt-1 break-all text-base font-semibold text-tc-auth-formTitle">{verificationEmail}</p>
               </div>
             </div>
           </div>
 
+          <p role="status" className="m-0 text-sm leading-7 text-tc-auth-formText">{deliveryStatus === 'accepted' ? 'The email provider accepted your request. Inbox delivery is not guaranteed.' : 'Your account was created, but email delivery could not be confirmed. Request another email below in a few minutes.'}</p>
           <div className="grid gap-3 rounded-[0.9rem] border border-tc-auth-inputBorder bg-white p-5 text-sm leading-7 text-tc-auth-formText">
             <p className="m-0">1. Open your inbox and look for the TruCycle verification email.</p>
             <p className="m-0">2. Click the verification link in that email.</p>
@@ -265,20 +269,6 @@ export default function SignupPage({
                 <PasswordVisibilityIcon isVisible={isPasswordVisible} />
               </button>
             </div>
-          </label>
-
-          <label className={authFieldClassName}>
-            <span className={authLabelClassName}>Postcode</span>
-            <input
-              autoComplete="postal-code"
-              className={authInputClassName}
-              name="postcode"
-              onChange={(event) => onInputChange('postcode', event)}
-              placeholder="SW1A 1AA"
-              required
-              type="text"
-              value={formValues.postcode}
-            />
           </label>
 
           <label className={authFieldClassName}>

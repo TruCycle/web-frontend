@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { X, Upload, Plus, Clock, MapPin, QrCode, Search } from 'lucide-react';
+import { X, Upload, Plus, MapPin, QrCode, Search } from 'lucide-react';
 import { Modal } from './Modal';
 import { Button } from '../button/Button';
 import { CustomSelect } from '@/shared/ui/select';
@@ -9,6 +9,7 @@ import { useAuthSession } from '@/shared/context/useAuthSession';
 import { apiRequest } from '@/shared/lib/api/client';
 import { unwrapApiData } from '@/shared/lib/api/envelope';
 import { env } from '@/shared/lib/config/env';
+import { ReuseSafetyNotice } from '@/shared/ui/reuse/ReuseSafetyNotice';
 
 interface ListItemDialogProps {
   isOpen: boolean;
@@ -36,11 +37,6 @@ interface CreateItemRequest {
   readonly postcode: string;
   readonly pickup_option: 'donate' | 'exchange';
   readonly dropoff_location_id?: string;
-  readonly size_unit: 'm';
-  readonly size_length: number;
-  readonly size_breadth: number;
-  readonly size_height: number;
-  readonly weight_kg: number;
 }
 
 interface CreatedPickupLocation {
@@ -112,7 +108,7 @@ async function uploadPhotoToCloudinary(file: File): Promise<{
   readonly deleteToken: string | null;
 }> {
   if (!hasCloudinaryConfig()) {
-    throw new Error('Image upload is not configured. Missing Cloudinary env values.');
+    throw new Error('Image upload is temporarily unavailable. Please try again later.');
   }
 
   const formData = new FormData();
@@ -129,16 +125,13 @@ async function uploadPhotoToCloudinary(file: File): Promise<{
   });
   const payload = asRecord(await response.json().catch(() => null));
   if (!response.ok) {
-    const uploadError = asRecord(payload?.error);
-    throw new Error(
-      readString(uploadError?.message) ?? 'Unable to upload this image right now.',
-    );
+    throw new Error('Unable to upload this image right now. Please try again or choose another photo.');
   }
 
   const cloudinaryUrl =
     readString(payload?.secure_url) ?? readString(payload?.url);
   if (!cloudinaryUrl) {
-    throw new Error('Image upload succeeded but no hosted URL was returned.');
+    throw new Error('The image could not be saved. Please try uploading it again.');
   }
 
   return {
@@ -371,7 +364,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
 
     if (!hasCloudinaryConfig()) {
       setSubmitError(
-        'Image upload is unavailable. Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET.',
+        'Image upload is temporarily unavailable. Please try again later.',
       );
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -474,7 +467,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
       await deletePhotoFromCloudinary(targetPhoto.deleteToken);
       removedPhotoIdsRef.current.delete(photoId);
     } catch {
-      setSubmitError('Image removed locally, but Cloudinary cleanup failed.');
+      setSubmitError('Image removed from your draft, but its saved copy could not be deleted. Please contact support.');
     }
   };
 
@@ -546,11 +539,6 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
       postcode: resolvedPostcode,
       pickup_option: usingAddress ? 'exchange' : 'donate',
       dropoff_location_id: usingAddress ? undefined : resolvedShop?.id,
-      size_unit: 'm',
-      size_length: 1,
-      size_breadth: 1,
-      size_height: 1,
-      weight_kg: 1,
     };
 
     try {
@@ -681,15 +669,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
             </div>
           </div>
 
-          <div className="rounded-xl border border-[#F9731680] bg-[#F973160D] p-5">
-            <div className="flex items-start gap-2">
-              <Clock size={18} className="mt-0.5 text-[#F97316]" />
-              <div>
-                <h4 className="text-sm font-semibold text-[#222222]">Expires in 71h</h4>
-                <p className="text-xs text-[#222222BF]">Listing expires if not claimed within 3 days.</p>
-              </div>
-            </div>
-          </div>
+          <p className="text-sm text-slate-600">Keep your listing up to date if availability or condition changes.</p>
 
           {qrDownloadError ? <p className="text-xs text-rose-600">{qrDownloadError}</p> : null}
 
@@ -710,10 +690,12 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
         <header className="flex items-start justify-between border-b border-slate-100 px-6 pb-4 pt-6">
           <div>
             <h2 className="text-lg font-bold text-slate-900">List an Item</h2>
-            <p className="text-sm text-slate-500">Share items you no longer need with your community</p>
+            <p className="text-sm text-slate-500">Offer items that are still good to use</p>
           </div>
           <button
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100"
+            type="button"
+            aria-label="Close listing"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100"
             onClick={handleClose}
           >
             <X size={20} />
@@ -721,6 +703,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
         </header>
 
         <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
+          <ReuseSafetyNotice />
           <div className="space-y-2">
             <label className="text-sm font-semibold text-slate-700">Photos</label>
             <input
@@ -864,7 +847,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
                 value={pickupAddressLine}
                 onChange={(event) => setPickupAddressLine(event.target.value)}
               />
-              <label className="text-sm font-semibold text-slate-700">Profile Postcode (sent to backend)</label>
+              <label className="text-sm font-semibold text-slate-700">Your profile postcode</label>
               <input
                 type="text"
                 readOnly
@@ -949,10 +932,9 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
           {submitError ? <p className="text-sm text-rose-600">{submitError}</p> : null}
 
           <div className="rounded-xl border border-[#0D3B24]/20 bg-[#0D3B24]/5 p-4">
-            <h3 className="text-sm font-bold text-slate-900">Environmental Impact</h3>
+            <h3 className="text-sm font-bold text-slate-900">Keep useful items in use</h3>
             <p className="mt-1 text-sm text-slate-600">
-              By listing this item, you're helping reduce electronic waste and saving approximately{' '}
-              <span className="font-extrabold text-[#0D3B24]">12kg of CO2</span> from entering the atmosphere.
+              Clear photos and an accurate description help the next owner decide whether the item is right for them.
             </p>
           </div>
         </div>

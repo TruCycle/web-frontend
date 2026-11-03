@@ -1,7 +1,16 @@
 import type { AuthTokens, AuthUser } from '@/features/auth/types'
 
 export type PersistMode = 'local' | 'session'
-
+export interface StoredSession {
+  readonly version: 1
+  readonly tokens: AuthTokens
+  readonly user: AuthUser
+  readonly persistMode: PersistMode
+}
+export interface SessionCapture {
+  readonly generation: number
+  readonly session: StoredSession
+}
 interface StoreSessionOptions {
   readonly tokens: AuthTokens
   readonly user: AuthUser
@@ -9,189 +18,165 @@ interface StoreSessionOptions {
   readonly keepRefreshToken: boolean
 }
 
-const accessTokenKey = 'auth_token'
-const refreshTokenKey = 'refresh_token'
-const userKey = 'auth_user'
-const accessTokenExpiryKey = 'auth_token_expires_at'
-const refreshTokenExpiryKey = 'refresh_token_expires_at'
+export const sessionStorageKey = 'tc-auth-session-v1'
+const legacyKeys = ['auth_token', 'refresh_token', 'auth_user', 'auth_token_expires_at', 'refresh_token_expires_at'] as const
+let generation = 0
+let suppressed = false
 
-function hasWindow() {
-  return typeof window !== 'undefined'
+export class SessionStorageError extends Error {
+  constructor() { super('Your saved sign-in could not be accessed. Please retry.'); this.name = 'SessionStorageError' }
+}
+export class SessionChangedError extends Error {
+  constructor() { super('The sign-in changed while this request was running.'); this.name = 'AbortError' }
+}
+export function getSessionGeneration(): number { return generation }
+export function invalidateSessionOperations(): number { return ++generation }
+export function isSessionStorageKey(key: string | null): boolean {
+  return key === null || key === sessionStorageKey || legacyKeys.some((value) => value === key)
 }
 
-function readFromStorage(key: string): string | null {
-  if (!hasWindow()) {
-    return null
-  }
-
-  const localValue = window.localStorage.getItem(key)
-  if (localValue) {
-    return localValue
-  }
-
-  return window.sessionStorage.getItem(key)
-}
-
-function removeFromStorage(key: string): void {
-  if (!hasWindow()) {
-    return
-  }
-
-  window.localStorage.removeItem(key)
-  window.sessionStorage.removeItem(key)
-}
-
-function setInStorage(key: string, value: string, persistMode: PersistMode): void {
-  if (!hasWindow()) {
-    return
-  }
-
-  if (persistMode === 'local') {
-    window.localStorage.setItem(key, value)
-    window.sessionStorage.removeItem(key)
-    return
-  }
-
-  window.sessionStorage.setItem(key, value)
-  window.localStorage.removeItem(key)
-}
-
-function readNumberFromStorage(key: string): number | null {
-  const rawValue = readFromStorage(key)
-  if (!rawValue) {
-    return null
-  }
-
-  const parsed = Number(rawValue)
-  if (!Number.isFinite(parsed)) {
-    return null
-  }
-
-  return parsed
-}
-
-function decodeJwtExpiryMs(token: string): number | null {
-  const segments = token.split('.')
-  if (segments.length < 2) {
-    return null
-  }
-
+function storage(mode: PersistMode): Storage { return mode === 'local' ? window.localStorage : window.sessionStorage }
+function tokenPayload(token: string): { exp?: unknown; sub?: unknown } | null {
   try {
-    const base64 = segments[1].replace(/-/g, '+').replace(/_/g, '/')
-    const padded = `${base64}${'='.repeat((4 - (base64.length % 4)) % 4)}`
-    const payload = JSON.parse(window.atob(padded)) as { exp?: number }
-    if (typeof payload.exp !== 'number') {
-      return null
+    const segment = token.split('.')[1]
+    if (!segment) return null
+    const base64 = segment.replace(/-/g, '+').replace(/_/g, '/')
+    return JSON.parse(window.atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '='))) as { exp?: unknown; sub?: unknown }
+  } catch { return null }
+}
+function expiry(token: string | undefined, explicit?: string): number | null {
+  const parsed = explicit ? Date.parse(explicit) : NaN
+  if (Number.isFinite(parsed)) return parsed
+  const exp = token ? tokenPayload(token)?.exp : undefined
+  return typeof exp === 'number' && Number.isFinite(exp) ? exp * 1000 : null
+}
+function validate(value: unknown, mode: PersistMode): StoredSession {
+  if (!value || typeof value !== 'object') throw new SessionStorageError()
+  const record = value as Partial<StoredSession>
+  const user = record.user
+  const tokens = record.tokens
+  if (record.version !== 1 || !user || typeof user.id !== 'string' || !user.id ||
+      typeof user.email !== 'string' || !tokens || typeof tokens.accessToken !== 'string' || !tokens.accessToken.trim() ||
+      (tokens.refreshToken !== undefined && (typeof tokens.refreshToken !== 'string' || !tokens.refreshToken.trim()))) {
+    throw new SessionStorageError()
+  }
+  // Untrusted JWT claims only reject inconsistent cache records. The API still
+  // validates signatures and account state; this is never authorization.
+  for (const token of [tokens.accessToken, tokens.refreshToken]) {
+    const subject = token ? tokenPayload(token)?.sub : undefined
+    if (typeof subject === 'string' && subject !== user.id) throw new SessionStorageError()
+  }
+  return { version: 1, user, tokens, persistMode: mode }
+}
+
+export function getStoredSession(): StoredSession | null {
+  if (typeof window === 'undefined' || suppressed) return null
+  try {
+    // Select one complete record/mode. Never fill fields from the other store.
+    for (const mode of ['local', 'session'] as const) {
+      const raw = storage(mode).getItem(sessionStorageKey)
+      if (raw) return validate(JSON.parse(raw), mode)
     }
-    return payload.exp * 1000
-  } catch {
+    for (const mode of ['local', 'session'] as const) {
+      const area = storage(mode)
+      const accessToken = area.getItem('auth_token')
+      if (!accessToken) continue
+      const rawUser = area.getItem('auth_user')
+      if (!rawUser) throw new SessionStorageError()
+      const asIso = (key: string) => {
+        const raw = area.getItem(key)
+        const value = raw ? Number(raw) : NaN
+        return Number.isFinite(value) ? new Date(value).toISOString() : undefined
+      }
+      return validate({ version: 1, user: JSON.parse(rawUser), tokens: {
+        accessToken, refreshToken: area.getItem('refresh_token') ?? undefined,
+        accessTokenExpiry: asIso('auth_token_expires_at'),
+        refreshTokenExpiry: asIso('refresh_token_expires_at'),
+      } }, mode)
+    }
     return null
-  }
+  } catch { throw new SessionStorageError() }
 }
-
-function resolveTokenExpiryMs(
-  token: string,
-  explicitExpiryIso?: string,
-): number | null {
-  if (explicitExpiryIso) {
-    const explicitExpiryMs = Date.parse(explicitExpiryIso)
-    if (Number.isFinite(explicitExpiryMs)) {
-      return explicitExpiryMs
-    }
-  }
-
-  return decodeJwtExpiryMs(token)
+export function captureStoredSession(): SessionCapture | null {
+  const session = getStoredSession()
+  return session ? { generation, session } : null
 }
-
-export function getStoredAccessToken(): string | null {
-  return readFromStorage(accessTokenKey)
+export function isSameSessionIdentity(capture: SessionCapture): boolean {
+  const current = getStoredSession()
+  return capture.generation === generation && current?.user.id === capture.session.user.id
 }
-
-export function getStoredRefreshToken(): string | null {
-  return readFromStorage(refreshTokenKey)
+export function isCurrentSession(capture: SessionCapture): boolean {
+  const current = getStoredSession()
+  return isSameSessionIdentity(capture) && current?.tokens.accessToken === capture.session.tokens.accessToken &&
+    current.tokens.refreshToken === capture.session.tokens.refreshToken
 }
-
+export function getStoredAccessToken(): string | null { return getStoredSession()?.tokens.accessToken ?? null }
+export function getStoredRefreshToken(): string | null { return getStoredSession()?.tokens.refreshToken ?? null }
 export function getStoredAccessTokenExpiresAt(): number | null {
-  return readNumberFromStorage(accessTokenExpiryKey)
+  const tokens = getStoredSession()?.tokens
+  return tokens ? expiry(tokens.accessToken, tokens.accessTokenExpiry) : null
 }
-
+export function getAccessTokenExpiry(tokens: AuthTokens): number | null {
+  return expiry(tokens.accessToken, tokens.accessTokenExpiry)
+}
 export function getStoredRefreshTokenExpiresAt(): number | null {
-  return readNumberFromStorage(refreshTokenExpiryKey)
+  const tokens = getStoredSession()?.tokens
+  return tokens ? expiry(tokens.refreshToken, tokens.refreshTokenExpiry) : null
 }
-
-export function getStoredPersistMode(): PersistMode | null {
-  if (!hasWindow()) {
-    return null
-  }
-
-  if (window.localStorage.getItem(accessTokenKey)) {
-    return 'local'
-  }
-
-  if (window.sessionStorage.getItem(accessTokenKey)) {
-    return 'session'
-  }
-
-  return null
-}
-
-export function getStoredUser(): AuthUser | null {
-  const rawValue = readFromStorage(userKey)
-  if (!rawValue) {
-    return null
-  }
-
-  try {
-    return JSON.parse(rawValue) as AuthUser
-  } catch {
-    return null
-  }
-}
-
-export function hasStoredSession(): boolean {
-  return Boolean(getStoredAccessToken())
-}
+export function getStoredPersistMode(): PersistMode | null { return getStoredSession()?.persistMode ?? null }
+export function getStoredUser(): AuthUser | null { return getStoredSession()?.user ?? null }
+export function hasStoredSession(): boolean { return getStoredSession() !== null }
 
 export function storeSession(options: StoreSessionOptions): void {
-  const persistMode = options.persistMode
-  setInStorage(accessTokenKey, options.tokens.accessToken, persistMode)
-  const accessTokenExpiryMs = resolveTokenExpiryMs(
-    options.tokens.accessToken,
-    options.tokens.accessTokenExpiry,
-  )
-  if (accessTokenExpiryMs !== null) {
-    setInStorage(accessTokenExpiryKey, String(accessTokenExpiryMs), persistMode)
-  } else {
-    removeFromStorage(accessTokenExpiryKey)
-  }
-
-  if (options.keepRefreshToken && options.tokens.refreshToken) {
-    setInStorage(refreshTokenKey, options.tokens.refreshToken, persistMode)
-    const refreshTokenExpiryMs = resolveTokenExpiryMs(
-      options.tokens.refreshToken,
-      options.tokens.refreshTokenExpiry,
-    )
-    if (refreshTokenExpiryMs !== null) {
-      setInStorage(refreshTokenExpiryKey, String(refreshTokenExpiryMs), persistMode)
-    } else {
-      removeFromStorage(refreshTokenExpiryKey)
+  if (typeof window === 'undefined') throw new SessionStorageError()
+  const record = validate({ version: 1, user: options.user, tokens: {
+    ...options.tokens,
+    refreshToken: options.keepRefreshToken ? options.tokens.refreshToken : undefined,
+    refreshTokenExpiry: options.keepRefreshToken ? options.tokens.refreshTokenExpiry : undefined,
+  } }, options.persistMode)
+  const previous: Array<{ area: Storage; key: string; value: string | null }> = []
+  let written = false
+  try {
+    for (const mode of ['local', 'session'] as const) {
+      const area = storage(mode)
+      for (const key of [sessionStorageKey, ...legacyKeys]) previous.push({ area, key, value: area.getItem(key) })
     }
-  } else {
-    removeFromStorage(refreshTokenKey)
-    removeFromStorage(refreshTokenExpiryKey)
+    const selected = storage(options.persistMode)
+    selected.setItem(sessionStorageKey, JSON.stringify(record))
+    written = true
+    storage(options.persistMode === 'local' ? 'session' : 'local').removeItem(sessionStorageKey)
+    for (const mode of ['local', 'session'] as const) {
+      for (const key of legacyKeys) storage(mode).removeItem(key)
+    }
+    suppressed = false
+  } catch {
+    // Failed cleanup must not look like successful account replacement.
+    if (written) {
+      for (const entry of previous) {
+        try {
+          if (entry.value === null) entry.area.removeItem(entry.key)
+          else entry.area.setItem(entry.key, entry.value)
+        } catch { suppressed = true }
+      }
+    }
+    throw new SessionStorageError()
   }
-
-  setInStorage(userKey, JSON.stringify(options.user), persistMode)
 }
-
 export function storeUser(user: AuthUser, persistMode: PersistMode): void {
-  setInStorage(userKey, JSON.stringify(user), persistMode)
+  const session = getStoredSession()
+  if (!session || session.user.id !== user.id) throw new SessionChangedError()
+  storeSession({ ...session, user, persistMode, keepRefreshToken: Boolean(session.tokens.refreshToken) })
 }
-
 export function clearSession(): void {
-  removeFromStorage(accessTokenKey)
-  removeFromStorage(refreshTokenKey)
-  removeFromStorage(userKey)
-  removeFromStorage(accessTokenExpiryKey)
-  removeFromStorage(refreshTokenExpiryKey)
+  // Stop this page using credentials even when the browser refuses deletion.
+  suppressed = true
+  if (typeof window === 'undefined') return
+  let failed = false
+  for (const mode of ['local', 'session'] as const) {
+    for (const key of [sessionStorageKey, ...legacyKeys]) {
+      try { storage(mode).removeItem(key) } catch { failed = true }
+    }
+  }
+  if (failed) throw new SessionStorageError()
+  suppressed = false
 }

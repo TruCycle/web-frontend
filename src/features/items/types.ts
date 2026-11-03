@@ -12,6 +12,7 @@ export interface BrowseItem {
   readonly condition: string
   readonly status: string
   readonly pickupOption: string
+  readonly locationPrecision: 'approximate' | 'unavailable'
   readonly distanceKm: number | null
   readonly locationLabel: string
   readonly image: ItemImage | null

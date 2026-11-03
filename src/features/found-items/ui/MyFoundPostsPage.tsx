@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import { FoundItemDetailsPanel } from './components/FoundItemDetailsPanel'
+import { useFoundItemDetails } from '../hooks/useFoundItemDetails'
 import { Link } from 'react-router-dom'
 import { Button } from '@/shared/ui/button/Button'
 import { useAuthSession } from '@/shared/context/useAuthSession'
@@ -7,6 +10,8 @@ import { FoundItemStatusBadge } from './components/FoundItemStatusBadge'
 
 export default function MyFoundPostsPage() {
   const { user } = useAuthSession()
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const details = useFoundItemDetails(selectedId, user?.id)
   const { success, error } = useToast()
   const {
     items,
@@ -14,6 +19,9 @@ export default function MyFoundPostsPage() {
     error: pageError,
     updateStatus,
     remove,
+    refresh,
+    pagination,
+    loadMore,
   } = useMyFoundPosts(user?.id)
 
   return (
@@ -55,7 +63,7 @@ export default function MyFoundPostsPage() {
 
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="font-semibold text-slate-900">{item.title}</h2>
+                <h2 className="font-semibold text-slate-900"><button type="button" className="text-left underline decoration-slate-300 underline-offset-4" onClick={() => setSelectedId(item.id)}>{item.title}</button></h2>
                 <p className="text-sm text-slate-500">{item.location.postcode}</p>
               </div>
               <FoundItemStatusBadge status={item.status} />
@@ -67,7 +75,7 @@ export default function MyFoundPostsPage() {
             </div>
 
             <div className="grid gap-2">
-              {item.status !== 'picked_up' ? (
+              {item.status === 'available' || item.status === 'claimed' ? (
                 <Button
                   variant="secondary"
                   className="justify-center"
@@ -79,7 +87,7 @@ export default function MyFoundPostsPage() {
                 >
                   Mark Picked Up
                 </Button>
-              ) : (
+              ) : item.status === 'expired' || item.status === 'gone' ? (
                 <Button
                   variant="secondary"
                   className="justify-center"
@@ -89,16 +97,23 @@ export default function MyFoundPostsPage() {
                       .catch(() => error('Update failed', 'Please try again in a moment.'))
                   }}
                 >
-                  Reopen Post
+                  Reconfirm Available
                 </Button>
-              )}
+              ) : null}
+              {item.status === 'available' || item.status === 'claimed' ? (
+                <Button variant="secondary" onClick={() => {
+                  void updateStatus(item.id, 'gone')
+                    .then(() => success('Closed', 'Post closed without recording a pickup.'))
+                    .catch(() => error('Update failed', 'Please try again in a moment.'))
+                }}>Mark Gone (no pickup)</Button>
+              ) : null}
               <Button
                 variant="danger"
                 className="justify-center"
                 onClick={() => {
                   void remove(item.id)
                     .then(() => success('Removed', 'Post deleted.'))
-                    .catch(() => error('Delete failed', 'Please try again in a moment.'))
+                    .catch(() => error('Delete failed', 'Close any active pickup requests before deleting this post.'))
                 }}
               >
                 Delete Post
@@ -107,6 +122,9 @@ export default function MyFoundPostsPage() {
           </article>
         ))}
       </div>
+      {details.error ? <p className="text-sm text-rose-600">{details.error}</p> : null}
+      {pagination && pagination.page < pagination.totalPages ? <Button disabled={isLoading} onClick={() => { void loadMore() }}>Load more posts</Button> : null}
+      <FoundItemDetailsPanel onLifecycleChange={() => { void Promise.all([refresh(), details.refresh()]) }} isOpen={selectedId !== null} onClose={() => setSelectedId(null)} item={details.item} claims={details.claims} currentUserId={user?.id} isLoading={details.isLoading} />
     </div>
   )
 }

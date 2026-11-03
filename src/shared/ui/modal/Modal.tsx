@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useId, useLayoutEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { classNames } from '@/shared/utils/classNames';
+import { manageModal } from './modalFocus';
 
 interface ModalProps {
     isOpen: boolean;
@@ -13,6 +14,8 @@ interface ModalProps {
     containerClassName?: string;
     contentClassName?: string;
     hideCloseButton?: boolean;
+    ariaLabel?: string;
+    ariaLabelledBy?: string;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -25,20 +28,27 @@ export const Modal: React.FC<ModalProps> = ({
     containerClassName,
     contentClassName,
     hideCloseButton,
+    ariaLabel,
+    ariaLabelledBy,
 }) => {
-    useEffect(() => {
-        const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') onClose();
-        };
-        if (isOpen) {
-            document.addEventListener('keydown', handleEscape);
-            document.body.style.overflow = 'hidden';
+    const overlayRef = useRef<HTMLDivElement>(null);
+    const dialogRef = useRef<HTMLDivElement>(null);
+    const closeRef = useRef(onClose);
+    const headingId = useId();
+    useLayoutEffect(() => { closeRef.current = onClose; });
+    useLayoutEffect(() => {
+        if (!isOpen || !overlayRef.current || !dialogRef.current) return;
+        const dialog = dialogRef.current;
+        if (!ariaLabelledBy && !ariaLabel) {
+            const heading = dialog.querySelector<HTMLElement>('h1, h2, h3, h4, h5, h6');
+            if (heading) {
+                if (!heading.id) heading.id = headingId;
+                dialog.setAttribute('aria-labelledby', heading.id);
+                dialog.removeAttribute('aria-label');
+            }
         }
-        return () => {
-            document.removeEventListener('keydown', handleEscape);
-            document.body.style.overflow = 'unset';
-        };
-    }, [isOpen, onClose]);
+        return manageModal({ overlay: overlayRef.current, dialog, close: () => closeRef.current() });
+    }, [isOpen, ariaLabel, ariaLabelledBy, headingId]);
 
     if (!isOpen) return null;
 
@@ -59,11 +69,12 @@ export const Modal: React.FC<ModalProps> = ({
     );
 
     return createPortal(
-        <div className={overlayClass} onClick={closeOnOverlayClick ? onClose : undefined}>
-            <div className={containerClass} onClick={(e) => e.stopPropagation()}>
+        <div ref={overlayRef} className={overlayClass} onClick={closeOnOverlayClick ? onClose : undefined}>
+            <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={ariaLabel ?? (ariaLabelledBy ? undefined : 'Dialog')} aria-labelledby={ariaLabelledBy} tabIndex={-1} className={containerClass} onClick={(e) => e.stopPropagation()}>
                 {!hideCloseButton && (
                     <button
-                        className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                        type="button"
+                        className="absolute right-3 top-3 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
                         onClick={onClose}
                         aria-label="Close modal"
                     >

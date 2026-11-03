@@ -10,9 +10,9 @@ type LandingHeroProps = {
 }
 
 const metrics = [
-  { value: '12,400+', label: 'Items rehomed' },
-  { value: '2,180', label: 'Active givers' },
-  { value: '38 tons', label: 'Diverted from landfill' },
+  { value: 'Offer', label: 'List a useful item' },
+  { value: 'Match', label: 'Agree a collection' },
+  { value: 'Handoff', label: 'Pass it on' },
 ] as const
 
 export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
@@ -24,7 +24,7 @@ export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
       <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[440px_minmax(0,1fr)] lg:items-center lg:gap-10">
         <div className="max-w-[27.5rem]">
           <p className="text-sm font-bold tracking-[0.04em] text-[#172033]">
-            Free - London &amp; surrounding areas
+            Free neighbour-to-neighbour reuse
           </p>
 
           <h1 className="mt-6 text-[clamp(3.35rem,8vw,5.5rem)] font-normal leading-[0.92] tracking-[-0.06em] text-[#0B3322]">
@@ -34,8 +34,8 @@ export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
           </h1>
 
           <div className="mt-8 space-y-1.5 text-base leading-8 text-[#121212B3] sm:text-[1.02rem]">
-            <p>List the things you no longer need. Neighbours collect them, free.</p>
-            <p>No skips, no landfill, no faff - just stuff finding new homes.</p>
+            <p>Offer useful things you no longer need, free to another neighbour.</p>
+            <p>Browse offers and arrange collection directly with the person giving.</p>
           </div>
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
@@ -71,20 +71,21 @@ export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
 
         <div className="relative mx-auto h-[29rem] w-full max-w-[28rem] lg:h-[31rem] lg:max-w-[29rem]">
           <div className="absolute left-0 top-0 h-[70%] w-[58%] overflow-hidden rounded-[1.9rem] border border-white/70 bg-white shadow-[0_24px_70px_rgba(11,51,34,0.12)]">
-            <img alt="Furniture ready for reuse" className="h-full w-full object-cover" src={heroImg1} />
+            <img alt="Illustrative furniture photo" className="h-full w-full object-cover" src={heroImg1} fetchPriority="high" decoding="async" />
           </div>
 
           <div className="absolute right-0 top-10 h-[42%] w-[46%] overflow-hidden rounded-[1.5rem] border border-white/80 bg-white shadow-[0_20px_60px_rgba(11,51,34,0.10)]">
-            <img alt="Books ready to rehome" className="h-full w-full object-cover" loading="lazy" src={heroImg2} />
+            <img alt="Illustrative books photo" className="h-full w-full object-cover" loading="lazy" src={heroImg2} />
           </div>
 
           <div className="absolute bottom-0 left-[18%] h-[38%] w-[50%] overflow-hidden rounded-[1.65rem] border border-white/80 bg-white shadow-[0_24px_70px_rgba(11,51,34,0.10)]">
-            <img alt="Kitchenware ready for a new home" className="h-full w-full object-cover" loading="lazy" src={heroImg3} />
+            <img alt="Illustrative kitchenware photo" className="h-full w-full object-cover" loading="lazy" src={heroImg3} />
           </div>
 
           <div className="absolute -left-5 top-14 h-24 w-24 rounded-full bg-[#0D3B24]/20 blur-2xl" />
           <div className="absolute right-4 top-0 h-16 w-16 rounded-full border border-[#A4F5A6]/40 bg-[radial-gradient(circle_at_35%_35%,rgba(164,245,166,0.90),rgba(13,59,36,0.50)_60%,rgba(164,245,166,0.08)_100%)] shadow-[0_16px_40px_rgba(13,59,36,0.14)]" />
           <div className="absolute bottom-10 right-6 h-24 w-24 rounded-full border border-[#D4A84B]/30 bg-[radial-gradient(circle_at_35%_35%,rgba(212,168,75,0.75),rgba(13,59,36,0.40)_55%,rgba(212,168,75,0.08)_100%)] shadow-[0_18px_50px_rgba(212,168,75,0.15)] backdrop-blur-sm" />
+          <p className="absolute -bottom-8 inset-x-0 text-center text-xs text-[#121212B3]">Illustrative photos, not current listings.</p>
         </div>
       </div>
     </section>

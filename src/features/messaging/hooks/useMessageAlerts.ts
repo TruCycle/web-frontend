@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { fetchActiveRooms } from '@/features/messaging/api/messagingApi'
 import { playIncomingMessageTone } from '@/features/messaging/lib/playIncomingMessageTone'
@@ -10,7 +10,7 @@ interface MessagingServerEvents extends Record<string, (...args: never[]) => voi
   'message:new': (message: RoomMessage) => void
 }
 
-interface MessagingClientEvents extends Record<string, (...args: never[]) => void> {}
+type MessagingClientEvents = Record<string, (...args: never[]) => void>
 
 function getSenderName(message: RoomMessage): string {
   const firstName = message.sender?.firstName?.trim() ?? ''
@@ -31,7 +31,12 @@ function getMessagePreview(message: RoomMessage): string {
 export function useMessageAlerts() {
   const location = useLocation()
   const { info } = useToast()
-  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0)
+  const isOnMessagesPage = location.pathname.startsWith('/messages')
+  const [unreadState, setUnreadState] = useState({
+    count: 0,
+    isOnMessagesPage,
+    hasVisitedMessages: isOnMessagesPage,
+  })
   const seenMessageIdsRef = useRef<Set<string>>(new Set())
   const websocketClient = useMemo(
     () =>
@@ -40,27 +45,35 @@ export function useMessageAlerts() {
       }),
     [],
   )
-  const isOnMessagesPage = location.pathname.startsWith('/messages')
+  // Adjust route-dependent state before committing children so stale badges
+  // cannot flash or reappear when leaving the messages page.
+  if (unreadState.isOnMessagesPage !== isOnMessagesPage) {
+    setUnreadState({
+      count: isOnMessagesPage ? 0 : unreadState.count,
+      isOnMessagesPage,
+      hasVisitedMessages: unreadState.hasVisitedMessages || isOnMessagesPage,
+    })
+  }
 
-  const loadUnreadSummary = useCallback(async () => {
-    try {
-      const rooms = await fetchActiveRooms()
+  useEffect(() => {
+    let isCurrent = true
+    void fetchActiveRooms().then((rooms) => {
+      if (!isCurrent) return
       const nextCount = rooms.reduce((total, room) => total + room.unreadCount, 0)
-      setUnreadMessagesCount(nextCount)
-    } catch {
+      // Visiting Messages invalidates the bootstrap snapshot, including if its
+      // response arrives after the user has already navigated away again.
+      setUnreadState((current) => current.hasVisitedMessages ? current : ({
+        ...current,
+        // The summary can overlap socket events received while it was in flight.
+        // Without a server snapshot boundary, adding counts could double-count;
+        // preserve the larger known count instead of overwriting newer events.
+        count: Math.max(current.count, nextCount),
+      }))
+    }).catch(() => {
       // Best-effort bootstrap for message alerts.
-    }
+    })
+    return () => { isCurrent = false }
   }, [])
-
-  useEffect(() => {
-    void loadUnreadSummary()
-  }, [loadUnreadSummary])
-
-  useEffect(() => {
-    if (isOnMessagesPage) {
-      setUnreadMessagesCount(0)
-    }
-  }, [isOnMessagesPage])
 
   useEffect(() => {
     const handleNewMessage = (message: RoomMessage) => {
@@ -74,7 +87,10 @@ export function useMessageAlerts() {
       seenMessageIdsRef.current.add(message.id)
 
       if (!isOnMessagesPage) {
-        setUnreadMessagesCount((currentCount) => currentCount + 1)
+        setUnreadState((current) => ({
+          ...current,
+          count: current.isOnMessagesPage ? 0 : current.count + 1,
+        }))
       }
 
       if (isOnMessagesPage || document.visibilityState !== 'visible') {
@@ -95,6 +111,6 @@ export function useMessageAlerts() {
   }, [info, isOnMessagesPage, websocketClient])
 
   return {
-    unreadMessagesCount,
+    unreadMessagesCount: isOnMessagesPage ? 0 : unreadState.count,
   }
 }
