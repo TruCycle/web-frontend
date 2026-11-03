@@ -109,14 +109,17 @@ export async function fetchActiveRooms(): Promise<ActiveRoom[]> {
   return data.map((entry) => mapRoom(entry)).filter((entry): entry is ActiveRoom => entry !== null)
 }
 
-export async function fetchRoomMessages(roomId: string): Promise<RoomMessagesResponse> {
-  const response = await apiRequest<unknown>(`/messages/rooms/${roomId}/messages`)
+export async function fetchRoomMessages(roomId: string, cursor?: string, signal?: AbortSignal): Promise<RoomMessagesResponse> {
+  const response = await apiRequest<unknown>(`/messages/rooms/${encodeURIComponent(roomId)}/messages${cursor ? '?cursor=' + encodeURIComponent(cursor) : ''}`, { signal })
   const data = asRecord(unwrapApiData<unknown>(response))
   const messages = Array.isArray(data?.messages)
     ? data.messages
         .map((entry) => mapMessage(entry))
         .filter((entry): entry is RoomMessage => entry !== null)
     : []
+  if (!Array.isArray(data?.messages) || messages.length !== data.messages.length || messages.some(message => message.roomId !== roomId) ||
+      data.messages.some(entry => { const timestamp = asRecord(entry)?.createdAt; return typeof timestamp !== 'string' || !Number.isFinite(Date.parse(timestamp)) }) ||
+      (data.nextCursor !== null && (typeof data.nextCursor !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.nextCursor)))) throw new Error('Conversation history could not be confirmed')
 
   return {
     messages,

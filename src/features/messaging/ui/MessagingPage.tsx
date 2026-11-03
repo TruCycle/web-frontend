@@ -181,6 +181,12 @@ export default function MessagingPage() {
     unreadCountByRoom,
     setActiveRoomId,
     sendMessage,
+    historyGap,
+    hasHistoryFailure,
+    hasOlderMessages,
+    loadOlderMessages,
+    resetHistory,
+    reloadMessages,
   } = useMessages()
   const consumedRoomIdRef = useRef<string | null>(null)
   const lastScrolledRoomIdRef = useRef<string | null>(null)
@@ -455,13 +461,19 @@ export default function MessagingPage() {
             ref={messageListRef}
             className="min-h-[520px] flex-1 space-y-3 overflow-y-auto p-4 md:min-h-0 md:p-7"
           >
+            {historyGap && <div role="status" className="space-y-2 rounded-xl border border-amber-300 p-3 text-sm">
+              <p>{historyGap === 'changed' ? 'The saved conversation has changed. Reload it to check the current history.' : 'Some missed messages have not loaded yet. Continue to check the gap.'}</p>
+              <button className="min-h-11 underline" disabled={isLoadingMessages} onClick={() => void (historyGap === 'changed' ? resetHistory() : reloadMessages())}>{historyGap === 'changed' ? 'Reload conversation' : 'Continue loading missed messages'}</button>
+            </div>}
+            {hasHistoryFailure && !historyGap && <p role="status">Conversation history is unavailable. <button className="min-h-11 underline" disabled={isLoadingMessages} onClick={() => void reloadMessages()}>Refresh conversation</button></p>}
+            {hasOlderMessages && !historyGap && <button className="min-h-11 underline" disabled={isLoadingMessages} onClick={() => void loadOlderMessages()}>Load older messages</button>}
             {isLoadingMessages ? (
               <p className="rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-500">
                 Loading messages...
               </p>
             ) : null}
 
-            {!isLoadingMessages && messages.length === 0 ? (
+            {!isLoadingMessages && !hasHistoryFailure && messages.length === 0 ? (
               <p className="rounded-xl border border-dashed border-slate-300 bg-white p-3 text-sm text-slate-500">
                 No messages yet in this room.
               </p>

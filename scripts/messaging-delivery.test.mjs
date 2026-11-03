@@ -39,3 +39,16 @@ test('a rejected or uncertain HTTP send is surfaced once without retrying anothe
   await assert.rejects(api.sendDirectTextMessage('room-a', { clientMessageId: id, text: 'Hello' }))
   assert.equal(requests.length, 1); failure = null
 })
+test('history pagination encodes the server cursor and forwards cancellation', async () => {
+  requests = []; failure = null; response = { data: { messages: [message()], nextCursor: id } }
+  const controller = new AbortController(); const value = await api.fetchRoomMessages('room-a', id, controller.signal)
+  assert.equal(requests[0][0], '/messages/rooms/room-a/messages?cursor=' + id)
+  assert.equal(requests[0][1].signal, controller.signal); assert.equal(value.nextCursor, id)
+})
+test('malformed or cross-room history cannot masquerade as an empty or complete conversation', async () => {
+  failure = null
+  for (const data of [{}, { messages: null, nextCursor: null }, { messages: [{ ...message(), roomId: 'other' }], nextCursor: null },
+    { messages: [{ ...message(), createdAt: null }], nextCursor: null }, { messages: [], nextCursor: 42 }, { messages: [] }]) {
+    response = { data }; await assert.rejects(api.fetchRoomMessages('room-a'))
+  }
+})

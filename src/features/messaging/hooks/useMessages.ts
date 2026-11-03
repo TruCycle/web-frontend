@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import {
   fetchActiveRooms,
   fetchRoomMessages,
   sendDirectTextMessage,
 } from '@/features/messaging/api/messagingApi'
-import type { ActiveRoom, RoomMessage } from '@/features/messaging/types'
+import type { RoomMessage } from '@/features/messaging/types'
 import { WebSocketClient } from '@/shared/lib/websocket/client'
 import { captureStoredSession, isSameSessionIdentity } from '@/shared/lib/auth/session'
+import { initialRoomState, roomReducer } from '@/features/messaging/lib/roomState'
+import { recoverHistory } from '@/features/messaging/lib/historyRecovery'
 
 interface MessagingServerEvents extends Record<string, (...args: never[]) => void> {
   'message:new': (message: RoomMessage) => void
@@ -16,14 +18,7 @@ interface MessagingServerEvents extends Record<string, (...args: never[]) => voi
   'presence:update': (payload: { userId: string; online: boolean }) => void
   'auth:ready': () => void
 }
-
-function sortRoomsByRecentActivity(rooms: readonly ActiveRoom[]): ActiveRoom[] {
-  return [...rooms].sort((a, b) => {
-    const aTime = new Date(a.updatedAt).getTime()
-    const bTime = new Date(b.updatedAt).getTime()
-    return bTime - aTime
-  })
-}
+interface GapAnchor { ids: Set<string>; cursor?: string; scanToEnd?: boolean; head?: RoomMessage; epoch?: number }
 
 function mergeMessageIntoRoom(messages: readonly RoomMessage[], next: RoomMessage): RoomMessage[] {
   if (messages.some((message) => message.id === next.id)) {
@@ -36,20 +31,18 @@ function mergeMessageIntoRoom(messages: readonly RoomMessage[], next: RoomMessag
   )
 }
 
-function updateRoomPreview(room: ActiveRoom, message: RoomMessage): ActiveRoom {
-  const previous = room.lastMessage
-  if (previous && (Date.parse(previous.createdAt) > Date.parse(message.createdAt) ||
-      (previous.createdAt === message.createdAt && previous.id.localeCompare(message.id) >= 0))) return room
-  return { ...room, lastMessage: message, updatedAt: Date.parse(room.updatedAt) > Date.parse(message.createdAt) ? room.updatedAt : message.createdAt }
-}
-
 export function useMessages() {
-  const [rooms, setRooms] = useState<ActiveRoom[]>([])
+  const [roomState, dispatchRoom] = useReducer(roomReducer, initialRoomState)
+  const rooms = roomState.rooms
   const [activeRoomId, setActiveRoomIdState] = useState<string | null>(null)
   const [roomMessages, setRoomMessages] = useState<Record<string, RoomMessage[]>>({})
   const [unreadCountByRoom, setUnreadCountByRoom] = useState<Record<string, number>>({})
   const [isLoadingRooms, setIsLoadingRooms] = useState(true)
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false)
+  const [loadingHistory, setLoadingHistory] = useState<Record<string, boolean>>({})
+  const isLoadingMessages = activeRoomId ? Boolean(loadingHistory[activeRoomId]) : false
+  const [olderCursors, setOlderCursors] = useState<Record<string, string | null>>({})
+  const [historyGaps, setHistoryGaps] = useState<Record<string, 'partial' | 'changed' | null>>({})
+  const [historyFailures, setHistoryFailures] = useState<Record<string, boolean>>({})
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sendError, setSendError] = useState<string | null>(null)
@@ -59,6 +52,23 @@ export function useMessages() {
   const pendingSends = useRef(new Map<string, { text: string; id: string; userId: string }>())
   const seenMessageIds = useRef(new Set<string>())
   const roomRevisions = useRef(new Map<string, number>())
+  const roomListRequest = useRef(0)
+  const messageCache = useRef<Record<string, RoomMessage[]>>({})
+  const historyOperations = useRef(new Map<string, AbortController>())
+  const historyLoadedRooms = useRef(new Set<string>())
+  const gapAnchors = useRef(new Map<string, GapAnchor>())
+  const confirmedAnchors = useRef(new Map<string, Set<string>>())
+  const historyEpoch = useRef(0)
+  const attemptedHistoryEpoch = useRef(new Map<string, number>())
+  const knownRoomIds = useRef(new Set<string>())
+  const deletedRoomIds = useRef(new Set<string>())
+  const clearedMessageIds = useRef(new Set<string>())
+  const unknownRoomTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => { knownRoomIds.current = new Set(rooms.map(room => room.id)) }, [rooms])
+  const cacheMessages = useCallback((roomId: string, update: (messages: RoomMessage[]) => RoomMessage[]) => {
+    const next = { ...messageCache.current, [roomId]: update(messageCache.current[roomId] ?? []) }
+    messageCache.current = next; setRoomMessages(next)
+  }, [])
 
   const websocketClient = useMemo(
     () =>
@@ -69,11 +79,14 @@ export function useMessages() {
   )
 
   const loadRooms = useCallback(async () => {
+    const request = ++roomListRequest.current
+    dispatchRoom({ type: 'start', id: request })
     try {
       setIsLoadingRooms(true)
       setError(null)
-      const nextRooms = sortRoomsByRecentActivity(await fetchActiveRooms())
-      setRooms(nextRooms)
+      const nextRooms = await fetchActiveRooms()
+      if (request !== roomListRequest.current) return
+      dispatchRoom({ type: 'snapshot', id: request, rooms: nextRooms })
       setUnreadCountByRoom((currentCounts) => {
         const nextCounts = { ...currentCounts }
         nextRooms.forEach((room) => {
@@ -87,11 +100,10 @@ export function useMessages() {
         })
         return nextCounts
       })
-      setActiveRoomIdState((current) => current ?? nextRooms[0]?.id ?? null)
     } catch {
-      setError('Unable to load conversations right now.')
+      if (request === roomListRequest.current) setError('Unable to load conversations right now.')
     } finally {
-      setIsLoadingRooms(false)
+      if (request === roomListRequest.current) setIsLoadingRooms(false)
     }
   }, [])
 
@@ -122,30 +134,75 @@ export function useMessages() {
     [clearUnreadForRoom],
   )
 
-  const loadMessagesForRoom = useCallback(async (roomId: string) => {
+  const loadMessagesForRoom = useCallback(async (roomId: string, mode: 'recent' | 'older' | 'reset' = 'recent', olderCursor?: string) => {
     const revision = roomRevisions.current.get(roomId) ?? 0
+    const hadHistory = historyLoadedRooms.current.has(roomId)
+    const epoch = historyEpoch.current
+    if (mode !== 'older') attemptedHistoryEpoch.current.set(roomId, epoch)
+    historyOperations.current.get(roomId)?.abort()
+    const controller = new AbortController(); historyOperations.current.set(roomId, controller)
+    const timer = setTimeout(() => controller.abort(), 15_000)
+    const current = () => historyOperations.current.get(roomId) === controller && (roomRevisions.current.get(roomId) ?? 0) === revision
+    if (mode === 'reset') { gapAnchors.current.delete(roomId); confirmedAnchors.current.delete(roomId); cacheMessages(roomId, () => []) }
     try {
-      setIsLoadingMessages(true)
+      setLoadingHistory(values => ({ ...values, [roomId]: true }))
+      setHistoryFailures(values => ({ ...values, [roomId]: false }))
       setError(null)
-      const response = await fetchRoomMessages(roomId)
-      if ((roomRevisions.current.get(roomId) ?? 0) !== revision) return
-      setRoomMessages((currentMessages) => ({
-        ...currentMessages,
-        [roomId]: response.messages.reduce((merged, message) => mergeMessageIntoRoom(merged, message), currentMessages[roomId] ?? []),
-      }))
+      let anchor: GapAnchor | undefined = mode === 'older' ? { ids: new Set<string>(), cursor: olderCursor } : gapAnchors.current.get(roomId)
+      if (!anchor) {
+        const ids = new Set(confirmedAnchors.current.get(roomId) ?? [])
+        anchor = { ids, scanToEnd: mode !== 'reset' && hadHistory && !ids.size }
+      }
+      if (mode === 'recent' && anchor.epoch !== epoch) {
+        // Another disconnect may have added messages above the saved cursor.
+        anchor = { ids: anchor.ids, scanToEnd: anchor.scanToEnd, epoch }
+      }
+      if (mode !== 'older' && (anchor.ids.size || anchor.scanToEnd)) gapAnchors.current.set(roomId, anchor)
+      const response = await recoverHistory(cursor => fetchRoomMessages(roomId, cursor, controller.signal), anchor.ids, anchor.cursor, 5, anchor.scanToEnd)
+      if (!current() || controller.signal.aborted) return
+      historyLoadedRooms.current.add(roomId)
+      cacheMessages(roomId, previous => response.messages.reduce((merged, message) => mergeMessageIntoRoom(merged, message), previous))
+      if (mode !== 'older') {
+        let head = anchor.head
+        for (const message of response.messages) if (!head || Date.parse(message.createdAt) > Date.parse(head.createdAt) ||
+            (message.createdAt === head.createdAt && message.id.localeCompare(head.id) > 0)) head = message
+        setHistoryGaps(values => ({ ...values, [roomId]: response.status === 'complete' ? null : response.status }))
+        if (response.status === 'partial') gapAnchors.current.set(roomId, { ...anchor, head, cursor: response.nextCursor ?? undefined })
+        else {
+          gapAnchors.current.delete(roomId)
+          if (response.status === 'complete') confirmedAnchors.current.set(roomId, new Set(head ? [head.id] : []))
+        }
+      }
+      if (mode === 'older' || !hadHistory || !anchor.ids.size) setOlderCursors(values => ({ ...values, [roomId]: response.nextCursor }))
     } catch {
-      setError('Unable to load room history right now.')
+      if (current()) {
+        setError('Unable to load room history right now. Try refreshing the conversation.')
+        setHistoryFailures(values => ({ ...values, [roomId]: true }))
+        const anchor = gapAnchors.current.get(roomId)
+        if (anchor?.ids.size || anchor?.scanToEnd) setHistoryGaps(values => ({ ...values, [roomId]: 'partial' }))
+      }
     } finally {
-      setIsLoadingMessages(false)
+      clearTimeout(timer)
+      if (historyOperations.current.get(roomId) === controller) {
+        historyOperations.current.delete(roomId)
+        setLoadingHistory(values => ({ ...values, [roomId]: false }))
+      }
     }
+  }, [cacheMessages])
+  useEffect(() => {
+    const operations = historyOperations.current
+    return () => { for (const controller of operations.values()) controller.abort(); operations.clear() }
   }, [])
 
   useEffect(() => {
     void loadRooms()
   }, [loadRooms])
+  useEffect(() => {
+    setActiveRoomIdState(current => current && rooms.some(room => room.id === current) ? current : rooms[0]?.id ?? null)
+  }, [rooms])
 
   useEffect(() => {
-    if (!activeRoomId || roomMessages[activeRoomId]) {
+    if (!activeRoomId || attemptedHistoryEpoch.current.get(activeRoomId) === historyEpoch.current || historyOperations.current.has(activeRoomId)) {
       return
     }
 
@@ -182,6 +239,7 @@ export function useMessages() {
 
   useEffect(() => {
     const handleNewMessage = (message: RoomMessage) => {
+      if (deletedRoomIds.current.has(message.roomId) || clearedMessageIds.current.has(message.id)) return
       if (seenMessageIds.current.has(message.id)) return
       seenMessageIds.current.add(message.id)
       if (seenMessageIds.current.size > 2000) seenMessageIds.current.delete(seenMessageIds.current.values().next().value!)
@@ -189,22 +247,11 @@ export function useMessages() {
       const isActiveRoomVisible =
         activeRoomIdRef.current === message.roomId && isPageVisibleRef.current
 
-      setRoomMessages((currentMessages) => ({
-        ...currentMessages,
-        [message.roomId]: mergeMessageIntoRoom(
-          currentMessages[message.roomId] ?? [],
-          message,
-        ),
-      }))
-      setRooms((currentRooms) =>
-        sortRoomsByRecentActivity(
-          currentRooms.map((room) =>
-            room.id === message.roomId
-              ? updateRoomPreview(room, message)
-              : room,
-          ),
-        ),
-      )
+      cacheMessages(message.roomId, messages => mergeMessageIntoRoom(messages, message))
+      dispatchRoom({ type: 'message', message })
+      if (!knownRoomIds.current.has(message.roomId) && unknownRoomTimer.current === null) unknownRoomTimer.current = setTimeout(() => {
+        unknownRoomTimer.current = null; void loadRooms()
+      }, 100)
 
       if (!isIncomingMessage) {
         return
@@ -231,37 +278,30 @@ export function useMessages() {
     }
 
     const handleRoomActivity = (payload: { roomId: string; updatedAt: string }) => {
-      setRooms((currentRooms) =>
-        sortRoomsByRecentActivity(
-          currentRooms.map((room) =>
-            room.id === payload.roomId ? { ...room, updatedAt: payload.updatedAt } : room,
-          ),
-        ),
-      )
+      dispatchRoom({ type: 'activity', ...payload })
     }
 
     const handleRoomCleared = (payload: { roomId: string }) => {
+      for (const message of messageCache.current[payload.roomId] ?? []) clearedMessageIds.current.add(message.id)
+      historyLoadedRooms.current.add(payload.roomId)
+      confirmedAnchors.current.set(payload.roomId, new Set()); attemptedHistoryEpoch.current.set(payload.roomId, historyEpoch.current)
       roomRevisions.current.set(payload.roomId, (roomRevisions.current.get(payload.roomId) ?? 0) + 1)
+      historyOperations.current.get(payload.roomId)?.abort(); gapAnchors.current.delete(payload.roomId)
+      setHistoryGaps(values => ({ ...values, [payload.roomId]: null })); setOlderCursors(values => ({ ...values, [payload.roomId]: null }))
       pendingSends.current.delete(payload.roomId)
-      setRoomMessages((currentMessages) => ({
-        ...currentMessages,
-        [payload.roomId]: [],
-      }))
-      setRooms((currentRooms) =>
-        currentRooms.map((room) =>
-          room.id === payload.roomId ? { ...room, lastMessage: null } : room,
-        ),
-      )
+      cacheMessages(payload.roomId, () => [])
+      dispatchRoom({ type: 'clear', roomId: payload.roomId })
     }
 
     const handleRoomDeleted = (payload: { roomId: string }) => {
+      deletedRoomIds.current.add(payload.roomId)
+      historyLoadedRooms.current.delete(payload.roomId)
+      confirmedAnchors.current.delete(payload.roomId); attemptedHistoryEpoch.current.delete(payload.roomId)
       roomRevisions.current.set(payload.roomId, (roomRevisions.current.get(payload.roomId) ?? 0) + 1)
       pendingSends.current.delete(payload.roomId)
-      setRoomMessages((currentMessages) => {
-        const remaining = { ...currentMessages }
-        delete remaining[payload.roomId]
-        return remaining
-      })
+      historyOperations.current.get(payload.roomId)?.abort(); gapAnchors.current.delete(payload.roomId)
+      const remaining = { ...messageCache.current }; delete remaining[payload.roomId]
+      messageCache.current = remaining; setRoomMessages(remaining)
       setUnreadCountByRoom((currentCounts) => {
         if (!(payload.roomId in currentCounts)) {
           return currentCounts
@@ -270,26 +310,16 @@ export function useMessages() {
         delete nextCounts[payload.roomId]
         return nextCounts
       })
-      setRooms((currentRooms) =>
-        currentRooms.filter((room) => room.id !== payload.roomId),
-      )
+      dispatchRoom({ type: 'delete', roomId: payload.roomId })
       setActiveRoomIdState((currentId) => (currentId === payload.roomId ? null : currentId))
     }
 
     const handlePresenceUpdate = (payload: { userId: string; online: boolean }) => {
-      setRooms((currentRooms) =>
-        currentRooms.map((room) => ({
-          ...room,
-          participants: room.participants.map((participant) =>
-            participant.id === payload.userId
-              ? { ...participant, online: payload.online }
-              : participant,
-          ),
-        })),
-      )
+      dispatchRoom({ type: 'presence', ...payload })
     }
 
     const handleReady = () => {
+      historyEpoch.current++
       void loadRooms()
       if (activeRoomIdRef.current) void loadMessagesForRoom(activeRoomIdRef.current)
     }
@@ -302,6 +332,8 @@ export function useMessages() {
     websocketClient.on('presence:update', handlePresenceUpdate)
 
     return () => {
+      if (unknownRoomTimer.current !== null) clearTimeout(unknownRoomTimer.current)
+      unknownRoomTimer.current = null
       websocketClient.off('auth:ready', handleReady)
       websocketClient.off('message:new', handleNewMessage)
       websocketClient.off('room:activity', handleRoomActivity)
@@ -310,7 +342,7 @@ export function useMessages() {
       websocketClient.off('presence:update', handlePresenceUpdate)
       websocketClient.disconnect()
     }
-  }, [websocketClient, loadRooms, loadMessagesForRoom])
+  }, [websocketClient, loadRooms, loadMessagesForRoom, cacheMessages])
 
   const sendMessage = useCallback(
     async (text: string) => {
@@ -333,22 +365,8 @@ export function useMessages() {
         const saved = await sendDirectTextMessage(roomId, { clientMessageId: pending.id, text: message })
         if (!isSameSessionIdentity(capture) || (roomRevisions.current.get(roomId) ?? 0) !== revision) return false
         pendingSends.current.delete(roomId)
-          setRoomMessages((currentMessages) => ({
-            ...currentMessages,
-            [roomId]: mergeMessageIntoRoom(
-              currentMessages[roomId] ?? [],
-              saved,
-            ),
-          }))
-          setRooms((currentRooms) =>
-            sortRoomsByRecentActivity(
-              currentRooms.map((room) =>
-                room.id === roomId
-                  ? updateRoomPreview(room, saved)
-                  : room,
-              ),
-            ),
-          )
+        cacheMessages(roomId, messages => mergeMessageIntoRoom(messages, saved))
+        dispatchRoom({ type: 'message', message: saved })
         return true
       } catch {
         setSendError('The message could not be confirmed. Your draft is kept. Check the conversation before retrying.')
@@ -358,7 +376,7 @@ export function useMessages() {
         setIsSending(false)
       }
     },
-    [activeRoomId],
+    [activeRoomId, cacheMessages],
   )
 
   const activeRoom = rooms.find((room) => room.id === activeRoomId) ?? null
@@ -377,6 +395,11 @@ export function useMessages() {
     setActiveRoomId,
     sendMessage,
     reloadRooms: loadRooms,
+    historyGap: activeRoomId ? historyGaps[activeRoomId] ?? null : null,
+    hasHistoryFailure: Boolean(activeRoomId && historyFailures[activeRoomId]),
+    hasOlderMessages: Boolean(activeRoomId && olderCursors[activeRoomId]),
+    loadOlderMessages: () => activeRoomId ? loadMessagesForRoom(activeRoomId, 'older', olderCursors[activeRoomId] ?? undefined) : Promise.resolve(),
+    resetHistory: () => activeRoomId ? loadMessagesForRoom(activeRoomId, 'reset') : Promise.resolve(),
     reloadMessages: () => (activeRoomId ? loadMessagesForRoom(activeRoomId) : Promise.resolve()),
   }
 }
