@@ -30,6 +30,7 @@ interface ResetPasswordValues {
 }
 
 const otpLength = 6
+const resetRequestMessage = 'If this email can be used to reset a password, check your inbox for a 6-digit code.'
 
 type ResetStep = 'request' | 'otp' | 'password'
 
@@ -193,7 +194,7 @@ export default function PasswordResetPage() {
       await requestPasswordReset(email.trim())
       setOtpValues(initialOtpValues)
       focusOtpInput(0)
-      success('Code resent', 'A fresh OTP has been sent to your email.')
+      success('Reset code requested', resetRequestMessage)
     } catch (caughtError) {
       const message =
         caughtError instanceof ApiError
@@ -222,7 +223,7 @@ export default function PasswordResetPage() {
       try {
         await requestPasswordReset(email.trim())
         setResetStep('otp')
-        success('Code sent', 'Check your inbox for the 6-digit verification code.')
+        success('Reset code requested', resetRequestMessage)
       } catch (caughtError) {
         const message =
           caughtError instanceof ApiError
@@ -242,7 +243,6 @@ export default function PasswordResetPage() {
         return
       }
       setResetStep('password')
-      success('Code verified', 'Now create your new password.')
       return
     }
 
@@ -282,7 +282,7 @@ export default function PasswordResetPage() {
     resetStep === 'request'
       ? 'Enter your registered email to proceed'
       : resetStep === 'otp'
-        ? 'Enter the code sent to your mail to continue.'
+        ? 'Enter the 6-digit reset code from your email.'
         : 'Set your new password'
 
   function renderStepContent() {
