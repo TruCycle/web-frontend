@@ -55,3 +55,8 @@ Verify Access denial first, then tester access, `/login` and SPA deep-link reloa
 - [Cloudflare Access self-hosted applications](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/self-hosted-public-app/)
 
 Configuration guidance was checked against these official pages on 1 November 2026. Account-side configuration and live behaviour remain unverified.
+
+
+## Hosted connection (6 Nov 2026)
+
+Cloudflare Workers Builds deploys `trucycle-web-staging` from this branch to `staging.trucycle.co.uk` (behind Cloudflare Access). The staging API is `https://api-staging.trucycle.co.uk` on the Railway `staging` environment.
