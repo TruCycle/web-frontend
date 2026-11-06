@@ -102,9 +102,10 @@ export default function PublicBrowsePage() {
 
   const resultLabel = useMemo(() => {
     if (isLoading) return 'Loading items…'
+    if (error) return error
     if (items.length === 0) return 'No items match your search right now.'
     return `${items.length} free item${items.length === 1 ? '' : 's'} available`
-  }, [isLoading, items.length])
+  }, [error, isLoading, items.length])
 
   return (
     <div className="min-h-screen bg-[#F7FBF4] text-tc-app-text">
@@ -170,8 +171,9 @@ export default function PublicBrowsePage() {
           </div>
         ) : null}
 
-        <p className="mt-6 text-sm text-slate-500">{resultLabel}</p>
-        {error ? <p className="mt-2 text-sm text-rose-600">{error}</p> : null}
+        <p className={error ? 'mt-6 text-sm text-rose-600' : 'mt-6 text-sm text-slate-500'} role={error ? 'alert' : 'status'}>
+          {resultLabel}
+        </p>
 
         <div className="mt-4 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {isLoading
