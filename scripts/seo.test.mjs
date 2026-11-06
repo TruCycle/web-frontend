@@ -79,6 +79,12 @@ test('canonical host policy does nothing without an explicitly verified alias in
   assert.equal(canonicalHostRedirect(new Request(origin + '/login'), config), null)
   assert.throws(() => canonicalHostRedirect(request, { ...config, canonicalOrigin: 'http://trucycle.co.uk' }), /HTTPS/)
 })
+test('the same-origin manifest can be fetched with the Cloudflare Access session', () => {
+  const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8')
+  const manifestLink = html.match(/<link\b[^>]*\brel="manifest"[^>]*>/i)?.[0] ?? ''
+  assert.match(manifestLink, /\bhref="\/manifest\.json"/)
+  assert.match(manifestLink, /\bcrossorigin="use-credentials"/)
+})
 test('declared icon formats/dimensions match real application assets, separate from social image', () => {
   const publicRoot = new URL('../public/', import.meta.url)
   const dimensions = file => { const bytes = fs.readFileSync(new URL(file, publicRoot)); assert.equal(bytes.subarray(0, 8).toString('hex'), '89504e470d0a1a0a'); return `${bytes.readUInt32BE(16)}x${bytes.readUInt32BE(20)}` }
