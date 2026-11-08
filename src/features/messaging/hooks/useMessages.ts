@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import {
+  acknowledgeRoomMessages,
   fetchActiveRooms,
   fetchRoomMessages,
   sendDirectTextMessage,
@@ -8,7 +9,9 @@ import type { RoomMessage } from '@/features/messaging/types'
 import { WebSocketClient } from '@/shared/lib/websocket/client'
 import { captureStoredSession, isSameSessionIdentity } from '@/shared/lib/auth/session'
 import { initialRoomState, roomReducer } from '@/features/messaging/lib/roomState'
+import { notifyUnreadChanged, unreadChangedEvent } from '@/features/messaging/lib/unreadEvents'
 import { recoverHistory } from '@/features/messaging/lib/historyRecovery'
+import { eligibleReadIds } from '@/features/messaging/lib/readEligibility'
 
 interface MessagingServerEvents extends Record<string, (...args: never[]) => void> {
   'message:new': (message: RoomMessage) => void
@@ -17,6 +20,7 @@ interface MessagingServerEvents extends Record<string, (...args: never[]) => voi
   'room:deleted': (payload: { roomId: string }) => void
   'presence:update': (payload: { userId: string; online: boolean }) => void
   'auth:ready': () => void
+  'messages:read': () => void
 }
 interface GapAnchor { ids: Set<string>; cursor?: string; scanToEnd?: boolean; head?: RoomMessage; epoch?: number }
 
@@ -47,7 +51,6 @@ export function useMessages() {
   const [error, setError] = useState<string | null>(null)
   const [sendError, setSendError] = useState<string | null>(null)
   const activeRoomIdRef = useRef<string | null>(null)
-  const isPageVisibleRef = useRef<boolean>(true)
   const sendingRef = useRef(false)
   const pendingSends = useRef(new Map<string, { text: string; id: string; userId: string }>())
   const seenMessageIds = useRef(new Set<string>())
@@ -60,11 +63,9 @@ export function useMessages() {
   const confirmedAnchors = useRef(new Map<string, Set<string>>())
   const historyEpoch = useRef(0)
   const attemptedHistoryEpoch = useRef(new Map<string, number>())
-  const knownRoomIds = useRef(new Set<string>())
   const deletedRoomIds = useRef(new Set<string>())
   const clearedMessageIds = useRef(new Set<string>())
   const unknownRoomTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  useEffect(() => { knownRoomIds.current = new Set(rooms.map(room => room.id)) }, [rooms])
   const cacheMessages = useCallback((roomId: string, update: (messages: RoomMessage[]) => RoomMessage[]) => {
     const next = { ...messageCache.current, [roomId]: update(messageCache.current[roomId] ?? []) }
     messageCache.current = next; setRoomMessages(next)
@@ -80,26 +81,17 @@ export function useMessages() {
 
   const loadRooms = useCallback(async () => {
     const request = ++roomListRequest.current
+    let capture: ReturnType<typeof captureStoredSession>
+    try { capture = captureStoredSession() } catch { return }
+    if (!capture) return
     dispatchRoom({ type: 'start', id: request })
     try {
       setIsLoadingRooms(true)
       setError(null)
       const nextRooms = await fetchActiveRooms()
-      if (request !== roomListRequest.current) return
+      if (request !== roomListRequest.current || !isSameSessionIdentity(capture)) return
       dispatchRoom({ type: 'snapshot', id: request, rooms: nextRooms })
-      setUnreadCountByRoom((currentCounts) => {
-        const nextCounts = { ...currentCounts }
-        nextRooms.forEach((room) => {
-          const existingCount = currentCounts[room.id] ?? 0
-          nextCounts[room.id] = Math.max(existingCount, room.unreadCount)
-        })
-        Object.keys(nextCounts).forEach((roomId) => {
-          if (!nextRooms.some((room) => room.id === roomId)) {
-            delete nextCounts[roomId]
-          }
-        })
-        return nextCounts
-      })
+      setUnreadCountByRoom(Object.fromEntries(nextRooms.map(room => [room.id, room.unreadCount])))
     } catch {
       if (request === roomListRequest.current) setError('Unable to load conversations right now.')
     } finally {
@@ -107,32 +99,33 @@ export function useMessages() {
     }
   }, [])
 
-  const clearUnreadForRoom = useCallback((roomId: string | null) => {
-    if (!roomId) {
-      return
-    }
-
-    setUnreadCountByRoom((currentCounts) => {
-      if (!currentCounts[roomId]) {
-        return currentCounts
-      }
-
-      return {
-        ...currentCounts,
-        [roomId]: 0,
-      }
-    })
+  const setActiveRoomId = useCallback((roomId: string | null) => {
+    activeRoomIdRef.current = roomId
+    setActiveRoomIdState(roomId)
   }, [])
-
-  const setActiveRoomId = useCallback(
-    (roomId: string | null) => {
-      setActiveRoomIdState(roomId)
-      if (roomId && document.visibilityState === 'visible') {
-        clearUnreadForRoom(roomId)
-      }
-    },
-    [clearUnreadForRoom],
-  )
+  const readConfirmed = useRef(new Set<string>())
+  const readInFlight = useRef(new Set<string>())
+  const acknowledgeVisibleMessages = useCallback(async (roomId: string, ids: readonly string[]) => {
+    if (activeRoomIdRef.current !== roomId || document.visibilityState !== 'visible' ||
+        !historyLoadedRooms.current.has(roomId)) return
+    let capture: ReturnType<typeof captureStoredSession>
+    try { capture = captureStoredSession() } catch { return }
+    if (!capture) return
+    const eligible = eligibleReadIds(messageCache.current[roomId] ?? [], ids, capture.session.user.id,
+      roomId, activeRoomIdRef.current, document.visibilityState === 'visible', historyLoadedRooms.current.has(roomId))
+      .filter(id => !readConfirmed.current.has(id) && !readInFlight.current.has(id)).slice(0, 100)
+    if (!eligible.length) return
+    eligible.forEach(id => readInFlight.current.add(id))
+    try {
+      const result = await acknowledgeRoomMessages(roomId, eligible)
+      if (!isSameSessionIdentity(capture)) return
+      result.readMessageIds.forEach(id => readConfirmed.current.add(id))
+      notifyUnreadChanged()
+      await loadRooms()
+    } catch {
+      if (isSameSessionIdentity(capture)) setError('Read status could not be saved. Reopen the conversation to retry.')
+    } finally { eligible.forEach(id => readInFlight.current.delete(id)) }
+  }, [loadRooms])
 
   const loadMessagesForRoom = useCallback(async (roomId: string, mode: 'recent' | 'older' | 'reset' = 'recent', olderCursor?: string) => {
     const revision = roomRevisions.current.get(roomId) ?? 0
@@ -214,28 +207,16 @@ export function useMessages() {
   }, [activeRoomId])
 
   useEffect(() => {
-    if (!activeRoomId || document.visibilityState !== 'visible') {
-      return
+    const refresh = () => {
+      if (document.visibilityState === 'visible') void loadRooms()
     }
-
-    clearUnreadForRoom(activeRoomId)
-  }, [activeRoomId, clearUnreadForRoom])
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      const isVisible = document.visibilityState === 'visible'
-      isPageVisibleRef.current = isVisible
-      if (isVisible) {
-        clearUnreadForRoom(activeRoomIdRef.current)
-      }
-    }
-
-    handleVisibilityChange()
-    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener(unreadChangedEvent, refresh)
+    document.addEventListener('visibilitychange', refresh)
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener(unreadChangedEvent, refresh)
+      document.removeEventListener('visibilitychange', refresh)
     }
-  }, [clearUnreadForRoom])
+  }, [loadRooms])
 
   useEffect(() => {
     const handleNewMessage = (message: RoomMessage) => {
@@ -243,37 +224,14 @@ export function useMessages() {
       if (seenMessageIds.current.has(message.id)) return
       seenMessageIds.current.add(message.id)
       if (seenMessageIds.current.size > 2000) seenMessageIds.current.delete(seenMessageIds.current.values().next().value!)
-      const isIncomingMessage = message.direction === 'incoming'
-      const isActiveRoomVisible =
-        activeRoomIdRef.current === message.roomId && isPageVisibleRef.current
 
       cacheMessages(message.roomId, messages => mergeMessageIntoRoom(messages, message))
       dispatchRoom({ type: 'message', message })
-      if (!knownRoomIds.current.has(message.roomId) && unknownRoomTimer.current === null) unknownRoomTimer.current = setTimeout(() => {
+      roomListRequest.current++
+      if (unknownRoomTimer.current === null) unknownRoomTimer.current = setTimeout(() => {
         unknownRoomTimer.current = null; void loadRooms()
       }, 100)
 
-      if (!isIncomingMessage) {
-        return
-      }
-
-      setUnreadCountByRoom((currentCounts) => {
-        if (isActiveRoomVisible) {
-          if (!currentCounts[message.roomId]) {
-            return currentCounts
-          }
-
-          return {
-            ...currentCounts,
-            [message.roomId]: 0,
-          }
-        }
-
-        return {
-          ...currentCounts,
-          [message.roomId]: (currentCounts[message.roomId] ?? 0) + 1,
-        }
-      })
 
     }
 
@@ -325,6 +283,7 @@ export function useMessages() {
     }
     websocketClient.connect()
     websocketClient.on('auth:ready', handleReady)
+    websocketClient.on('messages:read', loadRooms)
     websocketClient.on('message:new', handleNewMessage)
     websocketClient.on('room:activity', handleRoomActivity)
     websocketClient.on('room:cleared', handleRoomCleared)
@@ -335,6 +294,7 @@ export function useMessages() {
       if (unknownRoomTimer.current !== null) clearTimeout(unknownRoomTimer.current)
       unknownRoomTimer.current = null
       websocketClient.off('auth:ready', handleReady)
+      websocketClient.off('messages:read', loadRooms)
       websocketClient.off('message:new', handleNewMessage)
       websocketClient.off('room:activity', handleRoomActivity)
       websocketClient.off('room:cleared', handleRoomCleared)
@@ -393,6 +353,7 @@ export function useMessages() {
     error: sendError ?? error,
     unreadCountByRoom,
     setActiveRoomId,
+    acknowledgeVisibleMessages,
     sendMessage,
     reloadRooms: loadRooms,
     historyGap: activeRoomId ? historyGaps[activeRoomId] ?? null : null,

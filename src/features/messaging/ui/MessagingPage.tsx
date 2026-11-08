@@ -187,6 +187,7 @@ export default function MessagingPage() {
     loadOlderMessages,
     resetHistory,
     reloadMessages,
+    acknowledgeVisibleMessages,
   } = useMessages()
   const consumedRoomIdRef = useRef<string | null>(null)
   const lastScrolledRoomIdRef = useRef<string | null>(null)
@@ -244,6 +245,34 @@ export default function MessagingPage() {
       window.cancelAnimationFrame(animationFrameId)
     }
   }, [activeRoomId, isLoadingMessages, messages.length])
+
+  useEffect(() => {
+    const root = messageListRef.current
+    if (!root || !activeRoomId || isLoadingMessages || hasHistoryFailure) return
+    // Only rows actually intersecting the scroll viewport are acknowledged;
+    // loaded offscreen history and inactive conversations remain unread.
+    const visible = new Set<string>()
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        const id = (entry.target as HTMLElement).dataset.readMessageId
+        if (!id) continue
+        if (entry.isIntersecting && entry.intersectionRatio > 0) visible.add(id)
+        else visible.delete(id)
+      }
+      clearTimeout(timer)
+      if (document.visibilityState === 'visible' && visible.size) timer = setTimeout(() => {
+        if (document.visibilityState === 'visible') void acknowledgeVisibleMessages(activeRoomId, [...visible])
+      }, 100)
+    }, { root, threshold: [0, 0.5] })
+    const observe = () => {
+      observer.disconnect(); visible.clear(); clearTimeout(timer)
+      if (document.visibilityState === 'visible') root.querySelectorAll('[data-read-message-id]').forEach(node => observer.observe(node))
+    }
+    observe()
+    document.addEventListener('visibilitychange', observe)
+    return () => { observer.disconnect(); clearTimeout(timer); document.removeEventListener('visibilitychange', observe) }
+  }, [activeRoomId, messages, isLoadingMessages, hasHistoryFailure, acknowledgeVisibleMessages])
 
   const filteredRooms = useMemo(() => {
     const query = searchValue.trim().toLowerCase()
@@ -389,7 +418,7 @@ export default function MessagingPage() {
               filteredRooms.map((room) => {
                 const unreadCount = unreadCountByRoom[room.id] ?? 0
                 const isActiveRoom = activeRoomId === room.id
-                const isUnread = unreadCount > 0 && !isActiveRoom
+                const isUnread = unreadCount > 0
 
                 return (
                   <button
@@ -538,7 +567,7 @@ export default function MessagingPage() {
                           )}
                         >
                           {row.messages.map((message) => (
-                            <div key={message.id} className="rounded-xl bg-white/80 p-1">
+                            <div key={message.id} data-read-message-id={message.category === 'direct' && message.sender && message.sender.id !== user?.id ? message.id : undefined} className="rounded-xl bg-white/80 p-1">
                               <button
                                 type="button"
                                 className="block w-full overflow-hidden rounded-lg"
@@ -588,6 +617,7 @@ export default function MessagingPage() {
               return (
                 <div
                   key={row.key}
+                  data-read-message-id={message.category === 'direct' && message.sender && message.sender.id !== user?.id ? message.id : undefined}
                   className={classNames('flex', isOutgoing ? 'justify-end' : 'justify-start')}
                 >
                   <div className={classNames('flex items-start', isOutgoing ? '' : 'gap-2')}>

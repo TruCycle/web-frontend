@@ -52,3 +52,43 @@ test('malformed or cross-room history cannot masquerade as an empty or complete 
     response = { data }; await assert.rejects(api.fetchRoomMessages('room-a'))
   }
 })
+
+
+test('read acknowledgement sends only explicit observed IDs and preserves authoritative remaining count', async () => {
+  requests = []; failure = null; response = { data: { readMessageIds: [id], unreadCount: 2 } }
+  const ack = await api.acknowledgeRoomMessages('room/a', [id])
+  assert.equal(ack.unreadCount, 2)
+  assert.equal(requests[0][0], '/messages/rooms/room%2Fa/read')
+  assert.equal(requests[0][1].method, 'POST')
+  assert.deepEqual(Array.from(requests[0][1].body.messageIds), [id])
+})
+test('read acknowledgement rejects unrelated IDs and malformed counts instead of clearing badges', async () => {
+  failure = null
+  for (const data of [{ readMessageIds: ['other'], unreadCount: 0 }, { unreadCount: 0 },
+    { readMessageIds: [id], unreadCount: -1 }, { readMessageIds: [id], unreadCount: 1.5 },
+    { readMessageIds: [id], unreadCount: '0' }]) {
+    response = { data }; await assert.rejects(api.acknowledgeRoomMessages('room-a', [id]))
+  }
+})
+test('failed read acknowledgement is surfaced without manufacturing a successful zero count', async () => {
+  requests = []; failure = new Error('Synthetic read failure')
+  await assert.rejects(api.acknowledgeRoomMessages('room-a', [id]))
+  assert.equal(requests.length, 1); failure = null
+})
+const reads = load('src/features/messaging/lib/readEligibility.ts')
+const incoming = (messageId, extra = {}) => ({ ...message(), id: messageId, direction: 'incoming', sender: { id: 'other' }, ...extra })
+test('only observed incoming direct IDs in the active visible room are eligible', () => {
+  const rows = [incoming('seen'), incoming('unseen'), incoming('own', { sender: { id: 'viewer' } }),
+    incoming('general', { category: 'general' }), incoming('system', { sender: null }), incoming('foreign', { roomId: 'room-b' })]
+  assert.deepEqual(Array.from(reads.eligibleReadIds(rows, ['seen', 'seen', 'own', 'general', 'system', 'foreign', 'not-loaded'], 'viewer', 'room-a', 'room-a', true, true)), ['seen'])
+})
+for (const [active, visible, loaded] of [['room-b', true, true], ['room-a', false, true], ['room-a', true, false]]) {
+  test(`no read ack for inactive/hidden/failed history ${active}/${visible}/${loaded}`, () => {
+    assert.equal(reads.eligibleReadIds([incoming(id)], [id], 'viewer', 'room-a', active, visible, loaded).length, 0)
+  })
+}
+test('same-time and later unseen messages are not read through by ordering, and requests are bounded', () => {
+  const rows = Array.from({ length: 130 }, (_, i) => incoming('id-' + i))
+  const result = reads.eligibleReadIds(rows, rows.slice(0, 120).map(x => x.id), 'viewer', 'room-a', 'room-a', true, true)
+  assert.equal(result.length, 100); assert.ok(!result.includes('id-129'))
+})

@@ -4,10 +4,14 @@ import { fetchActiveRooms } from '@/features/messaging/api/messagingApi'
 import { playIncomingMessageTone } from '@/features/messaging/lib/playIncomingMessageTone'
 import type { RoomMessage } from '@/features/messaging/types'
 import { WebSocketClient } from '@/shared/lib/websocket/client'
+import { captureStoredSession, isSameSessionIdentity } from '@/shared/lib/auth/session'
+import { unreadChangedEvent } from '@/features/messaging/lib/unreadEvents'
 import { useToast } from '@/shared/ui/toast/useToast'
 
 interface MessagingServerEvents extends Record<string, (...args: never[]) => void> {
   'message:new': (message: RoomMessage) => void
+  'auth:ready': () => void
+  'messages:read': () => void
 }
 
 type MessagingClientEvents = Record<string, (...args: never[]) => void>
@@ -32,11 +36,7 @@ export function useMessageAlerts() {
   const location = useLocation()
   const { info } = useToast()
   const isOnMessagesPage = location.pathname.startsWith('/messages')
-  const [unreadState, setUnreadState] = useState({
-    count: 0,
-    isOnMessagesPage,
-    hasVisitedMessages: isOnMessagesPage,
-  })
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0)
   const seenMessageIdsRef = useRef<Set<string>>(new Set())
   const websocketClient = useMemo(
     () =>
@@ -45,35 +45,40 @@ export function useMessageAlerts() {
       }),
     [],
   )
-  // Adjust route-dependent state before committing children so stale badges
-  // cannot flash or reappear when leaving the messages page.
-  if (unreadState.isOnMessagesPage !== isOnMessagesPage) {
-    setUnreadState({
-      count: isOnMessagesPage ? 0 : unreadState.count,
-      isOnMessagesPage,
-      hasVisitedMessages: unreadState.hasVisitedMessages || isOnMessagesPage,
-    })
-  }
-
   useEffect(() => {
-    let isCurrent = true
-    void fetchActiveRooms().then((rooms) => {
-      if (!isCurrent) return
-      const nextCount = rooms.reduce((total, room) => total + room.unreadCount, 0)
-      // Visiting Messages invalidates the bootstrap snapshot, including if its
-      // response arrives after the user has already navigated away again.
-      setUnreadState((current) => current.hasVisitedMessages ? current : ({
-        ...current,
-        // The summary can overlap socket events received while it was in flight.
-        // Without a server snapshot boundary, adding counts could double-count;
-        // preserve the larger known count instead of overwriting newer events.
-        count: Math.max(current.count, nextCount),
-      }))
-    }).catch(() => {
-      // Best-effort bootstrap for message alerts.
-    })
-    return () => { isCurrent = false }
-  }, [])
+    let alive = true
+    let revision = 0
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const refresh = () => {
+      const request = ++revision
+      if (timer) clearTimeout(timer)
+      timer = setTimeout(() => {
+        let capture: ReturnType<typeof captureStoredSession>
+        try { capture = captureStoredSession() } catch { return }
+        if (!capture) return
+        void fetchActiveRooms().then(rooms => {
+          if (alive && request === revision && isSameSessionIdentity(capture)) {
+            setUnreadMessagesCount(rooms.reduce((sum, room) => sum + room.unreadCount, 0))
+          }
+        }).catch(() => { /* Keep last confirmed count on failure. */ })
+      }, 100)
+    }
+    const visible = () => { if (document.visibilityState === 'visible') refresh() }
+    refresh()
+    websocketClient.on('auth:ready', refresh)
+    websocketClient.on('message:new', refresh)
+    websocketClient.on('messages:read', refresh)
+    window.addEventListener(unreadChangedEvent, refresh)
+    document.addEventListener('visibilitychange', visible)
+    return () => {
+      alive = false; revision++; clearTimeout(timer)
+      websocketClient.off('auth:ready', refresh)
+      websocketClient.off('message:new', refresh)
+      websocketClient.off('messages:read', refresh)
+      window.removeEventListener(unreadChangedEvent, refresh)
+      document.removeEventListener('visibilitychange', visible)
+    }
+  }, [websocketClient])
 
   useEffect(() => {
     const handleNewMessage = (message: RoomMessage) => {
@@ -85,13 +90,6 @@ export function useMessageAlerts() {
         return
       }
       seenMessageIdsRef.current.add(message.id)
-
-      if (!isOnMessagesPage) {
-        setUnreadState((current) => ({
-          ...current,
-          count: current.isOnMessagesPage ? 0 : current.count + 1,
-        }))
-      }
 
       if (isOnMessagesPage || document.visibilityState !== 'visible') {
         return
@@ -111,6 +109,6 @@ export function useMessageAlerts() {
   }, [info, isOnMessagesPage, websocketClient])
 
   return {
-    unreadMessagesCount: isOnMessagesPage ? 0 : unreadState.count,
+    unreadMessagesCount,
   }
 }

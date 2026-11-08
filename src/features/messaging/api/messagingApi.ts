@@ -7,6 +7,19 @@ interface RoomMessagesResponse {
   readonly nextCursor: string | null
 }
 
+export async function acknowledgeRoomMessages(roomId: string, messageIds: readonly string[]) {
+  const response = await apiRequest<unknown, { messageIds: readonly string[] }>(`/messages/rooms/${encodeURIComponent(roomId)}/read`, {
+    method: 'POST', body: { messageIds },
+  })
+  const data = asRecord(unwrapApiData<unknown>(response))
+  const count = readCount(data?.unreadCount)
+  if (!data || count === null || count !== data.unreadCount || !Array.isArray(data.readMessageIds) ||
+      data.readMessageIds.some(id => typeof id !== 'string' || !messageIds.includes(id))) {
+    throw new Error('Invalid message read confirmation')
+  }
+  return { readMessageIds: data.readMessageIds as string[], unreadCount: count }
+}
+
 function asRecord(value: unknown): Record<string, unknown> | null {
   return typeof value === 'object' && value !== null
     ? (value as Record<string, unknown>)
