@@ -81,6 +81,11 @@ export function useMessageAlerts() {
   }, [websocketClient])
 
   useEffect(() => {
+    websocketClient.connect()
+    return () => websocketClient.disconnect()
+  }, [websocketClient])
+
+  useEffect(() => {
     const handleNewMessage = (message: RoomMessage) => {
       if (message.direction !== 'incoming') {
         return
@@ -99,12 +104,10 @@ export function useMessageAlerts() {
       playIncomingMessageTone()
     }
 
-    websocketClient.connect()
     websocketClient.on('message:new', handleNewMessage)
 
     return () => {
       websocketClient.off('message:new', handleNewMessage)
-      websocketClient.disconnect()
     }
   }, [info, isOnMessagesPage, websocketClient])
 

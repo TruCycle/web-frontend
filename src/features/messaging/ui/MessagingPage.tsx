@@ -249,8 +249,8 @@ export default function MessagingPage() {
   useEffect(() => {
     const root = messageListRef.current
     if (!root || !activeRoomId || isLoadingMessages || hasHistoryFailure) return
-    // Only rows actually intersecting the scroll viewport are acknowledged;
-    // loaded offscreen history and inactive conversations remain unread.
+    // The implicit viewport root also clips scrolling ancestors. An explicit
+    // list root could count rows while the whole panel is offscreen on mobile.
     const visible = new Set<string>()
     let timer: ReturnType<typeof setTimeout> | undefined
     const observer = new IntersectionObserver(entries => {
@@ -264,7 +264,7 @@ export default function MessagingPage() {
       if (document.visibilityState === 'visible' && visible.size) timer = setTimeout(() => {
         if (document.visibilityState === 'visible') void acknowledgeVisibleMessages(activeRoomId, [...visible])
       }, 100)
-    }, { root, threshold: [0, 0.5] })
+    }, { threshold: [0, 0.5] })
     const observe = () => {
       observer.disconnect(); visible.clear(); clearTimeout(timer)
       if (document.visibilityState === 'visible') root.querySelectorAll('[data-read-message-id]').forEach(node => observer.observe(node))
