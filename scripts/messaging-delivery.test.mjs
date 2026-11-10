@@ -92,3 +92,64 @@ test('same-time and later unseen messages are not read through by ordering, and 
   const result = reads.eligibleReadIds(rows, rows.slice(0, 120).map(x => x.id), 'viewer', 'room-a', 'room-a', true, true)
   assert.equal(result.length, 100); assert.ok(!result.includes('id-129'))
 })
+
+test('mounted message alerts refresh from incoming, private read and reconnect events on the real socket wrapper', async () => {
+  const effects = [], sockets = [], timers = new Map()
+  let count = 0, serverCount = 0, timerId = 0, fetches = 0
+  const session = { user: { id: 'viewer' }, tokens: { accessToken: 'synthetic-test-token' } }
+  const domEvents = () => ({ addEventListener() {}, removeEventListener() {} })
+  const imports = {
+    react: {
+      useEffect: callback => effects.push(callback), useMemo: callback => callback(),
+      useRef: current => ({ current }), useState: () => [0, next => { count = next }],
+    },
+    'react-router-dom': { useLocation: () => ({ pathname: '/dashboard' }) },
+    '@/features/messaging/api/messagingApi': { fetchActiveRooms: async () => { fetches++; return [{ unreadCount: serverCount }] } },
+    '@/features/messaging/lib/playIncomingMessageTone': { playIncomingMessageTone() {} },
+    '@/features/messaging/lib/unreadEvents': { unreadChangedEvent: 'unread-change' },
+    '@/shared/ui/toast/useToast': { useToast: () => ({ info() {} }) },
+    '@/shared/lib/auth/session': { getStoredSession: () => session, captureStoredSession: () => session, isSameSessionIdentity: capture => capture === session },
+    '@/shared/lib/api/client': { apiRequest: async () => ({}) },
+    '@/shared/lib/config/env': { env: { websocketUrl: 'https://synthetic.invalid', apiBaseUrl: '' } },
+    'socket.io-client': { io() {
+      const listeners = new Map()
+      const socket = {
+        connected: false,
+        on(event, listener) { const set = listeners.get(event) ?? new Set(); set.add(listener); listeners.set(event, set) },
+        off(event, listener) { listeners.get(event)?.delete(listener) },
+        connect() { this.connected = true }, disconnect() { this.connected = false },
+        deliver(event, value) { for (const listener of [...(listeners.get(event) ?? [])]) listener(value) },
+      }
+      sockets.push(socket); return socket
+    } },
+  }
+  function module(relative) {
+    const exports = {}
+    const source = ts.transpileModule(fs.readFileSync(path.join(root, relative), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText
+    vm.runInNewContext(source, {
+      exports, window: domEvents(), document: { ...domEvents(), visibilityState: 'visible' },
+      setTimeout(callback) { const key = ++timerId; timers.set(key, callback); return key }, clearTimeout: key => timers.delete(key),
+      require(name) { if (!(name in imports)) throw Error('Unexpected hook import: ' + name); return imports[name] },
+    })
+    return exports
+  }
+  imports['@/shared/lib/websocket/client'] = module('src/shared/lib/websocket/client.ts')
+  module('src/features/messaging/hooks/useMessageAlerts.ts').useMessageAlerts()
+  let cleanups = effects.map(effect => effect())
+  async function flush() { const pending = [...timers.values()]; timers.clear(); pending.forEach(callback => callback()); await Promise.resolve(); await Promise.resolve() }
+  await flush(); assert.equal(count, 0)
+  const incomingMessage = { id: 'new', direction: 'incoming', sender: { firstName: 'Synthetic' }, text: 'Test' }
+  serverCount = 2; sockets.at(-1).deliver('message:new', incomingMessage); await flush()
+  assert.equal(count, 2, 'incoming delivery must refresh the authoritative unread count without reload')
+  serverCount = 0; sockets.at(-1).deliver('messages:read'); await flush()
+  assert.equal(count, 0, 'another tab read must refresh this tab')
+  serverCount = 3; sockets.at(-1).deliver('auth:ready'); await flush()
+  assert.equal(count, 3, 'transport authentication/reconnect must reconcile unread count')
+  // React StrictMode replays effect setup after cleanup using the same hook instance.
+  cleanups.forEach(cleanup => cleanup?.()); cleanups = effects.map(effect => effect()); await flush()
+  serverCount = 4; sockets.at(-1).deliver('message:new', incomingMessage); await flush(); assert.equal(count, 4)
+  cleanups.forEach(cleanup => cleanup?.())
+  const completedFetches = fetches
+  sockets.at(-1).deliver('message:new', incomingMessage); await flush()
+  assert.equal(fetches, completedFetches, 'unmounted alerts must not keep fetching')
+})

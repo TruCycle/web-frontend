@@ -46,6 +46,9 @@ export function useMessageAlerts() {
     [],
   )
   useEffect(() => {
+    // The wrapper registers listeners only after connect creates its socket.
+    // Keep connection ownership with these stable authoritative listeners.
+    websocketClient.connect()
     let alive = true
     let revision = 0
     let timer: ReturnType<typeof setTimeout> | undefined
@@ -77,12 +80,8 @@ export function useMessageAlerts() {
       websocketClient.off('messages:read', refresh)
       window.removeEventListener(unreadChangedEvent, refresh)
       document.removeEventListener('visibilitychange', visible)
+      websocketClient.disconnect()
     }
-  }, [websocketClient])
-
-  useEffect(() => {
-    websocketClient.connect()
-    return () => websocketClient.disconnect()
   }, [websocketClient])
 
   useEffect(() => {
