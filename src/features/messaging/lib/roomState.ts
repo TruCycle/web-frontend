@@ -82,8 +82,11 @@ export function roomReducer(state: RoomState, action: RoomAction): RoomState {
     if (old) clearedMessageIds.add(old.id)
     if (shown) clearedMessageIds.add(shown.id)
     latest.delete(roomId)
-    return { ...state, versions, latest, clearedMessageIds, clearedVersions: new Map(state.clearedVersions).set(roomId, version(versions, roomId)), rooms: state.rooms.map(room => room.id === roomId ? { ...room, lastMessage: null } : room) }
+    return { ...state, versions, latest, clearedMessageIds, clearedVersions: new Map(state.clearedVersions).set(roomId, version(versions, roomId)), rooms: state.rooms.map(room => room.id === roomId ? { ...room, lastMessage: null, unreadCount: 0 } : room) }
   }
+  // A clear and a send can commit in order but arrive in either order. Once
+  // cleared, only an authoritative snapshot may restore this room's preview.
+  if (state.clearedVersions.has(roomId)) return state
   if (state.clearedMessageIds.has(action.message.id)) return state
   const previous = latest.get(roomId)
   if (!previous || Date.parse(previous.createdAt) < Date.parse(action.message.createdAt) || (previous.createdAt === action.message.createdAt && previous.id.localeCompare(action.message.id) < 0)) latest.set(roomId, action.message)

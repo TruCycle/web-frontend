@@ -145,6 +145,10 @@ test('mounted message alerts refresh from incoming, private read and reconnect e
   assert.equal(count, 0, 'another tab read must refresh this tab')
   serverCount = 3; sockets.at(-1).deliver('auth:ready'); await flush()
   assert.equal(count, 3, 'transport authentication/reconnect must reconcile unread count')
+  serverCount = 0; sockets.at(-1).deliver('room:cleared', { roomId: 'room-a' }); await flush()
+  assert.equal(count, 0, 'clearing a room must refresh dashboard unread state')
+  serverCount = 1; sockets.at(-1).deliver('room:deleted', { roomId: 'room-a' }); await flush()
+  assert.equal(count, 1, 'deleting a room must preserve other rooms unread state')
   // React StrictMode replays effect setup after cleanup using the same hook instance.
   cleanups.forEach(cleanup => cleanup?.()); cleanups = effects.map(effect => effect()); await flush()
   serverCount = 4; sockets.at(-1).deliver('message:new', incomingMessage); await flush(); assert.equal(count, 4)
@@ -152,4 +156,90 @@ test('mounted message alerts refresh from incoming, private read and reconnect e
   const completedFetches = fetches
   sockets.at(-1).deliver('message:new', incomingMessage); await flush()
   assert.equal(fetches, completedFetches, 'unmounted alerts must not keep fetching')
+})
+
+test('mounted messaging reconciles reordered clear/send history and coalesces delayed echoes against authoritative storage', async () => {
+  const effects = [], sockets = [], timers = new Map(), states = []
+  let timerId = 0, reducerState, historyCalls = 0
+  const session = { session: { user: { id: 'viewer' } }, user: { id: 'viewer' }, tokens: { accessToken: 'synthetic-test-token' } }
+  const record = (id, text = id) => ({ id, roomId: 'room-a', text, category: 'direct', direction: 'incoming', sender: { id: 'peer' }, createdAt: '2026-11-10T12:00:00.000Z' })
+  let storedHistory = [], storedRooms = [{ id: 'room-a', participants: [], unreadCount: 2, lastMessage: record('old'), updatedAt: '2026-11-10T12:00:00.000Z' }]
+  let fetchHistory = async () => ({ messages: storedHistory, nextCursor: null })
+  let confirmSend
+  const imports = {
+    react: {
+      useEffect: callback => effects.push(callback), useMemo: callback => callback(), useCallback: callback => callback,
+      useRef: current => ({ current }),
+      useState(initial) { const position = states.length; states.push(initial); return [initial, next => { states[position] = typeof next === 'function' ? next(states[position]) : next }] },
+      useReducer(reducer, initial) { reducerState = initial; return [initial, action => { reducerState = reducer(reducerState, action) }] },
+    },
+    '@/features/messaging/api/messagingApi': {
+      fetchActiveRooms: async () => storedRooms,
+      fetchRoomMessages: async () => { historyCalls++; return fetchHistory() },
+      sendDirectTextMessage: () => new Promise(resolve => { confirmSend = resolve }), acknowledgeRoomMessages: async () => { throw Error('Unused read') },
+    },
+    '@/shared/lib/auth/session': { getStoredSession: () => session, captureStoredSession: () => session, isSameSessionIdentity: capture => capture === session },
+    '@/shared/lib/api/client': { apiRequest: async () => ({}) },
+    '@/shared/lib/config/env': { env: { websocketUrl: 'https://synthetic.invalid', apiBaseUrl: '' } },
+    'socket.io-client': { io() {
+      const listeners = new Map()
+      const socket = { connected: false, on(event, callback) { const callbacks = listeners.get(event) ?? new Set(); callbacks.add(callback); listeners.set(event, callbacks) }, off(event, callback) { listeners.get(event)?.delete(callback) }, connect() { this.connected = true }, disconnect() { this.connected = false }, deliver(event, value) { for (const callback of [...(listeners.get(event) ?? [])]) callback(value) } }
+      sockets.push(socket); return socket
+    } },
+  }
+  function module(relative) {
+    const exports = {}
+    const source = ts.transpileModule(fs.readFileSync(path.join(root, relative), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText
+    vm.runInNewContext(source, { exports, AbortController, crypto: { randomUUID: () => id }, window: { addEventListener() {}, removeEventListener() {} }, document: { visibilityState: 'visible', addEventListener() {}, removeEventListener() {} }, setTimeout(callback, delay) { const key = ++timerId; timers.set(key, { callback, delay }); return key }, clearTimeout: key => timers.delete(key), require(name) { if (!(name in imports)) throw Error('Unexpected hook import: ' + name); return imports[name] } })
+    return exports
+  }
+  for (const relative of ['shared/lib/websocket/client', 'features/messaging/lib/roomState', 'features/messaging/lib/unreadEvents', 'features/messaging/lib/historyRecovery', 'features/messaging/lib/readEligibility']) imports['@/' + relative] = module('src/' + relative + '.ts')
+  const hook = module('src/features/messaging/hooks/useMessages.ts').useMessages()
+  const cleanups = effects.map(effect => effect())
+  const settle = async () => { for (let turn = 0; turn < 12; turn++) await Promise.resolve() }
+  const flushReconciliation = async () => { const pending = [...timers].filter(([, value]) => value.delay === 100); for (const [key, value] of pending) { timers.delete(key); value.callback() } await settle() }
+  await settle(); hook.setActiveRoomId('room-a')
+  const socket = sockets[0]
+  storedHistory = [record('old')]
+  socket.deliver('auth:ready'); await settle()
+  assert.equal(states[1]['room-a'][0].id, 'old')
+  storedHistory = [record('after-offline-clear')]
+  storedRooms = [{ ...storedRooms[0], lastMessage: storedHistory[0], unreadCount: 1 }]
+  socket.deliver('auth:ready'); await settle()
+  assert.equal(states[1]['room-a'].length, 1)
+  assert.equal(states[1]['room-a'][0].id, 'after-offline-clear', 'reconnect must replace history after a missed clear')
+  storedHistory = [record('post-clear')]; storedRooms = [{ ...storedRooms[0], lastMessage: storedHistory[0], unreadCount: 1 }]
+  socket.deliver('room:cleared', { roomId: 'room-a' })
+  assert.equal(states[1]['room-a'].length, 0)
+  await flushReconciliation()
+  assert.equal(states[1]['room-a'][0].id, 'post-clear', 'a delayed clear must recover the surviving committed message')
+  assert.equal(reducerState.rooms[0].lastMessage.id, 'post-clear')
+  const beforeBurst = historyCalls
+  for (let index = 0; index < 20; index++) socket.deliver('message:new', record('unseen-cleared-' + index))
+  assert.equal(states[1]['room-a'].length, 1, 'unseen delayed payloads must not be merged into cleared history')
+  await flushReconciliation()
+  assert.equal(historyCalls, beforeBurst + 1, 'a burst coalesces into one authoritative request')
+  assert.equal(states[1]['room-a'][0].id, 'post-clear')
+  let resolveOld
+  fetchHistory = () => new Promise(resolve => { resolveOld = resolve })
+  socket.deliver('message:new', record('stale-echo')); await flushReconciliation()
+  storedHistory = [record('latest-survivor')]; storedRooms = [{ ...storedRooms[0], lastMessage: storedHistory[0] }]
+  fetchHistory = async () => ({ messages: storedHistory, nextCursor: null })
+  socket.deliver('room:cleared', { roomId: 'room-a' }); await flushReconciliation()
+  resolveOld({ messages: [record('deleted-before-clear')], nextCursor: null }); await settle()
+  assert.equal(states[1]['room-a'][0].id, 'latest-survivor', 'an older in-flight history response cannot undo the later clear')
+  const pendingSend = hook.sendMessage('Confirmed before clear')
+  socket.deliver('room:cleared', { roomId: 'room-a' })
+  confirmSend({ ...record('already-cleared', 'Confirmed before clear'), direction: 'outgoing' })
+  assert.equal(await pendingSend, true, 'a successful send clears its draft even if clear invalidates its response')
+  assert.equal(states[1]['room-a'].length, 0, 'a stale send confirmation cannot resurrect cleared history')
+  await flushReconciliation()
+  storedRooms = []
+  socket.deliver('room:deleted', { roomId: 'room-a' })
+  const beforeDeletedEcho = historyCalls
+  socket.deliver('message:new', record('deleted-room-echo')); await flushReconciliation()
+  assert.equal(historyCalls, beforeDeletedEcho)
+  assert.equal(states[1]['room-a'], undefined)
+  assert.equal(reducerState.rooms.length, 0)
+  cleanups.forEach(cleanup => cleanup?.())
 })

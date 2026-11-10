@@ -12,6 +12,8 @@ interface MessagingServerEvents extends Record<string, (...args: never[]) => voi
   'message:new': (message: RoomMessage) => void
   'auth:ready': () => void
   'messages:read': () => void
+  'room:cleared': () => void
+  'room:deleted': () => void
 }
 
 type MessagingClientEvents = Record<string, (...args: never[]) => void>
@@ -71,6 +73,8 @@ export function useMessageAlerts() {
     websocketClient.on('auth:ready', refresh)
     websocketClient.on('message:new', refresh)
     websocketClient.on('messages:read', refresh)
+    websocketClient.on('room:cleared', refresh)
+    websocketClient.on('room:deleted', refresh)
     window.addEventListener(unreadChangedEvent, refresh)
     document.addEventListener('visibilitychange', visible)
     return () => {
@@ -78,6 +82,8 @@ export function useMessageAlerts() {
       websocketClient.off('auth:ready', refresh)
       websocketClient.off('message:new', refresh)
       websocketClient.off('messages:read', refresh)
+      websocketClient.off('room:cleared', refresh)
+      websocketClient.off('room:deleted', refresh)
       window.removeEventListener(unreadChangedEvent, refresh)
       document.removeEventListener('visibilitychange', visible)
       websocketClient.disconnect()

@@ -78,11 +78,27 @@ test('newer activity retains a known room missing from an in-flight list', () =>
   state = reduce(state, { type: 'activity', roomId: 'room-a', updatedAt: '2026-11-03T12:00:01Z' })
   state = reduce(state, { type: 'snapshot', id: 2, rooms: [] }); assert.equal(state.rooms.length, 1)
 })
-test('clear suppresses a previously displayed message echo while allowing a distinct new message', () => {
+test('clear suppresses known and unseen delayed events until a fresh authoritative snapshot', () => {
   let state = reduce(seed(), { type: 'message', message: message('Old', 'old-id') })
   state = reduce(state, { type: 'clear', roomId: 'room-a' })
   assert.equal(reduce(state, { type: 'message', message: message('Old', 'old-id') }), state)
-  state = reduce(state, { type: 'message', message: message('New', 'new-id') }); assert.equal(state.rooms[0].lastMessage.text, 'New')
+  assert.equal(reduce(state, { type: 'message', message: message('Unseen old', 'unseen-id') }), state)
+  state = reduce(state, { type: 'start', id: 2 })
+  state = reduce(state, { type: 'snapshot', id: 2, rooms: [room(message('Surviving new', 'new-id'))] })
+  assert.equal(state.rooms[0].lastMessage.text, 'Surviving new')
+  assert.equal(reduce(state, { type: 'message', message: message('Delayed old', 'delayed-id') }), state)
+})
+
+test('a delayed clear invalidates its preview and unread count but a fresh snapshot restores a surviving send', () => {
+  let state = reduce(seed(), { type: 'start', id: 2 })
+  state = reduce(state, { type: 'snapshot', id: 2, rooms: [{ ...room(message('Post-clear send')), unreadCount: 3 }] })
+  state = reduce(state, { type: 'clear', roomId: 'room-a' })
+  assert.equal(state.rooms[0].unreadCount, 0)
+  assert.equal(state.rooms[0].lastMessage, null)
+  state = reduce(state, { type: 'start', id: 3 })
+  state = reduce(state, { type: 'snapshot', id: 3, rooms: [{ ...room(message('Post-clear send')), unreadCount: 1 }] })
+  assert.equal(state.rooms[0].lastMessage.text, 'Post-clear send')
+  assert.equal(state.rooms[0].unreadCount, 1)
 })
 test('unknown-room metadata loaded after its live event still receives the pending preview', () => {
   let state = reduce(initial, { type: 'message', message: message() })
