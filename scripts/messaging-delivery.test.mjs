@@ -123,11 +123,12 @@ test('mounted message alerts refresh from incoming, private read and reconnect e
       sockets.push(socket); return socket
     } },
   }
+  const browserWindow = new EventTarget()
   function module(relative) {
     const exports = {}
     const source = ts.transpileModule(fs.readFileSync(path.join(root, relative), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText
     vm.runInNewContext(source, {
-      exports, window: domEvents(), document: { ...domEvents(), visibilityState: 'visible' },
+      exports, window: browserWindow, document: { ...domEvents(), visibilityState: 'visible' },
       setTimeout(callback) { const key = ++timerId; timers.set(key, callback); return key }, clearTimeout: key => timers.delete(key),
       require(name) { if (!(name in imports)) throw Error('Unexpected hook import: ' + name); return imports[name] },
     })
@@ -149,6 +150,8 @@ test('mounted message alerts refresh from incoming, private read and reconnect e
   assert.equal(count, 0, 'clearing a room must refresh dashboard unread state')
   serverCount = 1; sockets.at(-1).deliver('room:deleted', { roomId: 'room-a' }); await flush()
   assert.equal(count, 1, 'deleting a room must preserve other rooms unread state')
+  serverCount = 2; browserWindow.dispatchEvent(new Event('online')); await flush()
+  assert.equal(count, 2, 'browser online must reconcile unread without a socket handshake')
   // React StrictMode replays effect setup after cleanup using the same hook instance.
   cleanups.forEach(cleanup => cleanup?.()); cleanups = effects.map(effect => effect()); await flush()
   serverCount = 4; sockets.at(-1).deliver('message:new', incomingMessage); await flush(); assert.equal(count, 4)
@@ -160,6 +163,7 @@ test('mounted message alerts refresh from incoming, private read and reconnect e
 
 test('mounted messaging reconciles reordered clear/send history and coalesces delayed echoes against authoritative storage', async () => {
   const effects = [], sockets = [], timers = new Map(), states = []
+  const browserWindow = new EventTarget()
   let timerId = 0, reducerState, historyCalls = 0
   const session = { session: { user: { id: 'viewer' } }, user: { id: 'viewer' }, tokens: { accessToken: 'synthetic-test-token' } }
   const record = (id, text = id) => ({ id, roomId: 'room-a', text, category: 'direct', direction: 'incoming', sender: { id: 'peer' }, createdAt: '2026-11-10T12:00:00.000Z' })
@@ -190,7 +194,7 @@ test('mounted messaging reconciles reordered clear/send history and coalesces de
   function module(relative) {
     const exports = {}
     const source = ts.transpileModule(fs.readFileSync(path.join(root, relative), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText
-    vm.runInNewContext(source, { exports, AbortController, crypto: { randomUUID: () => id }, window: { addEventListener() {}, removeEventListener() {} }, document: { visibilityState: 'visible', addEventListener() {}, removeEventListener() {} }, setTimeout(callback, delay) { const key = ++timerId; timers.set(key, { callback, delay }); return key }, clearTimeout: key => timers.delete(key), require(name) { if (!(name in imports)) throw Error('Unexpected hook import: ' + name); return imports[name] } })
+    vm.runInNewContext(source, { exports, AbortController, crypto: { randomUUID: () => id }, window: browserWindow, document: { visibilityState: 'visible', addEventListener() {}, removeEventListener() {} }, setTimeout(callback, delay) { const key = ++timerId; timers.set(key, { callback, delay }); return key }, clearTimeout: key => timers.delete(key), require(name) { if (!(name in imports)) throw Error('Unexpected hook import: ' + name); return imports[name] } })
     return exports
   }
   for (const relative of ['shared/lib/websocket/client', 'features/messaging/lib/roomState', 'features/messaging/lib/unreadEvents', 'features/messaging/lib/historyRecovery', 'features/messaging/lib/readEligibility']) imports['@/' + relative] = module('src/' + relative + '.ts')
@@ -220,6 +224,12 @@ test('mounted messaging reconciles reordered clear/send history and coalesces de
   await flushReconciliation()
   assert.equal(historyCalls, beforeBurst + 1, 'a burst coalesces into one authoritative request')
   assert.equal(states[1]['room-a'][0].id, 'post-clear')
+  fetchHistory = async () => { throw Error('Offline') }
+  socket.deliver('room:cleared', { roomId: 'room-a' }); await flushReconciliation()
+  assert.equal(states[1]['room-a'].length, 0)
+  fetchHistory = async () => ({ messages: storedHistory, nextCursor: null })
+  browserWindow.dispatchEvent(new Event('online')); await settle()
+  assert.equal(states[1]['room-a'][0].id, 'post-clear', 'browser online must retry failed history without a socket handshake')
   let resolveOld
   fetchHistory = () => new Promise(resolve => { resolveOld = resolve })
   socket.deliver('message:new', record('stale-echo')); await flushReconciliation()

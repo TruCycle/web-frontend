@@ -76,6 +76,7 @@ export function useMessageAlerts() {
     websocketClient.on('room:cleared', refresh)
     websocketClient.on('room:deleted', refresh)
     window.addEventListener(unreadChangedEvent, refresh)
+    window.addEventListener('online', refresh)
     document.addEventListener('visibilitychange', visible)
     return () => {
       alive = false; revision++; clearTimeout(timer)
@@ -85,6 +86,7 @@ export function useMessageAlerts() {
       websocketClient.off('room:cleared', refresh)
       websocketClient.off('room:deleted', refresh)
       window.removeEventListener(unreadChangedEvent, refresh)
+      window.removeEventListener('online', refresh)
       document.removeEventListener('visibilitychange', visible)
       websocketClient.disconnect()
     }

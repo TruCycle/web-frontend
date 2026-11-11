@@ -332,6 +332,9 @@ export function useMessages() {
     websocketClient.on('room:cleared', handleRoomCleared)
     websocketClient.on('room:deleted', handleRoomDeleted)
     websocketClient.on('presence:update', handlePresenceUpdate)
+    // HTTP can recover without a fresh socket handshake. Retry authoritative
+    // history even if a lifecycle event arrived while requests were failing.
+    window.addEventListener('online', handleReady)
 
     return () => {
       if (unknownRoomTimer.current !== null) clearTimeout(unknownRoomTimer.current)
@@ -344,6 +347,7 @@ export function useMessages() {
       websocketClient.off('room:cleared', handleRoomCleared)
       websocketClient.off('room:deleted', handleRoomDeleted)
       websocketClient.off('presence:update', handlePresenceUpdate)
+      window.removeEventListener('online', handleReady)
       websocketClient.disconnect()
     }
   }, [websocketClient, loadRooms, loadMessagesForRoom, cacheMessages])
