@@ -1,5 +1,5 @@
 import paths from './routes.generated.js'
-import { isSpaPath } from './route-policy.js'
+import { getSpaPathStatus } from './route-policy.js'
 
 const robots = 'noindex, nofollow, noarchive'
 function protectedResponse(response, method = 'GET', status = response.status) {
@@ -20,10 +20,11 @@ export default {
         url.pathname = '/'
         return protectedResponse(new Response(null, { status: 308, headers: { Location: url.href } }), request.method)
       }
-      if (isSpaPath(url.pathname, paths)) {
+      const spaStatus = getSpaPathStatus(url.pathname, paths)
+      if (spaStatus !== null) {
         const shell = await environment.ASSETS.fetch(new Request(new URL('/index.html', url), { method: 'GET', redirect: 'manual' }))
         if (shell.status !== 200) return protectedResponse(new Response('Staging assets unavailable', { status: 503 }), request.method)
-        return protectedResponse(shell, request.method)
+        return protectedResponse(shell, request.method, spaStatus)
       }
       const asset = await environment.ASSETS.fetch(new Request(request, { redirect: 'manual' }))
       if (asset.status >= 300 && asset.status < 400 && asset.status !== 304) return protectedResponse(new Response('Staging assets unavailable', { status: 503 }), request.method)

@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import test from 'node:test'
 import paths from '../workers/staging-web/routes.generated.js'
 import worker from '../workers/staging-web/index.js'
-import { canonicalHostRedirect, isSpaPath } from '../workers/staging-web/route-policy.js'
+import { canonicalHostRedirect, getSpaPathStatus } from '../workers/staging-web/route-policy.js'
 import { extractSpaRoutes } from './spa-routes.mjs'
 import { startStaticServer } from './prerender.mjs'
 import os from 'node:os'
@@ -24,8 +24,8 @@ function fixture({ fail = false, redirect = false } = {}) {
 test('Worker route inventory covers every current React Router path, including auth/private aliases', () => {
   const source = fs.readFileSync(new URL('../src/app/routes/AppRoutes.tsx', import.meta.url), 'utf8')
   assert.deepEqual(paths, extractSpaRoutes(source))
-  for (const path of ['/auth/verify-email', '/profile', '/partner-shops', '/support/collector']) assert.equal(isSpaPath(path, paths), true)
-  for (const path of ['/missing', '/missing.js', '/support/a/b', '/%2fprofile']) assert.equal(isSpaPath(path, paths), false)
+  for (const path of ['/auth/verify-email', '/profile', '/partner-shops', '/support/collector']) assert.equal(getSpaPathStatus(path, paths), 200)
+  for (const path of ['/missing', '/missing.js', '/support/a/b', '/%2fprofile']) assert.equal(getSpaPathStatus(path, paths), null)
 })
 test('known SPA routes return shell200 with permanent staging headers and no token forwarded into the asset fetch', async () => {
   const env = fixture()
@@ -39,6 +39,25 @@ test('unknown navigation returns a genuine404 with a usable app shell', async ()
   const response = await worker.fetch(new Request(origin + '/not-a-route', { headers: { Accept: 'text/html' } }), fixture())
   assert.equal(response.status, 404); assert.match(await response.text(), /id="root"/)
   assert.match(response.headers.get('X-Robots-Tag'), /noindex/)
+})
+test('malformed item links return the app shell with HTTP 404 and no cache', async () => {
+  for (const pathname of ['/items/not-a-uuid', '/items/%6Eot-a-uuid/', '/items/missing.jpg']) {
+    const env = fixture()
+    const response = await worker.fetch(new Request(origin + pathname), env)
+    assert.equal(response.status, 404)
+    assert.match(await response.text(), /id="root"/)
+    assert.equal(response.headers.get('Cache-Control'), 'no-store')
+    assert.match(response.headers.get('X-Robots-Tag'), /noindex/)
+    assert.deepEqual(env.requests.map(request => new URL(request.url).pathname), ['/index.html'])
+  }
+  const head = await worker.fetch(new Request(origin + '/items/not-a-uuid', { method: 'HEAD' }), fixture())
+  assert.equal(head.status, 404)
+  assert.equal(await head.text(), '')
+})
+test('well-formed item links still return the app shell for the client to load the listing', async () => {
+  const response = await worker.fetch(new Request(origin + '/items/ABCDEF12-1234-1234-1234-1234567890AB/'), fixture())
+  assert.equal(response.status, 200)
+  assert.match(await response.text(), /id="root"/)
 })
 test('missing asset never receives the SPA HTML fallback, even with an HTML accept header', async () => {
   const response = await worker.fetch(new Request(origin + '/missing.js', { headers: { Accept: 'text/html' } }), fixture())
