@@ -103,19 +103,23 @@ export default function PublicBrowsePage() {
   const resultLabel = useMemo(() => {
     if (isLoading) return 'Loading items…'
     if (error) return error
-    if (items.length === 0) return 'No items match your search right now.'
+    if (items.length === 0) {
+      return search.trim() || postcode.trim() || category !== 'All Items'
+        ? 'No items match these filters. Try a broader category or a nearby postcode.'
+        : 'No items are available to browse right now.'
+    }
     return `${items.length} free item${items.length === 1 ? '' : 's'} available`
-  }, [error, isLoading, items.length])
+  }, [category, error, isLoading, items.length, postcode, search])
 
   return (
-    <div className="min-h-screen bg-[#F7FBF4] text-tc-app-text">
+    <div className="flex min-h-screen flex-col bg-[#F7FBF4] text-tc-app-text">
       <LandingNavbar
         dashboardTo="/dashboard"
         isAuthenticated={isAuthenticated}
         postItemTo={isAuthenticated ? '/listings' : '/signup?intent=donor'}
       />
 
-      <main className="mx-auto max-w-7xl px-6 pb-24 pt-32">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-6 pb-24 pt-32">
         <header className="max-w-2xl">
           <h1 className="text-4xl font-bold tracking-[-0.04em] text-[#0B3322] sm:text-5xl">
             {postcode.trim() ? 'Free items near your search area' : 'Free items to reuse'}
@@ -171,25 +175,12 @@ export default function PublicBrowsePage() {
           </div>
         ) : null}
 
-        <p className={error ? 'mt-6 text-sm text-rose-600' : 'mt-6 text-sm text-slate-500'} role={error ? 'alert' : 'status'}>
+        <p className={error ? 'mt-6 min-h-10 text-sm text-rose-600' : 'mt-6 min-h-10 text-sm text-slate-500'} role={error ? 'alert' : 'status'}>
           {resultLabel}
         </p>
 
         <div className="mt-4 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {isLoading
-            ? Array.from({ length: 6 }).map((_, index) => (
-                <div
-                  key={`browse-shimmer-${index}`}
-                  className="overflow-hidden rounded-xl border border-slate-200 bg-white"
-                >
-                  <div className="tc-shimmer-block h-56 w-full" />
-                  <div className="space-y-2 p-4">
-                    <span className="tc-shimmer-block block h-5 w-2/3 rounded-md" />
-                    <span className="tc-shimmer-block block h-4 w-1/2 rounded-md" />
-                  </div>
-                </div>
-              ))
-            : items.map((item) => (
+          {!isLoading && items.map((item) => (
                 <article
                   key={item.id}
                   className="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white"
@@ -231,11 +222,6 @@ export default function PublicBrowsePage() {
               ))}
         </div>
 
-        {!isLoading && items.length === 0 && !error ? (
-          <div className="mt-6 rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
-            Nothing here yet for that search. Try a broader category or a nearby postcode.
-          </div>
-        ) : null}
       </main>
 
       <Modal
