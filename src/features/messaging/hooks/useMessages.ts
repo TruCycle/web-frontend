@@ -4,6 +4,7 @@ import {
   fetchActiveRooms,
   fetchRoomMessages,
   sendDirectTextMessage,
+  uploadMessageImage,
 } from '@/features/messaging/api/messagingApi'
 import type { RoomMessage } from '@/features/messaging/types'
 import { WebSocketClient } from '@/shared/lib/websocket/client'
@@ -395,6 +396,36 @@ export function useMessages() {
   )
 
   const activeRoom = rooms.find((room) => room.id === activeRoomId) ?? null
+  const sendImage = async (file: File, id: string) => {
+    const roomId = activeRoomIdRef.current
+    const capture = captureStoredSession()
+    if (!roomId || !capture || sendingRef.current) return false
+    const revision = roomRevisions.current.get(roomId) ?? 0
+    sendingRef.current = true
+    setIsSending(true)
+    setSendError(null)
+    try {
+      const saved = await uploadMessageImage(roomId, id, file)
+      if (!isSameSessionIdentity(capture)) return false
+      if ((roomRevisions.current.get(roomId) ?? 0) === revision) {
+        cacheMessages(roomId, messages => mergeMessageIntoRoom(messages, saved))
+        dispatchRoom({ type: 'message', message: saved })
+      }
+      if (clearedRoomIds.current.has(roomId)) {
+        void loadRooms()
+        void loadMessagesForRoom(roomId, 'reset')
+      }
+      return true
+    } catch {
+      if (isSameSessionIdentity(capture)) {
+        setSendError('The image could not be confirmed. Check the conversation before retrying.')
+      }
+      return false
+    } finally {
+      sendingRef.current = false
+      setIsSending(false)
+    }
+  }
   const messages = activeRoomId ? roomMessages[activeRoomId] ?? [] : []
 
   return {
@@ -410,6 +441,7 @@ export function useMessages() {
     setActiveRoomId,
     acknowledgeVisibleMessages,
     sendMessage,
+    sendImage,
     reloadRooms: loadRooms,
     historyGap: activeRoomId ? historyGaps[activeRoomId] ?? null : null,
     hasHistoryFailure: Boolean(activeRoomId && historyFailures[activeRoomId]),

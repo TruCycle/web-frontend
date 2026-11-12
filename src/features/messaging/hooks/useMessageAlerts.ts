@@ -31,7 +31,7 @@ function getMessagePreview(message: RoomMessage): string {
     return preview
   }
 
-  return message.imageUrl ? 'Sent an image' : 'You received a new message.'
+  return message.imageUrl || message.hasAttachment ? 'Sent an image' : 'You received a new message.'
 }
 
 export function useMessageAlerts() {

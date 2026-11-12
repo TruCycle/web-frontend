@@ -6,6 +6,8 @@ import type { ActiveRoom, RoomMessage, RoomParticipant } from '@/features/messag
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { Button } from '@/shared/ui/button/Button'
 import { classNames } from '@/shared/utils/classNames'
+import { MessageImageComposer } from './MessageImageComposer'
+import { PrivateMessageImage } from './PrivateMessageImage'
 
 const IMAGE_GROUP_WINDOW_MS = 30_000
 
@@ -65,7 +67,7 @@ function formatPreview(message: RoomMessage | null): string {
   if (!message) {
     return 'No messages yet'
   }
-  if (message.imageUrl) {
+  if (message.imageUrl || message.hasAttachment) {
     return message.caption ?? 'Image'
   }
   return message.text ?? 'Message'
@@ -181,6 +183,7 @@ export default function MessagingPage() {
     unreadCountByRoom,
     setActiveRoomId,
     sendMessage,
+    sendImage,
     historyGap,
     hasHistoryFailure,
     hasOlderMessages,
@@ -634,7 +637,14 @@ export default function MessagingPage() {
                           isOutgoing ? 'bg-[#A4F5A6]' : 'bg-[#F8FAFC]',
                         )}
                       >
-                        {message.imageUrl ? (
+                        {message.hasAttachment && user ? (
+                          <PrivateMessageImage
+                            key={`${user.id}:${message.roomId}:${message.id}`}
+                            roomId={message.roomId}
+                            messageId={message.id}
+                            alt={message.caption ?? 'Message attachment'}
+                          />
+                        ) : message.imageUrl ? (
                           <button
                             type="button"
                             className="mb-2 block w-full overflow-hidden rounded-lg"
@@ -665,13 +675,13 @@ export default function MessagingPage() {
           </div>
 
           <div className="flex items-center gap-2 border-t border-[#F8FAFC] bg-white p-3">
-            <button
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-[#121212] hover:bg-slate-100"
-              disabled
-              title="Image attachments are unavailable"
-            >
-              <Paperclip size={20} />
-            </button>
+            {import.meta.env.VITE_MESSAGE_ATTACHMENTS_ENABLED === 'true' && activeRoomId && user ? (
+              <MessageImageComposer key={`${user.id}:${activeRoomId}`} disabled={isSending} send={sendImage} />
+            ) : (
+              <button type="button" aria-label="Attach image" className="inline-flex h-10 w-10 items-center justify-center rounded-full" disabled title="Image attachments are unavailable">
+                <Paperclip size={20} />
+              </button>
+            )}
             <div className="flex flex-1 items-center rounded-xl border border-[#E2E8F0] px-3">
               <input
                 type="text"

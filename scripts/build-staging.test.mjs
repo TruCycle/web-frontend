@@ -75,6 +75,7 @@ test('replaces inherited production browser values and strips unknown VITE keys'
     VITE_POSTHOG_PROJECT_TOKEN: 'production-analytics',
     VITE_CLOUDINARY_UPLOAD_PRESET: 'production-media',
     VITE_VISION_WORKER_URL: 'https://imgrc.trucycle01.workers.dev',
+    VITE_MESSAGE_ATTACHMENTS_ENABLED: 'true',
     VITE_UNKNOWN_SECRET: 'must-not-enter-the-browser',
     vite_lowercase_secret: 'must-not-enter-the-browser',
     NODE_ENV: 'development',
@@ -90,6 +91,8 @@ test('replaces inherited production browser values and strips unknown VITE keys'
     assert.equal(plan.environment[key], '')
   }
   assert.equal(plan.environment.VITE_ENABLE_SMART_SPOT, 'false')
+  assert.equal(plan.environment.VITE_MESSAGE_ATTACHMENTS_ENABLED, 'false')
+  assert.equal(createStagingBuildPlan(validEnvironment({ STAGING_MESSAGE_ATTACHMENTS_ENABLED: 'true' })).environment.VITE_MESSAGE_ATTACHMENTS_ENABLED, 'true')
   assert.equal(inherited.VITE_POSTHOG_PROJECT_TOKEN, 'production-analytics', 'does not mutate the parent environment')
 })
 

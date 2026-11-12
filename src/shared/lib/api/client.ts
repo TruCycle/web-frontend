@@ -37,7 +37,7 @@ async function recover() {
 
 // Timeout covers both headers and response-body parsing, even if a mocked or
 // non-conforming transport ignores abort. Late completion cannot reach callers.
-async function requestOnce<T>(url: string, init: RequestInit, signal: AbortSignal | undefined, timeoutMs: number): Promise<T> {
+async function requestOnce<T>(url: string, init: RequestInit, signal: AbortSignal | undefined, timeoutMs: number, readBody: (response: Response) => Promise<T>): Promise<T> {
   const controller = new AbortController()
   let timer: ReturnType<typeof setTimeout> | undefined
   let abort = () => {}
@@ -62,13 +62,26 @@ async function requestOnce<T>(url: string, init: RequestInit, signal: AbortSigna
       } catch { /* Retain status when an error body is unavailable. */ }
       throw new ApiError(message, response.status)
     }
-    return response.status === 204 ? undefined as T : await response.json() as T
+    return response.status === 204 ? undefined as T : await readBody(response)
   }
   try { return await Promise.race([operation(), cancelled]) }
   finally { clearTimeout(timer); signal?.removeEventListener('abort', abort) }
 }
 
 export async function apiRequest<TResponse, TBody = never>(path: string, options: RequestOptions<TBody> = {}): Promise<TResponse> {
+  return request(path, options, response => response.json() as Promise<TResponse>)
+}
+
+export async function apiRequestBlob(path: string, signal?: AbortSignal): Promise<Blob> {
+  return request(path, { signal }, response => response.blob(), true)
+}
+
+async function request<TResponse, TBody>(
+  path: string,
+  options: RequestOptions<TBody>,
+  readBody: (response: Response) => Promise<TResponse>,
+  rejectRedirects = false,
+): Promise<TResponse> {
   if (options.signal?.aborted) throw new DOMException('Request cancelled', 'AbortError')
   const method = options.method ?? 'GET'
   const authenticated = options.includeAuth ?? true
@@ -84,11 +97,13 @@ export async function apiRequest<TResponse, TBody = never>(path: string, options
     assertIdentity()
     const current = authenticated ? captureStoredSession() : null
     try {
+      const multipart = typeof FormData !== 'undefined' && options.body instanceof FormData ? options.body : undefined
       const response = await requestOnce<TResponse>(env.apiBaseUrl + path, {
         method,
-        headers: { 'Content-Type': 'application/json', ...(current ? { Authorization: 'Bearer ' + current.session.tokens.accessToken } : {}), ...options.headers },
-        body: options.body === undefined ? undefined : JSON.stringify(options.body),
-      }, options.signal, Math.min(60_000, Math.max(1, options.timeoutMs ?? 10_000)))
+        headers: { ...(multipart ? {} : { 'Content-Type': 'application/json' }), ...(current ? { Authorization: 'Bearer ' + current.session.tokens.accessToken } : {}), ...options.headers },
+        body: multipart ?? (options.body === undefined ? undefined : JSON.stringify(options.body)),
+        redirect: rejectRedirects || multipart ? 'error' : undefined,
+      }, options.signal, Math.min(60_000, Math.max(1, options.timeoutMs ?? 10_000)), readBody)
       assertIdentity()
       return response
     } catch (error) {

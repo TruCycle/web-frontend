@@ -1,4 +1,4 @@
-import { apiRequest } from '@/shared/lib/api/client'
+import { apiRequest, apiRequestBlob } from '@/shared/lib/api/client'
 import { unwrapApiData } from '@/shared/lib/api/envelope'
 import type { ActiveRoom, RoomMessage, RoomParticipant } from '@/features/messaging/types'
 
@@ -70,6 +70,7 @@ function mapMessage(value: unknown): RoomMessage | null {
     direction: (readString(message.direction) ?? 'incoming') as RoomMessage['direction'],
     category: (readString(message.category) ?? 'direct') as RoomMessage['category'],
     imageUrl: readString(message.imageUrl),
+    hasAttachment: message.hasAttachment === true,
     caption: readString(message.caption),
     text: readString(message.text),
     createdAt: readString(message.createdAt) ?? new Date().toISOString(),
@@ -190,4 +191,28 @@ export async function sendDirectTextMessage(roomId: string, payload: { readonly 
     throw new Error('The saved message could not be confirmed.')
   }
   return message
+}
+
+export const MAX_MESSAGE_IMAGE_BYTES = 512 * 1024
+
+export async function uploadMessageImage(roomId: string, clientMessageId: string, file: File): Promise<RoomMessage> {
+  const body = new FormData()
+  body.append('clientMessageId', clientMessageId)
+  body.append('image', file)
+  const response = await apiRequest<unknown, FormData>(`/messages/rooms/${encodeURIComponent(roomId)}/messages/image`, { method: 'POST', body })
+  const message = mapMessage(unwrapApiData<unknown>(response))
+  if (!message || message.id !== clientMessageId || message.roomId !== roomId ||
+      !message.hasAttachment || message.imageUrl || message.direction !== 'outgoing') {
+    throw new Error('The saved image could not be confirmed.')
+  }
+  return message
+}
+
+export async function fetchMessageImage(roomId: string, messageId: string, signal: AbortSignal): Promise<Blob> {
+  const image = await apiRequestBlob(`/messages/rooms/${encodeURIComponent(roomId)}/messages/${encodeURIComponent(messageId)}/image`, signal)
+  if (!image || !['image/jpeg', 'image/png', 'image/webp'].includes(image.type) ||
+      !image.size || image.size > MAX_MESSAGE_IMAGE_BYTES) {
+    throw new Error('Image attachment unavailable.')
+  }
+  return image
 }
