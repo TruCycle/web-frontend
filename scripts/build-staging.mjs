@@ -71,7 +71,7 @@ export function createStagingBuildPlan(environment, root = repoRoot) {
     VITE_POSTHOG_HOST: '',
     VITE_GOOGLE_CLIENT_ID: '',
     VITE_ENABLE_SMART_SPOT: 'false',
-    VITE_MESSAGE_ATTACHMENTS_ENABLED: environment.STAGING_MESSAGE_ATTACHMENTS_ENABLED === 'true' ? 'true' : 'false',
+    VITE_MESSAGE_ATTACHMENTS_ENABLED: (environment.STAGING_MESSAGE_ATTACHMENTS_ENABLED ?? 'true') === 'true' ? 'true' : 'false',
     VITE_VISION_WORKER_URL: '',
     VITE_INTERNAL_PIN: '',
   })
