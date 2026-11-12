@@ -24,6 +24,23 @@ const notifications = load('src/features/notifications/api/notificationsApi.ts')
 const item = (fields = {}) => ({ id: 'chair', title: 'Chair', distance_km: 0.1,
   location: { precision: 'approximate', postcode: 'E16 2RD', address_line: 'PRIVATE_STREET' }, ...fields })
 const itemId = '00000000-0000-4000-8000-000000000001'
+test('manual collection sends one authenticated mutation and requires a complete result', async () => {
+  requests = []
+  response = { data: { status: 'complete' } }
+  await api.collectItem(itemId)
+  assert.equal(requests.length, 1)
+  assert.equal(requests[0][0], '/items/' + itemId + '/collect')
+  assert.equal(requests[0][1].method, 'POST')
+  assert.equal(Object.keys(requests[0][1].body).length, 0)
+})
+test('uncertain or incomplete collection responses never report success', async () => {
+  for (const data of [null, {}, { status: 'pending_approval' }, { status: 'approved' }, { status: 'success' }]) {
+    requests = []
+    response = { data }
+    await assert.rejects(api.collectItem(itemId), /Collection could not be confirmed/)
+    assert.equal(requests.length, 1)
+  }
+})
 test('public item deep link requests only the guest projection and retains outward-only fields', async () => {
   requests = []; response = { data: item({ id: itemId }) }
   const result = await api.fetchPublicItem(itemId)

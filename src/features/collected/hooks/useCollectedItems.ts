@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   collectItem,
   fetchCollectedItems,
@@ -18,6 +18,7 @@ export function useCollectedItems(options: UseCollectedItemsOptions = {}) {
   const [items, setItems] = useState<CollectedItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isCollecting, setIsCollecting] = useState(false)
+  const collecting = useRef(false)
   const [error, setError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
   const [pagination, setPagination] = useState<PaginationMeta>({
@@ -61,27 +62,38 @@ export function useCollectedItems(options: UseCollectedItemsOptions = {}) {
   const completeCollection = useCallback(
     async (payload: {
       readonly itemId: string
-      readonly qrPayload: string
+      readonly qrPayload?: string
       readonly shopId?: string
     }) => {
+      if (collecting.current) throw new Error('Collection is already being recorded')
+      const selected = items.find(item => item.item.id === payload.itemId)
+      if (!payload.qrPayload && (!selected || selected.claimStatus.toLowerCase() !== 'approved' ||
+          selected.item.pickupOption.toLowerCase() !== 'exchange')) {
+        throw new Error('Only approved exchanges can be confirmed manually')
+      }
+      collecting.current = true
       try {
         setIsCollecting(true)
         setError(null)
-        await scanQrCode({
-          qrPayload: payload.qrPayload,
-          direction: 'out',
-          shopId: payload.shopId,
-        })
+        if (payload.qrPayload) {
+          const scan = await scanQrCode({
+            qrPayload: payload.qrPayload,
+            direction: 'out',
+            shopId: payload.shopId,
+          })
+          if (!scan.accepted) throw new Error('The QR scan was not accepted')
+        }
         await collectItem(payload.itemId, payload.shopId)
         await loadCollectedItems(page)
       } catch {
-        setError('Collection failed. Please rescan and try again.')
+        setError('Collection could not be confirmed. Check the item status before retrying.')
         throw new Error('Collection failed')
       } finally {
+        collecting.current = false
         setIsCollecting(false)
       }
     },
-    [loadCollectedItems, page],
+    [items, loadCollectedItems, page],
   )
 
   const canGoPrevious = pagination.page > 1

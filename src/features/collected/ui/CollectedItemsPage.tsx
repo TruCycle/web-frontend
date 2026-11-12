@@ -12,16 +12,22 @@ import { ItemQrCodeDialog } from '@/shared/ui/modal/ItemQrCodeDialog'
 import { QRCodeDialog } from '@/shared/ui/modal/QRCodeDialog'
 import { CollectionSuccessDialog } from '@/shared/ui/modal/CollectionSuccessDialog'
 import { PaginationControls } from '@/shared/ui/pagination/PaginationControls'
+import { Modal } from '@/shared/ui/modal/Modal'
 
-function statusLabel(claimStatus: string): 'Collected' | 'Claimed' {
-  if (claimStatus === 'complete' || claimStatus === 'completed') {
-    return 'Collected'
+function statusLabel(claimStatus: string): string {
+  const labels: Record<string, string> = {
+    pending_approval: 'Awaiting approval',
+    approved: 'Ready for collection',
+    complete: 'Collected',
+    completed: 'Collected',
+    rejected: 'Request declined',
+    cancelled: 'Request cancelled',
   }
-  return 'Claimed'
+  return labels[claimStatus.toLowerCase()] ?? 'Status unavailable'
 }
 
 function statusTone(claimStatus: string): 'claimed' | 'collected' {
-  return statusLabel(claimStatus) === 'Claimed' ? 'claimed' : 'collected'
+  return statusLabel(claimStatus) === 'Collected' ? 'collected' : 'claimed'
 }
 
 export default function CollectedItemsPage() {
@@ -45,6 +51,8 @@ export default function CollectedItemsPage() {
   const [selectedItem, setSelectedItem] = useState<CollectedItem | null>(null)
   const [selectedQrPreviewItem, setSelectedQrPreviewItem] = useState<CollectedItem | null>(null)
   const [qrItem, setQrItem] = useState<CollectedItem | null>(null)
+  const [manualItem, setManualItem] = useState<CollectedItem | null>(null)
+  const [manualError, setManualError] = useState<string | null>(null)
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const [collectedItemName, setCollectedItemName] = useState('')
 
@@ -92,6 +100,21 @@ export default function CollectedItemsPage() {
       item.item.pickupOption.toLowerCase() === 'donate' &&
       Boolean(item.item.qrCode)
     )
+  }
+
+  const confirmManualCollection = async () => {
+    if (!manualItem || isCollecting) return
+    setManualError(null)
+    try {
+      await completeCollection({ itemId: manualItem.item.id })
+      setCollectedItemName(manualItem.item.title)
+      setManualItem(null)
+      setShowSuccessDialog(true)
+      success('Collection recorded', 'The handoff has been completed successfully.')
+    } catch {
+      setManualError('Collection was not confirmed. Check the item status before retrying.')
+      toastError('Collection could not be confirmed', 'Check the item status before retrying.')
+    }
   }
 
   return (
@@ -173,6 +196,11 @@ export default function CollectedItemsPage() {
               imageAlt={item.item.title}
               actions={
                 <>
+                  {item.claimStatus.toLowerCase() === 'approved' && item.item.pickupOption.toLowerCase() === 'exchange' ? (
+                    <Button variant="primary" disabled={isCollecting} onClick={() => { setManualError(null); setManualItem(item) }}>
+                      Confirm collection
+                    </Button>
+                  ) : null}
                   {shouldShowQrPreviewAction(item) ? (
                     <Button
                       variant="primary"
@@ -234,6 +262,24 @@ export default function CollectedItemsPage() {
         onClose={() => setShowSuccessDialog(false)}
         itemName={collectedItemName}
       />
+
+      <Modal
+        isOpen={Boolean(manualItem)}
+        onClose={() => { if (!isCollecting) setManualItem(null) }}
+        ariaLabel="Confirm collection"
+      >
+        <div className="space-y-5 p-6">
+          <h2 className="text-xl font-semibold">Confirm collection</h2>
+          <p>Confirm only after you have received {manualItem?.item.title} from the donor.</p>
+          {manualError ? <p role="alert" className="text-sm text-rose-700">{manualError}</p> : null}
+          <div className="flex flex-wrap justify-end gap-3">
+            <Button variant="secondary" disabled={isCollecting} onClick={() => setManualItem(null)}>Cancel</Button>
+            <Button variant="primary" disabled={isCollecting} onClick={() => void confirmManualCollection()}>
+              {isCollecting ? 'Recording collection…' : 'I have received this item'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }

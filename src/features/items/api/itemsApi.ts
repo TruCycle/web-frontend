@@ -337,8 +337,12 @@ export async function scanQrCode(payload: {
 }
 
 export async function collectItem(itemId: string, shopId?: string): Promise<void> {
-  await apiRequest<unknown, { shop_id?: string }>(`/items/${itemId}/collect`, {
+  const response = await apiRequest<unknown, { shop_id?: string }>(`/items/${encodeURIComponent(itemId)}/collect`, {
     method: 'POST',
     body: shopId ? { shop_id: shopId } : {},
   })
+  const data = unwrapApiData<unknown>(response)
+  if (!data || typeof data !== 'object' || !('status' in data) || data.status !== 'complete') {
+    throw new Error('Collection could not be confirmed')
+  }
 }
