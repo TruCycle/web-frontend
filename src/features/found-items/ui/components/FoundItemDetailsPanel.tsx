@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useId, useState, type ReactNode } from 'react'
 import { Clock3, Flag, MapPin, Scale, Sparkles, Users } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
 import { Modal } from '@/shared/ui/modal/Modal'
@@ -74,6 +74,7 @@ function FoundItemDetailsContent({
   onCancelClaim,
   onReport,
 }: FoundItemDetailsPanelProps) {
+  const pickupNoteLabel = useId()
   const [claimMessage, setClaimMessage] = useState(viewerClaim?.message ?? '')
   const [reportReason, setReportReason] = useState('')
   const [reportDetails, setReportDetails] = useState('')
@@ -90,9 +91,9 @@ function FoundItemDetailsContent({
     viewerClaim !== null && (viewerClaim.status === 'pending' || viewerClaim.status === 'acknowledged')
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} containerClassName="max-w-[860px]">
+    <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Found item details" containerClassName="max-w-[860px]">
       <div className="space-y-5 p-5 sm:p-6">
-        {isLoading ? <p className="text-sm text-slate-500">Loading item...</p> : null}
+        {isLoading ? <p role="status" className="text-sm text-slate-500">Loading item...</p> : null}
 
         {!isLoading && !item ? <p className="text-sm text-slate-500">Choose an item to inspect.</p> : null}
 
@@ -192,7 +193,7 @@ function FoundItemDetailsContent({
                 {!isOwnPost ? (
                   <div className="space-y-4 rounded-[24px] border border-slate-200 bg-[#F8FAFC] p-4">
                     <div>
-                      <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        <h3 id={pickupNoteLabel} className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
                         Pickup note
                       </h3>
                       <p className="mt-2 text-sm leading-6 text-slate-500">
@@ -203,6 +204,7 @@ function FoundItemDetailsContent({
                     </div>
 
                     <textarea
+                      aria-labelledby={pickupNoteLabel}
                       value={claimMessage}
                       onChange={(event) => setClaimMessage(event.target.value)}
                       disabled={hasActiveViewerClaim}
@@ -267,12 +269,14 @@ function FoundItemDetailsContent({
                           </select>
                         </label>
 
-                        <textarea
-                          value={reportDetails}
-                          onChange={(event) => setReportDetails(event.target.value)}
-                          className="min-h-[96px] w-full rounded-[16px] border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
-                          placeholder="Extra details (optional)"
-                        />
+                        <label className="block space-y-1 text-sm font-medium text-slate-700">
+                          <span>Extra details (optional)</span>
+                          <textarea
+                            value={reportDetails}
+                            onChange={(event) => setReportDetails(event.target.value)}
+                            className="block min-h-[96px] w-full rounded-[16px] border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
+                          />
+                        </label>
 
                         <Button
                           variant="danger"

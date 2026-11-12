@@ -335,7 +335,7 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"
             aria-label="Close scan dialog"
           >
             <X size={16} />
