@@ -4,6 +4,7 @@ import { AppShell } from '@/app/shell/AppShell'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { LoadingState } from '@/shared/ui/loading/LoadingState'
 import { SessionUnavailable } from '@/shared/ui/auth/SessionUnavailable'
+import { internalVisionRoute } from './internalVisionRoute'
 
 const SignupPage = lazy(() => import('@/features/auth/ui/SignupPage'))
 const VerifyEmailPage = lazy(() => import('@/features/auth/ui/VerifyEmailPage'))
@@ -39,7 +40,6 @@ const FoundItemsPage = lazy(() => import('@/features/found-items/ui/FoundItemsPa
 const FoundItemsMapPage = lazy(() => import('@/features/found-items/ui/FoundItemsMapPage'))
 const PostFoundItemPage = lazy(() => import('@/features/found-items/ui/PostFoundItemPage'))
 const MyFoundPostsPage = lazy(() => import('@/features/found-items/ui/MyFoundPostsPage'))
-const InternalVisionPage = lazy(() => import('@/features/internal/ui/InternalVisionPage'))
 const NotFoundPage = lazy(() => import('@/features/home/ui/NotFoundPage'))
 
 function ShellLayout() {
@@ -134,14 +134,7 @@ export function AppRoutes() {
       <Route path="/" element={<HomePage />} />
       <Route path="/browse" element={<BrowseRoute />} />
       <Route path="/items/:id" element={<Suspense fallback={<LoadingState variant="page" label="Loading item" />}><PublicItemPage /></Suspense>} />
-      <Route
-        path="/internal/vision"
-        element={
-          <Suspense fallback={<LoadingState variant="page" label="" />}>
-            <InternalVisionPage />
-          </Suspense>
-        }
-      />
+      {internalVisionRoute}
       <Route path="/cookies" element={<CookiesPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />

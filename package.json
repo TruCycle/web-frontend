@@ -12,7 +12,7 @@
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b",
     "build:staging": "node scripts/build-staging.mjs",
-    "test:staging": "node --test scripts/build-staging.test.mjs",
+    "test:staging": "node --test scripts/build-staging.test.mjs scripts/staging-vision.test.mjs",
     "test:consent": "node --test scripts/analytics-consent.test.mjs",
     "test:session": "node --test scripts/session-recovery.test.mjs",
     "test:socket": "node --test scripts/websocket-auth.test.mjs",

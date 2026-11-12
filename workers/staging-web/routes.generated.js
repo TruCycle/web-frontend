@@ -12,7 +12,6 @@ export default [
   "/found-items/my-posts",
   "/found-items/post",
   "/impact",
-  "/internal/vision",
   "/items/:id",
   "/listings",
   "/login",
