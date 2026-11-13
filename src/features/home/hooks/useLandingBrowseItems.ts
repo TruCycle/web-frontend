@@ -9,6 +9,7 @@ export function useLandingBrowseItems(limit: number = 10) {
 
   useEffect(() => {
     let isActive = true
+    const request = new AbortController()
 
     async function loadItems() {
       try {
@@ -17,6 +18,7 @@ export function useLandingBrowseItems(limit: number = 10) {
         const response = await fetchBrowseItems({
           limit,
           includeAuth: false,
+          signal: request.signal,
         })
         if (!isActive) {
           return
@@ -41,6 +43,7 @@ export function useLandingBrowseItems(limit: number = 10) {
 
     return () => {
       isActive = false
+      request.abort()
     }
   }, [limit])
 

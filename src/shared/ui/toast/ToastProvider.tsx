@@ -15,6 +15,7 @@ interface ToastItem {
   readonly title: string
   readonly message: string
   readonly tone: ToastTone
+  readonly durationMs: number
 }
 
 interface ToastContextValue {
@@ -51,13 +52,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const scheduleAutoDismiss = useCallback(
     (id: number, durationMs: number) => {
+      clearDismissTimeout(id)
       const timeoutId = window.setTimeout(() => {
         dismissToast(id)
       }, durationMs)
 
       timeoutByIdRef.current.set(id, timeoutId)
     },
-    [dismissToast],
+    [clearDismissTimeout, dismissToast],
   )
 
   const showToast = useCallback(
@@ -70,27 +72,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         title: options.title,
         message: options.message,
         tone: options.tone ?? 'info',
+        durationMs: options.durationMs ?? defaultDurationMs,
       }
 
-      let hiddenToastIds: number[] = []
-      setToasts((currentToasts) => {
-        const nextToasts = [...currentToasts, nextToast]
-        const overflowCount = nextToasts.length - maxVisibleToasts
-        if (overflowCount <= 0) {
-          return nextToasts
-        }
-
-        hiddenToastIds = nextToasts
-          .slice(0, overflowCount)
-          .map((overflowToast) => overflowToast.id)
-        return nextToasts.slice(overflowCount)
-      })
-
-      hiddenToastIds.forEach(clearDismissTimeout)
-      scheduleAutoDismiss(id, options.durationMs ?? defaultDurationMs)
+      setToasts((currentToasts) => [...currentToasts, nextToast].slice(-maxVisibleToasts))
+      scheduleAutoDismiss(id, nextToast.durationMs)
       return id
     },
-    [clearDismissTimeout, scheduleAutoDismiss],
+    [scheduleAutoDismiss],
   )
 
   const clearToasts = useCallback(() => {
@@ -100,6 +89,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     timeoutByIdRef.current.clear()
     setToasts([])
   }, [])
+
+  useEffect(() => {
+    const visibleIds = new Set(toasts.map(toast => toast.id))
+    for (const id of timeoutByIdRef.current.keys()) {
+      if (!visibleIds.has(id)) clearDismissTimeout(id)
+    }
+  }, [clearDismissTimeout, toasts])
 
   useEffect(() => {
     const timeoutById = timeoutByIdRef.current
@@ -124,7 +120,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={contextValue}>
       {children}
 
-      {typeof document !== 'undefined' && createPortal(<div role="region" aria-label="Notifications" data-modal-feedback className="pointer-events-none fixed right-5 top-5 z-[1300] flex w-[min(92vw,22rem)] flex-col gap-2">
+      {typeof document !== 'undefined' && createPortal(<div role="region" aria-label="Notifications" data-modal-feedback className="pointer-events-none fixed right-4 top-24 z-[1300] flex max-h-[calc(100dvh-7rem)] w-[min(calc(100vw-2rem),22rem)] flex-col gap-2 overflow-y-auto">
         {toasts.map((toast, index) => {
           const resolvedTone = toast.tone === 'error' ? 'danger' : toast.tone
 
@@ -133,8 +129,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               key={toast.id}
               role={toast.tone === 'error' ? 'alert' : 'status'}
               aria-atomic="true"
+              onMouseEnter={() => clearDismissTimeout(toast.id)}
+              onMouseLeave={(event) => {
+                if (!event.currentTarget.contains(document.activeElement)) scheduleAutoDismiss(toast.id, toast.durationMs)
+              }}
+              onFocus={() => clearDismissTimeout(toast.id)}
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget) && !event.currentTarget.matches(':hover')) {
+                  scheduleAutoDismiss(toast.id, toast.durationMs)
+                }
+              }}
               className={classNames(
-                'pointer-events-auto relative overflow-hidden rounded-xl border bg-tc-shell-bg px-4 py-3 text-sm shadow-[0_16px_35px_rgba(0,0,0,0.24)] backdrop-blur-sm animate-[pulse_0.55s_ease-out_1]',
+                'pointer-events-auto relative shrink-0 overflow-hidden rounded-xl border bg-tc-shell-bg px-4 py-3 text-sm shadow-[0_16px_35px_rgba(0,0,0,0.24)] backdrop-blur-sm motion-safe:animate-[pulse_0.55s_ease-out_1]',
                 index % 2 === 0 ? 'rotate-[0.35deg]' : '-rotate-[0.35deg]',
                 resolvedTone === 'success' && 'border-tc-shell-accent text-tc-shell-accent',
                 resolvedTone === 'warning' && 'border-tc-shell-notify text-tc-shell-notify',

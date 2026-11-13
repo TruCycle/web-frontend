@@ -37,7 +37,7 @@ function getMessagePreview(message: RoomMessage): string {
 export function useMessageAlerts() {
   const location = useLocation()
   const { info } = useToast()
-  const isOnMessagesPage = location.pathname.startsWith('/messages')
+  const isOnMessagesPage = /^\/messages(?:\/|$)/i.test(location.pathname)
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0)
   const seenMessageIdsRef = useRef<Set<string>>(new Set())
   const websocketClient = useMemo(
@@ -51,40 +51,61 @@ export function useMessageAlerts() {
     // The wrapper registers listeners only after connect creates its socket.
     // Keep connection ownership with these stable authoritative listeners.
     websocketClient.connect()
-    let alive = true
-    let revision = 0
     let timer: ReturnType<typeof setTimeout> | undefined
+    let activeRequest: AbortController | undefined
+    let queued = false
     const refresh = () => {
-      const request = ++revision
-      if (timer) clearTimeout(timer)
+      if (activeRequest) {
+        queued = true
+        return
+      }
+      if (timer !== undefined) return
       timer = setTimeout(() => {
+        timer = undefined
         let capture: ReturnType<typeof captureStoredSession>
         try { capture = captureStoredSession() } catch { return }
         if (!capture) return
-        void fetchActiveRooms().then(rooms => {
-          if (alive && request === revision && isSameSessionIdentity(capture)) {
+        const request = new AbortController()
+        activeRequest = request
+        void fetchActiveRooms(request.signal).then(rooms => {
+          if (!request.signal.aborted && isSameSessionIdentity(capture)) {
             setUnreadMessagesCount(rooms.reduce((sum, room) => sum + room.unreadCount, 0))
           }
-        }).catch(() => { /* Keep last confirmed count on failure. */ })
+        }).catch(() => { /* Keep last confirmed count on failure. */ }).finally(() => {
+          if (activeRequest !== request) return
+          activeRequest = undefined
+          if (queued) {
+            queued = false
+            refresh()
+          }
+        })
       }, 100)
+    }
+    const refreshAfterRoomChange = () => {
+      activeRequest?.abort()
+      activeRequest = undefined
+      queued = false
+      refresh()
     }
     const visible = () => { if (document.visibilityState === 'visible') refresh() }
     refresh()
     websocketClient.on('auth:ready', refresh)
     websocketClient.on('message:new', refresh)
     websocketClient.on('messages:read', refresh)
-    websocketClient.on('room:cleared', refresh)
-    websocketClient.on('room:deleted', refresh)
+    websocketClient.on('room:cleared', refreshAfterRoomChange)
+    websocketClient.on('room:deleted', refreshAfterRoomChange)
     window.addEventListener(unreadChangedEvent, refresh)
     window.addEventListener('online', refresh)
     document.addEventListener('visibilitychange', visible)
     return () => {
-      alive = false; revision++; clearTimeout(timer)
+      clearTimeout(timer)
+      activeRequest?.abort()
+      activeRequest = undefined
       websocketClient.off('auth:ready', refresh)
       websocketClient.off('message:new', refresh)
       websocketClient.off('messages:read', refresh)
-      websocketClient.off('room:cleared', refresh)
-      websocketClient.off('room:deleted', refresh)
+      websocketClient.off('room:cleared', refreshAfterRoomChange)
+      websocketClient.off('room:deleted', refreshAfterRoomChange)
       window.removeEventListener(unreadChangedEvent, refresh)
       window.removeEventListener('online', refresh)
       document.removeEventListener('visibilitychange', visible)
@@ -102,6 +123,10 @@ export function useMessageAlerts() {
         return
       }
       seenMessageIdsRef.current.add(message.id)
+      if (seenMessageIdsRef.current.size > 2000) {
+        const oldest = seenMessageIdsRef.current.values().next()
+        if (!oldest.done) seenMessageIdsRef.current.delete(oldest.value)
+      }
 
       if (isOnMessagesPage || document.visibilityState !== 'visible') {
         return

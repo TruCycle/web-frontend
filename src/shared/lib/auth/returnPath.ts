@@ -12,7 +12,9 @@ export function authReturnPath(state: unknown): string {
         /[?#]/.test(pathname) || (search && !search.startsWith('?')) || (hash && !hash.startsWith('#')) ||
         /[\r\n\\]/.test(search + hash)) return '/dashboard'
     const resolved = new URL(pathname + search + hash, 'https://return.invalid')
-    if (resolved.origin !== 'https://return.invalid' || /^\/(?:login|signup|auth|reset-password)(?:\/|$)/.test(decodeURIComponent(resolved.pathname))) return '/dashboard'
+    const resolvedPath = decodeURIComponent(resolved.pathname)
+    if (resolved.origin !== 'https://return.invalid' || resolvedPath.startsWith('//') ||
+        /^\/(?:login|signup|auth|reset-password)(?:\/|$)/i.test(resolvedPath)) return '/dashboard'
     return resolved.pathname + resolved.search + resolved.hash
   } catch { return '/dashboard' }
 }

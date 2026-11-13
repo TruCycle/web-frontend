@@ -70,17 +70,28 @@ export default function PublicBrowsePage() {
 
   const search = useDebounce(searchInput, 350)
   const postcode = useDebounce(locationInput, 350)
+  const filterKey = JSON.stringify([search, category, postcode])
+  const [pageState, setPageState] = useState(() => {
+    const requested = Number(searchParams.get('page') ?? 1)
+    return { filterKey, page: Number.isInteger(requested) && requested >= 1 && requested <= 100 ? requested : 1 }
+  })
+  const page = pageState.filterKey === filterKey ? pageState.page : 1
+  if (pageState.filterKey !== filterKey) setPageState({ filterKey, page: 1 })
+  const [hasNextPage, setHasNextPage] = useState(false)
+  const [attempt, setAttempt] = useState(0)
 
   // Sync state changes with URL query parameters
   useEffect(() => {
     const params = new URLSearchParams()
     if (search.trim()) params.set('search', search.trim())
     if (category && category !== 'All Items') params.set('category', category)
+    if (postcode.trim()) params.set('postcode', postcode.trim())
+    if (page > 1) params.set('page', String(page))
     const itemId = selectedItem?.id ?? initialItemId.current
     if (itemId) params.set('item', itemId)
 
     setSearchParams(params, { replace: true })
-  }, [category, search, selectedItem, setSearchParams])
+  }, [category, page, postcode, search, selectedItem, setSearchParams])
 
   const setSelectedItem = (item: BrowseItem | null) => {
     setSelectedItemState(item)
@@ -88,20 +99,25 @@ export default function PublicBrowsePage() {
 
   useEffect(() => {
     let isActive = true
+    const request = new AbortController()
 
     async function load() {
       try {
         setIsLoading(true)
         setError(null)
+        setHasNextPage(false)
         const result = await fetchBrowseItems({
           search,
           category: category === 'All Items' ? undefined : category,
           postcode: postcode.trim() || undefined,
           limit: 24,
+          page,
           includeAuth: false,
+          signal: request.signal,
         })
         if (isActive) {
           setItems(result)
+          setHasNextPage(result.length === 24 && page < 100)
 
           // Check if URL has ?item=<id> to open initial preview modal
           const itemId = initialItemId.current
@@ -125,19 +141,21 @@ export default function PublicBrowsePage() {
     void load()
     return () => {
       isActive = false
+      request.abort()
     }
-  }, [search, category, postcode])
+  }, [search, category, postcode, page, attempt])
 
   const resultLabel = useMemo(() => {
     if (isLoading) return 'Loading items…'
     if (error) return error
     if (items.length === 0) {
+      if (page > 1) return 'There are no further items on this page. Return to the previous page.'
       return search.trim() || postcode.trim() || category !== 'All Items'
         ? 'No items match these filters. Try a broader category or a nearby postcode.'
         : 'No items are available to browse right now.'
     }
-    return `${items.length} free item${items.length === 1 ? '' : 's'} available`
-  }, [category, error, isLoading, items.length, postcode, search])
+    return `${items.length} free item${items.length === 1 ? '' : 's'} on page ${page}`
+  }, [category, error, isLoading, items.length, page, postcode, search])
 
   return (
     <div className="flex min-h-screen flex-col bg-[#F7FBF4] text-tc-app-text">
@@ -163,7 +181,9 @@ export default function PublicBrowsePage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input
               type="text"
-              placeholder="Search by keyword, item, or area (e.g. sofa, desk, bicycle)"
+              aria-label="Search item names or categories"
+              placeholder="Search item names or categories"
+              maxLength={120}
               className="h-12 w-full rounded-2xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#0B3322] focus:ring-4 focus:ring-[#0B3322]/10 sm:text-base"
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
@@ -228,6 +248,11 @@ export default function PublicBrowsePage() {
         <p className={error ? 'mt-6 min-h-10 text-sm text-rose-600' : 'mt-6 min-h-10 text-sm text-slate-500'} role={error ? 'alert' : 'status'}>
           {resultLabel}
         </p>
+        {error ? (
+          <button type="button" className="min-h-11 text-sm underline" disabled={isLoading} onClick={() => setAttempt(value => value + 1)}>
+            Retry loading items
+          </button>
+        ) : null}
 
         <div className="mt-4 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {!isLoading && items.map((item) => (
@@ -289,6 +314,17 @@ export default function PublicBrowsePage() {
               ))}
         </div>
 
+        {page > 1 || hasNextPage ? (
+          <nav aria-label="Catalogue pages" className="mt-8 flex items-center justify-center gap-4">
+            <Button variant="secondary" disabled={isLoading || page === 1} onClick={() => setPageState({ filterKey, page: page - 1 })}>
+              Previous page
+            </Button>
+            <span className="text-sm text-slate-600">Page {page}</span>
+            <Button variant="secondary" disabled={isLoading || !hasNextPage} onClick={() => setPageState({ filterKey, page: page + 1 })}>
+              Next page
+            </Button>
+          </nav>
+        ) : null}
       </main>
 
       <Modal
@@ -346,23 +382,18 @@ export default function PublicBrowsePage() {
               <div className="rounded-xl border border-[#0B3322]/15 bg-[#F7FBF4] p-4 text-sm text-slate-700">
                 <p className="font-semibold text-[#0B3322]">Ready to request or message the owner?</p>
                 <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                  Sign up or log in to message {selectedItem.ownerName} and arrange your free collection. It only takes a moment.
+                  Open the full listing to check availability and request this item.
                 </p>
               </div>
 
               <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                 <Link
-                  to="/signup?intent=collector"
+                  to={`/items/${encodeURIComponent(selectedItem.id)}`}
                   className="inline-flex flex-1 items-center justify-center rounded-full bg-[#0B3322] px-5 py-3 text-sm font-bold text-white no-underline shadow transition hover:bg-[#0D3B24]"
                 >
-                  Sign up to claim for free
+                  View full listing
                 </Link>
-                <Link
-                  to="/login"
-                  className="inline-flex flex-1 items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-[#0B3322] no-underline transition hover:bg-slate-50"
-                >
-                  Log in
-                </Link>
+
               </div>
             </div>
           </div>

@@ -26,54 +26,75 @@ export function useMyFoundPosts(
   const [pagination, setPagination] = useState<PaginationMeta | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const sequence = useRef(0)
+  const activeRequest = useRef<AbortController | null>(null)
   const [loadedKey, setLoadedKey] = useState<string | null>(null)
   const currentKey = JSON.stringify([userId, status])
 
   const loadPage = useCallback(async (page = 1, append = false) => {
-    const requestId = ++sequence.current
-    if (!userId) { setItems([]); setPagination(null); setIsLoading(false); return }
+    activeRequest.current?.abort()
+    if (!userId) {
+      activeRequest.current = null
+      setItems([])
+      setPagination(null)
+      setError(null)
+      setIsLoading(false)
+      return
+    }
+    const request = new AbortController()
+    activeRequest.current = request
     try {
       setIsLoading(true)
       setError(null)
-      const response = await fetchMyFoundPosts(userId, status, page)
-      if (requestId !== sequence.current) return
+      const response = await fetchMyFoundPosts(userId, status, page, undefined, request.signal)
+      if (request.signal.aborted) return
       setLoadedKey(JSON.stringify([userId, status]))
       setItems(current => append ? [...current, ...response.items] : response.items)
       setPagination(response.pagination)
     } catch {
-      if (requestId !== sequence.current) return
+      if (request.signal.aborted) return
       setItems([]); setPagination(null)
       setError('Unable to load your posts right now.')
     } finally {
-      if (requestId === sequence.current) setIsLoading(false)
+      if (activeRequest.current === request) {
+        activeRequest.current = null
+        if (!request.signal.aborted) setIsLoading(false)
+      }
     }
   }, [status, userId])
 
   const refresh = useCallback(() => loadPage(), [loadPage])
   const loadMore = useCallback(async () => {
-    if (!isLoading && pagination && pagination.page < pagination.totalPages) await loadPage(pagination.page + 1, true)
-  }, [isLoading, loadPage, pagination])
+    if (!activeRequest.current && loadedKey === currentKey && pagination && pagination.page < pagination.totalPages) {
+      await loadPage(pagination.page + 1, true)
+    }
+  }, [currentKey, loadedKey, loadPage, pagination])
 
+  const currentView = useRef<{ userId?: string; refresh: typeof refresh } | null>(null)
   useEffect(() => {
+    currentView.current = { userId, refresh }
     void refresh()
-    return () => { sequence.current += 1 }
-  }, [refresh])
+    return () => {
+      currentView.current = null
+      activeRequest.current?.abort()
+    }
+  }, [refresh, userId])
 
   const updateStatus = useCallback(
     async (itemId: string, nextStatus: FoundItemStatus) => {
       await updateFoundItemStatus(itemId, nextStatus)
-      await refresh()
+      const view = currentView.current
+      if (view && view.userId === userId) await view.refresh()
     },
-    [refresh],
+    [userId],
   )
 
   const remove = useCallback(
     async (itemId: string) => {
       await deleteFoundItem(itemId)
-      await refresh()
+      const view = currentView.current
+      if (view && view.userId === userId) await view.refresh()
     },
-    [refresh],
+    [userId],
   )
 
   return {

@@ -19,10 +19,11 @@ export default function PublicItemPage() {
   usePageMeta({ title: 'Item details — TruCycle', description: 'View this TruCycle listing and its availability.', noIndex: true })
   useEffect(() => {
     let active = true
-    void fetchPublicItem(id).then(item => { if (active) setResult({ id, item }) }).catch((error: unknown) => {
+    const request = new AbortController()
+    void fetchPublicItem(id, request.signal).then(item => { if (active) setResult({ id, item }) }).catch((error: unknown) => {
       if (active) setResult({ id, failure: error instanceof ApiError && [400, 404, 410].includes(error.statusCode) ? 'missing' : 'unavailable' })
     })
-    return () => { active = false }
+    return () => { active = false; request.abort() }
   }, [id, attempt])
   const current = result?.id === id ? result : null
   const item = current?.item

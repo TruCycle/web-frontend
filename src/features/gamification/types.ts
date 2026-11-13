@@ -64,7 +64,7 @@ export interface CommunityBoardPostcodeEntry {
   readonly spots: number
   readonly rescues: number
   readonly activeSpots: number
-  readonly totalCo2eKg: number
+  readonly totalCo2eKg: number | null
   readonly impactPoints: number
 }
 
@@ -74,7 +74,7 @@ export interface CommunityBoardSpotterEntry {
   readonly postcode: string | null
   readonly spotsPosted: number
   readonly rescues: number
-  readonly totalCo2eKg: number
+  readonly totalCo2eKg: number | null
   readonly impactPoints: number
 }
 
@@ -89,7 +89,7 @@ export interface CommunityBoardSnapshot {
     readonly localSpotterRank: number | null
     readonly impactPoints: number
     readonly spotsPosted: number
-    readonly totalCo2eKg: number
+    readonly totalCo2eKg: number | null
   }
 }
 
@@ -98,7 +98,7 @@ export interface FoundItemImpactRecentPost {
   readonly title: string
   readonly postcode: string
   readonly status: 'available' | 'claimed' | 'picked_up' | 'gone' | 'expired' | 'reported'
-  readonly estimatedCo2eKg: number
+  readonly estimatedCo2eKg: number | null
   readonly impactPoints: number
   readonly postedAt: string
 }

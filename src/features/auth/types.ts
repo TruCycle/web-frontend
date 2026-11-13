@@ -51,7 +51,7 @@ export interface UpgradeToPartnerPayload {
   readonly openingHours?: PartnerOpeningHoursPayload
 }
 
-export type VerificationDeliveryStatus = 'accepted' | 'unavailable' | 'rejected' | 'timeout' | 'failed' | 'unknown'
+export type VerificationDeliveryStatus = 'queued' | 'accepted' | 'unavailable' | 'rejected' | 'timeout' | 'failed' | 'unknown'
 
 export interface RegistrationResult {
   readonly user: AuthUser

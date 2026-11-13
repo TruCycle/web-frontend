@@ -1,4 +1,5 @@
 import type { PostHog } from 'posthog-js'
+import { isCurrentAuthenticationPath } from './authenticationPath'
 import { clearAnalyticsCookies } from './clearAnalyticsCookies'
 import { getTrackingConsentStatus } from './trackingConsent'
 
@@ -21,7 +22,7 @@ function withoutUrlProperties(value: unknown): unknown {
 }
 
 function capturePendingPageview(): void {
-  if (!client || !isEnabled || getTrackingConsentStatus() !== 'accepted') return
+  if (!client || !isEnabled || getTrackingConsentStatus() !== 'accepted' || isCurrentAuthenticationPath()) return
   if (pendingPath === null || pendingPath === lastPageview) return
   client.capture('$pageview', { page_path: pendingPath })
   lastPageview = pendingPath
@@ -44,6 +45,11 @@ export function syncPostHogConsent(): void {
     }
     return
   }
+  if (isCurrentAuthenticationPath()) {
+    pendingPath = null
+    lastPageview = null
+    return
+  }
   if (client) {
     if (!isEnabled) client.opt_in_capturing({ captureEventName: false })
     isEnabled = true
@@ -53,7 +59,7 @@ export function syncPostHogConsent(): void {
   const token = import.meta.env.VITE_POSTHOG_PROJECT_TOKEN?.trim()
   if (!token || loading) return
   loading = import('posthog-js').then(({ default: posthog }) => {
-    if (getTrackingConsentStatus() !== 'accepted') return
+    if (getTrackingConsentStatus() !== 'accepted' || isCurrentAuthenticationPath()) return
     const host = import.meta.env.VITE_POSTHOG_HOST?.trim()
     posthog.init(token, {
       ...(host ? { api_host: host } : {}), defaults: '2026-01-30',
@@ -64,7 +70,7 @@ export function syncPostHogConsent(): void {
       disable_conversations: true, disable_product_tours: true,
       save_campaign_params: false, save_referrer: false,
       property_denylist: [...sensitiveUrlProperties],
-      before_send: (event) => getTrackingConsentStatus() === 'accepted'
+      before_send: (event) => getTrackingConsentStatus() === 'accepted' && !isCurrentAuthenticationPath()
         ? withoutUrlProperties(event) as typeof event
         : null,
     })
@@ -79,7 +85,7 @@ export function syncPostHogConsent(): void {
 }
 
 export function trackPostHogPageview(path: string): void {
-  if (getTrackingConsentStatus() !== 'accepted') return
+  if (getTrackingConsentStatus() !== 'accepted' || isCurrentAuthenticationPath()) return
   pendingPath = path.split(/[?#]/, 1)[0]
   syncPostHogConsent()
 }

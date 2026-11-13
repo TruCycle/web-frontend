@@ -197,7 +197,7 @@ function normalizeCommunityBoardSnapshot(value: unknown): CommunityBoardSnapshot
               spots: readNumber(postcodeRecord?.spots) ?? 0,
               rescues: readNumber(postcodeRecord?.rescues) ?? 0,
               activeSpots: readNumber(postcodeRecord?.activeSpots) ?? 0,
-              totalCo2eKg: readNumber(postcodeRecord?.totalCo2eKg) ?? 0,
+              totalCo2eKg: readNumber(postcodeRecord?.totalCo2eKg),
               impactPoints: readNumber(postcodeRecord?.impactPoints) ?? 0,
             }
           })
@@ -219,7 +219,7 @@ function normalizeCommunityBoardSnapshot(value: unknown): CommunityBoardSnapshot
               postcode: readString(spotterRecord?.postcode),
               spotsPosted: readNumber(spotterRecord?.spotsPosted) ?? 0,
               rescues: readNumber(spotterRecord?.rescues) ?? 0,
-              totalCo2eKg: readNumber(spotterRecord?.totalCo2eKg) ?? 0,
+              totalCo2eKg: readNumber(spotterRecord?.totalCo2eKg),
               impactPoints: readNumber(spotterRecord?.impactPoints) ?? 0,
             }
           })
@@ -230,7 +230,7 @@ function normalizeCommunityBoardSnapshot(value: unknown): CommunityBoardSnapshot
       localSpotterRank: readNumber(currentUser?.localSpotterRank),
       impactPoints: readNumber(currentUser?.impactPoints) ?? 0,
       spotsPosted: readNumber(currentUser?.spotsPosted) ?? 0,
-      totalCo2eKg: readNumber(currentUser?.totalCo2eKg) ?? 0,
+      totalCo2eKg: readNumber(currentUser?.totalCo2eKg),
     },
   }
 }
@@ -278,7 +278,7 @@ function normalizeFoundItemImpactSummary(value: unknown): FoundItemImpactSummary
               title,
               postcode,
               status,
-              estimatedCo2eKg: readNumber(postRecord?.estimatedCo2eKg) ?? 0,
+              estimatedCo2eKg: readNumber(postRecord?.estimatedCo2eKg),
               impactPoints: readNumber(postRecord?.impactPoints) ?? 0,
               postedAt: readString(postRecord?.postedAt) ?? new Date().toISOString(),
             }

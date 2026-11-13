@@ -22,12 +22,19 @@ export default function VerifyEmailPage() {
   const token = useMemo(() => searchParams.get('token')?.trim() ?? '', [searchParams])
   const { verifyEmail } = useAuthSession()
   const [attempt, setAttempt] = useState(0)
-  const [result, setResult] = useState<{ token: string; attempt: number; status: VerificationStatus; message: string } | null>(null)
+  const [result, setResult] = useState<{
+    token: string
+    attempt: number
+    status: VerificationStatus
+    message: string
+    canRetry: boolean
+  } | null>(null)
   const request = useRef<{ token: string; attempt: number; promise: Promise<void> } | null>(null)
   const [email, setEmail] = useState('')
   const [resendState, setResendState] = useState<'idle' | 'sending' | 'requested' | 'error'>('idle')
-  const status = !token ? 'error' : result?.token === token && result.attempt === attempt ? result.status : 'verifying'
-  const errorMessage = !token ? 'This link is missing its verification token. Request a new email below.' : result?.token === token && result.attempt === attempt ? result.message : ''
+  const currentResult = result?.token === token && result.attempt === attempt ? result : null
+  const status = token ? currentResult?.status ?? 'verifying' : 'error'
+  const errorMessage = token ? currentResult?.message : 'This link is missing its verification token. Request a new email below.'
 
   useEffect(() => {
     if (!token) return
@@ -37,13 +44,19 @@ export default function VerifyEmailPage() {
       request.current = { token, attempt, promise: verifyEmail(token) }
     }
     void request.current.promise.then(() => {
-      if (current) setResult({ token, attempt, status: 'success', message: '' })
+      if (current) setResult({ token, attempt, status: 'success', message: '', canRetry: false })
     }).catch((caughtError: unknown) => {
       if (!current) return
       const transient = caughtError instanceof RequestTimeoutError || caughtError instanceof TypeError || (caughtError instanceof ApiError && (caughtError.statusCode >= 500 || caughtError.statusCode === 0 || caughtError.statusCode === 429))
-      setResult({ token, attempt, status: 'error', message: transient
-        ? 'Verification is temporarily unavailable. Try this link again, or request a fresh email below.'
-        : 'This link could not be verified. It may be invalid or expired. Request a fresh email below.' })
+      setResult({
+        token,
+        attempt,
+        status: 'error',
+        canRetry: transient,
+        message: transient
+          ? 'Verification is temporarily unavailable. Try this link again, or request a fresh email below.'
+          : 'This link could not be verified. It may be invalid or expired. Request a fresh email below.',
+      })
     })
     return () => { current = false }
   }, [token, attempt, verifyEmail])
@@ -140,7 +153,7 @@ export default function VerifyEmailPage() {
 
         {status === 'error' ? (
           <div className="grid gap-4">
-            {token ? <button className={authPrimaryButtonClassName} type="button" onClick={() => setAttempt((value) => value + 1)}>Try this link again</button> : null}
+            {currentResult?.canRetry ? <button className={authPrimaryButtonClassName} type="button" onClick={() => setAttempt((value) => value + 1)}>Try this link again</button> : null}
             <form className="grid gap-3" onSubmit={(event) => { event.preventDefault(); void resend() }}>
               <label className="grid gap-2 text-sm font-medium">Email address
                 <input className={authInputClassName} type="email" autoComplete="email" required disabled={resendState === 'sending'} value={email} onChange={(event) => { setEmail(event.target.value); setResendState('idle') }} />

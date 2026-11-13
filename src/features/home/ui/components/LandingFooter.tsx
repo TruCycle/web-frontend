@@ -117,7 +117,7 @@ export function LandingFooter() {
                 Terms
               </Link>
               <a className="text-[#E8F6EE] no-underline" href="mailto:hello@trucycle.co.uk?subject=Accessibility">
-                Accessibility
+                Email us about accessibility
               </a>
             </div>
           </div>

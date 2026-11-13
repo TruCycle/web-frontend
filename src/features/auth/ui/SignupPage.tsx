@@ -41,6 +41,12 @@ interface SignupPageProps {
   readonly onSubmitSuccess?: () => void
 }
 
+function verificationDeliveryMessage(status: VerificationDeliveryStatus): string {
+  if (status === 'queued') return 'Your verification email is queued. Check your inbox and spam folder in a few minutes.'
+  if (status === 'accepted') return 'The email provider accepted your verification request. Check your inbox and spam folder.'
+  return 'Your account was created, but email delivery could not be confirmed. Request another email below in a few minutes.'
+}
+
 export default function SignupPage({
   className,
   onSubmitSuccess,
@@ -103,9 +109,7 @@ export default function SignupPage({
       setDeliveryStatus(registration.verificationDelivery.status)
       onSubmitSuccess?.()
       setVerificationEmail(formValues.email.trim())
-      success('Account created', registration.verificationDelivery.status === 'accepted'
-        ? 'The email provider accepted your verification request. Check your inbox and spam folder.'
-        : 'Your account was created. Email delivery could not be confirmed. Request another verification email below in a few minutes.')
+      success('Account created', verificationDeliveryMessage(registration.verificationDelivery.status))
     } catch (caughtError) {
       const message =
         caughtError instanceof ApiError
@@ -170,7 +174,7 @@ export default function SignupPage({
             </div>
           </div>
 
-          <p role="status" className="m-0 text-sm leading-7 text-tc-auth-formText">{deliveryStatus === 'accepted' ? 'The email provider accepted your request. Inbox delivery is not guaranteed.' : 'Your account was created, but email delivery could not be confirmed. Request another email below in a few minutes.'}</p>
+          <p role="status" className="m-0 text-sm leading-7 text-tc-auth-formText">{verificationDeliveryMessage(deliveryStatus)}</p>
           <div className="grid gap-3 rounded-[0.9rem] border border-tc-auth-inputBorder bg-white p-5 text-sm leading-7 text-tc-auth-formText">
             <p className="m-0">1. Open your inbox and look for the TruCycle verification email.</p>
             <p className="m-0">2. Click the verification link in that email.</p>

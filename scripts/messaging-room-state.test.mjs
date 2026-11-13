@@ -22,9 +22,13 @@ for (const action of ['clear', 'delete']) test(`snapshot started before ${action
   let state = reduce(seed(), { type: 'start', id: 2 })
   state = reduce(state, { type: action, roomId: 'room-a' })
   state = reduce(state, { type: 'activity', roomId: 'room-a', updatedAt: '2026-11-03T12:00:01Z' })
-  state = reduce(state, { type: 'snapshot', id: 2, rooms: [room(message('Old'))] })
+  state = reduce(state, { type: 'snapshot', id: 2, rooms: [{ ...room(message('Old')), unreadCount: 3 }] })
   if (action === 'delete') assert.equal(state.rooms.some(value => value.id === 'room-a'), false)
-  else assert.equal(state.rooms.find(value => value.id === 'room-a').lastMessage, null)
+  else {
+    const cleared = state.rooms.find(value => value.id === 'room-a')
+    assert.equal(cleared.lastMessage, null)
+    assert.equal(cleared.unreadCount, 0)
+  }
 })
 test('out-of-order request completion cannot undo the latest completed room list', () => {
   let state = reduce(seed(), { type: 'start', id: 2 })

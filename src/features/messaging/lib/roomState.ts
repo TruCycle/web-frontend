@@ -46,7 +46,9 @@ export function roomReducer(state: RoomState, action: RoomAction): RoomState {
       let next = server
       if (changed && local) {
         const cleared = version(state.clearedVersions, server.id) > version(snapshot.versions, server.id)
-        next = cleared && !local.lastMessage ? { ...server, lastMessage: null } : local.lastMessage ? preview(server, local.lastMessage) : server
+        next = cleared
+          ? { ...server, lastMessage: local.lastMessage, unreadCount: local.unreadCount }
+          : local.lastMessage ? preview(server, local.lastMessage) : server
         next = { ...next, updatedAt: newerTime(next.updatedAt, local.updatedAt) }
       }
       else if (!local && state.latest.has(server.id)) next = preview(server, state.latest.get(server.id)!)

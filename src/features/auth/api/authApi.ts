@@ -91,7 +91,7 @@ export async function registerUser(payload: RegisterPayload): Promise<Registrati
   })
 
   const rawStatus = response.data.verificationDelivery?.status
-  const allowed: readonly unknown[] = ['accepted', 'unavailable', 'rejected', 'timeout', 'failed']
+  const allowed: readonly unknown[] = ['queued', 'accepted', 'unavailable', 'rejected', 'timeout', 'failed']
   const status: VerificationDeliveryStatus = allowed.includes(rawStatus) ? rawStatus as VerificationDeliveryStatus : 'unknown'
   return { user: normalizeUser(response.data.user), verificationDelivery: { status } }
 }

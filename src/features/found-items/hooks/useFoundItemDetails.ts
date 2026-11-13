@@ -20,40 +20,46 @@ export function useFoundItemDetails(
   const [viewerClaim, setViewerClaim] = useState<FoundItemClaim | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const sequence = useRef(0)
+  const activeRequest = useRef<AbortController | null>(null)
   const [loadedKey, setLoadedKey] = useState<string | null>(null)
   const currentKey = JSON.stringify([itemId, viewerId])
 
   const refresh = useCallback(async () => {
-    const requestId = ++sequence.current
-    setItem(null); setClaims([]); setViewerClaim(null)
+    activeRequest.current?.abort()
+    activeRequest.current = null
+    setItem(null)
+    setClaims([])
+    setViewerClaim(null)
+    setError(null)
     if (!itemId) {
-      setItem(null)
-      setClaims([])
-      setViewerClaim(null)
+      setIsLoading(false)
       return
     }
 
+    const request = new AbortController()
+    activeRequest.current = request
     try {
       setIsLoading(true)
-      setError(null)
-      const response = await fetchFoundItemById(itemId, viewerId)
-      if (requestId !== sequence.current) return
+      const response = await fetchFoundItemById(itemId, viewerId, request.signal)
+      if (request.signal.aborted) return
       setLoadedKey(JSON.stringify([itemId, viewerId]))
       setItem(response.item)
       setClaims(response.claims)
       setViewerClaim(response.viewerClaim)
     } catch {
-      if (requestId !== sequence.current) return
+      if (request.signal.aborted) return
       setError('Unable to load that item right now.')
     } finally {
-      if (requestId === sequence.current) setIsLoading(false)
+      if (activeRequest.current === request) {
+        activeRequest.current = null
+        if (!request.signal.aborted) setIsLoading(false)
+      }
     }
   }, [itemId, viewerId])
 
   useEffect(() => {
     void refresh()
-    return () => { sequence.current += 1 }
+    return () => { activeRequest.current?.abort() }
   }, [refresh])
 
   return {

@@ -30,6 +30,7 @@ export function LandingFeaturedItemsSection() {
 
   useEffect(() => {
     let isSubscribed = true
+    const request = new AbortController()
 
     async function loadCategoryItems() {
       setIsLoading(true)
@@ -39,6 +40,7 @@ export function LandingFeaturedItemsSection() {
           category: activeCategory === 'All Items' ? undefined : activeCategory,
           limit: 6,
           includeAuth: false,
+          signal: request.signal,
         })
 
         if (!isSubscribed) return
@@ -59,6 +61,7 @@ export function LandingFeaturedItemsSection() {
 
     return () => {
       isSubscribed = false
+      request.abort()
     }
   }, [activeCategory])
 
@@ -257,23 +260,18 @@ export function LandingFeaturedItemsSection() {
               <div className="rounded-xl border border-[#0B3322]/15 bg-[#F7FBF4] p-4 text-sm text-slate-700">
                 <p className="font-semibold text-[#0B3322]">Ready to collect this item?</p>
                 <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                  Sign up or log in to message {selectedItem.ownerName} and arrange your free collection.
+                  Open the full listing to check availability and request this item.
                 </p>
               </div>
 
               <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                 <Link
-                  to="/signup?intent=collector"
+                  to={`/items/${encodeURIComponent(selectedItem.id)}`}
                   className="inline-flex flex-1 items-center justify-center rounded-full bg-[#0B3322] px-5 py-3 text-sm font-bold text-white no-underline shadow transition hover:bg-[#0D3B24]"
                 >
-                  Sign up to claim for free
+                  View full listing
                 </Link>
-                <Link
-                  to="/login"
-                  className="inline-flex flex-1 items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-[#0B3322] no-underline transition hover:bg-slate-50"
-                >
-                  Log in
-                </Link>
+
               </div>
             </div>
           </div>

@@ -67,6 +67,7 @@ export function createStagingBuildPlan(environment, root = repoRoot) {
     VITE_CLOUDINARY_FOLDER: '',
     VITE_GA_MEASUREMENT_ID: '',
     VITE_META_PIXEL_ID: '',
+    VITE_ENABLE_META_PIXEL_SDK: 'false',
     VITE_POSTHOG_PROJECT_TOKEN: '',
     VITE_POSTHOG_HOST: '',
     VITE_GOOGLE_CLIENT_ID: '',

@@ -180,7 +180,6 @@ export default function MessagingPage() {
     isLoadingMessages,
     isSending,
     error,
-    unreadCountByRoom,
     setActiveRoomId,
     sendMessage,
     sendImage,
@@ -191,10 +190,15 @@ export default function MessagingPage() {
     resetHistory,
     reloadMessages,
     acknowledgeVisibleMessages,
+    hasReadFailure,
+    readRetryVersion,
+    retryReadStatus,
   } = useMessages()
   const consumedRoomIdRef = useRef<string | null>(null)
   const lastScrolledRoomIdRef = useRef<string | null>(null)
   const messageListRef = useRef<HTMLDivElement | null>(null)
+  const nearBottomRef = useRef(true)
+  const olderScrollRef = useRef<{ roomId: string; height: number; top: number } | null>(null)
   const [searchValue, setSearchValue] = useState('')
   const [drafts, setDrafts] = useState<Record<string, string>>({})
   const inputValue = activeRoomId ? drafts[activeRoomId] ?? '' : ''
@@ -236,6 +240,15 @@ export default function MessagingPage() {
 
     const roomChanged = lastScrolledRoomIdRef.current !== activeRoomId
     lastScrolledRoomIdRef.current = activeRoomId
+    const olderScroll = olderScrollRef.current
+    if (olderScroll?.roomId === activeRoomId && !roomChanged) {
+      messageList.scrollTop = olderScroll.top + messageList.scrollHeight - olderScroll.height
+      olderScrollRef.current = null
+      return
+    }
+    olderScrollRef.current = null
+    if (!roomChanged && !nearBottomRef.current) return
+    nearBottomRef.current = true
     const behavior: ScrollBehavior = roomChanged ? 'auto' : 'smooth'
     const animationFrameId = window.requestAnimationFrame(() => {
       messageList.scrollTo({
@@ -275,7 +288,7 @@ export default function MessagingPage() {
     observe()
     document.addEventListener('visibilitychange', observe)
     return () => { observer.disconnect(); clearTimeout(timer); document.removeEventListener('visibilitychange', observe) }
-  }, [activeRoomId, messages, isLoadingMessages, hasHistoryFailure, acknowledgeVisibleMessages])
+  }, [activeRoomId, messages, isLoadingMessages, hasHistoryFailure, acknowledgeVisibleMessages, readRetryVersion])
 
   const filteredRooms = useMemo(() => {
     const query = searchValue.trim().toLowerCase()
@@ -419,7 +432,7 @@ export default function MessagingPage() {
 
             {!isLoadingRooms &&
               filteredRooms.map((room) => {
-                const unreadCount = unreadCountByRoom[room.id] ?? 0
+                const unreadCount = room.unreadCount
                 const isActiveRoom = activeRoomId === room.id
                 const isUnread = unreadCount > 0
 
@@ -491,6 +504,10 @@ export default function MessagingPage() {
 
           <div
             ref={messageListRef}
+            onScroll={(event) => {
+              const list = event.currentTarget
+              nearBottomRef.current = list.scrollHeight - list.scrollTop - list.clientHeight < 80
+            }}
             className="min-h-[520px] flex-1 space-y-3 overflow-y-auto p-4 md:min-h-0 md:p-7"
           >
             {historyGap && <div role="status" className="space-y-2 rounded-xl border border-amber-300 p-3 text-sm">
@@ -498,7 +515,23 @@ export default function MessagingPage() {
               <button className="min-h-11 underline" disabled={isLoadingMessages} onClick={() => void (historyGap === 'changed' ? resetHistory() : reloadMessages())}>{historyGap === 'changed' ? 'Reload conversation' : 'Continue loading missed messages'}</button>
             </div>}
             {hasHistoryFailure && !historyGap && <p role="status">Conversation history is unavailable. <button className="min-h-11 underline" disabled={isLoadingMessages} onClick={() => void reloadMessages()}>Refresh conversation</button></p>}
-            {hasOlderMessages && !historyGap && <button className="min-h-11 underline" disabled={isLoadingMessages} onClick={() => void loadOlderMessages()}>Load older messages</button>}
+            {hasReadFailure ? (
+              <p role="status">
+                Read status could not be saved.{' '}
+                <button type="button" className="min-h-11 underline" disabled={isLoadingMessages} onClick={retryReadStatus}>
+                  Retry read status
+                </button>
+              </p>
+            ) : null}
+            {hasOlderMessages && !historyGap ? (
+              <button type="button" className="min-h-11 underline" disabled={isLoadingMessages} onClick={() => {
+                const list = messageListRef.current
+                if (list && activeRoomId) {
+                  olderScrollRef.current = { roomId: activeRoomId, height: list.scrollHeight, top: list.scrollTop }
+                }
+                void loadOlderMessages()
+              }}>Load older messages</button>
+            ) : null}
             {isLoadingMessages ? (
               <p className="rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-500">
                 Loading messages...

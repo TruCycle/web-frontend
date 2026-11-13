@@ -20,12 +20,14 @@ interface FetchBrowseItemsParams {
   readonly page?: number
   readonly limit?: number
   readonly includeAuth?: boolean
+  readonly signal?: AbortSignal
 }
 
 interface FetchCollectedItemsParams {
   readonly page?: number
   readonly limit?: number
   readonly claimStatus?: string
+  readonly signal?: AbortSignal
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -170,26 +172,13 @@ function mapCollectedItem(value: unknown): CollectedItem | null {
   }
 }
 
-function matchesSearch(item: BrowseItem, search: string): boolean {
-  const searchText = search.trim().toLowerCase()
-  if (!searchText) {
-    return true
-  }
-
-  return (
-    item.title.toLowerCase().includes(searchText) ||
-    item.category.toLowerCase().includes(searchText) ||
-    item.locationLabel.toLowerCase().includes(searchText) ||
-    item.ownerName.toLowerCase().includes(searchText)
-  )
-}
-
 export async function fetchBrowseItems(
   params: FetchBrowseItemsParams = {},
 ): Promise<BrowseItem[]> {
   const safeLimit = clampLimit(params.limit, 24)
   const query = toQueryString({
     status: 'active',
+    search: params.search?.trim() || undefined,
     category:
       params.category && params.category.toLowerCase() !== 'all items'
         ? params.category.toLowerCase()
@@ -201,25 +190,25 @@ export async function fetchBrowseItems(
 
   const response = await apiRequest<unknown>(`/items${query}`, {
     includeAuth: params.includeAuth,
+    signal: params.signal,
   })
   const data = unwrapApiData<unknown>(response)
   const collection = Array.isArray(data)
     ? data
     : Array.isArray(asRecord(data)?.items)
       ? (asRecord(data)?.items as unknown[])
-      : []
-
-  return collection
-    .map((entry) => mapBrowseItem(entry))
-    .filter((entry): entry is BrowseItem => entry !== null)
-    .filter((entry) => matchesSearch(entry, params.search ?? ''))
+      : null
+  if (!collection) throw new Error('The item catalogue could not be confirmed.')
+  const items = collection.map((entry) => mapBrowseItem(entry))
+  if (items.some((item) => item === null)) throw new Error('The item catalogue could not be confirmed.')
+  return items.filter((item): item is BrowseItem => item !== null)
 }
 
 /** Public deep links always use the guest projection, even in a signed-in tab. */
-export async function fetchPublicItem(itemId: string): Promise<BrowseItem> {
+export async function fetchPublicItem(itemId: string, signal?: AbortSignal): Promise<BrowseItem> {
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(itemId)) throw new ApiError('Item unavailable', 404)
   const normalizedId = itemId.toLowerCase()
-  const response = await apiRequest<unknown>(`/items/${normalizedId}`, { includeAuth: false, skipSessionRecovery: true })
+  const response = await apiRequest<unknown>(`/items/${normalizedId}`, { includeAuth: false, skipSessionRecovery: true, signal })
   const item = mapBrowseItem(unwrapApiData<unknown>(response))
   if (!item || item.id.toLowerCase() !== normalizedId) throw new ApiError('Item unavailable', 404)
   return item
@@ -243,7 +232,7 @@ export async function fetchCollectedItems(
     claim_status: params.claimStatus,
   })
 
-  const response = await apiRequest<unknown>(`/items/me/collected${query}`)
+  const response = await apiRequest<unknown>(`/items/me/collected${query}`, { signal: params.signal })
   const data = unwrapApiData<unknown>(response)
   const payloadRecord = asRecord(data)
   const items = Array.isArray(payloadRecord?.items)
@@ -284,11 +273,11 @@ export async function fetchImpactMetrics(): Promise<ImpactMetrics> {
   const data = asRecord(unwrapApiData<unknown>(response))
 
   return {
-    totalCo2SavedKg: readNumber(data?.total_co2_saved_kg) ?? 0,
+    totalCo2SavedKg: readNumber(data?.total_co2_saved_kg),
     itemsExchanged: readNumber(data?.items_exchanged) ?? 0,
     itemsDonated: readNumber(data?.items_donated) ?? 0,
     monthlyGoalProgressPercent:
-      readNumber(asRecord(data?.monthly_goal)?.progress_percent) ?? 0,
+      readNumber(asRecord(data?.monthly_goal)?.progress_percent),
   }
 }
 

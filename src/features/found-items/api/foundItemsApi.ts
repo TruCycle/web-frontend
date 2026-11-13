@@ -251,6 +251,7 @@ export async function fetchFoundItems(
   filters: FoundItemsFilter = {},
   page: number = 1,
   limit: number = 9,
+  signal?: AbortSignal,
 ): Promise<FoundItemsResponse> {
   const safeLimit = clampLimit(limit, 9)
   const query = toQueryString({
@@ -264,17 +265,18 @@ export async function fetchFoundItems(
     limit: safeLimit,
   })
 
-  const response = await apiRequest<unknown>(`/found-items${query}`)
+  const response = await apiRequest<unknown>(`/found-items${query}`, { signal })
   return unwrapFoundItemsResponse(unwrapApiData<unknown>(response), page, safeLimit)
 }
 
 export async function fetchFoundItemById(
   id: string,
   _viewerId?: string,
+  signal?: AbortSignal,
 ): Promise<{ item: FoundItem; claims: FoundItemClaim[]; viewerClaim: FoundItemClaim | null }> {
   // The authenticated server session determines the viewer; retain the call signature.
   void _viewerId
-  const response = await apiRequest<unknown>(`/found-items/${encodeURIComponent(id.trim())}`)
+  const response = await apiRequest<unknown>(`/found-items/${encodeURIComponent(id.trim())}`, { signal })
   const record = asRecord(unwrapApiData<unknown>(response))
 
   return {
@@ -293,6 +295,7 @@ export async function fetchMyFoundPosts(
   status?: FoundItemStatus,
   page: number = 1,
   limit: number = 12,
+  signal?: AbortSignal,
 ): Promise<FoundItemsResponse> {
   const safeLimit = clampLimit(limit, 12)
   const query = toQueryString({
@@ -301,7 +304,7 @@ export async function fetchMyFoundPosts(
     limit: safeLimit,
   })
 
-  const response = await apiRequest<unknown>(`/found-items/my-posts${query}`)
+  const response = await apiRequest<unknown>(`/found-items/my-posts${query}`, { signal })
   return unwrapFoundItemsResponse(unwrapApiData<unknown>(response), page, safeLimit)
 }
 

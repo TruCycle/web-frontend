@@ -15,8 +15,8 @@ const parseFlag = (value: string | undefined, fallback: boolean): boolean => {
   return true
 }
 
-const enableSmartSpot = parseFlag(import.meta.env.VITE_ENABLE_SMART_SPOT, true)
-const visionWorkerUrl = import.meta.env.VITE_VISION_WORKER_URL?.trim() || ''
+const enableSmartSpot = parseFlag(import.meta.env.VITE_ENABLE_SMART_SPOT, false)
+const enableMetaPixelSdk = import.meta.env.VITE_ENABLE_META_PIXEL_SDK === 'true'
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() || ''
 
 export const env = {
@@ -28,7 +28,7 @@ export const env = {
   cloudinaryFolder,
   googleAnalyticsMeasurementId,
   metaPixelId,
+  enableMetaPixelSdk,
   enableSmartSpot,
-  visionWorkerUrl,
   googleClientId,
 } as const

@@ -48,7 +48,9 @@ export function CommunityBoardPostcodeList({
             </div>
 
             <div className="text-right">
-              <p className="text-lg font-semibold text-slate-900">{entry.totalCo2eKg} kg</p>
+              <p className="text-lg font-semibold text-slate-900">
+                {entry.totalCo2eKg === null ? 'Unavailable' : `${entry.totalCo2eKg} kg`}
+              </p>
               <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Est. CO2e</p>
             </div>
 

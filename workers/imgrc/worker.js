@@ -12,34 +12,40 @@
  *   - Better JSON instruction-following than LLaVA 1.5
  */
 
-const ALLOWED_ORIGINS = [
-  'https://trucycle-stage.up.railway.app',
-  'https://trucycle.co.uk',
-  'https://www.trucycle.co.uk',
-  'http://localhost:5173',
-  'http://localhost:4173'
-]
-
 const MODEL = '@cf/meta/llama-3.2-11b-vision-instruct'
 
 // 1.5 MB hard limit — Workers can't resize images and spreading a 3MB
 // Uint8Array into a number[] easily exceeds the thread memory ceiling
 const MAX_BYTES = 1.5 * 1024 * 1024
+const MAX_BODY_BYTES = MAX_BYTES + 16 * 1024
 
-function corsHeaders(origin) {
-  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]
-  return {
-    'Access-Control-Allow-Origin': allowed,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Max-Age': '86400',
+async function readBoundedMultipart(request) {
+  const reader = request.body?.getReader()
+  if (!reader) throw new Error('Missing body')
+  const chunks = []
+  let size = 0
+  try {
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) break
+      size += value.byteLength
+      if (size > MAX_BODY_BYTES) {
+        void reader.cancel().catch(() => {})
+        return null
+      }
+      chunks.push(value)
+    }
+  } finally {
+    reader.releaseLock()
   }
+  const body = new Blob(chunks)
+  return new Response(body, { headers: { 'Content-Type': request.headers.get('Content-Type') ?? '' } }).formData()
 }
 
-function json(data, status = 200, origin = '') {
+function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
   })
 }
 
@@ -99,19 +105,22 @@ function extractJson(raw) {
 
 export default {
   async fetch(request, env) {
-    const origin = request.headers.get('Origin') ?? ''
-
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: corsHeaders(origin) })
-    }
-
     if (request.method !== 'POST') {
-      return json({ error: 'Method not allowed' }, 405, origin)
+      return json({ error: 'Method not allowed' }, 405)
+    }
+    const secret = env.VISION_WORKER_SECRET
+    if (typeof secret !== 'string' || !/^[0-9a-f]{64}$/.test(secret)) {
+      return json({ error: 'Image analysis is unavailable' }, 503)
+    }
+    const bearer = /^Bearer ([0-9a-f]{64})$/.exec(request.headers.get('Authorization') ?? '')
+    const encoder = new TextEncoder()
+    if (!bearer || !crypto.subtle.timingSafeEqual(encoder.encode(bearer[1]), encoder.encode(secret))) {
+      return json({ error: 'Unauthorized' }, 401)
     }
 
     if (!env.AI) {
       console.error('AI binding missing — add [ai] binding = "AI" to wrangler.toml')
-      return json({ error: 'AI binding not configured' }, 500, origin)
+      return json({ error: 'AI binding not configured' }, 500)
     }
 
     // ── Parse multipart form ────────────────────────────────────────────────
@@ -119,35 +128,39 @@ export default {
     let userPrompt = 'Analyze this item for TruCycle.'
 
     try {
-      const formData = await request.formData()
+      const formData = await readBoundedMultipart(request)
+      if (!formData) return json({ error: 'Request body is too large' }, 413)
+      if (formData.getAll('image').length !== 1 || formData.getAll('prompt').length > 1 ||
+          [...formData.keys()].some((key) => key !== 'image' && key !== 'prompt')) {
+        return json({ error: 'Invalid image form data' }, 400)
+      }
       const imageFile = formData.get('image')
       const customPrompt = formData.get('prompt')
-
-      if (!imageFile || typeof imageFile === 'string') {
-        return json({ error: "Missing 'image' file in form data" }, 400, origin)
+      if (customPrompt !== null && (typeof customPrompt !== 'string' || new TextEncoder().encode(customPrompt).length > 1024)) {
+        return json({ error: 'Invalid prompt' }, 400)
       }
 
-      const arrayBuffer = await imageFile.arrayBuffer()
+      if (!imageFile || typeof imageFile === 'string') {
+        return json({ error: "Missing 'image' file in form data" }, 400)
+      }
 
-      // Reject oversized images before allocation — spreading a 3MB file into
-      // a number[] can exhaust the Worker's memory and crash the thread
-      if (arrayBuffer.byteLength > MAX_BYTES) {
+      if (imageFile.size > MAX_BYTES) {
         return json({
-          error: `Image too large (${(arrayBuffer.byteLength / 1024 / 1024).toFixed(1)} MB). Max 1.5 MB.`,
+          error: `Image too large (${(imageFile.size / 1024 / 1024).toFixed(1)} MB). Max 1.5 MB.`,
           hint: 'Resize or compress the image before uploading.',
-        }, 413, origin)
+        }, 413)
       }
 
       // Array.from is equivalent to spread but slightly more explicit;
       // the Workers AI SDK requires number[] not TypedArray for image inputs
+      const arrayBuffer = await imageFile.arrayBuffer()
       imageArray = Array.from(new Uint8Array(arrayBuffer))
 
       if (customPrompt && typeof customPrompt === 'string' && customPrompt.trim()) {
         userPrompt = customPrompt.trim()
       }
-    } catch (err) {
-      console.error('Failed to parse request:', err)
-      return json({ error: 'Failed to parse request body', detail: String(err) }, 400, origin)
+    } catch {
+      return json({ error: 'Failed to parse request body' }, 400)
     }
 
     // ── Run inference ───────────────────────────────────────────────────────
@@ -179,20 +192,7 @@ export default {
         max_tokens: 350,
       }
 
-      let response
-      try {
-        response = await env.AI.run(MODEL, inferenceInput)
-      } catch (firstErr) {
-        // Error 5016 — model requires a one-time license agreement.
-        // Send the literal prompt 'agree' then retry the real request.
-        if (String(firstErr).includes('5016')) {
-          console.log('Accepting Llama 3.2 Vision license agreement (error 5016)…')
-          await env.AI.run(MODEL, { prompt: 'agree' })
-          response = await env.AI.run(MODEL, inferenceInput)
-        } else {
-          throw firstErr
-        }
-      }
+      const response = await env.AI.run(MODEL, inferenceInput)
 
       // Output schema: { response: string | object }
       const rawOutput =
@@ -208,7 +208,7 @@ export default {
       const parsed = extractJson(rawOutput)
 
       if (parsed) {
-        return json({ success: true, data: parsed }, 200, origin)
+        return json({ success: true, data: parsed })
       }
 
       // Could not extract JSON — return raw text so the UI can still show it
@@ -216,11 +216,15 @@ export default {
         success: true,
         data: null,
         raw: typeof rawOutput === 'string' ? rawOutput : JSON.stringify(rawOutput),
-      }, 200, origin)
+      })
 
     } catch (err) {
-      console.error('AI inference error:', err)
-      return json({ success: false, error: String(err), model: MODEL }, 500, origin)
+      if (/\b5016\b/.test(String(err))) {
+        console.warn('Vision model license requires account owner action')
+        return json({ success: false, error: 'Vision model unavailable pending account setup' }, 503)
+      }
+      console.error('Vision inference failed')
+      return json({ success: false, error: 'Vision inference failed' }, 500)
     }
   },
 }

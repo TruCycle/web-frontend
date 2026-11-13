@@ -58,7 +58,7 @@ function fixture() {
   const cache = new Map()
   function load(name, from = path.join(root, 'src/shared/lib/analytics')) {
     if (name === 'posthog-js') { calls.imports += 1; return { __esModule: true, default: sdk } }
-    if (name === '@/shared/lib/config/env') return { env: { googleAnalyticsMeasurementId: 'G-SYNTHETIC', metaPixelId: 'synthetic-pixel' } }
+    if (name === '@/shared/lib/config/env') return { env: { googleAnalyticsMeasurementId: 'G-SYNTHETIC', metaPixelId: 'synthetic-pixel', enableMetaPixelSdk: true } }
     let filename = name.startsWith('@/') ? path.join(root, 'src', name.slice(2)) : path.resolve(from, name)
     if (!filename.endsWith('.ts')) filename += '.ts'
     assert.ok(filename.startsWith(path.join(root, 'src')), 'Test loader cannot load external SDK code')

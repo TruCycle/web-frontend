@@ -18,13 +18,22 @@ export function useConfetti() {
       document.body.appendChild(canvas)
       active.current = { canvas, fire: confetti.create(canvas, { resize: true, useWorker: false }) }
     }
-    void active.current.fire({
+    const effect = active.current
+    const release = () => {
+      if (active.current !== effect) return
+      effect.fire.reset()
+      effect.canvas.remove()
+      active.current = null
+    }
+    const completion = effect.fire({
       particleCount: 120,
       spread: 70,
       origin: { y: 0.6 },
       colors: ['#0D3B24', '#A4F5A6', '#D4A84B', '#FFFFFF'],
       disableForReducedMotion: true,
     })
+    if (completion) void completion.then(release, release)
+    else release()
   }, [])
 
   return { fireMilestone }

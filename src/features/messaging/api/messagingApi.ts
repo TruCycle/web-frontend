@@ -113,14 +113,16 @@ function mapRoom(value: unknown): ActiveRoom | null {
   }
 }
 
-export async function fetchActiveRooms(): Promise<ActiveRoom[]> {
-  const response = await apiRequest<unknown>('/messages/rooms/active')
+export async function fetchActiveRooms(signal?: AbortSignal): Promise<ActiveRoom[]> {
+  const response = await apiRequest<unknown>('/messages/rooms/active', { signal })
   const data = unwrapApiData<unknown>(response)
   if (!Array.isArray(data)) {
-    return []
+    throw new Error('The conversation list could not be confirmed.')
   }
 
-  return data.map((entry) => mapRoom(entry)).filter((entry): entry is ActiveRoom => entry !== null)
+  const rooms = data.map((entry) => mapRoom(entry))
+  if (rooms.some((room) => room === null)) throw new Error('The conversation list could not be confirmed.')
+  return rooms.filter((room): room is ActiveRoom => room !== null)
 }
 
 export async function fetchRoomMessages(roomId: string, cursor?: string, signal?: AbortSignal): Promise<RoomMessagesResponse> {
@@ -209,7 +211,11 @@ export async function uploadMessageImage(roomId: string, clientMessageId: string
 }
 
 export async function fetchMessageImage(roomId: string, messageId: string, signal: AbortSignal): Promise<Blob> {
-  const image = await apiRequestBlob(`/messages/rooms/${encodeURIComponent(roomId)}/messages/${encodeURIComponent(messageId)}/image`, signal)
+  const image = await apiRequestBlob(
+    `/messages/rooms/${encodeURIComponent(roomId)}/messages/${encodeURIComponent(messageId)}/image`,
+    signal,
+    MAX_MESSAGE_IMAGE_BYTES,
+  )
   if (!image || !['image/jpeg', 'image/png', 'image/webp'].includes(image.type) ||
       !image.size || image.size > MAX_MESSAGE_IMAGE_BYTES) {
     throw new Error('Image attachment unavailable.')

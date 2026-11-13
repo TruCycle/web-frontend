@@ -41,7 +41,6 @@ export function useMessages() {
   const rooms = roomState.rooms
   const [activeRoomId, setActiveRoomIdState] = useState<string | null>(null)
   const [roomMessages, setRoomMessages] = useState<Record<string, RoomMessage[]>>({})
-  const [unreadCountByRoom, setUnreadCountByRoom] = useState<Record<string, number>>({})
   const [isLoadingRooms, setIsLoadingRooms] = useState(true)
   const [loadingHistory, setLoadingHistory] = useState<Record<string, boolean>>({})
   const isLoadingMessages = activeRoomId ? Boolean(loadingHistory[activeRoomId]) : false
@@ -51,12 +50,15 @@ export function useMessages() {
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sendError, setSendError] = useState<string | null>(null)
+  const [readFailures, setReadFailures] = useState<Record<string, boolean>>({})
+  const [readRetryVersion, setReadRetryVersion] = useState(0)
   const activeRoomIdRef = useRef<string | null>(null)
   const sendingRef = useRef(false)
   const pendingSends = useRef(new Map<string, { text: string; id: string; userId: string }>())
   const seenMessageIds = useRef(new Set<string>())
   const roomRevisions = useRef(new Map<string, number>())
   const roomListRequest = useRef(0)
+  const roomListController = useRef<AbortController | null>(null)
   const messageCache = useRef<Record<string, RoomMessage[]>>({})
   const historyOperations = useRef(new Map<string, AbortController>())
   const historyLoadedRooms = useRef(new Set<string>())
@@ -82,22 +84,27 @@ export function useMessages() {
   )
 
   const loadRooms = useCallback(async () => {
-    const request = ++roomListRequest.current
     let capture: ReturnType<typeof captureStoredSession>
     try { capture = captureStoredSession() } catch { return }
     if (!capture) return
+    const request = ++roomListRequest.current
+    roomListController.current?.abort()
+    const controller = new AbortController()
+    roomListController.current = controller
     dispatchRoom({ type: 'start', id: request })
     try {
       setIsLoadingRooms(true)
       setError(null)
-      const nextRooms = await fetchActiveRooms()
-      if (request !== roomListRequest.current || !isSameSessionIdentity(capture)) return
+      const nextRooms = await fetchActiveRooms(controller.signal)
+      if (controller.signal.aborted || !isSameSessionIdentity(capture)) return
       dispatchRoom({ type: 'snapshot', id: request, rooms: nextRooms })
-      setUnreadCountByRoom(Object.fromEntries(nextRooms.map(room => [room.id, room.unreadCount])))
     } catch {
-      if (request === roomListRequest.current) setError('Unable to load conversations right now.')
+      if (!controller.signal.aborted && isSameSessionIdentity(capture)) setError('Unable to load conversations right now.')
     } finally {
-      if (request === roomListRequest.current) setIsLoadingRooms(false)
+      if (roomListController.current === controller) {
+        roomListController.current = null
+        if (!controller.signal.aborted) setIsLoadingRooms(false)
+      }
     }
   }, [])
 
@@ -117,19 +124,24 @@ export function useMessages() {
       roomId, activeRoomIdRef.current, document.visibilityState === 'visible', historyLoadedRooms.current.has(roomId))
       .filter(id => !readConfirmed.current.has(id) && !readInFlight.current.has(id)).slice(0, 100)
     if (!eligible.length) return
+    const revision = roomRevisions.current.get(roomId) ?? 0
     eligible.forEach(id => readInFlight.current.add(id))
     try {
       const result = await acknowledgeRoomMessages(roomId, eligible)
-      if (!isSameSessionIdentity(capture)) return
+      if (!isSameSessionIdentity(capture) || (roomRevisions.current.get(roomId) ?? 0) !== revision) return
       result.readMessageIds.forEach(id => readConfirmed.current.add(id))
+      setReadFailures(values => ({ ...values, [roomId]: false }))
       notifyUnreadChanged()
       await loadRooms()
     } catch {
-      if (isSameSessionIdentity(capture)) setError('Read status could not be saved. Reopen the conversation to retry.')
+      if (isSameSessionIdentity(capture) && (roomRevisions.current.get(roomId) ?? 0) === revision) {
+        setReadFailures(values => ({ ...values, [roomId]: true }))
+      }
     } finally { eligible.forEach(id => readInFlight.current.delete(id)) }
   }, [loadRooms])
 
   const loadMessagesForRoom = useCallback(async (roomId: string, mode: 'recent' | 'older' | 'reset' = 'recent', olderCursor?: string) => {
+    if (mode === 'older' && (!olderCursor || historyOperations.current.has(roomId))) return
     const revision = roomRevisions.current.get(roomId) ?? 0
     const hadHistory = historyLoadedRooms.current.has(roomId)
     const epoch = historyEpoch.current
@@ -208,6 +220,7 @@ export function useMessages() {
 
   useEffect(() => {
     void loadRooms()
+    return () => { roomListController.current?.abort() }
   }, [loadRooms])
   useEffect(() => {
     setActiveRoomIdState(current => current && rooms.some(room => room.id === current) ? current : rooms[0]?.id ?? null)
@@ -240,7 +253,6 @@ export function useMessages() {
   useEffect(() => {
     const historyResets = pendingHistoryResets.current
     const reconcile = (roomId?: string) => {
-      roomListRequest.current++
       if (roomId) {
         // Invalidate in-flight history before a delayed payload can merge it.
         historyOperations.current.get(roomId)?.abort()
@@ -280,7 +292,9 @@ export function useMessages() {
 
     const handleRoomCleared = (payload: { roomId: string }) => {
       if (deletedRoomIds.current.has(payload.roomId)) return
+      roomListController.current?.abort()
       clearedRoomIds.current.add(payload.roomId)
+      setReadFailures(values => ({ ...values, [payload.roomId]: false }))
       roomRevisions.current.set(payload.roomId, (roomRevisions.current.get(payload.roomId) ?? 0) + 1)
       // Do not tombstone cached IDs: a delayed clear event may arrive after a
       // genuinely newer send. Stored history decides which messages survived.
@@ -289,12 +303,13 @@ export function useMessages() {
       setHistoryGaps(values => ({ ...values, [payload.roomId]: null })); setOlderCursors(values => ({ ...values, [payload.roomId]: null }))
       cacheMessages(payload.roomId, () => [])
       dispatchRoom({ type: 'clear', roomId: payload.roomId })
-      setUnreadCountByRoom(values => ({ ...values, [payload.roomId]: 0 }))
       reconcile(payload.roomId)
     }
 
     const handleRoomDeleted = (payload: { roomId: string }) => {
+      roomListController.current?.abort()
       deletedRoomIds.current.add(payload.roomId)
+      setReadFailures(values => ({ ...values, [payload.roomId]: false }))
       historyLoadedRooms.current.delete(payload.roomId)
       confirmedAnchors.current.delete(payload.roomId); attemptedHistoryEpoch.current.delete(payload.roomId)
       roomRevisions.current.set(payload.roomId, (roomRevisions.current.get(payload.roomId) ?? 0) + 1)
@@ -302,14 +317,6 @@ export function useMessages() {
       historyOperations.current.get(payload.roomId)?.abort(); gapAnchors.current.delete(payload.roomId)
       const remaining = { ...messageCache.current }; delete remaining[payload.roomId]
       messageCache.current = remaining; setRoomMessages(remaining)
-      setUnreadCountByRoom((currentCounts) => {
-        if (!(payload.roomId in currentCounts)) {
-          return currentCounts
-        }
-        const nextCounts = { ...currentCounts }
-        delete nextCounts[payload.roomId]
-        return nextCounts
-      })
       dispatchRoom({ type: 'delete', roomId: payload.roomId })
       setActiveRoomIdState((currentId) => (currentId === payload.roomId ? null : currentId))
       reconcile()
@@ -437,9 +444,11 @@ export function useMessages() {
     isLoadingMessages,
     isSending,
     error: sendError ?? error,
-    unreadCountByRoom,
     setActiveRoomId,
     acknowledgeVisibleMessages,
+    hasReadFailure: Boolean(activeRoomId && readFailures[activeRoomId]),
+    readRetryVersion,
+    retryReadStatus: () => setReadRetryVersion(value => value + 1),
     sendMessage,
     sendImage,
     reloadRooms: loadRooms,

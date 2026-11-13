@@ -24,28 +24,33 @@ export function useFoundItems(initialFilters: FoundItemsFilter = {}): UseFoundIt
   if (filterState.initialKey !== initialKey) {
     setFilterState({ initialKey, value: initialFilters })
   }
-  const requestSequence = useRef(0)
+  const activeRequest = useRef<AbortController | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const loadItems = useCallback(
     async (page: number = 1, append: boolean = false) => {
-      const requestId = ++requestSequence.current
+      activeRequest.current?.abort()
+      const request = new AbortController()
+      activeRequest.current = request
       try {
         setIsLoading(true)
         setError(null)
-        const response = await fetchFoundItems(filters, page)
-        if (requestId !== requestSequence.current) return
+        const response = await fetchFoundItems(filters, page, undefined, request.signal)
+        if (request.signal.aborted) return
         setLoadedKey(JSON.stringify(filters))
         setItems((currentItems) => (append ? [...currentItems, ...response.items] : response.items))
         setPagination(response.pagination)
       } catch {
-        if (requestId !== requestSequence.current) return
+        if (request.signal.aborted) return
         setItems([])
         setPagination(null)
         setError('Unable to load the board right now.')
       } finally {
-        if (requestId === requestSequence.current) setIsLoading(false)
+        if (activeRequest.current === request) {
+          activeRequest.current = null
+          if (!request.signal.aborted) setIsLoading(false)
+        }
       }
     },
     [filters],
@@ -53,7 +58,7 @@ export function useFoundItems(initialFilters: FoundItemsFilter = {}): UseFoundIt
 
   useEffect(() => {
     void loadItems()
-    return () => { requestSequence.current += 1 }
+    return () => { activeRequest.current?.abort() }
   }, [loadItems])
 
   const updateFilters = useCallback((updates: Partial<FoundItemsFilter>) => {
@@ -61,12 +66,12 @@ export function useFoundItems(initialFilters: FoundItemsFilter = {}): UseFoundIt
   }, [])
 
   const loadMore = useCallback(async () => {
-    if (!pagination || pagination.page >= pagination.totalPages) {
+    if (activeRequest.current || loadedKey !== JSON.stringify(filters) || !pagination || pagination.page >= pagination.totalPages) {
       return
     }
 
     await loadItems(pagination.page + 1, true)
-  }, [loadItems, pagination])
+  }, [filters, loadedKey, loadItems, pagination])
 
   const refresh = useCallback(async () => {
     await loadItems()

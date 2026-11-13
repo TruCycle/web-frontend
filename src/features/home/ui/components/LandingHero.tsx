@@ -56,11 +56,14 @@ export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
           </div>
 
           {/* Instant Discovery Search Bar */}
-          <form onSubmit={handleSearch} className="mt-8">
+          <form role="search" onSubmit={handleSearch} className="mt-8">
+            <label className="sr-only" htmlFor="landing-item-search">Search available items</label>
             <div className="relative flex items-center rounded-2xl border border-[#0B332226] bg-white p-1.5 shadow-[0_12px_36px_rgba(11,51,34,0.08)] transition focus-within:border-[#0B3322] focus-within:ring-4 focus-within:ring-[#0B3322]/10">
-              <Search className="ml-3 h-5 w-5 text-slate-400" />
+              <Search aria-hidden="true" className="ml-3 h-5 w-5 text-slate-400" />
               <input
-                type="text"
+                id="landing-item-search"
+                type="search"
+                maxLength={120}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search sofas, desk, books, kitchen..."
@@ -122,15 +125,39 @@ export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
 
         <div className="relative mx-auto h-[29rem] w-full max-w-[28rem] lg:h-[31rem] lg:max-w-[29rem]">
           <div className="absolute left-0 top-0 h-[70%] w-[58%] overflow-hidden rounded-[1.9rem] border border-white/70 bg-white shadow-[0_24px_70px_rgba(11,51,34,0.12)]">
-            <img alt="Illustrative furniture photo" className="h-full w-full object-cover" src={heroImg1} fetchPriority="high" decoding="async" />
+            <img
+              alt="Illustrative furniture photo"
+              className="h-full w-full object-cover"
+              src={heroImg1}
+              srcSet={`${heroImg1.replace('w=700', 'w=280')} 280w, ${heroImg1.replace('w=700', 'w=560')} 560w, ${heroImg1.replace('w=700', 'w=840')} 840w`}
+              sizes="(min-width: 496px) 270px, calc((100vw - 48px) * 0.58)"
+              fetchPriority="high"
+              decoding="async"
+            />
           </div>
 
           <div className="absolute right-0 top-10 h-[42%] w-[46%] overflow-hidden rounded-[1.5rem] border border-white/80 bg-white shadow-[0_20px_60px_rgba(11,51,34,0.10)]">
-            <img alt="Illustrative books photo" className="h-full w-full object-cover" loading="lazy" src={heroImg2} />
+            <img
+              alt="Illustrative books photo"
+              className="h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
+              src={heroImg2}
+              srcSet={`${heroImg2.replace('w=600', 'w=220')} 220w, ${heroImg2.replace('w=600', 'w=440')} 440w, ${heroImg2.replace('w=600', 'w=660')} 660w`}
+              sizes="(min-width: 496px) 214px, calc((100vw - 48px) * 0.46)"
+            />
           </div>
 
           <div className="absolute bottom-0 left-[18%] h-[38%] w-[50%] overflow-hidden rounded-[1.65rem] border border-white/80 bg-white shadow-[0_24px_70px_rgba(11,51,34,0.10)]">
-            <img alt="Illustrative kitchenware photo" className="h-full w-full object-cover" loading="lazy" src={heroImg3} />
+            <img
+              alt="Illustrative kitchenware photo"
+              className="h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
+              src={heroImg3}
+              srcSet={`${heroImg3.replace('w=600', 'w=240')} 240w, ${heroImg3.replace('w=600', 'w=480')} 480w, ${heroImg3.replace('w=600', 'w=720')} 720w`}
+              sizes="(min-width: 496px) 232px, calc((100vw - 48px) * 0.5)"
+            />
           </div>
 
           <div className="absolute -left-5 top-14 h-24 w-24 rounded-full bg-[#0D3B24]/20 blur-2xl" />

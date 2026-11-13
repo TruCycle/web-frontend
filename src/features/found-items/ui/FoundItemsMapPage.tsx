@@ -12,7 +12,7 @@ import {
   fetchFoundItems,
   reportFoundItem,
 } from '../api/foundItemsApi'
-import type { FoundItem, FoundItemCategory, FoundItemStatus } from '../types'
+import type { FoundItem, FoundItemCategory, FoundItemStatus, FoundItemsFilter } from '../types'
 import { foundItemCategories } from '../types'
 import { useFoundItemDetails } from '../hooks/useFoundItemDetails'
 import { foundItemMapPoint, formatApproximateDistance, outwardPostcode } from '../lib/foundItemLocation'
@@ -416,14 +416,8 @@ export default function FoundItemsMapPage() {
   const [locationError, setLocationError] = useState<string | null>(null)
   const [focusMode, setFocusMode] = useState<FocusMode>(highlightId ? 'selected' : 'me')
   const [focusRequestKey, setFocusRequestKey] = useState(0)
-  const [isMobileItemModalOpen, setIsMobileItemModalOpen] = useState(Boolean(highlightId))
-  const {
-    item: detailedSelectedItem,
-    viewerClaim,
-    isLoading: isLoadingDetails,
-    error: detailsError,
-    refresh: refreshDetails,
-  } = useFoundItemDetails(selectedItemId, user?.id)
+  const [isMobileItemModalOpen, setIsMobileItemModalOpen] = useState(false)
+  const appliedHighlight = useRef('')
 
   const actor = {
     id: user?.id ?? 'current-user',
@@ -431,59 +425,69 @@ export default function FoundItemsMapPage() {
     avatarUrl: null,
   }
 
-  const boardRequest = useRef(0)
+  const boardRequest = useRef<AbortController | null>(null)
   const loadBoard = useCallback(async () => {
-    const requestId = ++boardRequest.current
+    boardRequest.current?.abort()
+    const request = new AbortController()
+    boardRequest.current = request
     setIsLoading(true)
     setItemsError(null)
 
     try {
-      const response = await fetchFoundItems(
-        {
-          postcode: user?.postcode?.trim() || undefined,
-          sortBy: user?.postcode ? 'nearest' : 'newest',
-          maxDistance: user?.postcode ? 5 : undefined,
-          includeRecentClosed: true,
-          category: categoryFilter === 'all' ? undefined : categoryFilter,
-        },
-        1,
-        50,
-      )
+      const postcode = user?.postcode?.trim() || undefined
+      const filters: FoundItemsFilter = {
+        postcode,
+        sortBy: postcode ? 'nearest' : 'newest',
+        maxDistance: postcode ? 5 : undefined,
+        includeRecentClosed: true,
+        category: categoryFilter === 'all' ? undefined : categoryFilter,
+      }
+      const response = await fetchFoundItems(filters, 1, 50, request.signal)
 
       const allItems = [...response.items]
       for (let page = 2; page <= response.pagination.totalPages; page += 1) {
-        if (requestId !== boardRequest.current) return
-        const next = await fetchFoundItems({ postcode: user?.postcode?.trim() || undefined, sortBy: user?.postcode ? 'nearest' : 'newest', maxDistance: user?.postcode ? 5 : undefined, includeRecentClosed: true, category: categoryFilter === 'all' ? undefined : categoryFilter }, page, 50)
+        if (request.signal.aborted) return
+        const next = await fetchFoundItems(filters, page, 50, request.signal)
         allItems.push(...next.items)
       }
       let nextItems = allItems.filter((item) => isVisibleMapStatus(item.status))
 
-      if (highlightId) {
+      if (highlightId && !nextItems.some((item) => item.id === highlightId)) {
         try {
-          const highlightResponse = await fetchFoundItemById(highlightId, user?.id)
-          if (!nextItems.some((item) => item.id === highlightResponse.item.id)) {
-            nextItems = [highlightResponse.item, ...nextItems]
-          }
+          const highlightResponse = await fetchFoundItemById(highlightId, user?.id, request.signal)
+          nextItems = [highlightResponse.item, ...nextItems]
         } catch {
           // Keep the main board responsive even if the highlighted item can no longer be fetched.
         }
       }
 
-      if (requestId !== boardRequest.current) return
+      if (request.signal.aborted) return
       setItems(nextItems)
+      if (highlightId && appliedHighlight.current !== highlightId && nextItems.some((item) => item.id === highlightId)) {
+        appliedHighlight.current = highlightId
+        setMapFilter('all')
+        setSelectedItemId(highlightId)
+        setFocusMode('selected')
+        setFocusRequestKey((current) => current + 1)
+        setIsMobileItemModalOpen(true)
+      }
     } catch {
-      if (requestId !== boardRequest.current) return
+      if (request.signal.aborted) return
       setItems([])
       setItemsError('Unable to load the live map right now.')
     } finally {
-      if (requestId === boardRequest.current) setIsLoading(false)
+      if (boardRequest.current === request) {
+        boardRequest.current = null
+        if (!request.signal.aborted) setIsLoading(false)
+      }
     }
   }, [highlightId, user?.id, user?.postcode, categoryFilter])
 
   useEffect(() => {
+    if (!highlightId) appliedHighlight.current = ''
     void loadBoard()
-    return () => { boardRequest.current += 1 }
-  }, [loadBoard])
+    return () => { boardRequest.current?.abort() }
+  }, [highlightId, loadBoard])
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -575,6 +579,13 @@ export default function FoundItemsMapPage() {
 
   const selectedItem =
     nearbyItems.find((entry) => entry.item.id === selectedItemId)?.item ?? nearbyItems[0]?.item ?? null
+  const {
+    item: detailedSelectedItem,
+    viewerClaim,
+    isLoading: isLoadingDetails,
+    error: detailsError,
+    refresh: refreshDetails,
+  } = useFoundItemDetails(selectedItem?.id ?? null, user?.id)
   const selectedItemForPanel = detailedSelectedItem ?? selectedItem
   const selectedDistanceKm = selectedItem ? readDistanceKm(selectedItem, liveLocation) : null
   const selectedItemOwnPost = selectedItem ? selectedItem.poster.id === user?.id : false

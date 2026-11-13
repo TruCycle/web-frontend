@@ -42,7 +42,7 @@ function mapNotification(value: unknown): NotificationItem | null {
 export async function fetchNotifications(params?: {
   readonly unreadOnly?: boolean
   readonly limit?: number
-}): Promise<NotificationItem[]> {
+}, signal?: AbortSignal): Promise<NotificationItem[]> {
   const query = new URLSearchParams()
   if (params?.limit) {
     query.set('limit', String(clampLimit(params.limit)))
@@ -53,21 +53,35 @@ export async function fetchNotifications(params?: {
 
   const response = await apiRequest<unknown>(
     `/notifications${query.size > 0 ? `?${query.toString()}` : ''}`,
+    { signal },
   )
   const data = unwrapApiData<unknown>(response)
   if (!Array.isArray(data)) {
-    return []
+    throw new Error('Notifications could not be confirmed.')
   }
 
-  return data
-    .map((entry) => mapNotification(entry))
-    .filter((entry): entry is NotificationItem => entry !== null)
+  const items = data.map((entry) => mapNotification(entry))
+  if (items.some((item) => item === null)) throw new Error('Notifications could not be confirmed.')
+  return items.filter((item): item is NotificationItem => item !== null)
 }
 
-export async function fetchUnreadNotificationsCount(): Promise<number> {
-  const response = await apiRequest<unknown>('/notifications/unread-count')
+export async function fetchUnreadNotificationsCount(signal?: AbortSignal): Promise<number> {
+  const response = await apiRequest<unknown>('/notifications/unread-count', { signal })
   const payload = unwrapApiData<unknown>(response)
   const data = asRecord(payload)
   const count = data?.count
-  return typeof count === 'number' && Number.isFinite(count) ? count : 0
+  if (typeof count !== 'number' || !Number.isSafeInteger(count) || count < 0) {
+    throw new Error('Unread notification count could not be confirmed.')
+  }
+  return count
+}
+
+export async function markNotificationsRead(ids?: string[]): Promise<void> {
+  const response = ids
+    ? await apiRequest<unknown, { ids: string[] }>('/notifications/read', { method: 'POST', body: { ids } })
+    : await apiRequest<unknown>('/notifications/read-all', { method: 'POST' })
+  const result = asRecord(unwrapApiData<unknown>(response))
+  if (typeof result?.updated !== 'number' || !Number.isSafeInteger(result.updated) || result.updated < 0) {
+    throw new Error('Notification read status could not be confirmed.')
+  }
 }

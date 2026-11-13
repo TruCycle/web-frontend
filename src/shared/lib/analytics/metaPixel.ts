@@ -21,7 +21,7 @@ let isInitialized = false
 
 export function syncMetaPixelConsent(): void {
   if (typeof window === 'undefined') return
-  if (getTrackingConsentStatus() === 'accepted') {
+  if (env.enableMetaPixelSdk && getTrackingConsentStatus() === 'accepted') {
     if (isInitialized) window.fbq?.('consent', 'grant')
     return
   }
@@ -33,7 +33,7 @@ export function syncMetaPixelConsent(): void {
 }
 
 export function initMetaPixel(): void {
-  if (getTrackingConsentStatus() !== 'accepted') return
+  if (!env.enableMetaPixelSdk || getTrackingConsentStatus() !== 'accepted') return
   if (isInitialized || !env.metaPixelId || typeof window === 'undefined') {
     return
   }
@@ -73,7 +73,7 @@ export function initMetaPixel(): void {
 }
 
 export function trackMetaPageView(): void {
-  if (getTrackingConsentStatus() !== 'accepted' || !isInitialized) return
+  if (!env.enableMetaPixelSdk || getTrackingConsentStatus() !== 'accepted' || !isInitialized) return
   window.fbq?.('track', 'PageView')
 }
 
@@ -81,6 +81,6 @@ export function trackMetaEvent(
   eventName: string,
   params?: Record<string, unknown>,
 ): void {
-  if (getTrackingConsentStatus() !== 'accepted' || !isInitialized) return
+  if (!env.enableMetaPixelSdk || getTrackingConsentStatus() !== 'accepted' || !isInitialized) return
   window.fbq?.('track', eventName, params)
 }

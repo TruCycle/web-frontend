@@ -3,13 +3,14 @@ import fs from 'node:fs'
 import test from 'node:test'
 import paths from '../workers/staging-web/routes.generated.js'
 import worker from '../workers/staging-web/index.js'
-import { canonicalHostRedirect, getSpaPathStatus } from '../workers/staging-web/route-policy.js'
+import { canonicalHostRedirect, getSpaRoute } from '../workers/staging-web/route-policy.js'
 import { extractSpaRoutes } from './spa-routes.mjs'
 import { startStaticServer } from './prerender.mjs'
 import os from 'node:os'
 import path from 'node:path'
 
 const origin = 'https://web-staging.example.test'
+const itemId = 'abcdef12-1234-1234-1234-1234567890ab'
 function fixture({ fail = false, redirect = false } = {}) {
   const requests = []
   return { requests, ASSETS: { async fetch(request) {
@@ -24,8 +25,8 @@ function fixture({ fail = false, redirect = false } = {}) {
 test('Worker route inventory covers every current React Router path, including auth/private aliases', () => {
   const source = fs.readFileSync(new URL('../src/app/routes/AppRoutes.tsx', import.meta.url), 'utf8')
   assert.deepEqual(paths, extractSpaRoutes(source))
-  for (const path of ['/auth/verify-email', '/profile', '/partner-shops', '/support/collector']) assert.equal(getSpaPathStatus(path, paths), 200)
-  for (const path of ['/missing', '/missing.js', '/support/a/b', '/%2fprofile']) assert.equal(getSpaPathStatus(path, paths), null)
+  for (const path of ['/auth/verify-email', '/profile', '/partner-shops', '/support/collector']) assert.deepEqual(getSpaRoute(path, paths), { status: 200 })
+  for (const path of ['/missing', '/missing.js', '/support/a/b', '/%2fprofile']) assert.equal(getSpaRoute(path, paths), null)
 })
 test('known SPA routes return shell200 with permanent staging headers and no token forwarded into the asset fetch', async () => {
   const env = fixture()
@@ -40,7 +41,8 @@ test('unknown navigation returns a genuine404 with a usable app shell', async ()
   assert.equal(response.status, 404); assert.match(await response.text(), /id="root"/)
   assert.match(response.headers.get('X-Robots-Tag'), /noindex/)
 })
-test('malformed item links return the app shell with HTTP 404 and no cache', async () => {
+test('malformed item links return the app shell with HTTP 404 and skip the API', async ({ mock }) => {
+  const probe = mock.method(globalThis, 'fetch', () => { throw Error('Unexpected API call') })
   for (const pathname of ['/items/not-a-uuid', '/items/%6Eot-a-uuid/', '/items/missing.jpg']) {
     const env = fixture()
     const response = await worker.fetch(new Request(origin + pathname), env)
@@ -53,11 +55,69 @@ test('malformed item links return the app shell with HTTP 404 and no cache', asy
   const head = await worker.fetch(new Request(origin + '/items/not-a-uuid', { method: 'HEAD' }), fixture())
   assert.equal(head.status, 404)
   assert.equal(await head.text(), '')
+  assert.equal(probe.mock.callCount(), 0)
 })
-test('well-formed item links still return the app shell for the client to load the listing', async () => {
-  const response = await worker.fetch(new Request(origin + '/items/ABCDEF12-1234-1234-1234-1234567890AB/'), fixture())
+test('active item documents return the shell and check visibility without visitor credentials', async ({ mock }) => {
+  const probe = mock.method(globalThis, 'fetch', () => new Response('API_PAYLOAD', {
+    headers: { 'Set-Cookie': 'upstream=private' },
+  }))
+  const request = new Request(`${origin}/items/${itemId.toUpperCase()}/?next=PRIVATE_QUERY`, {
+    headers: { Authorization: 'Bearer PRIVATE_TOKEN', Cookie: 'private=1', 'CF-Access-Jwt-Assertion': 'PRIVATE_ASSERTION' },
+  })
+  const response = await worker.fetch(request, fixture())
   assert.equal(response.status, 200)
+  const body = await response.text()
+  assert.match(body, /id="root"/)
+  assert.doesNotMatch(body, /API_PAYLOAD/)
+  assert.equal(response.headers.has('Set-Cookie'), false)
+  assert.equal(probe.mock.callCount(), 1)
+  const [url, options] = probe.mock.calls[0].arguments
+  assert.equal(url, `https://api-staging.trucycle.co.uk/items/${itemId}`)
+  assert.equal(options.method, 'GET')
+  assert.deepEqual(options.headers, { Accept: 'application/json' })
+  assert.equal(options.credentials, 'omit')
+  assert.equal(options.redirect, 'manual')
+  assert.equal(options.cache, 'no-store')
+  assert.ok(options.signal instanceof AbortSignal)
+  const config = JSON.parse(fs.readFileSync(new URL('../workers/staging-web/wrangler.json', import.meta.url), 'utf8'))
+  assert.ok(config.compatibility_flags.includes('global_fetch_strictly_public'))
+})
+test('retired or missing item documents return the HTTP 404 shell for GET and empty 404 for HEAD', async ({ mock }) => {
+  const probe = mock.method(globalThis, 'fetch', () => new Response('API_PAYLOAD', { status: 404 }))
+  for (const method of ['GET', 'HEAD']) {
+    const response = await worker.fetch(new Request(`${origin}/items/${itemId}`, { method }), fixture())
+    assert.equal(response.status, 404)
+    assert.equal(response.headers.get('Cache-Control'), 'no-store')
+    assert.match(response.headers.get('X-Robots-Tag'), /noindex/)
+    const body = await response.text()
+    if (method === 'HEAD') assert.equal(body, '')
+    else assert.match(body, /id="root"/)
+  }
+  assert.deepEqual(probe.mock.calls.map(call => call.arguments[1].method), ['GET', 'GET'])
+})
+test('item lookup redirects, throttling, and API errors are temporary document failures', async ({ mock }) => {
+  const probe = mock.method(globalThis, 'fetch')
+  for (const status of [302, 401, 429, 500]) {
+    probe.mock.mockImplementation(() => new Response('PRIVATE_UPSTREAM', {
+      status, headers: { Location: 'https://production.example.test/' },
+    }))
+    const response = await worker.fetch(new Request(`${origin}/items/${itemId}`), fixture())
+    assert.equal(response.status, 503)
+    assert.equal(response.headers.has('Location'), false)
+    const body = await response.text()
+    assert.match(body, /id="root"/)
+    assert.doesNotMatch(body, /PRIVATE_UPSTREAM/)
+  }
+})
+test('a bounded item lookup timeout returns the retryable shell', async ({ mock }) => {
+  const timeout = mock.method(AbortSignal, 'timeout', () => AbortSignal.abort())
+  mock.method(globalThis, 'fetch', (_url, options) => {
+    options.signal.throwIfAborted()
+  })
+  const response = await worker.fetch(new Request(`${origin}/items/${itemId}`), fixture())
+  assert.equal(response.status, 503)
   assert.match(await response.text(), /id="root"/)
+  assert.deepEqual(timeout.mock.calls[0].arguments, [2500])
 })
 test('missing asset never receives the SPA HTML fallback, even with an HTML accept header', async () => {
   const response = await worker.fetch(new Request(origin + '/missing.js', { headers: { Accept: 'text/html' } }), fixture())

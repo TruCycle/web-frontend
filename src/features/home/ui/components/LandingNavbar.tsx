@@ -10,19 +10,19 @@ type LandingNavbarProps = {
 
 const navLinks = [
   { to: '/browse', label: 'Browse items' },
-  { href: '#explore-items', label: 'Top categories' },
-  { href: '#how', label: 'How it works' },
-  { href: '#what-we-take', label: 'What to offer' },
-  { href: '#impact', label: 'Why reuse' },
-  { href: '#faq', label: 'Questions' },
+  { href: '/#explore-items', label: 'Top categories' },
+  { href: '/#how', label: 'How it works' },
+  { href: '/#what-we-take', label: 'What to offer' },
+  { href: '/#impact', label: 'Why reuse' },
+  { href: '/#faq', label: 'Questions' },
 ]
 
 export function LandingNavbar({ dashboardTo, isAuthenticated, postItemTo }: LandingNavbarProps) {
   return (
-    <nav className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
+    <nav aria-label="Main navigation" className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between rounded-full border border-[#0B332212] bg-white/90 px-4 shadow-[0_18px_50px_rgba(11,51,34,0.08)] backdrop-blur-xl sm:px-6">
-        <Link className="inline-flex shrink-0 items-center gap-2.5 no-underline" to="/">
-          <img alt="TruCycle" className="h-10 w-10 rounded-2xl" src={logoSrc} />
+        <Link aria-label="TruCycle home" className="inline-flex shrink-0 items-center gap-2.5 no-underline" to="/">
+          <img alt="" className="h-10 w-10 rounded-2xl" src={logoSrc} />
           <span className="max-[360px]:hidden text-lg font-semibold tracking-[-0.03em] text-[#0B3322]">TruCycle</span>
         </Link>
 
