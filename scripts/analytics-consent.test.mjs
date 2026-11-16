@@ -23,7 +23,7 @@ function fixture() {
   const window = Object.assign(new EventTarget(), {
     localStorage,
     sessionStorage: localStorage,
-    location: { hostname: 'localhost', origin: 'http://localhost', pathname: '/signup' },
+    location: { hostname: 'localhost', origin: 'http://localhost', pathname: '/browse' },
   })
   const cookies = new Map([['auth_session', 'preserve'], ['_ga', 'optional'], ['_fbp', 'optional']])
   const scripts = []
@@ -117,10 +117,11 @@ test('unknown and rejected choices never import/init optional SDKs or inject scr
 test('late PostHog module completion after rejection cannot initialise', async () => {
   const f = fixture()
   f.consent.setTrackingConsentStatus('accepted')
-  f.posthog.trackPostHogPageview('/signup')
+  f.posthog.trackPostHogPageview('/browse')
   f.consent.setTrackingConsentStatus('rejected')
   f.sync()
   await flushImports()
+  assert.equal(f.calls.imports, 1)
   assert.equal(f.calls.inits, 0)
   assert.equal(f.calls.events.length, 0)
 })
@@ -128,12 +129,12 @@ test('late PostHog module completion after rejection cannot initialise', async (
 test('PostHog initialises once, deduplicates StrictMode pageviews and supports reaccept', async () => {
   const f = fixture()
   f.consent.setTrackingConsentStatus('accepted')
-  f.posthog.trackPostHogPageview('/signup?token=private#secret')
-  f.posthog.trackPostHogPageview('/signup?token=private#secret')
+  f.posthog.trackPostHogPageview('/browse?search=private#secret')
+  f.posthog.trackPostHogPageview('/browse?search=private#secret')
   await flushImports()
   assert.equal(f.calls.inits, 1)
   assert.equal(f.calls.events.length, 1)
-  assert.equal(f.calls.events[0].properties.page_path, '/signup')
+  assert.equal(f.calls.events[0].properties.page_path, '/browse')
   assert.equal(f.options().advanced_disable_flags, true)
   assert.equal(f.options().disable_session_recording, true)
   assert.equal(f.options().opt_out_persistence_by_default, true)

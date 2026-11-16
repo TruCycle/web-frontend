@@ -128,7 +128,7 @@ test('mounted message alerts refresh from incoming, private read and reconnect e
     const exports = {}
     const source = ts.transpileModule(fs.readFileSync(path.join(root, relative), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText
     vm.runInNewContext(source, {
-      exports, window: browserWindow, document: { ...domEvents(), visibilityState: 'visible' },
+      exports, window: browserWindow, document: { ...domEvents(), visibilityState: 'visible' }, AbortController,
       setTimeout(callback) { const key = ++timerId; timers.set(key, callback); return key }, clearTimeout: key => timers.delete(key),
       require(name) { if (!(name in imports)) throw Error('Unexpected hook import: ' + name); return imports[name] },
     })
