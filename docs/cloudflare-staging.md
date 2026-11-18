@@ -29,6 +29,8 @@ Analytics, Google OAuth, Cloudinary uploads and the existing Vision Worker are d
 
 ## Mandatory account steps before deployment
 
+PostHog can be turned on independently for an isolated EU staging project. Set `STAGING_POSTHOG_PROJECT_TOKEN` to that project's browser token and `STAGING_POSTHOG_ISOLATION_CONFIRMED=isolated-staging-only` in the staging Worker's build variables. The build uses `https://eu.i.posthog.com` for ingestion. With no explicit staging token, PostHog remains disabled. After deployment, verify in a fresh browser that events begin only after acceptance, that auth routes emit no events, and that withdrawal stops capture. Check arrival in the staging project and inspect payload field names without retaining user data.
+
 1. Confirm the intended Cloudflare account and separate staging Worker identity. Do not bind this scaffold to `trucycle.co.uk`, `www.trucycle.co.uk`, the production API or the existing image-recognition Worker.
 2. Provision/verify the isolated API runtime, synthetic database/fixtures, staging JWT secrets and sandboxed outbound services. Confirm the API and socket endpoints do not redirect to production. Do not copy production user data or provider secrets.
 3. Select a dedicated staging hostname and create a Cloudflare Access self-hosted application covering that entire hostname, including assets/deep links. Use an explicit tester allowlist and default deny. Confirm anonymous and non-allowlisted users are blocked. Access protection is an account-side prerequisite; the Wrangler file does not provide it.

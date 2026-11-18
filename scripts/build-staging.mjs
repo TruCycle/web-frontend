@@ -51,6 +51,13 @@ export function createStagingBuildPlan(environment, root = repoRoot) {
   }
   const apiOrigin = stagingOrigin(environment.STAGING_API_ORIGIN, 'STAGING_API_ORIGIN', ['https:'])
   const websocketOrigin = stagingOrigin(environment.STAGING_WS_ORIGIN, 'STAGING_WS_ORIGIN', ['https:', 'wss:'])
+  const posthogToken = environment.STAGING_POSTHOG_PROJECT_TOKEN?.trim() || ''
+  if (posthogToken && (
+    environment.STAGING_POSTHOG_ISOLATION_CONFIRMED !== isolationAttestation ||
+    !/^phc_[A-Za-z0-9_-]+$/.test(posthogToken)
+  )) {
+    throw Error('PostHog requires a verified separate staging project and its browser project token.')
+  }
 
   // Remove inherited browser variables, including unknown future VITE_* keys.
   // Case-insensitive filtering also protects builds launched on Windows.
@@ -68,8 +75,8 @@ export function createStagingBuildPlan(environment, root = repoRoot) {
     VITE_GA_MEASUREMENT_ID: '',
     VITE_META_PIXEL_ID: '',
     VITE_ENABLE_META_PIXEL_SDK: 'false',
-    VITE_POSTHOG_PROJECT_TOKEN: '',
-    VITE_POSTHOG_HOST: '',
+    VITE_POSTHOG_PROJECT_TOKEN: posthogToken,
+    VITE_POSTHOG_HOST: posthogToken ? 'https://eu.i.posthog.com' : '',
     VITE_GOOGLE_CLIENT_ID: '',
     VITE_ENABLE_SMART_SPOT: 'false',
     VITE_MESSAGE_ATTACHMENTS_ENABLED: (environment.STAGING_MESSAGE_ATTACHMENTS_ENABLED ?? 'true') === 'true' ? 'true' : 'false',
