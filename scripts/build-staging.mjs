@@ -51,6 +51,14 @@ export function createStagingBuildPlan(environment, root = repoRoot) {
   }
   const apiOrigin = stagingOrigin(environment.STAGING_API_ORIGIN, 'STAGING_API_ORIGIN', ['https:'])
   const websocketOrigin = stagingOrigin(environment.STAGING_WS_ORIGIN, 'STAGING_WS_ORIGIN', ['https:', 'wss:'])
+  const mediaCloud = environment.STAGING_CLOUDINARY_CLOUD_NAME?.trim() || ''
+  const mediaPreset = environment.STAGING_CLOUDINARY_UPLOAD_PRESET?.trim() || ''
+  if ((mediaCloud || mediaPreset) && (
+    environment.STAGING_CLOUDINARY_ISOLATION_CONFIRMED !== isolationAttestation ||
+    !/^[a-z0-9_-]+$/i.test(mediaCloud) || !/^[a-z0-9_-]+$/i.test(mediaPreset)
+  )) {
+    throw Error('Cloudinary requires a verified separate staging cloud and a valid upload preset.')
+  }
 
   // Remove inherited browser variables, including unknown future VITE_* keys.
   // Case-insensitive filtering also protects builds launched on Windows.
@@ -62,8 +70,8 @@ export function createStagingBuildPlan(environment, root = repoRoot) {
     VITE_API_BASE_URL: apiOrigin,
     VITE_WS_URL: websocketOrigin,
     VITE_DEFAULT_SEARCH_POSTCODE: '',
-    VITE_CLOUDINARY_CLOUD_NAME: '',
-    VITE_CLOUDINARY_UPLOAD_PRESET: '',
+    VITE_CLOUDINARY_CLOUD_NAME: mediaCloud,
+    VITE_CLOUDINARY_UPLOAD_PRESET: mediaPreset,
     VITE_CLOUDINARY_FOLDER: '',
     VITE_GA_MEASUREMENT_ID: '',
     VITE_META_PIXEL_ID: '',
