@@ -120,6 +120,26 @@ test('PostHog accepts only an explicit isolated EU staging project token', () =>
   assert.equal(environment.VITE_POSTHOG_HOST, 'https://eu.i.posthog.com')
 })
 
+test('Cloudinary is enabled only with both explicit staging values and independent isolation confirmation', () => {
+  const media = {
+    STAGING_CLOUDINARY_CLOUD_NAME: 'qa-media-cloud',
+    STAGING_CLOUDINARY_UPLOAD_PRESET: 'staging_listing_images',
+    STAGING_CLOUDINARY_ISOLATION_CONFIRMED: isolationAttestation,
+  }
+  const build = createStagingBuildPlan(validEnvironment({ ...media, VITE_CLOUDINARY_UPLOAD_PRESET: 'prod' }))
+  assert.equal(build.environment.VITE_CLOUDINARY_CLOUD_NAME, 'qa-media-cloud')
+  assert.equal(build.environment.VITE_CLOUDINARY_UPLOAD_PRESET, 'staging_listing_images')
+  for (const change of [
+    { STAGING_CLOUDINARY_ISOLATION_CONFIRMED: '' },
+    { STAGING_CLOUDINARY_CLOUD_NAME: '' },
+    { STAGING_CLOUDINARY_CLOUD_NAME: 'https://example.test' },
+    { STAGING_CLOUDINARY_UPLOAD_PRESET: '' },
+    { STAGING_CLOUDINARY_UPLOAD_PRESET: 'invalid/preset' },
+  ]) {
+    assert.throws(() => createStagingBuildPlan(validEnvironment({ ...media, ...change })), /verified separate staging cloud/)
+  }
+})
+
 test('Vite resolves the real staging config with env-file loading disabled and sanitized browser values', () => {
   const plan = createStagingBuildPlan({
     ...process.env,

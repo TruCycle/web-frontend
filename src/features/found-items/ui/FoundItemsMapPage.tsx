@@ -412,8 +412,9 @@ export default function FoundItemsMapPage() {
   const [isCancellingId, setIsCancellingId] = useState<string | null>(null)
   const [isReportingId, setIsReportingId] = useState<string | null>(null)
   const [liveLocation, setLiveLocation] = useState<GeoPoint | null>(null)
-  const [isLocating, setIsLocating] = useState(true)
+  const [isLocating, setIsLocating] = useState(false)
   const [locationError, setLocationError] = useState<string | null>(null)
+  const locationWatch = useRef<number | null>(null)
   const [focusMode, setFocusMode] = useState<FocusMode>(highlightId ? 'selected' : 'me')
   const [focusRequestKey, setFocusRequestKey] = useState(0)
   const [isMobileItemModalOpen, setIsMobileItemModalOpen] = useState(false)
@@ -489,14 +490,32 @@ export default function FoundItemsMapPage() {
     return () => { boardRequest.current?.abort() }
   }, [highlightId, loadBoard])
 
-  useEffect(() => {
+  const stopLocationWatch = useCallback(() => {
+    if (locationWatch.current !== null) {
+      navigator.geolocation.clearWatch(locationWatch.current)
+      locationWatch.current = null
+    }
+  }, [])
+
+  useEffect(() => stopLocationWatch, [stopLocationWatch])
+
+  const centreOnMe = () => {
+    if (liveLocation && locationWatch.current !== null) {
+      setFocusMode('me')
+      setFocusRequestKey((current) => current + 1)
+      return
+    }
+    if (locationWatch.current !== null) return
     if (!navigator.geolocation) {
-      setIsLocating(false)
-      setLocationError('Live location is not available in this browser.')
+      setLocationError('Live location is unavailable in this browser. You can still use the map.')
       return
     }
 
-    const watchId = navigator.geolocation.watchPosition(
+    setLocationError(null)
+    setIsLocating(true)
+    setFocusMode('me')
+    setFocusRequestKey((current) => current + 1)
+    locationWatch.current = navigator.geolocation.watchPosition(
       (position) => {
         setLiveLocation({
           latitude: position.coords.latitude,
@@ -505,8 +524,12 @@ export default function FoundItemsMapPage() {
         setLocationError(null)
         setIsLocating(false)
       },
-      () => {
-        setLocationError('Allow location access to keep nearby spots updated as you move.')
+      (locationFailure) => {
+        stopLocationWatch()
+        setLiveLocation(null)
+        setLocationError(locationFailure.code === 1
+          ? 'Location access was blocked. You can still use the map and menu.'
+          : 'Could not get your location. You can still use the map and menu.')
         setIsLocating(false)
       },
       {
@@ -516,10 +539,7 @@ export default function FoundItemsMapPage() {
       },
     )
 
-    return () => {
-      navigator.geolocation.clearWatch(watchId)
-    }
-  }, [])
+  }
 
   useEffect(() => {
     const nextFilteredIds = items
@@ -662,13 +682,24 @@ export default function FoundItemsMapPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-3xl font-bold tracking-[-0.03em] text-slate-950">Map</h1>
-        <p className="mt-1 text-sm text-slate-500">{locationLabel}</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-bold tracking-[-0.03em] text-slate-950">Map</h1>
+          <p className="mt-1 text-sm text-slate-500">{locationLabel}</p>
+        </div>
+        <button
+          type="button"
+          onClick={centreOnMe}
+          disabled={isLocating}
+          className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm ring-1 ring-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-60"
+        >
+          <LocateFixed aria-hidden="true" size={16} />
+          {isLocating ? 'Finding your location…' : 'Centre on me'}
+        </button>
       </div>
 
       {itemsError ? <p className="text-sm text-rose-600">{itemsError}</p> : null}
-      {locationError ? <p className="text-sm text-amber-700">{locationError}</p> : null}
+      {locationError ? <p role="status" className="text-sm text-amber-700">{locationError}</p> : null}
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.38fr)_340px] 2xl:grid-cols-[minmax(0,1.26fr)_360px]">
         <div className="min-w-0 space-y-2">
@@ -783,22 +814,6 @@ export default function FoundItemsMapPage() {
                 </span>
               </div>
 
-              <button
-                type="button"
-                className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-3 text-sm font-semibold text-slate-800 shadow-[0_12px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:text-slate-950"
-                onClick={() => {
-                  if (!liveLocation) {
-                    error('Location unavailable', 'Allow location access to centre the map on you.')
-                    return
-                  }
-
-                  setFocusMode('me')
-                  setFocusRequestKey((current) => current + 1)
-                }}
-              >
-                <LocateFixed size={16} />
-                Centre on me
-              </button>
             </div>
           </div>
 
