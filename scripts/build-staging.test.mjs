@@ -105,6 +105,21 @@ test('staging build has a separate output and no deploy command', () => {
   assert.equal(plan.commands[1].includes('staging'), true)
 })
 
+test('PostHog accepts only an explicit isolated EU staging project token', () => {
+  const token = 'phc_synthetic_staging_only'
+  assert.throws(() => createStagingBuildPlan(validEnvironment({ STAGING_POSTHOG_PROJECT_TOKEN: token })), /separate staging project/)
+  const options = { STAGING_POSTHOG_ISOLATION_CONFIRMED: isolationAttestation }
+  assert.throws(() => createStagingBuildPlan(validEnvironment({ ...options, STAGING_POSTHOG_PROJECT_TOKEN: 'phx_personal_key' })), /browser project token/)
+  const { environment } = createStagingBuildPlan(validEnvironment({
+    ...options,
+    STAGING_POSTHOG_PROJECT_TOKEN: token,
+    VITE_POSTHOG_PROJECT_TOKEN: 'phc_production',
+    VITE_POSTHOG_HOST: 'https://unreviewed.example.test',
+  }))
+  assert.equal(environment.VITE_POSTHOG_PROJECT_TOKEN, token)
+  assert.equal(environment.VITE_POSTHOG_HOST, 'https://eu.i.posthog.com')
+})
+
 test('Cloudinary is enabled only with both explicit staging values and independent isolation confirmation', () => {
   const media = {
     STAGING_CLOUDINARY_CLOUD_NAME: 'qa-media-cloud',
