@@ -64,7 +64,7 @@ const socialLinks: readonly SocialLink[] = [
 
 export function LandingFooter() {
   return (
-    <footer className="bg-[#0B3322] px-6 py-14 text-white sm:py-16">
+    <footer className="bg-tc-brand-deep px-6 py-14 text-white sm:py-16">
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-12 lg:grid-cols-[310px_minmax(0,1fr)] lg:gap-[4.375rem]">
           <div className="space-y-[1.125rem]">
@@ -75,7 +75,7 @@ export function LandingFooter() {
               </span>
             </Link>
 
-            <p className="max-w-[19rem] text-base leading-7 text-[#E8F6EE]">
+            <p className="max-w-[19rem] text-base leading-7 text-tc-brand-haze">
               Neighbour-to-neighbour reuse for homes, studios, flats, and
               families.
             </p>
@@ -83,7 +83,7 @@ export function LandingFooter() {
           </div>
 
           <div className="flex flex-col gap-4 lg:items-end">
-            <p className="text-base font-semibold tracking-[0.02em] text-[#E8F6EE] lg:text-right">
+            <p className="text-base font-semibold tracking-[0.02em] text-tc-brand-haze lg:text-right">
               Follow us on all social platforms
             </p>
 
@@ -92,7 +92,7 @@ export function LandingFooter() {
                 <a
                   key={label}
                   aria-label={label}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-[#E8F6EE] transition duration-200 hover:-translate-y-0.5 hover:border-tc-shell-accent hover:text-tc-shell-accent"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-tc-brand-haze transition duration-200 hover:-translate-y-0.5 hover:border-tc-brand-mint hover:text-tc-brand-mint"
                   href={href}
                   rel="noreferrer"
                   target="_blank"
@@ -107,16 +107,16 @@ export function LandingFooter() {
 
         <div className="mt-14 space-y-4">
           <div className="h-px w-full bg-white/15" />
-          <div className="flex flex-col gap-4 text-sm font-medium tracking-[0.04em] text-[#E8F6EE] sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 text-sm font-medium tracking-[0.04em] text-tc-brand-haze sm:flex-row sm:items-center sm:justify-between">
             <span>{new Date().getFullYear()} TruCycle. Free neighbour-to-neighbour handovers.</span>
             <div className="flex flex-wrap gap-5">
-              <Link className="text-[#E8F6EE] no-underline" to="/privacy">
+              <Link className="text-tc-brand-haze no-underline" to="/privacy">
                 Privacy
               </Link>
-              <Link className="text-[#E8F6EE] no-underline" to="/terms">
+              <Link className="text-tc-brand-haze no-underline" to="/terms">
                 Terms
               </Link>
-              <a className="text-[#E8F6EE] no-underline" href="mailto:hello@trucycle.co.uk?subject=Accessibility">
+              <a className="text-tc-brand-haze no-underline" href="mailto:hello@trucycle.co.uk?subject=Accessibility">
                 Email us about accessibility
               </a>
             </div>

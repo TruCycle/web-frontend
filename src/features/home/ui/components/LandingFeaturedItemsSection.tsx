@@ -70,11 +70,11 @@ export function LandingFeaturedItemsSection() {
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           <div className="max-w-2xl">
-            <span className="inline-flex items-center gap-2 rounded-full bg-[#0B3322]/5 px-3.5 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[#0B3322]">
-              <Sparkles className="h-3.5 w-3.5 text-[#2f9d7e]" />
+            <span className="inline-flex items-center gap-2 rounded-full bg-tc-brand-deep/5 px-3.5 py-1 text-xs font-bold uppercase tracking-[0.12em] text-tc-brand-deep">
+              <Sparkles className="h-3.5 w-3.5 text-tc-brand-link" />
               Live Community Listings
             </span>
-            <h2 className="mt-4 text-3xl font-bold tracking-[-0.04em] text-[#0B3322] sm:text-4xl lg:text-[2.75rem]">
+            <h2 className="mt-4 text-3xl font-bold tracking-[-0.04em] text-tc-brand-deep sm:text-4xl lg:text-[2.75rem]">
               See what neighbours are giving away
             </h2>
             <p className="mt-3 text-base leading-7 text-slate-600 sm:text-lg">
@@ -84,10 +84,10 @@ export function LandingFeaturedItemsSection() {
 
           <Link
             to={`/browse?category=${encodeURIComponent(activeCategory)}`}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-[#0B3322] no-underline shadow-sm transition hover:border-[#0B3322] hover:bg-slate-50"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-tc-brand-deep no-underline shadow-sm transition hover:border-tc-brand-deep hover:bg-slate-50"
           >
             <span>Browse all in {activeCategory}</span>
-            <ArrowRight className="h-4 w-4 text-[#0B3322]" />
+            <ArrowRight className="h-4 w-4 text-tc-brand-deep" />
           </Link>
         </div>
 
@@ -102,7 +102,7 @@ export function LandingFeaturedItemsSection() {
                 onClick={() => setActiveCategory(cat.id)}
                 className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
                   isActive
-                    ? 'bg-[#0B3322] text-white shadow-md shadow-[#0B3322]/15'
+                    ? 'bg-tc-brand-deep text-white shadow-md shadow-tc-brand-deep/15'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
@@ -137,7 +137,7 @@ export function LandingFeaturedItemsSection() {
             : items.map((item) => (
                 <article
                   key={item.id}
-                  className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-200 hover:-translate-y-1 hover:border-[#0B3322]/30 hover:shadow-[0_16px_40px_rgba(11,51,34,0.10)]"
+                  className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-200 hover:-translate-y-1 hover:border-tc-brand-deep/30 hover:shadow-[0_16px_40px_rgba(15,42,30,0.10)]"
                 >
                   <div className="relative h-52 w-full overflow-hidden bg-slate-100">
                     {item.image ? (
@@ -153,10 +153,10 @@ export function LandingFeaturedItemsSection() {
                       </div>
                     )}
                     <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-                      <span className="rounded-full bg-white/95 px-2.5 py-0.5 text-xs font-bold text-[#0B3322] shadow-sm backdrop-blur-sm">
+                      <span className="rounded-full bg-white/95 px-2.5 py-0.5 text-xs font-bold text-tc-brand-deep shadow-sm backdrop-blur-sm">
                         {item.category}
                       </span>
-                      <span className="rounded-full bg-[#0B3322] px-2.5 py-0.5 text-xs font-medium text-white shadow-sm">
+                      <span className="rounded-full bg-tc-brand-deep px-2.5 py-0.5 text-xs font-medium text-white shadow-sm">
                         {item.condition}
                       </span>
                     </div>
@@ -164,7 +164,7 @@ export function LandingFeaturedItemsSection() {
                   </div>
 
                   <div className="flex flex-1 flex-col p-5">
-                    <h3 className="line-clamp-1 text-base font-bold text-slate-900 group-hover:text-[#0B3322]">
+                    <h3 className="line-clamp-1 text-base font-bold text-slate-900 group-hover:text-tc-brand-deep">
                       {item.title}
                     </h3>
 
@@ -182,7 +182,7 @@ export function LandingFeaturedItemsSection() {
                       <Button
                         type="button"
                         variant="secondary"
-                        className="w-full justify-center gap-2 rounded-xl border border-slate-300 bg-[#F8FCF7] text-sm font-bold text-[#0B3322] transition group-hover:border-[#0B3322] group-hover:bg-[#0B3322] group-hover:text-white"
+                        className="w-full justify-center gap-2 rounded-xl border border-slate-300 bg-tc-brand-surface text-sm font-bold text-tc-brand-deep transition group-hover:border-tc-brand-deep group-hover:bg-tc-brand-hover group-hover:text-white"
                         onClick={() => setSelectedItem(item)}
                       >
                         <Eye className="h-4 w-4" />
@@ -195,7 +195,7 @@ export function LandingFeaturedItemsSection() {
         </div>
 
         {/* Big Bottom Explore CTA */}
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 rounded-2xl bg-[#0B3322] p-8 text-white sm:flex-row sm:p-10">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 rounded-2xl bg-tc-brand-deep p-8 text-white sm:flex-row sm:p-10">
           <div className="space-y-1 text-center sm:text-left">
             <h3 className="text-xl font-bold sm:text-2xl">Want to see all items in your local area?</h3>
             <p className="text-sm text-white/80 sm:text-base">
@@ -204,7 +204,7 @@ export function LandingFeaturedItemsSection() {
           </div>
           <Link
             to="/browse"
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-tc-shell-accent px-7 py-3 text-base font-bold text-[#0B3322] no-underline shadow-lg transition duration-200 hover:-translate-y-0.5 hover:bg-tc-shell-accentHover"
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-tc-brand-deep px-7 py-3 text-base font-bold text-white no-underline shadow-lg transition duration-200 hover:-translate-y-0.5 hover:bg-tc-brand-hover"
           >
             <span>Explore all free items</span>
             <ArrowRight className="h-4 w-4" />
@@ -228,10 +228,10 @@ export function LandingFeaturedItemsSection() {
                   className="h-full w-full rounded-t-2xl object-cover"
                 />
                 <div className="absolute left-4 top-4 flex gap-2">
-                  <span className="rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-[#0B3322] shadow">
+                  <span className="rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-tc-brand-deep shadow">
                     {selectedItem.category}
                   </span>
-                  <span className="rounded-full bg-[#0B3322] px-3 py-1 text-xs font-medium text-white shadow">
+                  <span className="rounded-full bg-tc-brand-deep px-3 py-1 text-xs font-medium text-white shadow">
                     {selectedItem.condition}
                   </span>
                 </div>
@@ -243,7 +243,7 @@ export function LandingFeaturedItemsSection() {
                 <h2 className="text-2xl font-bold text-slate-900">{selectedItem.title}</h2>
                 <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-600">
                   <div className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4 text-[#2f9d7e]" />
+                    <MapPin className="h-4 w-4 text-tc-brand-link" />
                     <span>{selectedItem.locationLabel}</span>
                   </div>
                   <span>·</span>
@@ -257,8 +257,8 @@ export function LandingFeaturedItemsSection() {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-[#0B3322]/15 bg-[#F7FBF4] p-4 text-sm text-slate-700">
-                <p className="font-semibold text-[#0B3322]">Ready to collect this item?</p>
+              <div className="rounded-xl border border-tc-brand-deep/15 bg-tc-brand-haze p-4 text-sm text-slate-700">
+                <p className="font-semibold text-tc-brand-deep">Ready to collect this item?</p>
                 <p className="mt-1 text-xs text-slate-600 leading-relaxed">
                   Open the full listing to check availability and request this item.
                 </p>
@@ -267,7 +267,7 @@ export function LandingFeaturedItemsSection() {
               <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                 <Link
                   to={`/items/${encodeURIComponent(selectedItem.id)}`}
-                  className="inline-flex flex-1 items-center justify-center rounded-full bg-[#0B3322] px-5 py-3 text-sm font-bold text-white no-underline shadow transition hover:bg-[#0D3B24]"
+                  className="inline-flex flex-1 items-center justify-center rounded-full bg-tc-brand-deep px-5 py-3 text-sm font-bold text-white no-underline shadow transition hover:bg-tc-brand-hover"
                 >
                   View full listing
                 </Link>

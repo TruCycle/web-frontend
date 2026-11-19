@@ -114,7 +114,7 @@ export default function VerifyEmailPage() {
               className={classNames(
                 'inline-flex h-14 w-14 items-center justify-center rounded-full',
                 status === 'success'
-                  ? 'bg-tc-shell-accent/20 text-tc-shell-bg'
+                  ? 'bg-tc-brand-mint/20 text-tc-shell-bg'
                   : status === 'error'
                     ? 'bg-rose-100 text-rose-600'
                     : 'bg-slate-100 text-slate-600',

@@ -38,10 +38,10 @@ export function AuthCheckbox({
         onChange={onChange}
         type="checkbox"
       />
-      <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-[0.35rem] border border-tc-auth-inputBorder bg-white transition peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-tc-auth-inputFocus peer-checked:border-tc-auth-submit peer-checked:bg-tc-auth-submit peer-disabled:border-slate-200 peer-disabled:bg-slate-100">
+      <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-[0.35rem] border border-tc-auth-inputBorder bg-white transition peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-tc-auth-inputFocus peer-checked:border-tc-auth-submit peer-checked:bg-tc-auth-submit peer-checked:[&>svg]:opacity-100 peer-disabled:border-slate-200 peer-disabled:bg-slate-100">
         <svg
           aria-hidden
-          className="h-3.5 w-3.5 opacity-0 transition-opacity peer-checked:opacity-100"
+          className="h-3.5 w-3.5 opacity-0 transition-opacity"
           viewBox="0 0 20 20"
         >
           <path

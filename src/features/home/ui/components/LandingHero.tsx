@@ -35,22 +35,22 @@ export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
   }
   return (
     <section className="relative overflow-hidden px-6 pb-20 pt-32 sm:pb-24 sm:pt-36 lg:pt-40">
-      <div className="absolute inset-x-0 top-0 -z-10 h-[28rem] bg-[radial-gradient(circle_at_18%_22%,rgba(164,245,166,0.25),transparent_42%),radial-gradient(circle_at_78%_18%,rgba(11,51,34,0.08),transparent_32%)]" />
-      <div className="absolute left-1/2 top-24 -z-10 h-64 w-64 -translate-x-1/2 rounded-full bg-tc-shell-accent/20 blur-3xl" />
+      <div className="absolute inset-x-0 top-0 -z-10 h-[28rem] bg-[radial-gradient(circle_at_18%_22%,rgba(104,200,155,0.25),transparent_42%),radial-gradient(circle_at_78%_18%,rgba(15,42,30,0.08),transparent_32%)]" />
+      <div className="absolute left-1/2 top-24 -z-10 h-64 w-64 -translate-x-1/2 rounded-full bg-tc-brand-mint/20 blur-3xl" />
 
       <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[440px_minmax(0,1fr)] lg:items-center lg:gap-10">
         <div className="max-w-[27.5rem]">
-          <p className="text-sm font-bold tracking-[0.04em] text-[#172033]">
+          <p className="text-sm font-bold tracking-[0.04em] text-tc-brand-ink">
             Free neighbour-to-neighbour reuse
           </p>
 
-          <h1 className="mt-6 text-[clamp(3.35rem,8vw,5.5rem)] font-normal leading-[0.92] tracking-[-0.06em] text-[#0B3322]">
+          <h1 className="mt-6 text-[clamp(3.35rem,8vw,5.5rem)] font-normal leading-[0.92] tracking-[-0.06em] text-tc-brand-deep">
             <span className="block">Your clutter is</span>
             <span className="block">someone&apos;s</span>
-            <span className="block text-[#172033]">treasure.</span>
+            <span className="block text-tc-brand-ink">treasure.</span>
           </h1>
 
-          <div className="mt-8 space-y-1.5 text-base leading-8 text-[#121212B3] sm:text-[1.02rem]">
+          <div className="mt-8 space-y-1.5 text-base leading-8 text-tc-brand-muted sm:text-[1.02rem]">
             <p>Offer useful things you no longer need, free to another neighbour.</p>
             <p>Browse offers and arrange collection directly with the person giving.</p>
           </div>
@@ -58,8 +58,8 @@ export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
           {/* Instant Discovery Search Bar */}
           <form role="search" onSubmit={handleSearch} className="mt-8">
             <label className="sr-only" htmlFor="landing-item-search">Search available items</label>
-            <div className="relative flex items-center rounded-2xl border border-[#0B332226] bg-white p-1.5 shadow-[0_12px_36px_rgba(11,51,34,0.08)] transition focus-within:border-[#0B3322] focus-within:ring-4 focus-within:ring-[#0B3322]/10">
-              <Search aria-hidden="true" className="ml-3 h-5 w-5 text-slate-400" />
+            <div className="relative flex items-center rounded-2xl border border-tc-brand-control bg-white p-1.5 shadow-[0_12px_36px_rgba(15,42,30,0.08)] transition focus-within:border-tc-brand-deep focus-within:ring-4 focus-within:ring-tc-brand-deep/10">
+              <Search aria-hidden="true" className="ml-3 h-5 w-5 text-tc-brand-muted" />
               <input
                 id="landing-item-search"
                 type="search"
@@ -67,11 +67,11 @@ export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search sofas, desk, books, kitchen..."
-                className="w-full bg-transparent px-3 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400 sm:text-base"
+                className="w-full bg-transparent px-3 py-2 text-sm text-slate-900 outline-none placeholder:text-tc-brand-muted sm:text-base"
               />
               <button
                 type="submit"
-                className="inline-flex shrink-0 items-center justify-center rounded-xl bg-[#0B3322] px-4 py-2.5 text-xs font-bold text-white shadow transition hover:bg-[#0D3B24] sm:px-5 sm:text-sm"
+                className="inline-flex shrink-0 items-center justify-center rounded-xl bg-tc-brand-deep px-4 py-2.5 text-xs font-bold text-white shadow transition hover:bg-tc-brand-hover sm:px-5 sm:text-sm"
               >
                 Search
               </button>
@@ -85,7 +85,7 @@ export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
               <Link
                 key={item.category}
                 to={`/browse?category=${encodeURIComponent(item.category)}`}
-                className="rounded-full bg-white/80 px-2.5 py-1 font-medium text-slate-700 shadow-sm transition hover:bg-white hover:text-[#0B3322]"
+                className="rounded-full bg-white/80 px-2.5 py-1 font-medium text-slate-700 shadow-sm transition hover:bg-white hover:text-tc-brand-deep"
               >
                 {item.label}
               </Link>
@@ -94,28 +94,28 @@ export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
-              className="inline-flex items-center justify-center rounded-full bg-[#0B3322] px-6 py-3 text-base font-bold text-white no-underline shadow-[0_18px_40px_rgba(11,51,34,0.18)] transition-transform duration-200 hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center rounded-full bg-tc-brand-deep px-6 py-3 text-base font-bold text-white no-underline shadow-[0_18px_40px_rgba(15,42,30,0.18)] transition-transform duration-200 hover:-translate-y-0.5"
               to={postItemTo}
             >
               Post an item -&gt;
             </Link>
             <Link
-              className="inline-flex items-center justify-center rounded-full border border-[#0B33221A] bg-[#F8FCF7] px-6 py-3 text-base font-bold text-[#0B3322] no-underline transition-colors duration-200 hover:bg-white"
+              className="inline-flex items-center justify-center rounded-full border border-tc-brand-control bg-tc-brand-surface px-6 py-3 text-base font-bold text-tc-brand-deep no-underline transition-colors duration-200 hover:bg-white"
               to={browseTo}
             >
               Browse free items
             </Link>
           </div>
 
-          <div className="mt-10 h-px w-full max-w-[25.625rem] bg-[#CBD5E1]" />
+          <div className="mt-10 h-px w-full max-w-[25.625rem] bg-tc-brand-line" />
 
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {metrics.map((metric) => (
               <div className="max-w-[7rem]" key={metric.label}>
-                <p className="text-[1.7rem] font-normal leading-none tracking-[-0.05em] text-[#0B3322]">
+                <p className="text-[1.7rem] font-normal leading-none tracking-[-0.05em] text-tc-brand-deep">
                   {metric.value}
                 </p>
-                <p className="mt-2 text-sm font-medium tracking-[0.02em] text-[#121212B3]">
+                <p className="mt-2 text-sm font-medium tracking-[0.02em] text-tc-brand-muted">
                   {metric.label}
                 </p>
               </div>
@@ -124,7 +124,7 @@ export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
         </div>
 
         <div className="relative mx-auto h-[29rem] w-full max-w-[28rem] lg:h-[31rem] lg:max-w-[29rem]">
-          <div className="absolute left-0 top-0 h-[70%] w-[58%] overflow-hidden rounded-[1.9rem] border border-white/70 bg-white shadow-[0_24px_70px_rgba(11,51,34,0.12)]">
+          <div className="absolute left-0 top-0 h-[70%] w-[58%] overflow-hidden rounded-[1.9rem] border border-white/70 bg-white shadow-[0_24px_70px_rgba(15,42,30,0.12)]">
             <img
               alt="Illustrative furniture photo"
               className="h-full w-full object-cover"
@@ -136,7 +136,7 @@ export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
             />
           </div>
 
-          <div className="absolute right-0 top-10 h-[42%] w-[46%] overflow-hidden rounded-[1.5rem] border border-white/80 bg-white shadow-[0_20px_60px_rgba(11,51,34,0.10)]">
+          <div className="absolute right-0 top-10 h-[42%] w-[46%] overflow-hidden rounded-[1.5rem] border border-white/80 bg-white shadow-[0_20px_60px_rgba(15,42,30,0.10)]">
             <img
               alt="Illustrative books photo"
               className="h-full w-full object-cover"
@@ -148,7 +148,7 @@ export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
             />
           </div>
 
-          <div className="absolute bottom-0 left-[18%] h-[38%] w-[50%] overflow-hidden rounded-[1.65rem] border border-white/80 bg-white shadow-[0_24px_70px_rgba(11,51,34,0.10)]">
+          <div className="absolute bottom-0 left-[18%] h-[38%] w-[50%] overflow-hidden rounded-[1.65rem] border border-white/80 bg-white shadow-[0_24px_70px_rgba(15,42,30,0.10)]">
             <img
               alt="Illustrative kitchenware photo"
               className="h-full w-full object-cover"
@@ -160,10 +160,10 @@ export function LandingHero({ browseTo, postItemTo }: LandingHeroProps) {
             />
           </div>
 
-          <div className="absolute -left-5 top-14 h-24 w-24 rounded-full bg-[#0D3B24]/20 blur-2xl" />
-          <div className="absolute right-4 top-0 h-16 w-16 rounded-full border border-[#A4F5A6]/40 bg-[radial-gradient(circle_at_35%_35%,rgba(164,245,166,0.90),rgba(13,59,36,0.50)_60%,rgba(164,245,166,0.08)_100%)] shadow-[0_16px_40px_rgba(13,59,36,0.14)]" />
-          <div className="absolute bottom-10 right-6 h-24 w-24 rounded-full border border-[#D4A84B]/30 bg-[radial-gradient(circle_at_35%_35%,rgba(212,168,75,0.75),rgba(13,59,36,0.40)_55%,rgba(212,168,75,0.08)_100%)] shadow-[0_18px_50px_rgba(212,168,75,0.15)] backdrop-blur-sm" />
-          <p className="absolute -bottom-8 inset-x-0 text-center text-xs text-[#121212B3]">Illustrative photos, not current listings.</p>
+          <div className="absolute -left-5 top-14 h-24 w-24 rounded-full bg-tc-brand-deep/20 blur-2xl" />
+          <div className="absolute right-4 top-0 h-16 w-16 rounded-full border border-tc-brand-mint/40 bg-[radial-gradient(circle_at_35%_35%,rgba(104,200,155,0.90),rgba(15,42,30,0.50)_60%,rgba(104,200,155,0.08)_100%)] shadow-[0_16px_40px_rgba(15,42,30,0.14)]" />
+          <div className="absolute bottom-10 right-6 h-24 w-24 rounded-full border border-tc-brand-mint/30 bg-[radial-gradient(circle_at_35%_35%,rgba(104,200,155,0.55),rgba(15,42,30,0.40)_55%,rgba(104,200,155,0.08)_100%)] shadow-[0_18px_50px_rgba(104,200,155,0.15)] backdrop-blur-sm" />
+          <p className="absolute -bottom-8 inset-x-0 text-center text-xs text-tc-brand-muted">Illustrative photos, not current listings.</p>
         </div>
       </div>
     </section>
