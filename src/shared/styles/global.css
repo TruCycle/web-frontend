@@ -5,7 +5,7 @@
 /* Remains visible on both the light canvas and dark panels, including controls
    that suppress the browser's default outline. */
 :focus-visible {
-  outline: 3px solid #0b3322 !important;
+  outline: 3px solid theme('colors.tc.brand.deep') !important;
   outline-offset: 3px !important;
   box-shadow: 0 0 0 3px #fff !important;
 }

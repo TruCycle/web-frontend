@@ -158,7 +158,7 @@ export default function PublicBrowsePage() {
   }, [category, error, isLoading, items.length, page, postcode, search])
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F7FBF4] text-tc-app-text">
+    <div className="flex min-h-screen flex-col bg-tc-brand-haze text-tc-brand-ink">
       <LandingNavbar
         dashboardTo="/dashboard"
         isAuthenticated={isAuthenticated}
@@ -167,7 +167,7 @@ export default function PublicBrowsePage() {
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-6 pb-24 pt-32">
         <header className="max-w-2xl">
-          <h1 className="text-4xl font-bold tracking-[-0.04em] text-[#0B3322] sm:text-5xl">
+          <h1 className="text-4xl font-bold tracking-[-0.04em] text-tc-brand-deep sm:text-5xl">
             {postcode.trim() ? 'Free items near your search area' : 'Free items to reuse'}
           </h1>
           <p className="mt-4 text-lg leading-8 text-slate-600">
@@ -178,20 +178,20 @@ export default function PublicBrowsePage() {
 
         <div className="mt-8 flex flex-wrap gap-3">
           <div className="relative min-w-[260px] flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-tc-brand-muted" size={20} />
             <input
               type="text"
               aria-label="Search item names or categories"
               placeholder="Search item names or categories"
               maxLength={120}
-              className="h-12 w-full rounded-2xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#0B3322] focus:ring-4 focus:ring-[#0B3322]/10 sm:text-base"
+              className="h-12 w-full rounded-2xl border border-tc-brand-control bg-white pl-10 pr-3 text-sm text-slate-900 outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-4 focus:ring-tc-brand-deep/10 sm:text-base"
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
             />
           </div>
           <button
             type="button"
-            className="inline-flex h-12 items-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            className="inline-flex h-12 items-center gap-2 rounded-2xl border border-tc-brand-control bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
             onClick={() => setIsFiltersOpen((open) => !open)}
           >
             {isFiltersOpen ? <X size={18} /> : <SlidersHorizontal size={18} />}
@@ -210,8 +210,8 @@ export default function PublicBrowsePage() {
                 onClick={() => setCategory(opt.value)}
                 className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition sm:text-sm sm:px-4 sm:py-2 ${
                   isSelected
-                    ? 'bg-[#0B3322] text-white shadow-sm'
-                    : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-100'
+                    ? 'bg-tc-brand-deep text-white shadow-sm'
+                    : 'border border-tc-brand-control bg-white text-tc-brand-deep hover:bg-tc-brand-haze'
                 }`}
               >
                 <span>{opt.emoji}</span>
@@ -229,7 +229,7 @@ export default function PublicBrowsePage() {
                 value={category}
                 options={CATEGORY_OPTIONS}
                 onChange={setCategory}
-                buttonClassName="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm"
+                buttonClassName="h-11 w-full rounded-xl border border-tc-brand-control bg-white px-3 text-sm"
               />
             </label>
             <label className="space-y-2 text-sm">
@@ -237,7 +237,7 @@ export default function PublicBrowsePage() {
               <input
                 type="text"
                 placeholder="e.g. IG11 7FR, Hackney, Stratford"
-                className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none focus:border-[#0B3322] focus:ring-4 focus:ring-[#0B3322]/10"
+                className="h-11 w-full rounded-xl border border-tc-brand-control bg-white px-3 text-sm outline-none focus:border-tc-brand-deep focus:ring-4 focus:ring-tc-brand-deep/10"
                 value={locationInput}
                 onChange={(event) => setLocationInput(event.target.value)}
               />
@@ -258,7 +258,7 @@ export default function PublicBrowsePage() {
           {!isLoading && items.map((item) => (
                 <article
                   key={item.id}
-                  className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#0B3322]/30 hover:shadow-md"
+                  className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-tc-brand-deep/30 hover:shadow-md"
                 >
                   <div className="relative h-56 w-full overflow-hidden bg-slate-100">
                     {item.image ? (
@@ -269,15 +269,15 @@ export default function PublicBrowsePage() {
                         loading="lazy"
                       />
                     ) : (
-                      <div className="flex h-56 w-full items-center justify-center text-sm font-medium text-slate-400">
+                      <div className="flex h-56 w-full items-center justify-center text-sm font-medium text-tc-brand-muted">
                         No image
                       </div>
                     )}
                     <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-                      <span className="rounded-full bg-white/95 px-2.5 py-0.5 text-xs font-bold text-[#0B3322] shadow-sm backdrop-blur-sm">
+                      <span className="rounded-full bg-white/95 px-2.5 py-0.5 text-xs font-bold text-tc-brand-deep shadow-sm backdrop-blur-sm">
                         {item.category}
                       </span>
-                      <span className="rounded-full bg-[#0B3322] px-2.5 py-0.5 text-xs font-medium text-white shadow-sm">
+                      <span className="rounded-full bg-tc-brand-deep px-2.5 py-0.5 text-xs font-medium text-white shadow-sm">
                         {item.condition}
                       </span>
                     </div>
@@ -285,12 +285,12 @@ export default function PublicBrowsePage() {
                   </div>
 
                   <div className="flex flex-1 flex-col p-5">
-                    <h2 className="line-clamp-1 text-base font-bold text-slate-900 group-hover:text-[#0B3322]">
+                    <h2 className="line-clamp-1 text-base font-bold text-slate-900 group-hover:text-tc-brand-deep">
                       {item.title}
                     </h2>
 
                     <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
-                      <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                      <MapPin className="h-3.5 w-3.5 text-tc-brand-muted" />
                       <span>{item.locationLabel}</span>
                       {item.distanceKm ? <span>· {item.distanceKm} km away</span> : null}
                     </div>
@@ -302,7 +302,7 @@ export default function PublicBrowsePage() {
                     <div className="mt-auto pt-4">
                       <Button
                         variant="secondary"
-                        className="w-full justify-center gap-2 rounded-xl border border-slate-300 bg-[#F8FCF7] text-sm font-bold text-[#0B3322] transition group-hover:border-[#0B3322] group-hover:bg-[#0B3322] group-hover:text-white"
+                        className="w-full justify-center gap-2 rounded-xl border border-tc-brand-control bg-tc-brand-surface text-sm font-bold text-tc-brand-deep transition group-hover:border-tc-brand-deep group-hover:bg-tc-brand-hover group-hover:text-white"
                         onClick={() => setSelectedItem(item)}
                       >
                         <Eye className="h-4 w-4" />
@@ -342,10 +342,10 @@ export default function PublicBrowsePage() {
                   className="h-full w-full rounded-t-2xl object-cover"
                 />
                 <div className="absolute left-4 top-4 flex gap-2">
-                  <span className="rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-[#0B3322] shadow">
+                  <span className="rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-tc-brand-deep shadow">
                     {selectedItem.category}
                   </span>
-                  <span className="rounded-full bg-[#0B3322] px-3 py-1 text-xs font-medium text-white shadow">
+                  <span className="rounded-full bg-tc-brand-deep px-3 py-1 text-xs font-medium text-white shadow">
                     {selectedItem.condition}
                   </span>
                 </div>
@@ -356,7 +356,7 @@ export default function PublicBrowsePage() {
                 <h2 className="text-2xl font-bold text-slate-900">{selectedItem.title}</h2>
                 <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-600">
                   <div className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4 text-[#2f9d7e]" />
+                    <MapPin className="h-4 w-4 text-tc-brand-link" />
                     <span>{selectedItem.locationLabel}</span>
                   </div>
                   <span>·</span>
@@ -371,7 +371,7 @@ export default function PublicBrowsePage() {
               </div>
 
               {selectedItem.estimatedCo2SavedKg ? (
-                <div className="flex items-center gap-2 rounded-xl bg-emerald-50 px-3.5 py-2.5 text-xs font-medium text-emerald-800">
+                <div className="flex items-center gap-2 rounded-xl bg-tc-brand-haze px-3.5 py-2.5 text-xs font-medium text-tc-brand-deep">
                   <Leaf className="h-4 w-4 text-emerald-600" />
                   <span>
                     ~{selectedItem.estimatedCo2SavedKg.toFixed(1)} kg CO₂e potential reuse estimate
@@ -379,8 +379,8 @@ export default function PublicBrowsePage() {
                 </div>
               ) : null}
 
-              <div className="rounded-xl border border-[#0B3322]/15 bg-[#F7FBF4] p-4 text-sm text-slate-700">
-                <p className="font-semibold text-[#0B3322]">Ready to request or message the owner?</p>
+              <div className="rounded-xl border border-tc-brand-deep/15 bg-tc-brand-haze p-4 text-sm text-slate-700">
+                <p className="font-semibold text-tc-brand-deep">Ready to request or message the owner?</p>
                 <p className="mt-1 text-xs text-slate-600 leading-relaxed">
                   Open the full listing to check availability and request this item.
                 </p>
@@ -389,7 +389,7 @@ export default function PublicBrowsePage() {
               <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                 <Link
                   to={`/items/${encodeURIComponent(selectedItem.id)}`}
-                  className="inline-flex flex-1 items-center justify-center rounded-full bg-[#0B3322] px-5 py-3 text-sm font-bold text-white no-underline shadow transition hover:bg-[#0D3B24]"
+                  className="inline-flex flex-1 items-center justify-center rounded-full bg-tc-brand-deep px-5 py-3 text-sm font-bold text-white no-underline shadow transition hover:bg-tc-brand-hover"
                 >
                   View full listing
                 </Link>

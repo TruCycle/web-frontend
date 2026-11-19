@@ -63,44 +63,44 @@ export function LandingFaqSection() {
   }, [])
 
   return (
-    <section className="bg-[#F7FBF4] px-6 py-20 sm:py-24" id="faq">
+    <section className="bg-tc-brand-haze px-6 py-20 sm:py-24" id="faq">
       <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-16">
         <div className="max-w-[15.75rem]">
-          <p className="text-sm font-bold tracking-[0.04em] text-[#172033]">
+          <p className="text-sm font-bold tracking-[0.04em] text-tc-brand-ink">
             Common questions
           </p>
-          <h2 className="mt-5 text-[clamp(2.2rem,4vw,3rem)] font-normal leading-[1.1] tracking-[-0.05em] text-[#0B3322]">
+          <h2 className="mt-5 text-[clamp(2.2rem,4vw,3rem)] font-normal leading-[1.1] tracking-[-0.05em] text-tc-brand-deep">
             <span className="block">Stuff people</span>
-            <span className="block text-[#172033]">usually ask.</span>
+            <span className="block text-tc-brand-ink">usually ask.</span>
           </h2>
-          <p className="mt-8 text-base leading-8 text-[#121212B3]">
+          <p className="mt-8 text-base leading-8 text-tc-brand-muted">
             Can&apos;t see your question? Drop us a note at{' '}
-            <a className="font-semibold text-[#0B3322]" href="mailto:hello@trucycle.co.uk">
+            <a className="font-semibold text-tc-brand-deep" href="mailto:hello@trucycle.co.uk">
               hello@trucycle.co.uk
             </a>.
           </p>
         </div>
 
-        <div className="border-t border-[#CBD5E1]">
+        <div className="border-t border-tc-brand-line">
           {faqItems.map((item, index) => {
             const isOpen = openIndex === index
 
             return (
-              <div className="border-b border-[#CBD5E1] py-6" key={item.question}>
+              <div className="border-b border-tc-brand-line py-6" key={item.question}>
                 <button
                   aria-expanded={isOpen}
                   className="flex w-full items-start justify-between gap-6 bg-transparent p-0 text-left"
                   onClick={() => setOpenIndex(isOpen ? -1 : index)}
                   type="button"
                 >
-                  <span className="max-w-3xl text-xl font-normal leading-8 text-[#0B3322] sm:text-[1.12rem]">
+                  <span className="max-w-3xl text-xl font-normal leading-8 text-tc-brand-deep sm:text-[1.12rem]">
                     {item.question}
                   </span>
                   <span
                     className={`mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-colors ${
                       isOpen
-                        ? 'border-tc-shell-accent bg-tc-shell-accent text-[#0B3322]'
-                        : 'border-[#CBD5E1] bg-[#FBFDFB] text-[#0B3322]'
+                        ? 'border-tc-brand-mint bg-tc-brand-mint text-tc-brand-deep'
+                        : 'border-tc-brand-line bg-tc-brand-surface text-tc-brand-deep'
                     }`}
                   >
                     {isOpen ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
@@ -108,7 +108,7 @@ export function LandingFaqSection() {
                 </button>
 
                 {isOpen ? (
-                  <p className="mt-4 max-w-3xl pr-12 text-base leading-8 text-[#121212B3]">
+                  <p className="mt-4 max-w-3xl pr-12 text-base leading-8 text-tc-brand-muted">
                     {item.answer}
                   </p>
                 ) : null}

@@ -7,10 +7,10 @@ const dashboardRoles = [
 
 export function LandingDashboardSection() {
   return (
-    <section className="overflow-hidden bg-[#0d2018] px-6 py-24 text-white">
+    <section className="overflow-hidden bg-tc-brand-deep px-6 py-24 text-white">
       <div className="mx-auto grid max-w-7xl gap-16 lg:grid-cols-2 lg:items-center">
         <div className="max-w-xl">
-          <span className="tc-landing-fade-up text-sm font-semibold uppercase tracking-[0.2em] text-tc-shell-accent">
+          <span className="tc-landing-fade-up text-sm font-semibold uppercase tracking-[0.2em] text-tc-brand-mint">
             Your dashboard
           </span>
           <h2 className="tc-landing-fade-up tc-landing-delay-1 mt-3 text-4xl font-bold tracking-[-0.04em] text-white sm:text-5xl">
@@ -26,13 +26,13 @@ export function LandingDashboardSection() {
             {dashboardRoles.map((entry, index) => (
               <div
                 key={entry.role}
-                className={`tc-landing-fade-up rounded-[1.35rem] border border-white/5 bg-[#24332c] px-5 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] ${index === 0 ? 'tc-landing-delay-2' : 'tc-landing-delay-3'}`}
+                className={`tc-landing-fade-up rounded-[1.35rem] border border-white/5 bg-tc-brand-hover px-5 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] ${index === 0 ? 'tc-landing-delay-2' : 'tc-landing-delay-3'}`}
               >
                 <div className="flex items-start gap-4">
-                  <div className="mt-2.5 h-2.5 w-2.5 shrink-0 rounded-full bg-[#2f9d7e]" />
+                  <div className="mt-2.5 h-2.5 w-2.5 shrink-0 rounded-full bg-tc-brand-mint" />
                   <div>
                     <p className="text-[1.05rem] font-semibold tracking-[-0.02em] text-white">{entry.role}</p>
-                    <p className="mt-2 text-[0.95rem] leading-7 text-[#9fb1ab]">{entry.description}</p>
+                    <p className="mt-2 text-[0.95rem] leading-7 text-tc-brand-haze">{entry.description}</p>
                   </div>
                 </div>
               </div>
@@ -41,7 +41,7 @@ export function LandingDashboardSection() {
         </div>
 
         <div className="relative flex min-h-[22rem] items-center justify-center">
-          <div className="animate-pulse-soft absolute h-64 w-64 rounded-full bg-tc-shell-accent/12" />
+          <div className="animate-pulse-soft absolute h-64 w-64 rounded-full bg-tc-brand-mint/12" />
           <div className="absolute h-80 w-80 rounded-full border border-white/10" />
           <img
             alt="Exchange illustration"

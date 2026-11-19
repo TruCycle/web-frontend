@@ -45,7 +45,7 @@ function AuthShowcasePanel({
   authorRole = 'Sustainable Living Enthusiast',
 }: AuthShowcaseProps) {
   return (
-    <aside className="flex h-full basis-[50%] flex-col justify-between gap-7 rounded-[25px] bg-tc-auth-hero px-[6rem] py-8 text-tc-auth-heroText max-[900px]:hidden">
+    <aside className="flex h-full basis-[50%] flex-col justify-between gap-7 rounded-[25px] bg-tc-brand-deep px-[6rem] py-8 text-tc-auth-heroText max-[900px]:hidden">
       <div className="inline-flex w-fit items-center gap-2.5">
         <img
           alt=""
@@ -89,7 +89,7 @@ function AuthShowcasePanel({
             ) : (
               <span
                 aria-hidden
-                className="inline-flex h-[50px] w-[50px] items-center justify-center rounded-full bg-tc-auth-avatar text-[0.8rem] font-bold text-tc-auth-avatarText"
+                className="inline-flex h-[50px] w-[50px] items-center justify-center rounded-full bg-tc-brand-haze text-[0.8rem] font-bold text-tc-auth-avatarText"
               >
                 {avatarLabel}
               </span>
@@ -180,11 +180,11 @@ export const authInputClassName =
 export const authPasswordToggleClassName =
   'absolute right-1 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-transparent p-0 text-tc-auth-icon focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tc-auth-inputFocus'
 export const authPrimaryButtonClassName =
-  'inline-flex h-[3.05rem] items-center justify-center gap-2 rounded-[0.55rem] border-0 bg-tc-auth-submit px-4 text-lg font-bold text-tc-auth-submitText transition hover:-translate-y-px hover:brightness-95 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-tc-auth-submitFocus disabled:cursor-not-allowed disabled:opacity-70 max-sm:text-xl'
+  'inline-flex h-[3.05rem] items-center justify-center gap-2 rounded-[0.55rem] border-0 bg-tc-auth-submit px-4 text-lg font-bold text-tc-auth-submitText transition hover:-translate-y-px hover:bg-tc-brand-hover focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-tc-auth-submitFocus disabled:cursor-not-allowed disabled:opacity-70 max-sm:text-xl'
 export const authInlineMetaClassName =
   'text-[0.92rem] text-tc-auth-row'
 export const authFooterCopyClassName = 'mt-[1rem] text-center text-tc-auth-muted'
 export const authFooterLinkClassName =
-  'font-semibold text-tc-auth-link no-underline hover:underline'
+  'font-semibold text-tc-auth-link underline underline-offset-2'
 export const authLoadingSpinnerClassName =
   'inline-block h-[1.1rem] w-[1.1rem] animate-spin rounded-full border-2 border-tc-auth-submitText/20 border-t-tc-auth-submitText'

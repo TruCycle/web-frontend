@@ -74,27 +74,27 @@ const categories: readonly Category[] = [
 
 export function LandingWhatWeTakeSection() {
   return (
-    <section className="bg-[#F7FBF4] px-6 py-20 sm:py-24" id="what-we-take">
+    <section className="bg-tc-brand-haze px-6 py-20 sm:py-24" id="what-we-take">
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-8 lg:grid-cols-[460px_minmax(0,1fr)] lg:items-center lg:gap-8">
           <div className="max-w-[28.75rem]">
-            <p className="text-sm font-bold tracking-[0.04em] text-[#172033]">
+            <p className="text-sm font-bold tracking-[0.04em] text-tc-brand-ink">
               Ideas for things to offer
             </p>
-            <h2 className="mt-5 text-[clamp(2.45rem,4.9vw,3.5rem)] font-normal leading-[0.98] tracking-[-0.05em] text-[#0B3322]">
+            <h2 className="mt-5 text-[clamp(2.45rem,4.9vw,3.5rem)] font-normal leading-[0.98] tracking-[-0.05em] text-tc-brand-deep">
               <span className="block">Useful pieces, ready</span>
               <span className="block">for another home.</span>
             </h2>
-            <p className="mt-6 max-w-[28rem] text-base leading-8 text-[#121212B3]">
+            <p className="mt-6 max-w-[28rem] text-base leading-8 text-tc-brand-muted">
               These categories are examples, not current listings. Show the object, choose a
               category, and add the pickup detail that makes saying yes easy.
             </p>
           </div>
 
-          <aside className="rounded-[1rem] bg-[#113A29] px-6 py-5 text-white shadow-[0_24px_60px_rgba(11,51,34,0.16)] sm:px-7">
+          <aside className="rounded-[1rem] bg-tc-brand-hover px-6 py-5 text-white shadow-[0_24px_60px_rgba(15,42,30,0.16)] sm:px-7">
             <div className="space-y-6">
               <div>
-                <p className="text-sm font-bold tracking-[0.04em] text-[#8EEA93]">
+                <p className="text-sm font-bold tracking-[0.04em] text-tc-brand-mint">
                   List with light
                 </p>
                 <p className="mt-2 max-w-[18rem] text-base leading-8 text-white">
@@ -102,7 +102,7 @@ export function LandingWhatWeTakeSection() {
                 </p>
               </div>
               <div>
-                <p className="text-sm font-bold tracking-[0.04em] text-[#8EEA93]">
+                <p className="text-sm font-bold tracking-[0.04em] text-tc-brand-mint">
                   Keep it practical
                 </p>
                 <p className="mt-2 max-w-[18rem] text-base leading-8 text-white">
@@ -117,14 +117,14 @@ export function LandingWhatWeTakeSection() {
           {categories.map(({ Icon, badge, description, imageUrl, title, categoryQuery }) => (
             <Link
               to={`/browse?category=${encodeURIComponent(categoryQuery)}`}
-              className="group flex flex-col overflow-hidden rounded-[1.15rem] border border-[#CBD5E1] bg-white no-underline shadow-[0_18px_48px_rgba(11,51,34,0.06)] transition-all duration-200 hover:-translate-y-1 hover:border-[#0B3322]/40 hover:shadow-[0_20px_50px_rgba(11,51,34,0.12)]"
+              className="group flex flex-col overflow-hidden rounded-[1.15rem] border border-tc-brand-line bg-white no-underline shadow-[0_18px_48px_rgba(15,42,30,0.06)] transition-all duration-200 hover:-translate-y-1 hover:border-tc-brand-deep/40 hover:shadow-[0_20px_50px_rgba(15,42,30,0.12)]"
               key={title}
             >
               <div
                 className="relative h-36 bg-cover bg-center transition-transform duration-300 group-hover:scale-[1.02]"
                 style={{ backgroundImage: `url(${imageUrl})` }}
               >
-                <div className="absolute inset-0 bg-[#0B3322]/55 transition-colors group-hover:bg-[#0B3322]/45" />
+                <div className="absolute inset-0 bg-tc-brand-deep/55 transition-colors group-hover:bg-tc-brand-hover/45" />
                 <div className="absolute left-4 top-4 rounded-full bg-white/15 px-3 py-1 text-sm font-bold tracking-[0.04em] text-white backdrop-blur-sm">
                   {badge}
                 </div>
@@ -136,16 +136,16 @@ export function LandingWhatWeTakeSection() {
               <div className="flex flex-1 flex-col justify-between space-y-3 p-5">
                 <div>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-[1.45rem] font-normal leading-none tracking-[-0.04em] text-[#0B3322] group-hover:text-[#0D3B24]">
+                    <h3 className="text-[1.45rem] font-normal leading-none tracking-[-0.04em] text-tc-brand-deep group-hover:text-tc-brand-deep">
                       {title}
                     </h3>
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors group-hover:bg-[#0B3322] group-hover:text-white">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors group-hover:bg-tc-brand-hover group-hover:text-white">
                       <ArrowUpRight className="h-4 w-4" />
                     </div>
                   </div>
-                  <p className="mt-2 text-base leading-7 text-[#121212B3]">{description}</p>
+                  <p className="mt-2 text-base leading-7 text-tc-brand-muted">{description}</p>
                 </div>
-                <span className="text-xs font-bold text-[#0B3322] opacity-0 transition-opacity group-hover:opacity-100">
+                <span className="text-xs font-bold text-tc-brand-deep opacity-0 transition-opacity group-hover:opacity-100">
                   Explore {title} listings →
                 </span>
               </div>
@@ -154,8 +154,8 @@ export function LandingWhatWeTakeSection() {
         </div>
         <div className="mt-8"><ReuseSafetyNotice /></div>
 
-        <div className="mt-6 flex items-center gap-3 text-sm font-semibold tracking-[0.04em] text-[#121212B3]">
-          <span className="h-px w-10 bg-[#D7E3D5]" />
+        <div className="mt-6 flex items-center gap-3 text-sm font-semibold tracking-[0.04em] text-tc-brand-muted">
+          <span className="h-px w-10 bg-tc-brand-line" />
           <span>
             Small categories make browsing feel like a neighbour&apos;s shelf, not a
             marketplace.
