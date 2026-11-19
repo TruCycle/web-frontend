@@ -33,7 +33,7 @@ export default function HomePage() {
   const spotTo = isAuthenticated ? '/found-items/post' : '/signup?intent=spotter'
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#F7FBF4] text-tc-app-text">
+    <div className="min-h-screen overflow-x-hidden bg-tc-brand-haze text-tc-brand-ink">
       <LandingNavbar
         dashboardTo={dashboardTo}
         isAuthenticated={isAuthenticated}

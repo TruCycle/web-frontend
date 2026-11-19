@@ -162,9 +162,9 @@ export default function SignupPage({
     >
       {verificationEmail ? (
         <div className="mt-8 grid gap-5">
-          <div className="rounded-[0.9rem] border border-tc-auth-inputBorder bg-[#F8FAFC] p-5">
+          <div className="rounded-[0.9rem] border border-tc-auth-inputBorder bg-tc-brand-haze p-5">
             <div className="flex items-start gap-3">
-              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tc-shell-accent/20 text-tc-shell-bg">
+              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tc-brand-mint/20 text-tc-shell-bg">
                 <Mail size={20} />
               </span>
               <div>

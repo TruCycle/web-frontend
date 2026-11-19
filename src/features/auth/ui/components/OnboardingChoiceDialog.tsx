@@ -27,7 +27,7 @@ export function OnboardingChoiceDialog({
       isOpen={isOpen}
       onClose={onClose}
       closeOnOverlayClick={false}
-      overlayClassName="bg-[#22222299] backdrop-blur-[16px]"
+      overlayClassName="bg-tc-brand-ink/60 backdrop-blur-[16px]"
       containerClassName="max-w-[700px]"
       hideCloseButton
     >
@@ -40,17 +40,17 @@ export function OnboardingChoiceDialog({
           />
         </div>
 
-        <h2 className="text-xl font-semibold text-[#121212]">
+        <h2 className="text-xl font-semibold text-tc-brand-ink">
           What do you want to try first?
         </h2>
-        <p className="text-sm text-[#12121299]">
+        <p className="text-sm text-tc-brand-muted">
           Start your TruCycle journey by collecting or donating
         </p>
 
         <div className="mt-4 grid w-full grid-cols-2 gap-4 max-sm:grid-cols-1">
           <button
             className={classNames(
-              'flex flex-col items-center gap-2 rounded-2xl border-2 border-transparent bg-[#A4F5A61A] px-5 py-8 text-center transition hover:border-[#15A119] focus-visible:border-[#15A119] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-70',
+              'flex flex-col items-center gap-2 rounded-2xl border-2 border-transparent bg-tc-brand-haze px-5 py-8 text-center transition hover:border-tc-brand-link focus-visible:border-tc-brand-link focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-70',
               isLoading && loadingChoice === 'collect' && 'cursor-wait',
             )}
             type="button"
@@ -58,10 +58,10 @@ export function OnboardingChoiceDialog({
             disabled={isLoading}
             aria-busy={Boolean(isLoading && loadingChoice === 'collect')}
           >
-            <div className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#A4F5A640] text-[#15A119]">
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-tc-brand-mint/25 text-tc-brand-link">
               <Package size={20} />
             </div>
-            <h3 className="inline-flex items-center gap-2 text-base font-semibold text-[#121212]">
+            <h3 className="inline-flex items-center gap-2 text-base font-semibold text-tc-brand-ink">
               Collect an item
               {isLoading && loadingChoice === 'collect' ? (
                 <span
@@ -70,17 +70,17 @@ export function OnboardingChoiceDialog({
                 />
               ) : null}
             </h3>
-            <p className="text-sm text-[#12121299]">
+            <p className="text-sm text-tc-brand-muted">
               Browse and claim quality items from the community
             </p>
-            <span className="rounded-full border border-[#A4F5A6] px-3 py-1 text-xs text-[#15A119]/80 bg-[#A4F5A61A]">
+            <span className="rounded-full border border-tc-brand-mint px-3 py-1 text-xs text-tc-brand-link bg-tc-brand-haze">
               Recommended for first time
             </span>
           </button>
 
           <button
             className={classNames(
-              'flex flex-col items-center gap-2 rounded-2xl border-2 border-transparent bg-[#A4F5A61A] px-5 py-8 text-center transition hover:border-[#15A119] focus-visible:border-[#15A119] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-70',
+              'flex flex-col items-center gap-2 rounded-2xl border-2 border-transparent bg-tc-brand-haze px-5 py-8 text-center transition hover:border-tc-brand-link focus-visible:border-tc-brand-link focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-70',
               isLoading && loadingChoice === 'donate' && 'cursor-wait',
             )}
             type="button"
@@ -88,10 +88,10 @@ export function OnboardingChoiceDialog({
             disabled={isLoading}
             aria-busy={Boolean(isLoading && loadingChoice === 'donate')}
           >
-            <div className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#A4F5A640] text-[#15A119]">
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-tc-brand-mint/25 text-tc-brand-link">
               <Gift size={20} />
             </div>
-            <h3 className="inline-flex items-center gap-2 text-base font-semibold text-[#121212]">
+            <h3 className="inline-flex items-center gap-2 text-base font-semibold text-tc-brand-ink">
               Donate an item
               {isLoading && loadingChoice === 'donate' ? (
                 <span
@@ -100,16 +100,16 @@ export function OnboardingChoiceDialog({
                 />
               ) : null}
             </h3>
-            <p className="text-sm text-[#12121299]">
+            <p className="text-sm text-tc-brand-muted">
               List items you no longer need and help others
             </p>
-            <span className="rounded-full border border-[#E2E8F0] px-3 py-1 text-xs text-[#222222] bg-[#F8FAFC]">
+            <span className="rounded-full border border-tc-brand-line px-3 py-1 text-xs text-tc-brand-ink bg-tc-brand-haze">
               Make an impact
             </span>
           </button>
         </div>
 
-        <p className="text-sm text-[#222222]">
+        <p className="text-sm text-tc-brand-ink">
           You can always do both -- switch between collecting and donating anytime in your settings.
         </p>
       </div>
