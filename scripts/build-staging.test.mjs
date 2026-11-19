@@ -142,7 +142,8 @@ test('Cloudinary is enabled only with both explicit staging values and independe
 
 test('Vite resolves the real staging config with env-file loading disabled and sanitized browser values', () => {
   const plan = createStagingBuildPlan({
-    ...process.env,
+    // Keep process settings needed by Vite while using only fixture staging settings.
+    ...Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('STAGING_'))),
     ...validEnvironment(),
     VITE_UNKNOWN_SECRET: 'production-sentinel-must-not-leak',
     VITE_POSTHOG_PROJECT_TOKEN: 'production-sentinel-must-not-leak',
