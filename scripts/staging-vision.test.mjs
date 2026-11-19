@@ -18,7 +18,8 @@ test('the staging Worker serves a 404 for the internal Vision route', async () =
 
 test('a real Vite staging build omits the internal Vision UI and production Worker URL', () => {
   const plan = createStagingBuildPlan({
-    ...process.env,
+    // Keep process settings needed by Vite while using only fixture staging settings.
+    ...Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^STAGING_/i.test(key))),
     STAGING_RESOURCE_ISOLATION_CONFIRMED: isolationAttestation,
     STAGING_API_ORIGIN: 'https://api-staging.example.test',
     STAGING_WS_ORIGIN: 'wss://api-staging.example.test',
