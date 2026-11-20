@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ChangeEvent, type Keyboa
 import { Camera, Image as ImageIcon, LoaderCircle, MapPin, RotateCw, Upload, X } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
 import { classNames } from '@/shared/utils/classNames'
-import { INITIAL_CAMERA_TRANSFORM, resolveCameraFrame, zoomCameraAt, type CameraTransform } from '@/features/found-items/lib/cameraFraming'
+import { INITIAL_CAMERA_TRANSFORM, resolveCameraFrame, zoomCameraAt, type CameraTransform } from './cameraFraming'
 
 interface CameraCaptureProps {
   readonly onCapture: (file: File) => void
@@ -320,8 +320,8 @@ export function CameraCapture({
         ) : (
           <>
             <div className="relative z-10 mx-auto mt-6 w-full max-w-[430px]">
-              <div ref={frameRef} {...pointerHandlers} aria-label="Camera framing area"
-                className="relative aspect-[3/4] touch-none overflow-hidden rounded-[36px] bg-black shadow-[0_28px_80px_rgba(0,0,0,0.45)]">
+              <div ref={frameRef} {...pointerHandlers} aria-label="Camera framing area" style={{ touchAction: 'none' }}
+                className="relative aspect-[3/4] overflow-hidden rounded-[36px] bg-black shadow-[0_28px_80px_rgba(0,0,0,0.45)]">
                 {preview}
               </div>
 
@@ -419,8 +419,8 @@ export function CameraCapture({
         </div>
       ) : (
         <>
-          <div ref={frameRef} {...pointerHandlers} aria-label="Camera framing area"
-            className="relative h-[320px] touch-none overflow-hidden rounded-2xl bg-black">
+          <div ref={frameRef} {...pointerHandlers} aria-label="Camera framing area" style={{ touchAction: 'none' }}
+            className="relative h-[320px] overflow-hidden rounded-2xl bg-black">
             {preview}
           </div>
 
