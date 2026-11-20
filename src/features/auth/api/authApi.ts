@@ -39,6 +39,7 @@ interface AuthDataWithTokens {
 
 interface AuthDataWithoutTokens {
   readonly user: ApiAuthUser
+  readonly verificationDelivery?: { readonly status?: string }
 }
 
 function normalizeUser(user: ApiAuthUser): AuthUser {
@@ -62,7 +63,10 @@ function mapTokens(payload: AuthDataWithTokens): AuthTokens {
   }
 }
 
-export async function registerUser(payload: RegisterPayload): Promise<AuthUser> {
+export async function registerUser(payload: RegisterPayload): Promise<{
+  user: AuthUser
+  verificationAccepted: boolean
+}> {
   const response = await apiRequest<ApiEnvelope<AuthDataWithoutTokens>, {
     first_name: string
     last_name: string
@@ -78,7 +82,10 @@ export async function registerUser(payload: RegisterPayload): Promise<AuthUser> 
     },
   })
 
-  return normalizeUser(response.data.user)
+  return {
+    user: normalizeUser(response.data.user),
+    verificationAccepted: response.data.verificationDelivery?.status === 'accepted',
+  }
 }
 
 export async function loginUser(

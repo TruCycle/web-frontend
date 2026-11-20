@@ -225,7 +225,7 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
   }, [])
 
   const register = useCallback(async (payload: RegisterPayload) => {
-    await registerUser(payload)
+    return (await registerUser(payload)).verificationAccepted
   }, [])
 
   const verifyEmail = useCallback(async (token: string) => {

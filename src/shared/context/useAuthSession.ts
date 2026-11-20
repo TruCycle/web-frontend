@@ -17,7 +17,7 @@ interface AuthSessionContextValue {
   readonly isBootstrapping: boolean
   login: (payload: LoginPayload, options: LoginOptions) => Promise<void>
   loginWithGoogle: (idToken: string) => Promise<void>
-  register: (payload: RegisterPayload) => Promise<void>
+  register: (payload: RegisterPayload) => Promise<boolean>
   verifyEmail: (token: string) => Promise<void>
   upgradeToPartner: (payload: UpgradeToPartnerPayload) => Promise<void>
   requestPasswordReset: (email: string) => Promise<void>

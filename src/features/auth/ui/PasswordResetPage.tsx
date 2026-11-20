@@ -48,6 +48,7 @@ export default function PasswordResetPage() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isConfirmVisible, setIsConfirmVisible] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isResending, setIsResending] = useState(false)
   const otpInputRefs = useRef<Array<HTMLInputElement | null>>([])
   const navigateTimeoutRef = useRef<number | null>(null)
   const { requestPasswordReset, resetPassword } = useAuthSession()
@@ -63,7 +64,6 @@ export default function PasswordResetPage() {
   }, [])
 
   useEffect(() => {
-    setIsSubmitting(false)
     if (resetStep !== 'otp') {
       return
     }
@@ -184,22 +184,26 @@ export default function PasswordResetPage() {
   }
 
   async function onResendCode() {
+    if (isSubmitting || isResending) return
     if (!email.trim()) {
       error('Missing email', 'Enter your email before requesting another code.')
       return
     }
 
+    setIsResending(true)
     try {
       await requestPasswordReset(email.trim())
       setOtpValues(initialOtpValues)
       focusOtpInput(0)
-      success('Code resent', 'A fresh OTP has been sent to your email.')
+      success('New code requested', 'If your account is eligible, use the newest code in your inbox. Check spam as well.')
     } catch (caughtError) {
       const message =
         caughtError instanceof ApiError
           ? caughtError.message
           : 'Could not resend code right now. Please try again.'
       error('Resend failed', message)
+    } finally {
+      setIsResending(false)
     }
   }
 
@@ -216,13 +220,14 @@ export default function PasswordResetPage() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (isSubmitting || isResending) return
 
     if (resetStep === 'request') {
       setIsSubmitting(true)
       try {
         await requestPasswordReset(email.trim())
         setResetStep('otp')
-        success('Code sent', 'Check your inbox for the 6-digit verification code.')
+        success('Reset requested', 'If your account is eligible, check your inbox or spam folder for a 6-digit code.')
       } catch (caughtError) {
         const message =
           caughtError instanceof ApiError
@@ -242,7 +247,6 @@ export default function PasswordResetPage() {
         return
       }
       setResetStep('password')
-      success('Code verified', 'Now create your new password.')
       return
     }
 
@@ -272,6 +276,11 @@ export default function PasswordResetPage() {
           ? caughtError.message
           : 'Could not reset password right now. Please try again.'
       error('Reset failed', message)
+      if (caughtError instanceof ApiError && caughtError.statusCode === 401) {
+        setOtpValues(initialOtpValues)
+        setPasswordValues(initialResetPasswordValues)
+        setResetStep('otp')
+      }
       setIsSubmitting(false)
     }
   }
@@ -282,7 +291,7 @@ export default function PasswordResetPage() {
     resetStep === 'request'
       ? 'Enter your registered email to proceed'
       : resetStep === 'otp'
-        ? 'Enter the code sent to your mail to continue.'
+        ? 'Enter the newest code from your email. You can request another if needed.'
         : 'Set your new password'
 
   function renderStepContent() {
@@ -309,7 +318,7 @@ export default function PasswordResetPage() {
         <>
           <label className={authFieldClassName}>
             <span className={authLabelClassName}>OTP Code</span>
-            <div className="grid w-fit grid-cols-6 gap-4">
+            <div className="grid w-full max-w-lg grid-cols-6 gap-2 sm:gap-3">
               {otpValues.map((value, index) => (
                 <input
                   key={`otp-${index + 1}`}
@@ -317,7 +326,7 @@ export default function PasswordResetPage() {
                     otpInputRefs.current[index] = element
                   }}
                   aria-label={`OTP digit ${index + 1}`}
-                  className="h-16 w-16 sm:h-20 sm:w-20 rounded-[8px] border border-tc-auth-inputBorder text-center text-lg font-semibold text-tc-app-text outline-none transition focus:border-tc-auth-inputFocus focus:ring-4 focus:ring-tc-auth-inputFocusRing"
+                  className="h-12 w-full min-w-0 rounded-[8px] border border-tc-auth-inputBorder text-center text-lg font-semibold text-tc-app-text outline-none transition focus:border-tc-auth-inputFocus focus:ring-4 focus:ring-tc-auth-inputFocusRing sm:h-16"
                   inputMode="numeric"
                   maxLength={1}
                   onChange={(event) => onOtpChange(index, event)}
@@ -334,17 +343,17 @@ export default function PasswordResetPage() {
           </label>
 
           <p className="text-sm text-tc-auth-row">
-            Didn&apos;t receive code? Click{' '}
+            Didn&apos;t receive a code?{' '}
             <button
               className={classNames(
                 'font-semibold text-tc-auth-link underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tc-auth-inputFocus',
               )}
               onClick={onResendCode}
+              disabled={isSubmitting || isResending}
               type="button"
             >
-              here
-            </button>{' '}
-            to resend
+              {isResending ? 'Requesting…' : 'Request a new code'}
+            </button>
           </p>
         </>
       )
@@ -421,7 +430,7 @@ export default function PasswordResetPage() {
         <button
           className={classNames(authPrimaryButtonClassName, isSubmitting && 'opacity-80')}
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isResending}
           aria-busy={isSubmitting}
         >
           {isSubmitting ? (
