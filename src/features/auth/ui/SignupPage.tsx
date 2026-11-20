@@ -52,6 +52,7 @@ export default function SignupPage({
   const [isRegistering, setIsRegistering] = useState(false)
   const [isResendingVerification, setIsResendingVerification] = useState(false)
   const [verificationEmail, setVerificationEmail] = useState<string | null>(null)
+  const [verificationAccepted, setVerificationAccepted] = useState(false)
   const { register } = useAuthSession()
   const { success, error } = useToast()
 
@@ -94,7 +95,7 @@ export default function SignupPage({
 
     setIsRegistering(true)
     try {
-      await register({
+      const accepted = await register({
         firstName: splitName.firstName,
         lastName: splitName.lastName,
         email: formValues.email.trim(),
@@ -102,7 +103,8 @@ export default function SignupPage({
       })
       onSubmitSuccess?.()
       setVerificationEmail(formValues.email.trim())
-      success('Account created', 'Check your email to verify your account and complete registration.')
+      setVerificationAccepted(accepted)
+      success('Account created', 'Verify your email to finish setting up your account.')
     } catch (caughtError) {
       const message =
         caughtError instanceof ApiError
@@ -122,7 +124,7 @@ export default function SignupPage({
     setIsResendingVerification(true)
     try {
       await resendVerificationEmail(verificationEmail)
-      success('Verification email sent', 'Check your inbox for a fresh verification link.')
+      success('Verification requested', 'If your account needs verification, check your inbox or spam folder for a fresh link.')
     } catch (caughtError) {
       const message =
         caughtError instanceof ApiError
@@ -161,13 +163,18 @@ export default function SignupPage({
                 <Mail size={20} />
               </span>
               <div>
-                <p className="m-0 text-sm font-medium text-tc-auth-formText">Verification email sent to</p>
+                <p className="m-0 text-sm font-medium text-tc-auth-formText">Verification requested for</p>
                 <p className="mt-1 break-all text-base font-semibold text-tc-auth-formTitle">{verificationEmail}</p>
               </div>
             </div>
           </div>
 
           <div className="grid gap-3 rounded-[0.9rem] border border-tc-auth-inputBorder bg-white p-5 text-sm leading-7 text-tc-auth-formText">
+            <p role="status" className="m-0">
+              {verificationAccepted
+                ? 'Our email provider accepted the request. Check your inbox or spam folder for the verification link.'
+                : 'Email delivery could not be confirmed. Check your inbox or spam folder, then resend the link if needed.'}
+            </p>
             <p className="m-0">1. Open your inbox and look for the TruCycle verification email.</p>
             <p className="m-0">2. Click the verification link in that email.</p>
             <p className="m-0">3. Once verified, return here and log in to continue.</p>
