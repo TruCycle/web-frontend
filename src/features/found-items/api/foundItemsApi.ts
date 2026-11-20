@@ -279,6 +279,8 @@ export async function fetchFoundItemById(
   id: string,
   _viewerId?: string,
 ): Promise<{ item: FoundItem; claims: FoundItemClaim[]; viewerClaim: FoundItemClaim | null }> {
+  // The authenticated server session determines the viewer.
+  void _viewerId
   const response = await apiRequest<unknown>(`/found-items/${encodeURIComponent(id.trim())}`)
   const record = asRecord(unwrapApiData<unknown>(response))
 
@@ -339,6 +341,8 @@ export async function createFoundItem(
   payload: CreateFoundItemPayload,
   _poster?: ActorSummary,
 ): Promise<FoundItem> {
+  // The server attributes the post to the authenticated account.
+  void _poster
   const response = await apiRequest<unknown, Record<string, unknown>>('/found-items', {
     method: 'POST',
     body: {
@@ -408,6 +412,8 @@ export async function cancelFoundItemClaim(
   id: string,
   _claimerId: string = 'current-user',
 ): Promise<void> {
+  // The server cancels the authenticated account's claim.
+  void _claimerId
   await apiRequest<void>(`/found-items/${encodeURIComponent(id.trim())}/claim`, {
     method: 'DELETE',
   })

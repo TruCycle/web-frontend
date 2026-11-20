@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { fetchActiveRooms } from '@/features/messaging/api/messagingApi'
 import { playIncomingMessageTone } from '@/features/messaging/lib/playIncomingMessageTone'
@@ -10,7 +10,7 @@ interface MessagingServerEvents extends Record<string, (...args: never[]) => voi
   'message:new': (message: RoomMessage) => void
 }
 
-interface MessagingClientEvents extends Record<string, (...args: never[]) => void> {}
+type MessagingClientEvents = Record<string, (...args: never[]) => void>
 
 function getSenderName(message: RoomMessage): string {
   const firstName = message.sender?.firstName?.trim() ?? ''
@@ -31,6 +31,8 @@ function getMessagePreview(message: RoomMessage): string {
 export function useMessageAlerts() {
   const location = useLocation()
   const { info } = useToast()
+  const isOnMessagesPage = location.pathname.startsWith('/messages')
+  const [wasOnMessagesPage, setWasOnMessagesPage] = useState(isOnMessagesPage)
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0)
   const seenMessageIdsRef = useRef<Set<string>>(new Set())
   const websocketClient = useMemo(
@@ -40,27 +42,24 @@ export function useMessageAlerts() {
       }),
     [],
   )
-  const isOnMessagesPage = location.pathname.startsWith('/messages')
-
-  const loadUnreadSummary = useCallback(async () => {
-    try {
-      const rooms = await fetchActiveRooms()
-      const nextCount = rooms.reduce((total, room) => total + room.unreadCount, 0)
-      setUnreadMessagesCount(nextCount)
-    } catch {
-      // Best-effort bootstrap for message alerts.
-    }
-  }, [])
-
-  useEffect(() => {
-    void loadUnreadSummary()
-  }, [loadUnreadSummary])
-
-  useEffect(() => {
+  if (wasOnMessagesPage !== isOnMessagesPage) {
+    setWasOnMessagesPage(isOnMessagesPage)
     if (isOnMessagesPage) {
       setUnreadMessagesCount(0)
     }
-  }, [isOnMessagesPage])
+  }
+
+  useEffect(() => {
+    let active = true
+    void fetchActiveRooms().then((rooms) => {
+      if (active) {
+        setUnreadMessagesCount(rooms.reduce((total, room) => total + room.unreadCount, 0))
+      }
+    }).catch(() => {
+      // Best-effort bootstrap for message alerts.
+    })
+    return () => { active = false }
+  }, [])
 
   useEffect(() => {
     const handleNewMessage = (message: RoomMessage) => {
@@ -95,6 +94,6 @@ export function useMessageAlerts() {
   }, [info, isOnMessagesPage, websocketClient])
 
   return {
-    unreadMessagesCount,
+    unreadMessagesCount: isOnMessagesPage ? 0 : unreadMessagesCount,
   }
 }

@@ -20,7 +20,7 @@ interface RescueServerEvents extends Record<string, (...args: never[]) => void> 
   'rescue:flytip': (payload: unknown) => void
 }
 
-interface RescueClientEvents extends Record<string, (...args: never[]) => void> {}
+type RescueClientEvents = Record<string, (...args: never[]) => void>
 
 const RESCUE_POP_SRC = '/sounds/rescue-pop.mp3'
 const FLYTIP_SIGH_SRC = '/sounds/flytip-sigh.mp3'
