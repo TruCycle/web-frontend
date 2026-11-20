@@ -229,13 +229,14 @@ export function CameraQrScanner({
   }, [barcodeDetector, decodeWithJsQr, isActive, onDetected, onError, stopScanner])
 
   useEffect(() => {
-    if (!isActive) {
-      stopScanner()
-      return
-    }
+    if (!isActive) return
 
-    void startScanner()
+    let active = true
+    queueMicrotask(() => {
+      if (active) void startScanner()
+    })
     return () => {
+      active = false
       stopScanner()
     }
   }, [isActive, startScanner, stopScanner])

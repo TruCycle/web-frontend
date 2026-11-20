@@ -248,12 +248,6 @@ function SelectedItemDetails({
   const [reportReason, setReportReason] = useState('')
   const [reportDetails, setReportDetails] = useState('')
 
-  useEffect(() => {
-    setClaimMessage('')
-    setReportReason('')
-    setReportDetails('')
-  }, [item?.id])
-
   if (!item) {
     return (
       <div className="flex h-full min-h-[420px] flex-col items-center justify-center rounded-[24px] bg-[#F7FAF1] px-6 text-center">
@@ -791,6 +785,7 @@ export default function FoundItemsMapPage() {
 
         <aside className="relative z-10 hidden rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm md:block lg:p-5">
           <SelectedItemDetails
+            key={selectedItemForPanel?.id}
             item={selectedItemForPanel}
             distanceKm={selectedDistanceKm}
             isOwnPost={selectedItemOwnPost}
@@ -821,6 +816,7 @@ export default function FoundItemsMapPage() {
         contentClassName="max-h-[calc(100vh-3.5rem)] overflow-y-auto p-4"
       >
         <SelectedItemDetails
+          key={selectedItemForPanel?.id}
           item={selectedItemForPanel}
           distanceKm={selectedDistanceKm}
           isOwnPost={selectedItemOwnPost}

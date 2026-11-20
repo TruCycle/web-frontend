@@ -38,10 +38,6 @@ export default function FoundItemsPage() {
     refresh: refreshDetails,
   } = useFoundItemDetails(selectedItemId, user?.id)
 
-  if (searchParams.get('compose') === '1') {
-    return <Navigate replace to="/found-items/post" />
-  }
-
   useEffect(() => {
     if (user?.postcode) {
       updateFilters({ postcode: user.postcode })
@@ -56,6 +52,10 @@ export default function FoundItemsPage() {
     }),
     [user?.firstName, user?.id, user?.lastName],
   )
+
+  if (searchParams.get('compose') === '1') {
+    return <Navigate replace to="/found-items/post" />
+  }
 
   const handleClaim = async (itemId: string, message?: string) => {
     try {
@@ -146,6 +146,7 @@ export default function FoundItemsPage() {
       </div>
 
       <FoundItemDetailsPanel
+        key={JSON.stringify([selectedItem?.id, viewerClaim?.id, viewerClaim?.message])}
         isOpen={Boolean(selectedItemId)}
         onClose={() => setSelectedItemId(null)}
         item={selectedItem}

@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Clock3, Flag, MapPin, Scale, Sparkles, Users } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
 import { Modal } from '@/shared/ui/modal/Modal'
@@ -62,15 +62,9 @@ export function FoundItemDetailsPanel({
   onCancelClaim,
   onReport,
 }: FoundItemDetailsPanelProps) {
-  const [claimMessage, setClaimMessage] = useState('')
+  const [claimMessage, setClaimMessage] = useState(viewerClaim?.message ?? '')
   const [reportReason, setReportReason] = useState('')
   const [reportDetails, setReportDetails] = useState('')
-
-  useEffect(() => {
-    setClaimMessage(viewerClaim?.message ?? '')
-    setReportReason('')
-    setReportDetails('')
-  }, [item?.id, viewerClaim?.id, viewerClaim?.message])
 
   if (!isOpen) {
     return null

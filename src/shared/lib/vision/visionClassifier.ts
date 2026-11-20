@@ -6,10 +6,9 @@
 // analysis. We map that onto a CatalogHint the Post flow already understands.
 
 import { env } from '@/shared/lib/config/env'
-import type { FoundItemCategory } from '../types'
 
 export interface CatalogHint {
-  readonly category: FoundItemCategory
+  readonly category: (typeof CATEGORY_MAP)[keyof typeof CATEGORY_MAP]
   readonly keyword: string
   readonly displayLabel: string
   readonly confidence: number
@@ -34,7 +33,7 @@ interface WorkerResponse {
 }
 
 // The worker's suggested_category enum -> our FoundItemCategory.
-const CATEGORY_MAP: Record<string, FoundItemCategory> = {
+const CATEGORY_MAP = {
   furniture: 'furniture',
   kitchenware: 'appliances',
   'books + media': 'books',
@@ -43,7 +42,7 @@ const CATEGORY_MAP: Record<string, FoundItemCategory> = {
   'tech shelf': 'electronics',
   clothing: 'clothing',
   other: 'other',
-}
+} as const
 
 function isVisionConfigured(): boolean {
   return env.visionWorkerUrl.trim().length > 0
@@ -97,7 +96,7 @@ async function compressImage(file: File): Promise<Blob> {
  * Returns a CatalogHint for smart pre-fill, or null when the worker is not
  * configured / could not produce a confident structured result.
  */
-export async function classifyImageWithWorker(file: File): Promise<CatalogHint | null> {
+export async function classifyImageWithWorker(file: File, context: 'spot' | 'listing' = 'spot'): Promise<CatalogHint | null> {
   if (!isVisionConfigured()) {
     return null
   }
@@ -105,11 +104,14 @@ export async function classifyImageWithWorker(file: File): Promise<CatalogHint |
   const compressed = await compressImage(file)
   const formData = new FormData()
   formData.append('image', compressed, 'spot.jpg')
-  formData.append('prompt', 'Analyze this item spotted on a UK street for TruCycle.')
+  formData.append('prompt', context === 'listing'
+    ? 'Identify the main item offered for reuse in this TruCycle listing photo.'
+    : 'Analyze this item spotted on a UK street for TruCycle.')
 
   const response = await fetch(env.visionWorkerUrl.trim(), {
     method: 'POST',
     body: formData,
+    signal: AbortSignal.timeout(10_000),
   })
 
   if (!response.ok) {
@@ -127,7 +129,7 @@ export async function classifyImageWithWorker(file: File): Promise<CatalogHint |
     typeof data.suggested_category === 'string'
       ? data.suggested_category.trim().toLowerCase()
       : ''
-  const category = CATEGORY_MAP[suggested] ?? 'other'
+  const category = Object.hasOwn(CATEGORY_MAP, suggested) ? CATEGORY_MAP[suggested as keyof typeof CATEGORY_MAP] : 'other'
 
   if (!itemType && category === 'other') {
     return null

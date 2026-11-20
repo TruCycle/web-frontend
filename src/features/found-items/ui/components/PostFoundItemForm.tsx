@@ -5,7 +5,7 @@ import { CustomSelect } from '@/shared/ui/select'
 import { uploadFoundItemImage } from '../../api/foundItemsApi'
 import { foundItemCategories } from '../../types'
 import type { CreateFoundItemPayload, FoundItemCategory } from '../../types'
-import { CameraCapture } from './CameraCapture'
+import { CameraCapture } from '@/shared/ui/camera/CameraCapture'
 
 interface PostFoundItemFormProps {
   readonly defaultPostcode: string

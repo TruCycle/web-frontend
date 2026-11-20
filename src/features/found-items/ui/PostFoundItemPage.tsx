@@ -14,7 +14,7 @@ import {
   classifyImageWithWorker,
   isVisionWorkerEnabled,
   type CatalogHint,
-} from '../lib/visionClassifier'
+} from '@/shared/lib/vision/visionClassifier'
 import { foundItemCategories } from '../types'
 import { RescueShareCard } from './components/RescueShareCard'
 import type {
@@ -23,7 +23,7 @@ import type {
   FoundItemCatalogEntry,
   FoundItemCategory,
 } from '../types'
-import { CameraCapture } from './components/CameraCapture'
+import { CameraCapture } from '@/shared/ui/camera/CameraCapture'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
 import { env } from '@/shared/lib/config/env'
@@ -196,6 +196,7 @@ export default function PostFoundItemPage() {
   const [identifiedPostcode, setIdentifiedPostcode] = useState<string>('')
   const [isResolvingPostcode, setIsResolvingPostcode] = useState(false)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [failedPhoto, setFailedPhoto] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [createdItem, setCreatedItem] = useState<FoundItem | null>(null)
   const [smartHint, setSmartHint] = useState<CatalogHint | null>(null)
@@ -411,14 +412,14 @@ export default function PostFoundItemPage() {
   }, [])
 
   const handleCapturedFile = useCallback(
-    async (file: File) => {
-      setNextPreviewUrl(URL.createObjectURL(file))
+    async (file: File, retry = false) => {
+      if (!retry) setNextPreviewUrl(URL.createObjectURL(file))
 
       // Smart pre-fill: classify via the Cloudflare Vision Worker in parallel
       // with the Cloudinary upload so we don't add latency. The hint is applied
       // to the form state when ready.
       const classifyTask =
-        env.enableSmartSpot && isVisionWorkerEnabled()
+        !retry && env.enableSmartSpot && isVisionWorkerEnabled()
         ? (async () => {
             try {
               setIsClassifying(true)
@@ -442,16 +443,17 @@ export default function PostFoundItemPage() {
       try {
         setIsUploadingImage(true)
         const uploadedImage = await uploadFoundItemImage(file)
+        setFailedPhoto(null)
         setUploadedImageUrl(uploadedImage.url)
         setStep('details')
       } catch {
-        error('Upload failed', 'Retake the photo or try uploading it again.')
+        setFailedPhoto(file)
       } finally {
         setIsUploadingImage(false)
         await classifyTask
       }
     },
-    [error, info, setNextPreviewUrl],
+    [info, setNextPreviewUrl],
   )
 
   const resetDraft = useCallback(() => {
@@ -466,6 +468,7 @@ export default function PostFoundItemPage() {
     setIsFlyTipped(false)
     setNotes('')
     setUploadedImageUrl('')
+    setFailedPhoto(null)
     setCreatedItem(null)
     setPinnedLocation(null)
     setNextPreviewUrl(null)
@@ -620,6 +623,27 @@ export default function PostFoundItemPage() {
   }
 
   if (step === 'capture') {
+    if (failedPhoto) {
+      return (
+        <section className="mx-auto flex max-w-lg flex-col gap-4 p-5">
+          {previewUrl ? <img src={previewUrl} alt="Your captured item" className="max-h-[55dvh] w-full rounded-2xl object-contain" /> : null}
+          <p role="status" className="text-sm text-slate-700">
+            {isUploadingImage ? 'Retrying photo upload…' : 'Photo upload failed. Try again or take another photo.'}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="primary" disabled={isUploadingImage || isClassifying} onClick={() => void handleCapturedFile(failedPhoto, true)}>Retry upload</Button>
+            <Button type="button" variant="secondary" disabled={isUploadingImage || isClassifying} onClick={() => {
+              setFailedPhoto(null)
+              setSmartHint(null)
+              setCategory('furniture')
+              setItemName('')
+              setNextPreviewUrl(null)
+            }}>Retake photo</Button>
+            <Button type="button" variant="secondary" disabled={isUploadingImage} onClick={() => navigate('/found-items')}>Cancel</Button>
+          </div>
+        </section>
+      )
+    }
     return (
       <CameraCapture
         variant="immersive"
