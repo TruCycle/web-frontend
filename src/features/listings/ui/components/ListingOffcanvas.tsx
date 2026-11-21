@@ -366,7 +366,7 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
                     <p className="text-[11px] font-semibold tracking-[0.06em] text-tc-brand-body">STATUS</p>
                     <p
                       className={classNames(
-                        'mt-1 inline-flex rounded-full border border-tc-brand-mintLine !bg-white px-2.5 py-1 text-xs font-semibold !text-tc-brand-ink',
+                        'mt-1 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold',
                         statusTone(item.status),
                       )}
                     >
