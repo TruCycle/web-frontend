@@ -80,7 +80,7 @@ export function LocationPinMap({
   if (!pin) {
     return (
       <div
-        className={`flex ${heightClassName} items-center justify-center rounded-[24px] bg-[#EEF1E6] text-sm text-slate-500`}
+        className={`flex ${heightClassName} items-center justify-center rounded-tc-lg bg-tc-brand-soft text-sm text-tc-brand-muted`}
       >
         Waiting for GPS…
       </div>
@@ -88,7 +88,7 @@ export function LocationPinMap({
   }
 
   return (
-    <div className={`overflow-hidden rounded-[24px] ${heightClassName}`}>
+    <div className={`overflow-hidden rounded-tc-lg border border-tc-brand-line ${heightClassName}`}>
       <MapContainer
         center={center}
         zoom={17}

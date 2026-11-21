@@ -98,22 +98,22 @@ function FoundItemsBoard() {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Found Items</h1>
-          <p className="text-slate-500">Nearby curb alerts and community pickups.</p>
+    <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-[30px] leading-9 font-semibold tracking-[-0.02em] text-tc-brand-ink">Found Items</h1>
+          <p className="text-base leading-6 text-tc-brand-body">Nearby curb alerts and community pickups.</p>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <Link
             to="/found-items/my-posts"
-            className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-tc-md border border-tc-brand-control bg-white px-4 py-3 text-sm font-semibold text-tc-brand-deep transition hover:bg-tc-brand-soft"
           >
             My Posts
           </Link>
           <Link
             to="/found-items/post"
-            className="inline-flex items-center rounded-xl bg-tc-action-primary px-4 py-3 text-sm font-medium text-tc-action-primaryText transition hover:bg-tc-action-primaryHover"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-tc-md bg-tc-brand-deep px-4 py-3 text-sm font-semibold text-white transition hover:bg-tc-brand-hover"
           >
             Post Item
           </Link>
@@ -122,19 +122,19 @@ function FoundItemsBoard() {
 
       <FoundItemsFilterBar filters={filters} onUpdate={updateFilters} />
 
-      {itemsError ? <p className="text-sm text-rose-600">{itemsError}</p> : null}
-      {detailsError ? <p className="text-sm text-rose-600">{detailsError}</p> : null}
+      {itemsError ? <p className="rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft px-4 py-3 text-sm text-tc-brand-danger">{itemsError}</p> : null}
+      {detailsError ? <p className="rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft px-4 py-3 text-sm text-tc-brand-danger">{detailsError}</p> : null}
 
-      <div className="space-y-4">
-        {isLoading ? <p className="rounded-2xl bg-white p-5 text-sm text-slate-500 shadow-sm">Loading board...</p> : null}
+      <div className="flex flex-col gap-4">
+        {isLoading ? <p className="rounded-tc-lg border border-tc-brand-line bg-white p-6 text-sm text-tc-brand-body">Loading board...</p> : null}
 
         {!isLoading && items.length === 0 ? (
-          <p className="rounded-2xl bg-white p-5 text-sm text-slate-500 shadow-sm">
+          <p className="rounded-tc-lg border border-dashed border-tc-brand-control bg-white p-8 text-center text-sm text-tc-brand-body">
             Nothing nearby yet.
           </p>
         ) : null}
 
-        <div className="space-y-3">
+        <div className="grid gap-4 xl:grid-cols-2">
           {items.map((item) => (
             <FoundItemCard
               key={item.id}
@@ -146,7 +146,7 @@ function FoundItemsBoard() {
         </div>
       </div>
 
-      {pagination && pagination.page < pagination.totalPages ? <button disabled={isLoading} onClick={() => { void loadMore() }} className="rounded-xl border px-4 py-3">Load more spots</button> : null}
+      {pagination && pagination.page < pagination.totalPages ? <button disabled={isLoading} onClick={() => { void loadMore() }} className="self-center inline-flex min-h-11 items-center justify-center gap-2 rounded-tc-md border border-tc-brand-control bg-white px-4 py-3 text-sm font-semibold text-tc-brand-deep transition hover:bg-tc-brand-soft disabled:cursor-not-allowed disabled:opacity-50">Load more spots</button> : null}
       <FoundItemDetailsPanel
         isOpen={Boolean(selectedItemId)}
         onClose={() => setSelectedItemId(null)}

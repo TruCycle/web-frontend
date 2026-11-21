@@ -25,60 +25,65 @@ export default function MyFoundPostsPage() {
   } = useMyFoundPosts(user?.id)
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">My Found Posts</h1>
-          <p className="text-slate-500">Manage what you have shared.</p>
+    <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-[30px] leading-9 font-semibold tracking-[-0.02em] text-tc-brand-ink">My Found Posts</h1>
+          <p className="text-base leading-6 text-tc-brand-body">Manage what you have shared.</p>
         </div>
         <Link
           to="/found-items?compose=1"
-          className="inline-flex items-center rounded-xl bg-tc-action-primary px-4 py-3 text-sm font-medium text-tc-action-primaryText transition hover:bg-tc-action-primaryHover"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-tc-md bg-tc-brand-deep px-4 py-3 text-sm font-semibold text-white transition hover:bg-tc-brand-hover"
         >
           Post Item
         </Link>
       </div>
 
-      {pageError ? <p className="text-sm text-rose-600">{pageError}</p> : null}
-      {isLoading ? <p className="rounded-2xl bg-white p-5 text-sm text-slate-500 shadow-sm">Loading posts...</p> : null}
+      {pageError ? <p className="rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft px-4 py-3 text-sm text-tc-brand-danger">{pageError}</p> : null}
+      {isLoading ? <p className="rounded-tc-lg border border-tc-brand-line bg-white p-6 text-sm text-tc-brand-body">Loading posts...</p> : null}
 
       {!isLoading && items.length === 0 ? (
-        <p className="rounded-2xl bg-white p-5 text-sm text-slate-500 shadow-sm">No posts yet.</p>
+        <p className="rounded-tc-lg border border-dashed border-tc-brand-control bg-white p-8 text-center text-sm text-tc-brand-body">No posts yet.</p>
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => (
-          <article key={item.id} className="space-y-4 rounded-2xl bg-white p-4 shadow-sm">
-            {item.images[0] ? (
-              <img
-                src={item.images[0].thumbnailUrl || item.images[0].url}
-                alt={item.title}
-                className="h-44 w-full rounded-xl object-cover"
-              />
-            ) : (
-              <div className="flex h-44 items-center justify-center rounded-xl bg-slate-100 text-sm text-slate-500">
-                No image
-              </div>
-            )}
-
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="font-semibold text-slate-900"><button type="button" className="text-left underline decoration-slate-300 underline-offset-4" onClick={() => setSelectedId(item.id)}>{item.title}</button></h2>
-                <p className="text-sm text-slate-500">{item.location.postcode}</p>
-              </div>
-              <FoundItemStatusBadge status={item.status} />
+          <article key={item.id} className="flex min-w-0 flex-col overflow-hidden rounded-tc-lg border border-tc-brand-line bg-white">
+            <div className="relative">
+              {item.images[0] ? (
+                <img
+                  src={item.images[0].thumbnailUrl || item.images[0].url}
+                  alt={item.title}
+                  className="block h-[196px] w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-[196px] items-center justify-center bg-tc-brand-soft text-sm text-tc-brand-muted">
+                  No image
+                </div>
+              )}
+              <span className="absolute left-3 top-3 inline-flex">
+                <FoundItemStatusBadge status={item.status} />
+              </span>
             </div>
 
-            <div className="flex items-center justify-between text-sm text-slate-500">
+            <div className="flex flex-1 flex-col gap-3 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <h2 className="text-base leading-6 font-semibold text-tc-brand-ink"><button type="button" className="break-words text-left underline decoration-tc-brand-control underline-offset-4 hover:decoration-tc-brand-deep" onClick={() => setSelectedId(item.id)}>{item.title}</button></h2>
+                <p className="text-[13px] leading-5 text-tc-brand-muted">{item.location.postcode}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] leading-5 tabular-nums text-tc-brand-muted">
               <span>{item.claimCount} interested</span>
               <span>{item.viewCount} views</span>
             </div>
 
-            <div className="grid gap-2">
+            <div className="mt-auto flex flex-wrap items-center gap-2">
               {item.status === 'available' || item.status === 'claimed' ? (
                 <Button
-                  variant="secondary"
-                  className="justify-center"
+                  variant="primary"
+                  className="basis-full justify-center"
                   onClick={() => {
                     void updateStatus(item.id, 'picked_up')
                       .then(() => success('Updated', 'Marked as picked up.'))
@@ -89,8 +94,8 @@ export default function MyFoundPostsPage() {
                 </Button>
               ) : item.status === 'expired' || item.status === 'gone' ? (
                 <Button
-                  variant="secondary"
-                  className="justify-center"
+                  variant="primary"
+                  className="basis-full justify-center"
                   onClick={() => {
                     void updateStatus(item.id, 'available')
                       .then(() => success('Updated', 'Item is live again.'))
@@ -101,7 +106,7 @@ export default function MyFoundPostsPage() {
                 </Button>
               ) : null}
               {item.status === 'available' || item.status === 'claimed' ? (
-                <Button variant="secondary" onClick={() => {
+                <Button variant="secondary" className="flex-auto shrink-0 justify-center whitespace-nowrap" onClick={() => {
                   void updateStatus(item.id, 'gone')
                     .then(() => success('Closed', 'Post closed without recording a pickup.'))
                     .catch(() => error('Update failed', 'Please try again in a moment.'))
@@ -109,7 +114,7 @@ export default function MyFoundPostsPage() {
               ) : null}
               <Button
                 variant="danger"
-                className="justify-center"
+                className="shrink-0 justify-center whitespace-nowrap"
                 onClick={() => {
                   void remove(item.id)
                     .then(() => success('Removed', 'Post deleted.'))
@@ -119,11 +124,12 @@ export default function MyFoundPostsPage() {
                 Delete Post
               </Button>
             </div>
+            </div>
           </article>
         ))}
       </div>
-      {details.error ? <p className="text-sm text-rose-600">{details.error}</p> : null}
-      {pagination && pagination.page < pagination.totalPages ? <Button disabled={isLoading} onClick={() => { void loadMore() }}>Load more posts</Button> : null}
+      {details.error ? <p className="rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft px-4 py-3 text-sm text-tc-brand-danger">{details.error}</p> : null}
+      {pagination && pagination.page < pagination.totalPages ? <Button variant="secondary" className="self-center" disabled={isLoading} onClick={() => { void loadMore() }}>Load more posts</Button> : null}
       <FoundItemDetailsPanel onLifecycleChange={() => { void Promise.all([refresh(), details.refresh()]) }} isOpen={selectedId !== null} onClose={() => setSelectedId(null)} item={details.item} claims={details.claims} currentUserId={user?.id} isLoading={details.isLoading} />
     </div>
   )

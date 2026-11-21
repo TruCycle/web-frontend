@@ -98,8 +98,10 @@ function normalise(source, fileName) {
     visit(node)
   }
   const walk = (node) => {
-    if (ts.isJsxAttribute(node) && isStyleName(node.name.getText(file)) && node.initializer) {
-      blank(node.initializer)
+    // A styling attribute is dropped whole, so adding `className` to an
+    // element that had none still counts as styling only.
+    if (ts.isJsxAttribute(node) && isStyleName(node.name.getText(file))) {
+      edits.push([node.getStart(file), node.getEnd(), ''])
       return
     }
     if (

@@ -13,12 +13,12 @@ export function FoundItemStatusBadge({ status }: FoundItemStatusBadgeProps) {
   return (
     <span
       className={classNames(
-        'inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize',
-        status === 'available' && 'bg-[#E9FCE8] text-[#166534]',
-        status === 'claimed' && 'bg-[#FFF4D9] text-[#D97706]',
-        status === 'picked_up' && 'bg-[#F1F5F9] text-slate-600',
-        (status === 'expired' || status === 'gone') && 'bg-[#FFF7ED] text-[#C2410C]',
-        status === 'reported' && 'bg-[#FEF2F2] text-[#DC2626]',
+        'inline-flex items-center rounded-full px-2.5 py-1 text-xs leading-4 font-semibold capitalize',
+        status === 'available' && 'bg-tc-brand-mintSoft text-tc-brand-deep',
+        status === 'claimed' && 'bg-amber-100 text-amber-900',
+        status === 'picked_up' && 'bg-tc-brand-soft text-tc-brand-body',
+        (status === 'expired' || status === 'gone') && 'bg-tc-brand-soft text-tc-brand-muted',
+        status === 'reported' && 'bg-tc-brand-dangerSoft text-tc-brand-danger',
       )}
     >
       {labelForStatus(status)}

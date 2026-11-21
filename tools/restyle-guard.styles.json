@@ -21,5 +21,9 @@
   ],
   "src/features/found-items/ui/PostFoundItemPage.tsx": [
     "confettiPieces"
+  ],
+  "src/features/found-items/ui/FoundItemsMapPage.tsx": [
+    "markerPalette",
+    "buildMarkerIcon"
   ]
 }
