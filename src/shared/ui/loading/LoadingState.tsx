@@ -14,8 +14,8 @@ export function LoadingState({
 }: LoadingStateProps) {
   const containerClass =
     variant === 'page'
-      ? 'min-h-[60vh] w-full rounded-2xl border border-slate-200 bg-white'
-      : 'min-h-[160px] w-full rounded-xl border border-slate-200 bg-white'
+      ? 'min-h-[60vh] w-full rounded-tc-lg border border-tc-brand-line bg-white'
+      : 'min-h-[160px] w-full rounded-tc-lg border border-tc-brand-line bg-white'
 
   const logoClass =
     size === 'sm'
@@ -28,7 +28,7 @@ export function LoadingState({
     return (
       <div
         className={classNames(
-          'flex items-center justify-center p-6 text-slate-600',
+          'flex items-center justify-center p-6 text-tc-brand-body',
           containerClass,
         )}
         role="status"
@@ -36,11 +36,11 @@ export function LoadingState({
         aria-busy="true"
       >
         <div className="w-full max-w-[34rem] space-y-3">
-          <span className="tc-shimmer-block block h-4 w-28 rounded-md" />
-          <span className="tc-shimmer-block block h-10 w-full rounded-xl" />
+          <span className="tc-shimmer-block block h-4 w-28 rounded-tc-sm" />
+          <span className="tc-shimmer-block block h-10 w-full rounded-tc-md" />
           <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
-            <span className="tc-shimmer-block block h-20 rounded-xl" />
-            <span className="tc-shimmer-block block h-20 rounded-xl" />
+            <span className="tc-shimmer-block block h-20 rounded-tc-md" />
+            <span className="tc-shimmer-block block h-20 rounded-tc-md" />
           </div>
           <span className="sr-only">{label}</span>
         </div>
@@ -51,7 +51,7 @@ export function LoadingState({
   return (
     <div
       className={classNames(
-        'flex flex-col items-center justify-center gap-3 p-6 text-slate-600',
+        'flex flex-col items-center justify-center gap-3 p-6 text-tc-brand-body',
         containerClass,
       )}
       role="status"

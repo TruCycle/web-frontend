@@ -51,10 +51,10 @@ interface AppShellProps {
 
 function navLinkClassName({ isActive }: NavLinkRenderProps): string {
   return classNames(
-    'group flex items-center gap-3.5 rounded-lg px-4 py-2 text-[0.9rem] font-medium text-white transition [&>svg]:text-white',
+    'group flex min-h-11 items-center gap-3 rounded-tc-md px-3 py-3 text-sm leading-5 font-medium transition [&>svg]:shrink-0',
     isActive
-      ? 'bg-tc-shell-active text-white opacity-100 [&>span]:font-semibold [&>svg]:text-tc-shell-accent'
-      : 'opacity-60 hover:opacity-100',
+      ? 'bg-tc-brand-hover text-white'
+      : 'text-tc-brand-onDeep hover:bg-tc-brand-hover/60 hover:text-white',
   )
 }
 
@@ -151,7 +151,7 @@ function AccountShell({ children }: AppShellProps) {
   }
 
   const sidebarNavigation = isPartnerArea ? (
-    <nav className="flex flex-1 flex-col gap-2 overflow-visible">
+    <nav className="flex flex-1 flex-col gap-0 overflow-visible">
       <div className="flex flex-col gap-1">
         <NavLink className={navLinkClassName} to="/partner" end onClick={onSidebarNavigate}>
           <DashboardIcon />
@@ -163,7 +163,7 @@ function AccountShell({ children }: AppShellProps) {
         </NavLink>
       </div>
 
-      <div className="-mx-4 my-4 h-px bg-tc-shell-divider" />
+      <div className="mx-0 my-4 h-px shrink-0 bg-tc-brand-deepLine" />
 
       <div className="flex flex-col gap-1">
         <NavLink className={navLinkClassName} to="/partner/notifications" onClick={onSidebarNavigate}>
@@ -175,7 +175,7 @@ function AccountShell({ children }: AppShellProps) {
                   <span
                     className={classNames(
                       'absolute -right-1.5 top-0 inline-block h-2 w-2 rounded-full border-[1.5px] bg-tc-shell-notify',
-                      isActive ? 'border-tc-shell-active' : 'border-tc-shell-bg',
+                      isActive ? 'border-tc-brand-hover' : 'border-tc-brand-deep',
                     )}
                   />
                 )}
@@ -194,10 +194,10 @@ function AccountShell({ children }: AppShellProps) {
         </NavLink>
       </div>
 
-      <div className="mt-auto px-3 pb-2 pt-3">
+      <div className="mt-auto pt-4">
         <button
           type="button"
-          className="inline-flex h-[50px] w-full items-center justify-center rounded-[10px] border border-tc-shell-accent bg-transparent px-4 text-sm font-medium text-white/90 transition hover:bg-white/5"
+          className="inline-flex min-h-[52px] w-full items-center justify-center rounded-tc-md border border-tc-brand-deepLine bg-tc-brand-hover px-4 text-sm font-semibold text-white transition hover:border-tc-brand-mint"
           onClick={() => {
             onSidebarNavigate()
             navigate('/partner')
@@ -208,7 +208,7 @@ function AccountShell({ children }: AppShellProps) {
       </div>
     </nav>
   ) : (
-    <nav className="flex flex-1 flex-col gap-2 overflow-visible">
+    <nav className="flex flex-1 flex-col gap-0 overflow-visible">
       <div className="flex flex-col gap-1">
         <NavLink className={navLinkClassName} to="/dashboard" onClick={onSidebarNavigate}>
           <DashboardIcon />
@@ -230,7 +230,7 @@ function AccountShell({ children }: AppShellProps) {
         ) : null}
       </div>
 
-      <div className="-mx-4 my-4 h-px bg-tc-shell-divider" />
+      <div className="mx-0 my-4 h-px shrink-0 bg-tc-brand-deepLine" />
 
       <div className="flex flex-col gap-1">
         {role === 'spotter' ? (
@@ -280,10 +280,10 @@ function AccountShell({ children }: AppShellProps) {
                   {unreadMessagesCount > 0 && (
                     <span
                       className={classNames(
-                        'absolute -right-1.5 top-0 inline-flex h-4 min-w-4 items-center justify-center rounded-full border-[1.5px] px-1 text-[0.55rem] font-bold leading-none',
+                        'absolute -right-1.5 top-0 inline-flex h-4 min-w-4 items-center justify-center rounded-full border-[1.5px] px-1 text-[0.55rem] font-semibold leading-none',
                         isActive
-                          ? 'border-tc-shell-active bg-tc-shell-accent text-tc-shell-roleActiveText'
-                          : 'border-tc-shell-bg bg-tc-shell-notify text-white',
+                          ? 'border-tc-brand-hover bg-tc-brand-mint text-tc-brand-onMint'
+                          : 'border-tc-brand-deep bg-tc-brand-mint text-tc-brand-onMint',
                       )}
                     >
                       {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
@@ -297,7 +297,7 @@ function AccountShell({ children }: AppShellProps) {
         ) : null}
       </div>
 
-      <div className="-mx-4 my-4 h-px bg-tc-shell-divider" />
+      <div className="mx-0 my-4 h-px shrink-0 bg-tc-brand-deepLine" />
 
       <div className="flex flex-col gap-1">
         <NavLink className={navLinkClassName} to="/notifications" onClick={onSidebarNavigate}>
@@ -309,7 +309,7 @@ function AccountShell({ children }: AppShellProps) {
                   <span
                     className={classNames(
                       'absolute -right-1.5 top-0 inline-block h-2 w-2 rounded-full border-[1.5px] bg-tc-shell-notify',
-                      isActive ? 'border-tc-shell-active' : 'border-tc-shell-bg',
+                      isActive ? 'border-tc-brand-hover' : 'border-tc-brand-deep',
                     )}
                   />
                 )}
@@ -328,16 +328,16 @@ function AccountShell({ children }: AppShellProps) {
         </NavLink>
       </div>
 
-      <div className="mt-auto flex justify-center pb-2 pt-3">
-        <div role="group" aria-label="Dashboard mode" className="flex min-h-[52px] w-fit items-center gap-1 rounded-[10px] border border-tc-shell-accent bg-tc-shell-toggle p-1">
+      <div className="mt-auto flex justify-center pt-4">
+        <div role="group" aria-label="Dashboard mode" className="grid min-h-[52px] w-full grid-cols-3 items-center gap-1 rounded-tc-md bg-tc-brand-hover p-1">
           <button
             type="button"
             aria-pressed={role === 'spotter'}
             className={classNames(
-              'min-h-11 flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
+              'min-h-11 min-w-0 rounded-tc-sm px-1 text-[13px] leading-4 transition',
               role === 'spotter'
-                ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
-                : 'bg-transparent text-tc-shell-roleText',
+                ? 'bg-tc-brand-mint font-semibold text-tc-brand-onMint'
+                : 'bg-transparent font-medium text-tc-brand-onDeep hover:text-white',
             )}
             onClick={() => {
               onRoleChange('spotter')
@@ -350,10 +350,10 @@ function AccountShell({ children }: AppShellProps) {
             type="button"
             aria-pressed={role === 'collector'}
             className={classNames(
-              'min-h-11 flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
+              'min-h-11 min-w-0 rounded-tc-sm px-1 text-[13px] leading-4 transition',
               role === 'collector'
-                ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
-                : 'bg-transparent text-tc-shell-roleText',
+                ? 'bg-tc-brand-mint font-semibold text-tc-brand-onMint'
+                : 'bg-transparent font-medium text-tc-brand-onDeep hover:text-white',
             )}
             onClick={() => {
               onRoleChange('collector')
@@ -366,10 +366,10 @@ function AccountShell({ children }: AppShellProps) {
             type="button"
             aria-pressed={role === 'donor'}
             className={classNames(
-              'min-h-11 flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
+              'min-h-11 min-w-0 rounded-tc-sm px-1 text-[13px] leading-4 transition',
               role === 'donor'
-                ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
-                : 'bg-transparent text-tc-shell-roleText',
+                ? 'bg-tc-brand-mint font-semibold text-tc-brand-onMint'
+                : 'bg-transparent font-medium text-tc-brand-onDeep hover:text-white',
             )}
             onClick={() => {
               onRoleChange('donor')
@@ -386,13 +386,13 @@ function AccountShell({ children }: AppShellProps) {
   return (
     <div
       className={classNames(
-        'flex min-h-screen bg-tc-app-canvas text-tc-app-text max-md:flex-col',
+        'flex min-h-screen bg-tc-brand-haze text-tc-brand-ink max-md:flex-col',
         isFoundItemsPostRoute ? 'max-md:p-0' : 'max-md:p-2',
       )}
     >
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[120] focus:rounded-lg focus:bg-white focus:px-4 focus:py-3 focus:font-semibold focus:text-slate-900"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[120] focus:rounded-tc-md focus:bg-white focus:px-4 focus:py-3 focus:font-semibold focus:text-tc-brand-ink"
         onClick={(event) => {
           if (!mainContentRef.current) return
           event.preventDefault()
@@ -401,13 +401,13 @@ function AccountShell({ children }: AppShellProps) {
       >
         Skip to main content
       </a>
-      <aside className="sticky top-4 z-10 my-4 ml-4 mr-0 flex h-[calc(100vh-2rem)] w-[250px] shrink-0 flex-col rounded-[25px] bg-tc-shell-bg px-4 py-5 max-[1024px]:w-[220px] max-md:hidden">
-        <div className="px-3 pb-4 pt-2">
-          <Link className="flex items-center gap-3 no-underline" to="/">
+      <aside className="sticky top-4 z-10 my-4 ml-4 mr-0 flex h-[calc(100vh-2rem)] w-[264px] shrink-0 flex-col overflow-y-auto rounded-tc-xl bg-tc-brand-deep px-4 pb-4 pt-6 max-[1024px]:w-[220px] max-[1024px]:px-3 max-md:hidden">
+        <div className="px-2 pb-6">
+          <Link className="flex items-center gap-2.5 no-underline" to="/">
             <div className="flex items-center justify-center">
               <img src={logo} alt="TruCycle Logo" width="34" height="34" />
             </div>
-            <span className="text-2xl font-bold tracking-[-0.01em] text-white">TruCycle</span>
+            <span className="text-lg font-semibold tracking-[-0.02em] text-white">TruCycle</span>
           </Link>
         </div>
 
@@ -417,28 +417,28 @@ function AccountShell({ children }: AppShellProps) {
       {isMobileSidebarOpen ? createPortal(
         <div
           ref={mobileSidebarOverlayRef}
-          className="fixed inset-0 bg-slate-900/40 md:hidden"
+          className="fixed inset-0 bg-tc-brand-ink/55 md:hidden"
           onClick={(event) => {
             if (event.target === event.currentTarget) setIsMobileSidebarOpen(false)
           }}
         >
-          <div ref={mobileSidebarRef} id="mobile-sidebar" role="dialog" aria-modal="true" aria-label="Sidebar menu" tabIndex={-1} className="flex h-full w-[min(85vw,320px)] flex-col overflow-y-auto overscroll-contain bg-tc-shell-bg px-4 py-5 shadow-2xl">
-            <div className="flex items-center justify-between px-3 pb-4 pt-2">
+          <div ref={mobileSidebarRef} id="mobile-sidebar" role="dialog" aria-modal="true" aria-label="Sidebar menu" tabIndex={-1} className="flex h-full w-[min(85vw,320px)] flex-col overflow-y-auto overscroll-contain rounded-r-tc-xl bg-tc-brand-deep px-4 pb-4 pt-5 shadow-tc-dialog">
+            <div className="flex items-center justify-between pb-5 pl-2">
               <button
                 type="button"
-                className="order-last inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="order-last inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tc-brand-hover text-white transition hover:bg-tc-brand-deepLine"
                 onClick={() => setIsMobileSidebarOpen(false)}
                 aria-label="Close sidebar"
               >
                 <X size={20} />
               </button>
               <Link
-                className="flex items-center gap-3 no-underline"
+                className="flex items-center gap-2.5 no-underline"
                 to="/"
                 onClick={() => setIsMobileSidebarOpen(false)}
               >
                 <img src={logo} alt="TruCycle Logo" width="34" height="34" />
-                <span className="text-2xl font-bold tracking-[-0.01em] text-white">TruCycle</span>
+                <span className="text-lg font-semibold tracking-[-0.02em] text-white">TruCycle</span>
               </Link>
             </div>
             {sidebarNavigation}
@@ -450,19 +450,19 @@ function AccountShell({ children }: AppShellProps) {
       <div
         className={classNames(
           'flex h-screen min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden bg-transparent max-md:flex-none',
-          isFoundItemsPostRoute ? 'max-md:h-[100dvh] max-md:rounded-none' : 'max-md:h-[calc(100dvh-1rem)] max-md:rounded-2xl',
+          isFoundItemsPostRoute ? 'max-md:h-[100dvh] max-md:rounded-none' : 'max-md:h-[calc(100dvh-1rem)] max-md:rounded-tc-lg',
         )}
       >
         <header
           className={classNames(
-            'sticky top-0 z-[100] flex h-[72px] w-full shrink-0 items-center justify-end border-b border-tc-header-border bg-[#FFFFFF] px-6 shadow-none max-md:justify-between max-md:px-4',
+            'sticky top-0 z-[100] flex h-[72px] w-full shrink-0 items-center justify-end border-b border-tc-brand-line bg-white px-8 shadow-none max-md:justify-between max-md:px-4',
             isFoundItemsPostRoute && 'max-md:hidden',
           )}
         >
           <div className="hidden items-center gap-2 max-md:flex">
             <button
               type="button"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-tc-header-border text-[#334155] transition hover:bg-slate-100"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-tc-md border border-tc-brand-control bg-white text-tc-brand-deep transition hover:bg-tc-brand-soft"
               onClick={(event) => {
                 event.currentTarget.focus()
                 setIsProfileMenuOpen(false)
@@ -475,16 +475,16 @@ function AccountShell({ children }: AppShellProps) {
             >
               <Menu size={20} />
             </button>
-            <span className="text-sm font-semibold text-slate-700">Menu</span>
+            <span className="text-sm font-semibold text-tc-brand-ink">Menu</span>
           </div>
-          <div className="flex items-center gap-4">
-            <Link to="/notifications" aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'} className="relative flex h-11 w-11 items-center justify-center text-tc-app-text opacity-80 transition hover:opacity-100">
+          <div className="flex items-center gap-3">
+            <Link to="/notifications" aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'} className="relative flex h-11 w-11 items-center justify-center rounded-tc-md text-tc-brand-deep transition hover:bg-tc-brand-soft">
               <BellIcon />
               {!isLoading && unreadCount > 0 && (
-                <span className="absolute right-[3px] top-[6px] inline-block h-2 w-2 rounded-full border-[1.5px] border-white bg-tc-shell-notify" />
+                <span className="absolute right-[9px] top-[8px] inline-block h-2.5 w-2.5 rounded-full border-2 border-white bg-tc-shell-notify" />
               )}
             </Link>
-            <div className="mx-1 h-6 w-px bg-tc-header-divider" />
+            <div className="mx-1 h-6 w-px bg-tc-brand-line" />
             <div
               className="relative"
               ref={profileMenuRef}
@@ -502,26 +502,26 @@ function AccountShell({ children }: AppShellProps) {
               <button
                 ref={profileMenuTriggerRef}
                 type="button"
-                className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full px-1 py-1 text-tc-app-text transition hover:bg-slate-100"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2.5 rounded-full py-1 pl-1.5 pr-2 text-tc-brand-ink transition hover:bg-tc-brand-soft"
                 onClick={() => setIsProfileMenuOpen((current) => !current)}
                 aria-expanded={isProfileMenuOpen}
                 aria-controls={isProfileMenuOpen ? 'profile-actions' : undefined}
                 aria-label="Open profile menu"
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-tc-header-avatar text-[0.85rem] font-bold text-white">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-tc-brand-deep text-[13px] font-semibold text-white shadow-tc-halo">
                   {initials}
                 </span>
-                <ChevronDown size={16} className="text-slate-500" />
+                <ChevronDown size={16} className="text-tc-brand-muted" />
               </button>
 
               {isProfileMenuOpen ? (
                 <div
                   id="profile-actions"
-                  className="absolute right-0 top-[calc(100%+0.5rem)] z-[110] min-w-[220px] rounded-2xl border border-slate-200 bg-white p-2 shadow-lg"
+                  className="absolute right-0 top-[calc(100%+0.5rem)] z-[110] min-w-[220px] rounded-tc-lg border border-tc-brand-line bg-white p-2 shadow-tc-raised"
                 >
                   <button
                     type="button"
-                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[0.9rem] font-medium text-slate-700 hover:bg-slate-100"
+                    className="flex min-h-11 w-full items-center gap-3 rounded-tc-md px-3.5 py-3 text-left text-sm font-medium text-tc-brand-ink transition hover:bg-tc-brand-soft"
                     onClick={() => {
                       setIsProfileMenuOpen(false)
                       navigate(profileShopAction.path)
@@ -532,7 +532,7 @@ function AccountShell({ children }: AppShellProps) {
                   </button>
                   <button
                     type="button"
-                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[0.9rem] font-medium text-slate-700 hover:bg-slate-100"
+                    className="flex min-h-11 w-full items-center gap-3 rounded-tc-md px-3.5 py-3 text-left text-sm font-medium text-tc-brand-ink transition hover:bg-tc-brand-soft"
                     onClick={() => {
                       setIsProfileMenuOpen(false)
                       navigate(isPartnerUser ? '/partner/settings' : '/settings')
@@ -543,7 +543,7 @@ function AccountShell({ children }: AppShellProps) {
                   </button>
                   <button
                     type="button"
-                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[0.9rem] font-medium text-rose-600 hover:bg-rose-50"
+                    className="flex min-h-11 w-full items-center gap-3 rounded-tc-md px-3.5 py-3 text-left text-sm font-medium text-tc-brand-danger transition hover:bg-tc-brand-dangerSoft"
                     onClick={() => {
                       setIsProfileMenuOpen(false)
                       setRole('collector')
@@ -564,8 +564,8 @@ function AccountShell({ children }: AppShellProps) {
           id="main-content"
           tabIndex={-1}
           className={classNames(
-            'min-h-0 flex-1 overflow-y-auto px-8 pb-8 pt-6 max-md:px-4 max-md:pb-6',
-            isFoundItemsPostRoute && 'max-md:px-0 max-md:pb-0 max-md:pt-0',
+            'min-h-0 flex-1 overflow-y-auto px-8 pb-8 pt-6 lg:pr-24 lg:pt-8 max-md:px-4 max-md:pb-6',
+            isFoundItemsPostRoute && 'max-md:px-0 max-md:pb-0 max-md:pt-0 lg:!pr-8',
           )}
         >
           {children}

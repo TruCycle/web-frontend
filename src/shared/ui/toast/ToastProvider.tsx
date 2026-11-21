@@ -140,19 +140,19 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 }
               }}
               className={classNames(
-                'pointer-events-auto relative shrink-0 overflow-hidden rounded-xl border bg-tc-shell-bg px-4 py-3 text-sm shadow-[0_16px_35px_rgba(0,0,0,0.24)] backdrop-blur-sm motion-safe:animate-[pulse_0.55s_ease-out_1]',
-                index % 2 === 0 ? 'rotate-[0.35deg]' : '-rotate-[0.35deg]',
-                resolvedTone === 'success' && 'border-tc-shell-accent text-tc-shell-accent',
-                resolvedTone === 'warning' && 'border-tc-shell-notify text-tc-shell-notify',
-                resolvedTone === 'danger' && 'border-tc-shell-danger text-tc-shell-danger',
-                resolvedTone === 'info' && 'border-slate-100 text-slate-100',
+                'pointer-events-auto relative shrink-0 overflow-hidden rounded-tc-lg border bg-tc-brand-deep py-3.5 pl-10 pr-4 text-sm shadow-tc-float motion-safe:animate-[pulse_0.55s_ease-out_1]',
+                index % 2 === 0 ? 'rotate-0' : 'rotate-0',
+                resolvedTone === 'success' && 'border-tc-brand-deepLine text-tc-brand-mint',
+                resolvedTone === 'warning' && 'border-tc-brand-deepLine text-tc-shell-notify',
+                resolvedTone === 'danger' && 'border-red-400 text-red-400',
+                resolvedTone === 'info' && 'border-tc-brand-deepLine text-tc-brand-onDeep',
               )}
             >
-              <span className="pointer-events-none absolute -right-5 -top-5 h-16 w-16 rounded-full bg-white/10 blur-xl" />
-              <p className="text-sm font-semibold">{toast.title}</p>
-              <p className="mt-1 text-xs/5 text-current/90">{toast.message}</p>
+              <span className="pointer-events-none absolute left-4 top-5 h-2 w-2 rounded-full bg-current" />
+              <p className="m-0 text-sm leading-5 font-semibold text-white">{toast.title}</p>
+              <p className="mb-0 mt-0.5 text-[13px] leading-5 text-tc-brand-onDeep">{toast.message}</p>
               <button
-                className="mt-2 min-h-11 min-w-11 rounded-md border border-current/35 px-2 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.05em] text-current/90 hover:bg-white/10"
+                className="mt-2 min-h-11 min-w-11 rounded-tc-sm border border-tc-brand-deepLine bg-tc-brand-hover px-3 py-1 text-xs font-semibold text-white transition hover:border-tc-brand-onDeep"
                 onClick={() => dismissToast(toast.id)}
                 type="button"
               >

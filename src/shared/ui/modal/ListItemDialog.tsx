@@ -159,7 +159,7 @@ async function deletePhotoFromCloudinary(deleteToken: string): Promise<void> {
 }
 
 const inputClassName =
-  'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-lime-400 focus:ring-4 focus:ring-lime-100';
+  'h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint';
 
 export const ListItemDialog: React.FC<ListItemDialogProps> = ({
   isOpen,
@@ -612,9 +612,9 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
 
     return (
       <Modal isOpen={isOpen} onClose={handleClose} hideCloseButton containerClassName="max-w-[520px]">
-        <div className="relative flex flex-col gap-4 p-6">
+        <div className="relative flex flex-col gap-4 p-6 pt-8">
           <button
-            className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100"
+            className="absolute right-4 top-4 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tc-brand-soft text-tc-brand-ink transition hover:bg-tc-brand-line"
             onClick={handleClose}
           >
             <X size={20} />
@@ -625,55 +625,55 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
           </div>
 
           <div className="text-center">
-            <h2 className="text-xl font-bold text-[#121212]">Congratulations!</h2>
-            <p className="mt-1 text-md text-[#12121299]">Your listing is live</p>
+            <h2 className="text-xl leading-7 font-semibold tracking-[-0.015em] text-tc-brand-ink">Congratulations!</h2>
+            <p className="mt-1 text-sm leading-5 text-tc-brand-body">Your listing is live</p>
           </div>
 
-          <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC80] p-5">
-            <h4 className="text-md text-[#222222]">{itemName || 'Untitled item'}</h4>
-            <p className="mt-2 text-md text-[#222222BF]">
-              Category: <span className="font-medium text-[#222222]">{selectedCategory || 'Electronics'}</span>
+          <div className="rounded-tc-md bg-tc-brand-soft p-4">
+            <h4 className="text-base font-semibold text-tc-brand-ink">{itemName || 'Untitled item'}</h4>
+            <p className="mt-2 text-sm text-tc-brand-body">
+              Category: <span className="font-semibold text-tc-brand-ink">{selectedCategory || 'Electronics'}</span>
             </p>
-            <p className="text-md text-[#222222BF]">
-              Condition: <span className="font-medium text-[#222222]">{selectedConditionLabel || 'Like New'}</span>
+            <p className="text-sm text-tc-brand-body">
+              Condition: <span className="font-semibold text-tc-brand-ink">{selectedConditionLabel || 'Like New'}</span>
             </p>
           </div>
 
-          <div className="rounded-xl p-4 text-center">
-            <div className="mx-auto mb-2 flex h-72 w-72 items-center justify-center rounded-xl bg-white p-2">
+          <div className="rounded-tc-lg border border-tc-brand-line bg-tc-brand-haze p-4 text-center">
+            <div className="mx-auto mb-2 flex h-72 w-72 max-w-full items-center justify-center rounded-tc-md bg-white p-2">
               {createdQrCodeUrl ? (
                 <img
                   src={createdQrCodeUrl}
                   alt="Listing QR code"
-                  className="h-full w-full rounded object-contain"
+                  className="h-full w-full rounded-tc-sm object-contain"
                 />
               ) : (
-                <QrCode size={52} className="text-emerald-700" strokeWidth={1.5} />
+                <QrCode size={52} className="text-tc-brand-deep" strokeWidth={1.5} />
               )}
             </div>
-            <p className="text-sm text-[#222222BF]">
+            <p className="text-sm text-tc-brand-body">
               Share this QR code with potential collectors or use it at handoff.
             </p>
             {createdQrCodeUrl ? null : (
-              <p className="mt-2 text-sm text-orange-600">QR code was not returned for this listing.</p>
+              <p className="mt-2 text-sm text-tc-brand-danger">QR code was not returned for this listing.</p>
             )}
           </div>
 
-          <div className="rounded-xl border border-[#A4F5A680] bg-[#A4F5A60D] p-5">
+          <div className="rounded-tc-md border border-tc-brand-mintLine bg-tc-brand-mintSoft p-4">
             <div className="flex items-start gap-2">
-              <MapPin size={18} className="mt-0.5 text-[#A4F5A6]" />
+              <MapPin size={18} className="mt-0.5 shrink-0 text-tc-brand-deep" />
               <div>
-                <h4 className="text-sm font-semibold text-[#222222]">{pickupTitle}</h4>
-                <p className="text-xs text-[#222222BF]">{pickupAddress}</p>
+                <h4 className="text-sm font-semibold text-tc-brand-ink">{pickupTitle}</h4>
+                <p className="text-[13px] leading-5 text-tc-brand-body">{pickupAddress}</p>
               </div>
             </div>
           </div>
 
-          <p className="text-sm text-slate-600">Keep your listing up to date if availability or condition changes.</p>
+          <p className="text-sm text-tc-brand-body">Keep your listing up to date if availability or condition changes.</p>
 
-          {qrDownloadError ? <p className="text-xs text-rose-600">{qrDownloadError}</p> : null}
+          {qrDownloadError ? <p className="text-[13px] leading-5 text-tc-brand-danger">{qrDownloadError}</p> : null}
 
-          <div className="flex justify-end gap-3 py-3">
+          <div className="flex justify-end gap-3 border-t border-tc-brand-line pt-4">
             <Button variant="secondary" onClick={handleClose}>Done</Button>
             <Button variant="primary" onClick={() => { void handleSaveQrCode(); }} disabled={!createdQrCodeUrl}>
               Save QR Code
@@ -687,25 +687,25 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={handleClose} hideCloseButton containerClassName="max-w-[620px]">
       <div className="flex max-h-[90vh] flex-col">
-        <header className="flex items-start justify-between border-b border-slate-100 px-6 pb-4 pt-6">
+        <header className="flex items-start justify-between gap-4 border-b border-tc-brand-line px-6 pb-4 pt-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">List an Item</h2>
-            <p className="text-sm text-slate-500">Offer items that are still good to use</p>
+            <h2 className="text-xl leading-7 font-semibold tracking-[-0.015em] text-tc-brand-ink">List an Item</h2>
+            <p className="mt-1 text-sm leading-5 text-tc-brand-body">Offer items that are still good to use</p>
           </div>
           <button
             type="button"
             aria-label="Close listing"
-            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tc-brand-soft text-tc-brand-ink transition hover:bg-tc-brand-line"
             onClick={handleClose}
           >
             <X size={20} />
           </button>
         </header>
 
-        <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
+        <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
           <ReuseSafetyNotice />
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Photos</label>
+            <label className="text-sm font-semibold text-tc-brand-ink">Photos</label>
             <input
               type="file"
               ref={fileInputRef}
@@ -716,20 +716,20 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
             />
             <div className="flex flex-wrap gap-3">
               {photos.map((photo, index) => (
-                <div key={photo.id} className="relative h-20 w-20 overflow-hidden rounded-xl border border-slate-200">
+                <div key={photo.id} className="relative h-20 w-20 overflow-hidden rounded-tc-md border border-tc-brand-line">
                   <img src={photo.previewUrl} alt={`Upload ${index + 1}`} className="h-full w-full object-cover" />
                   {photo.isUploading ? (
-                    <div className="absolute inset-0 flex items-center justify-center bg-slate-900/40">
+                    <div className="absolute inset-0 flex items-center justify-center bg-tc-brand-ink/55">
                       <span className="text-[10px] font-semibold text-white">Uploading...</span>
                     </div>
                   ) : null}
                   {photo.error ? (
-                    <div className="absolute inset-x-0 bottom-0 bg-rose-600/85 px-1 py-0.5 text-center text-[9px] font-semibold text-white">
+                    <div className="absolute inset-x-0 bottom-0 bg-tc-brand-danger px-1 py-0.5 text-center text-[10px] font-semibold text-white">
                       Failed
                     </div>
                   ) : null}
                   <button
-                    className="absolute right-1 top-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-white text-rose-500 shadow-sm"
+                    className="absolute right-1 top-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-tc-brand-danger shadow-tc-card"
                     onClick={() => {
                       void removePhoto(photo.id);
                     }}
@@ -742,20 +742,20 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
               ))}
               {photos.length < 4 ? (
                 <button
-                  className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-slate-300 text-slate-500 transition hover:border-lime-300 hover:text-slate-700"
+                  className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-tc-md border border-dashed border-tc-brand-control bg-tc-brand-haze text-tc-brand-deep transition hover:bg-tc-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isSubmitting}
                 >
                   <Upload size={20} />
-                  <span className="text-[11px] font-medium">Add photo</span>
+                  <span className="text-xs font-medium">Add photo</span>
                 </button>
               ) : null}
             </div>
-            <p className="text-xs text-slate-400">You can upload up to 4 photos. First photo will be the cover image.</p>
+            <p className="text-xs leading-4 text-tc-brand-muted">You can upload up to 4 photos. First photo will be the cover image.</p>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Item Name</label>
+            <label className="text-sm font-semibold text-tc-brand-ink">Item Name</label>
             <input
               type="text"
               className={inputClassName}
@@ -766,7 +766,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Category</label>
+            <label className="text-sm font-semibold text-tc-brand-ink">Category</label>
             <CustomSelect
               value={selectedCategory}
               options={CATEGORIES.map((category) => ({ value: category, label: category }))}
@@ -777,7 +777,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Condition</label>
+            <label className="text-sm font-semibold text-tc-brand-ink">Condition</label>
             <CustomSelect
               value={selectedCondition}
               options={CONDITIONS.map((condition) => ({ value: condition.value, label: condition.label }))}
@@ -788,9 +788,9 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Description (optional)</label>
+            <label className="text-sm font-semibold text-tc-brand-ink">Description (optional)</label>
             <textarea
-              className="min-h-24 w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+              className="min-h-24 w-full resize-none rounded-tc-md border border-tc-brand-control bg-white px-3.5 py-3 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
               placeholder="Describe the item's condition, accessories included, etc..."
               value={itemDescription}
               onChange={(e) => setItemDescription(e.target.value)}
@@ -798,38 +798,38 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">Pickup Location Type</label>
-            <div className="grid grid-cols-2 gap-3">
+            <label className="text-sm font-semibold text-tc-brand-ink">Pickup Location Type</label>
+            <div className="grid grid-cols-2 gap-2">
               <button
                 className={classNames(
-                  'flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold',
+                  'flex min-h-11 items-center justify-center gap-2 rounded-tc-md border px-3 py-2 text-sm font-semibold transition',
                   locationType === 'address'
-                    ? 'border-[#0D3B24] bg-[#0D3B24] text-white'
-                    : 'border-slate-200 bg-white text-slate-700',
+                    ? 'border-tc-brand-deep bg-tc-brand-deep text-white'
+                    : 'border-tc-brand-control bg-white text-tc-brand-deep hover:bg-tc-brand-soft',
                 )}
                 onClick={() => setLocationType('address')}
               >
                 <span>My Address</span>
                 <span className={classNames(
                   'rounded-full px-2 py-0.5 text-[11px] font-semibold',
-                  locationType === 'address' ? 'bg-white text-slate-900' : 'bg-slate-100 text-slate-600',
+                  locationType === 'address' ? 'bg-tc-brand-mint text-tc-brand-onMint' : 'bg-tc-brand-mintSoft text-tc-brand-onMint',
                 )}>
                   Exchange
                 </span>
               </button>
               <button
                 className={classNames(
-                  'flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold',
+                  'flex min-h-11 items-center justify-center gap-2 rounded-tc-md border px-3 py-2 text-sm font-semibold transition',
                   locationType === 'shop'
-                    ? 'border-[#0D3B24] bg-[#0D3B24] text-white'
-                    : 'border-slate-200 bg-white text-slate-700',
+                    ? 'border-tc-brand-deep bg-tc-brand-deep text-white'
+                    : 'border-tc-brand-control bg-white text-tc-brand-deep hover:bg-tc-brand-soft',
                 )}
                 onClick={() => setLocationType('shop')}
               >
                 <span>Partner Shop</span>
                 <span className={classNames(
                   'rounded-full px-2 py-0.5 text-[11px] font-semibold',
-                  locationType === 'shop' ? 'bg-white text-slate-900' : 'bg-slate-100 text-slate-600',
+                  locationType === 'shop' ? 'bg-tc-brand-mint text-tc-brand-onMint' : 'bg-tc-brand-mintSoft text-tc-brand-onMint',
                 )}>
                   Donor
                 </span>
@@ -838,8 +838,8 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
           </div>
 
           {locationType === 'address' ? (
-            <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <label className="text-sm font-semibold text-slate-700">Pickup Address Line</label>
+            <div className="space-y-2 rounded-tc-md bg-tc-brand-soft p-4">
+              <label className="text-sm font-semibold text-tc-brand-ink">Pickup Address Line</label>
               <input
                 type="text"
                 className={inputClassName}
@@ -847,19 +847,19 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
                 value={pickupAddressLine}
                 onChange={(event) => setPickupAddressLine(event.target.value)}
               />
-              <label className="text-sm font-semibold text-slate-700">Your profile postcode</label>
+              <label className="text-sm font-semibold text-tc-brand-ink">Your profile postcode</label>
               <input
                 type="text"
                 readOnly
-                className={classNames(inputClassName, 'bg-slate-100 text-slate-600')}
+                className={classNames(inputClassName, 'bg-tc-brand-line text-tc-brand-body')}
                 value={user?.postcode ?? ''}
                 placeholder="No postcode on profile"
               />
             </div>
           ) : (
-            <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+            <div className="space-y-3 rounded-tc-md bg-tc-brand-soft p-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-tc-brand-muted" size={18} />
                 <input
                   type="text"
                   readOnly
@@ -869,7 +869,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
                 />
               </div>
 
-              <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-3">
+              <div className="space-y-3 rounded-tc-md border border-tc-brand-line bg-white p-3">
                 <div className="relative">
                   <input
                     type="text"
@@ -882,17 +882,17 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
 
                 <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
                   {isLoadingShops ? (
-                    <p className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-500">
+                    <p className="rounded-tc-md border border-dashed border-tc-brand-control px-3 py-3 text-sm text-tc-brand-body">
                       Loading nearby partner shops...
                     </p>
                   ) : null}
                   {!isLoadingShops && shopsError ? (
-                    <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-600">
+                    <p className="rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft px-4 py-3 text-sm text-tc-brand-danger">
                       {shopsError}
                     </p>
                   ) : null}
                   {!isLoadingShops && !shopsError && filteredShops.length === 0 ? (
-                    <p className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-500">
+                    <p className="rounded-tc-md border border-dashed border-tc-brand-control px-3 py-3 text-sm text-tc-brand-body">
                       No shops found matching your search.
                     </p>
                   ) : null}
@@ -904,19 +904,19 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
                           key={shop.id}
                           type="button"
                           className={classNames(
-                            'w-full rounded-xl border px-3 py-3 text-left transition',
+                            'w-full rounded-tc-md border px-3 py-3 text-left transition',
                             isSelected
-                              ? 'border-lime-400 bg-lime-50'
-                              : 'border-slate-200 bg-white hover:border-slate-300',
+                              ? 'border-tc-brand-mintLine bg-tc-brand-mintSoft'
+                              : 'border-tc-brand-line bg-white hover:border-tc-brand-control',
                           )}
                           onClick={() => setSelectedShopId(shop.id)}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div>
-                              <p className="text-sm font-semibold text-slate-900">{shop.name}</p>
-                              <p className="text-xs text-slate-600">{shop.address}</p>
+                              <p className="text-sm font-semibold text-tc-brand-ink">{shop.name}</p>
+                              <p className="text-[13px] leading-5 text-tc-brand-body">{shop.address}</p>
                             </div>
-                            <span className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-700">
+                            <span className="shrink-0 rounded-full bg-tc-brand-soft px-2.5 py-1 text-xs font-semibold text-tc-brand-body">
                               {shop.postcode}
                             </span>
                           </div>
@@ -929,17 +929,17 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
             </div>
           )}
 
-          {submitError ? <p className="text-sm text-rose-600">{submitError}</p> : null}
+          {submitError ? <p className="rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft px-4 py-3 text-sm text-tc-brand-danger">{submitError}</p> : null}
 
-          <div className="rounded-xl border border-[#0D3B24]/20 bg-[#0D3B24]/5 p-4">
-            <h3 className="text-sm font-bold text-slate-900">Keep useful items in use</h3>
-            <p className="mt-1 text-sm text-slate-600">
+          <div className="rounded-tc-md border border-tc-brand-mintLine bg-tc-brand-mintSoft p-4">
+            <h3 className="text-sm font-semibold text-tc-brand-ink">Keep useful items in use</h3>
+            <p className="mt-1 text-sm text-tc-brand-body">
               Clear photos and an accurate description help the next owner decide whether the item is right for them.
             </p>
           </div>
         </div>
 
-        <footer className="flex justify-end gap-3 border-t border-slate-100 px-6 pb-6 pt-4">
+        <footer className="flex justify-end gap-3 border-t border-tc-brand-line px-6 pb-6 pt-4">
           <Button variant="secondary" onClick={handleClose} disabled={isSubmitting}>Cancel</Button>
           <Button variant="primary" onClick={() => { void handleListAction(); }} disabled={isSubmitting || hasUploadingPhotos}>
             <Plus size={18} />

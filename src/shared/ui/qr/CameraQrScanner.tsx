@@ -245,7 +245,7 @@ function CameraQrScannerSession({
   return (
     <div
       className={classNames(
-        'relative h-[210px] w-[210px] overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-300 to-emerald-500',
+        'relative h-[210px] w-[210px] overflow-hidden rounded-tc-lg bg-tc-brand-deep',
         className,
       )}
       style={{ boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.2)' }}
@@ -261,7 +261,7 @@ function CameraQrScannerSession({
         autoPlay
       />
       {!isLive && statusMessage ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#0000004D] px-4 text-center text-xs font-medium text-white">
+        <div className="absolute inset-0 flex items-center justify-center bg-tc-brand-deep px-4 text-center text-xs leading-4 font-medium text-tc-brand-onDeep">
           {statusMessage}
         </div>
       ) : null}
