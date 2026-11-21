@@ -6,9 +6,10 @@
 // compared. If anything else differs (an element, a handler, a prop, a hook,
 // a data call), the file is reported.
 //
-// Styling strings are: the value of a `className`-like JSX attribute, and any
+// Styling strings are: the value of a `className`-like JSX attribute; any
 // string held in a variable, property or parameter whose name ends in
-// "class", "className", "classes" or "classNames".
+// "class", "className", "classes" or "classNames" (or is `cls`); and any
+// string inside a function whose name ends the same way.
 //
 // Usage:
 //   node tools/restyle-guard.mjs [--base <ref>] [--allow-layout <file,...>] [--only <path prefix,...>]
@@ -63,7 +64,7 @@ const show = (ref, file) => {
 }
 
 // `variant` picks one of a shared part's looks (for example Button), so it counts as styling.
-const STYLE_NAME = /(^class$|class(name)?s?$|classes$|^variant$)/i
+const STYLE_NAME = /(^class$|^cls$|class(name)?s?$|classes$|^variant$)/i
 const isStyleName = (name) => Boolean(name) && STYLE_NAME.test(name)
 
 function normalise(source, fileName) {
@@ -99,6 +100,12 @@ function normalise(source, fileName) {
       isStyleName(node.name.getText(file).replace(/['"]/g, ''))
     ) {
       blank(node.initializer)
+      return
+    }
+    // A helper that only returns class strings, for example
+    // `function statusClassName(status) { ... return 'bg-...' }`.
+    if (ts.isFunctionDeclaration(node) && node.name && node.body && isStyleName(node.name.getText(file))) {
+      blank(node.body)
       return
     }
     ts.forEachChild(node, walk)
