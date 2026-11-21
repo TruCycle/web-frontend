@@ -18,5 +18,8 @@
   ],
   "src/features/listings/ui/components/ListingOffcanvas.tsx": [
     "statusTone"
+  ],
+  "src/features/found-items/ui/PostFoundItemPage.tsx": [
+    "confettiPieces"
   ]
 }

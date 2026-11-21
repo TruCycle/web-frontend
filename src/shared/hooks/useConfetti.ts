@@ -29,7 +29,7 @@ export function useConfetti() {
       particleCount: 120,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#0D3B24', '#A4F5A6', '#D4A84B', '#FFFFFF'],
+      colors: ['#232323', '#8EE3A8', '#DDF4E3', '#FFFFFF'],
       disableForReducedMotion: true,
     })
     if (completion) void completion.then(release, release)
