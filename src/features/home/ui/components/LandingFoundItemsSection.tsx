@@ -30,51 +30,51 @@ export function LandingFoundItemsSection({ isAuthenticated }: LandingFoundItemsS
   const secondaryCtaLabel = isAuthenticated ? 'Open map' : 'Log in'
 
   return (
-    <section className="relative overflow-hidden px-6 py-24" id="found-items">
-      <div className="absolute inset-x-0 top-0 -z-10 h-64 bg-[radial-gradient(circle_at_top_left,_rgba(104,200,155,0.22),_transparent_55%)]" />
+    <section className="relative overflow-hidden px-4 py-20 sm:px-6" id="found-items">
+      <div className="absolute inset-x-0 top-0 -z-10 h-64 bg-tc-brand-haze" />
 
-      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+      <div className="mx-auto grid max-w-[1184px] gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
         <div className="max-w-2xl">
-          <span className="tc-landing-fade-up inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.2em] text-tc-brand-deep">
-            <Sparkles className="h-4 w-4 text-tc-brand-mint" />
+          <span className="tc-landing-fade-up inline-flex items-center gap-2 text-[13px] font-semibold uppercase leading-5 tracking-[0.06em] text-tc-brand-muted">
+            <Sparkles className="h-4 w-4 text-tc-brand-muted" />
             Found Items
           </span>
 
-          <h2 className="tc-landing-fade-up tc-landing-delay-1 mt-3 text-4xl font-bold tracking-[-0.04em] text-slate-950 sm:text-5xl">
+          <h2 className="tc-landing-fade-up tc-landing-delay-1 mt-3 text-[clamp(2rem,4.2vw,2.75rem)] font-semibold leading-[1.14] tracking-[-0.03em] text-tc-brand-ink">
             Catch nearby finds
             <br />
             before they become waste.
           </h2>
 
-          <p className="tc-landing-fade-up tc-landing-delay-2 mt-6 max-w-xl text-lg leading-8 text-slate-600">
+          <p className="tc-landing-fade-up tc-landing-delay-2 mt-4 max-w-xl text-base leading-[26px] text-tc-brand-body">
             Spot local finds, check the item details, and confirm permission before collecting.
           </p>
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
+          <div className="mt-8 grid gap-3.5 sm:grid-cols-3">
             {foundItemHighlights.map((feature, index) => (
               <div
-                className={`tc-landing-card rounded-[1.6rem] border border-slate-200 bg-white/90 p-6 shadow-[0_14px_34px_rgba(15,23,42,0.06)] backdrop-blur ${index === 0 ? 'tc-landing-delay-1' : index === 1 ? 'tc-landing-delay-2' : 'tc-landing-delay-3'}`}
+                className={`tc-landing-card rounded-tc-lg border border-tc-brand-line bg-white p-5 ${index === 0 ? 'tc-landing-delay-1' : index === 1 ? 'tc-landing-delay-2' : 'tc-landing-delay-3'}`}
                 key={feature.title}
               >
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-tc-brand-mint/18 text-tc-brand-deep">
+                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-tc-brand-mintSoft text-tc-brand-deep">
                   <feature.icon className="h-5 w-5" />
                 </div>
-                <h3 className="text-lg font-bold tracking-[-0.02em] text-slate-950">{feature.title}</h3>
-                <p className="mt-2 text-sm leading-7 text-slate-600">{feature.description}</p>
+                <h3 className="text-lg font-semibold leading-6 text-tc-brand-ink">{feature.title}</h3>
+                <p className="mt-1.5 text-[15px] leading-[22px] text-tc-brand-body">{feature.description}</p>
               </div>
             ))}
           </div>
 
-          <div className="tc-landing-fade-up tc-landing-delay-3 mt-10 flex flex-col gap-3 sm:flex-row">
+          <div className="tc-landing-fade-up tc-landing-delay-3 mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-tc-brand-deep px-8 py-3.5 text-base font-semibold text-white no-underline shadow-[0_18px_40px_rgba(104,200,155,0.28)] transition duration-200 hover:-translate-y-0.5 hover:bg-tc-brand-hover"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full px-[22px] text-[15px] font-semibold no-underline transition duration-200 hover:-translate-y-0.5 bg-tc-brand-deep text-white hover:bg-tc-brand-hover"
               to={primaryCtaTo}
             >
               {primaryCtaLabel}
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-8 py-3.5 text-base font-medium text-slate-700 no-underline transition-colors hover:bg-slate-50"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full px-[22px] text-[15px] font-semibold no-underline transition duration-200 hover:-translate-y-0.5 border border-tc-brand-control bg-transparent text-tc-brand-ink hover:bg-tc-brand-soft"
               to={secondaryCtaTo}
             >
               {secondaryCtaLabel}
@@ -83,37 +83,37 @@ export function LandingFoundItemsSection({ isAuthenticated }: LandingFoundItemsS
         </div>
 
         <div className="relative">
-          <div className="absolute -right-4 top-6 -z-10 h-48 w-48 rounded-full bg-tc-brand-mint/16 blur-3xl" />
+          <div className="absolute -right-4 top-6 -z-10 h-48 w-48 rounded-full bg-tc-brand-mint/20 blur-3xl" />
 
-          <div className="tc-landing-card rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)] ring-1 ring-slate-100/80 sm:p-8">
+          <div className="tc-landing-card rounded-tc-xl border border-tc-brand-line bg-white p-6 sm:p-8">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-tc-brand-deep/70">
+                <p className="text-[13px] font-semibold uppercase leading-5 tracking-[0.06em] text-tc-brand-muted">
                   Illustrative board example � not a current listing
                 </p>
-                <h3 className="mt-2 text-3xl font-bold tracking-[-0.04em] text-slate-950">
+                <h3 className="mt-2 text-[30px] font-semibold leading-9 tracking-[-0.02em] text-tc-brand-ink">
                   Example armchair
                 </h3>
-                <p className="mt-2 text-base text-slate-500">0.8 km away · Barking riverside</p>
+                <p className="mt-1 text-[13px] leading-5 text-tc-brand-muted">0.8 km away · Barking riverside</p>
               </div>
 
-              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
+              <span className="rounded-full bg-tc-brand-mintSoft px-2.5 py-1 text-xs font-semibold leading-4 text-tc-brand-deep">
                 Example
               </span>
             </div>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-[1.4rem] bg-tc-brand-haze px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Condition</p>
-                <p className="mt-2 text-3xl font-bold tracking-[-0.05em] text-slate-950">Check details</p>
+              <div className="rounded-tc-md bg-tc-brand-soft p-4">
+                <p className="text-xs font-semibold uppercase leading-4 tracking-[0.06em] text-tc-brand-muted">Condition</p>
+                <p className="mt-2 text-xl font-semibold leading-7 tracking-[-0.015em] text-tc-brand-ink">Check details</p>
               </div>
-              <div className="rounded-[1.4rem] bg-tc-brand-haze px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Collection</p>
-                <p className="mt-2 text-3xl font-bold tracking-[-0.05em] text-tc-brand-link">Agree first</p>
+              <div className="rounded-tc-md bg-tc-brand-soft p-4">
+                <p className="text-xs font-semibold uppercase leading-4 tracking-[0.06em] text-tc-brand-muted">Collection</p>
+                <p className="mt-2 text-xl font-semibold leading-7 tracking-[-0.015em] text-tc-brand-ink">Agree first</p>
               </div>
-              <div className="rounded-[1.4rem] bg-slate-950 px-4 py-4 text-white">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Post flow</p>
-                <p className="mt-2 text-xl font-semibold tracking-[-0.03em]">Photo, pin, match</p>
+              <div className="rounded-tc-md bg-tc-brand-deep p-4 text-white">
+                <p className="text-xs font-semibold uppercase leading-4 tracking-[0.06em] text-tc-brand-mint">Post flow</p>
+                <p className="mt-2 text-xl font-semibold leading-7 tracking-[-0.015em]">Photo, pin, match</p>
               </div>
             </div>
           </div>

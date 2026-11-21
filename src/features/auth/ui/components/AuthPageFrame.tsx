@@ -45,75 +45,75 @@ function AuthShowcasePanel({
   authorRole = 'Sustainable Living Enthusiast',
 }: AuthShowcaseProps) {
   return (
-    <aside className="flex h-full basis-[50%] flex-col justify-between gap-7 rounded-[25px] bg-tc-brand-deep px-[6rem] py-8 text-tc-auth-heroText max-[900px]:hidden">
+    <aside className="flex h-full basis-[50%] flex-col justify-between gap-7 rounded-tc-xl bg-tc-brand-deep p-10 text-tc-brand-onDeep max-[900px]:hidden">
       <div className="inline-flex w-fit items-center gap-2.5">
         <img
           alt=""
           aria-hidden
-          className="h-[2.1rem] w-[2.1rem] shrink-0"
+          className="h-7 w-7 shrink-0"
           src={logoSrc}
         />
-        <span className="text-[1.8rem] font-bold text-tc-auth-heroBrand max-sm:text-2xl">
+        <span className="text-lg font-semibold tracking-[-0.02em] text-white">
           TruCycle
         </span>
       </div>
 
-      <section className="my-auto flex flex-col gap-8">
-        <h2 className="m-0 text-[clamp(2rem,4vw,3.2rem)] leading-[1.1] tracking-[-0.02em] text-tc-auth-heroTitle">
+      <section className="mt-auto flex flex-col gap-7">
+        <h2 className="m-0 text-[clamp(2rem,3.2vw,2.5rem)] font-semibold leading-[1.15] tracking-[-0.03em] text-white">
           {titlePrefix}
           <br />
-          <span className="font-bold tracking-[0.01em] text-tc-auth-heroAccent">
+          <span className="text-tc-brand-mint">
             {titleAccent}
           </span>
         </h2>
-        <ul className="grid list-none gap-[0.65rem] p-0">
+        <ul className="m-0 grid list-none gap-2.5 p-0">
           {benefits.map((benefit) => (
             <li
               key={benefit}
-              className="inline-flex items-center gap-[0.55rem] text-base text-tc-auth-quote"
+              className="inline-flex items-center gap-2.5 text-sm leading-5 text-tc-brand-onDeep"
             >
-              <img alt="" aria-hidden className="h-[1.02rem] w-[1.02rem] shrink-0" src={checkIconSrc} />
+              <img alt="" aria-hidden className="h-4 w-4 shrink-0" src={checkIconSrc} />
               {benefit}
             </li>
           ))}
         </ul>
 
-        <article className="rounded-[20px] border border-1.5 border-tc-auth-testimonialBorder bg-tc-auth-card px-10 py-8 shadow-tc-auth-card">
+        <article className="rounded-tc-lg border border-tc-brand-deepLine bg-tc-brand-hover p-5">
           <div className="flex items-center gap-3">
             {avatarSrc ? (
               <img
                 alt=""
-                className="h-[50px] w-[50px] rounded-full object-cover"
+                className="h-10 w-10 rounded-full object-cover"
                 src={avatarSrc}
               />
             ) : (
               <span
                 aria-hidden
-                className="inline-flex h-[50px] w-[50px] items-center justify-center rounded-full bg-tc-brand-haze text-[0.8rem] font-bold text-tc-auth-avatarText"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-tc-brand-mint text-xs font-semibold text-tc-brand-onMint"
               >
                 {avatarLabel}
               </span>
             )}
             <div>
-              <p className="m-0 text-base text-tc-auth-author">
+              <p className="m-0 text-sm font-semibold leading-5 text-white">
                 {authorName}
               </p>
-              <p className="mt-[0.15rem] text-sm text-tc-auth-authorRole">
+              <p className="m-0 text-[13px] leading-5 text-tc-brand-onDeep">
                 {authorRole}
               </p>
             </div>
           </div>
-          <p className="my-4 text-md text-tc-auth-quote">
+          <p className="my-3 text-sm leading-5 text-tc-brand-onDeep">
             {quote}
           </p>
-          <div className="flex items-center justify-between text-xs text-tc-auth-meta">
+          <div className="flex items-center justify-between text-xs leading-4 text-tc-brand-onDeep">
             <span>{dateLabel}</span>
             <span aria-hidden className="inline-flex items-center gap-0">
               {Array.from({ length: 5 }, (_, index) => (
                 <img
                   key={`star-${index + 1}`}
                   alt=""
-                  className="h-6 w-6 shrink-0"
+                  className="h-5 w-5 shrink-0"
                   src={starIconSrc}
                 />
               ))}
@@ -140,11 +140,11 @@ export function AuthPageFrame({
   return (
     <main
       className={classNames(
-        'flex h-screen overflow-hidden bg-tc-auth-page p-3 max-[900px]:p-0',
+        'flex h-screen overflow-hidden bg-white p-4 text-tc-brand-ink max-[900px]:p-0',
         className,
       )}
     >
-      <div className="flex h-full w-full overflow-hidden bg-tc-auth-panel">
+      <div className="flex h-full w-full overflow-hidden bg-white">
         <AuthShowcasePanel
           quote={
             showcase?.quote ??
@@ -160,11 +160,11 @@ export function AuthPageFrame({
           authorRole={showcase?.authorRole}
         />
 
-        <section className="flex h-full basis-[50%] flex-col overflow-y-auto px-[6rem] py-[5rem] max-[900px]:basis-full max-[900px]:px-[3rem] max-[900px]:pb-[3rem] max-[900px]:pt-[2.4rem] max-sm:px-[2rem] max-sm:pb-8 max-sm:pt-[3rem]">
-          <h1 className="m-0 font-medium text-[clamp(1.7rem,2.4vw,2rem)] text-tc-auth-formTitle">
+        <section className="flex h-full basis-[50%] flex-col overflow-y-auto px-[max(2.5rem,calc(25%-200px))] py-10 [justify-content:safe_center] max-[900px]:basis-full max-[900px]:px-[max(2.5rem,calc(50%-200px))] max-[900px]:py-10 max-sm:px-5 max-sm:pb-8 max-sm:pt-10">
+          <h1 className="m-0 text-[30px] font-semibold leading-9 tracking-[-0.02em] text-tc-brand-ink">
             {formTitle}
           </h1>
-          <p className="mt-[0.55rem] text-tc-auth-formText">{formDescription}</p>
+          <p className="mt-1.5 text-sm leading-5 text-tc-brand-body">{formDescription}</p>
           {children}
           {footer}
         </section>
@@ -173,18 +173,18 @@ export function AuthPageFrame({
   )
 }
 
-export const authFieldClassName = 'grid gap-2'
-export const authLabelClassName = 'text-tc-auth-label'
+export const authFieldClassName = 'grid gap-1.5'
+export const authLabelClassName = 'text-sm font-medium leading-5 text-tc-brand-ink'
 export const authInputClassName =
-  'h-12 w-full rounded-[0.55rem] border border-tc-auth-inputBorder px-[0.95rem] pr-14 text-[0.95rem] text-tc-app-text transition placeholder:text-tc-auth-inputPlaceholder focus:border-tc-auth-inputFocus focus:outline-none focus:ring-4 focus:ring-tc-auth-inputFocusRing'
+  'h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink transition placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:outline-none focus:ring-2 focus:ring-tc-brand-mint disabled:cursor-not-allowed disabled:opacity-50'
 export const authPasswordToggleClassName =
-  'absolute right-1 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-transparent p-0 text-tc-auth-icon focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tc-auth-inputFocus'
+  'absolute right-0 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-transparent p-0 text-tc-brand-muted transition hover:text-tc-brand-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-tc-brand-deep'
 export const authPrimaryButtonClassName =
-  'inline-flex h-[3.05rem] items-center justify-center gap-2 rounded-[0.55rem] border-0 bg-tc-auth-submit px-4 text-lg font-bold text-tc-auth-submitText transition hover:-translate-y-px hover:bg-tc-brand-hover focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-tc-auth-submitFocus disabled:cursor-not-allowed disabled:opacity-70 max-sm:text-xl'
+  'inline-flex h-12 items-center justify-center gap-2 rounded-full border-0 bg-tc-brand-deep px-5 text-sm font-semibold text-white transition hover:-translate-y-px hover:bg-tc-brand-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tc-brand-deep disabled:cursor-not-allowed disabled:opacity-50'
 export const authInlineMetaClassName =
-  'text-[0.92rem] text-tc-auth-row'
-export const authFooterCopyClassName = 'mt-[1rem] text-center text-tc-auth-muted'
+  'text-sm leading-5 text-tc-brand-ink'
+export const authFooterCopyClassName = 'mt-4 text-center text-sm leading-5 text-tc-brand-body'
 export const authFooterLinkClassName =
-  'font-semibold text-tc-auth-link underline underline-offset-2'
+  'font-semibold text-tc-brand-deep underline underline-offset-4 hover:text-black'
 export const authLoadingSpinnerClassName =
-  'inline-block h-[1.1rem] w-[1.1rem] animate-spin rounded-full border-2 border-tc-auth-submitText/20 border-t-tc-auth-submitText'
+  'inline-block h-[1.1rem] w-[1.1rem] animate-spin rounded-full border-2 border-white/25 border-t-white'

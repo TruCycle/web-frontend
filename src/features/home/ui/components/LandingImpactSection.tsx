@@ -17,23 +17,23 @@ const smallMetrics = [
 
 export function LandingImpactSection({ browseTo }: LandingImpactSectionProps) {
   return (
-    <section className="bg-tc-brand-deep px-6 py-20 text-white sm:py-24" id="impact">
-      <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[405px_minmax(0,1fr)] lg:items-center lg:gap-[3.125rem]">
-        <div className="space-y-[1.125rem]">
-          <p className="text-sm font-bold tracking-[0.04em] text-tc-brand-mint">
+    <section className="bg-tc-brand-haze px-4 py-6 text-white sm:px-6" id="impact">
+      <div className="mx-auto grid max-w-[1184px] gap-12 rounded-tc-xl bg-tc-brand-deep px-6 py-12 sm:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-center lg:gap-14 lg:px-16 lg:py-[72px]">
+        <div className="space-y-[18px]">
+          <p className="text-[13px] font-semibold uppercase leading-5 tracking-[0.06em] text-tc-brand-mint">
             Why it matters
           </p>
 
-          <div className="space-y-2 text-[clamp(2.55rem,5vw,3.5rem)] font-normal leading-[1.02] tracking-[-0.05em]">
+          <div className="space-y-0 text-[clamp(2.25rem,4.6vw,3.25rem)] font-semibold leading-[1.12] tracking-[-0.03em] text-white">
             <p>Give useful things</p>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-0">
               <span>a chance</span>
-              <span className="text-tc-brand-mint">at another</span>
+              <span className="text-white">at another</span>
             </div>
-            <p className="text-tc-brand-mint">home.</p>
+            <p className="text-white">home.</p>
           </div>
 
-          <p className="max-w-[25rem] text-[1.05rem] leading-8 text-tc-brand-haze">
+          <p className="max-w-[440px] text-base leading-[26px] text-tc-brand-onDeep">
             Reuse starts with an item someone can use and a handoff both people
             agree to. Offer it clearly, check its condition, and arrange a
             practical collection together.
@@ -41,7 +41,7 @@ export function LandingImpactSection({ browseTo }: LandingImpactSectionProps) {
 
           <div className="flex flex-col gap-3 pt-2 sm:flex-row">
             <a
-              className="inline-flex items-center justify-center rounded-full border border-white/20 px-6 py-3 text-base font-bold text-white no-underline transition-colors hover:bg-white/5"
+              className="inline-flex min-h-11 items-center justify-center self-start text-[15px] font-semibold text-tc-brand-mint no-underline transition-colors hover:text-tc-brand-mintHover"
               href="#how"
             >
               See how reuse works -&gt;
@@ -49,38 +49,38 @@ export function LandingImpactSection({ browseTo }: LandingImpactSectionProps) {
           </div>
         </div>
 
-        <div className="space-y-4">
-          <article className="rounded-[1.1rem] bg-tc-brand-mint p-6 text-tc-brand-deep shadow-[0_20px_60px_rgba(0,0,0,0.18)] sm:p-7">
+        <div className="flex flex-col gap-3.5">
+          <article className="order-2 rounded-tc-lg bg-tc-brand-mintSoft p-6 text-tc-brand-ink">
             <div className="flex items-start gap-2">
-              <span className="text-[clamp(3.3rem,8vw,4.8rem)] font-normal leading-none tracking-[-0.08em]">
+              <span className="text-lg font-semibold leading-6 text-tc-brand-ink">
                 Reuse
               </span>
             </div>
-            <p className="mt-4 max-w-md text-base leading-7 text-tc-brand-deep/85">
+            <p className="mt-1 max-w-md text-[15px] leading-[22px] text-tc-brand-body">
               Offer useful items for another home. Explore current offers to find something you can use.
             </p>
           </article>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="order-1 grid gap-3.5 sm:grid-cols-2">
             {smallMetrics.map((metric) => (
               <article
-                className="rounded-[1rem] border border-white/10 bg-tc-brand-hover p-5"
+                className="rounded-tc-lg border border-tc-brand-deepLine bg-tc-brand-hover p-[22px]"
                 key={metric.value}
               >
-                <p className="text-[2.6rem] font-normal leading-none tracking-[-0.06em] text-tc-brand-mint">
+                <p className="text-[26px] font-semibold leading-8 tracking-[-0.02em] text-white">
                   {metric.value}
                 </p>
-                <p className="mt-5 max-w-[12rem] text-base leading-7 text-tc-brand-haze">
+                <p className="mt-1.5 text-[15px] leading-[22px] text-tc-brand-onDeep">
                   {metric.description}
                 </p>
               </article>
             ))}
           </div>
 
-          <div className="rounded-[1rem] border border-white/10 bg-white/5 px-5 py-4 text-base leading-8 text-tc-brand-haze">
+          <div className="order-3 rounded-tc-lg border border-tc-brand-deepLine bg-tc-brand-hover px-[22px] py-4 text-[15px] leading-[22px] text-tc-brand-onDeep">
             <span className="font-semibold text-white">Neighbour-first browsing:</span>{' '}
             check the listing and collection arrangements before making a trip.
-            <Link className="ml-2 font-semibold text-tc-brand-mint no-underline" to={browseTo}>
+            <Link className="ml-2 font-semibold text-tc-brand-mint no-underline hover:text-tc-brand-mintHover" to={browseTo}>
               Browse free items
             </Link>
           </div>

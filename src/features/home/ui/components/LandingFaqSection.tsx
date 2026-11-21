@@ -63,44 +63,44 @@ export function LandingFaqSection() {
   }, [])
 
   return (
-    <section className="bg-tc-brand-haze px-6 py-20 sm:py-24" id="faq">
-      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-16">
-        <div className="max-w-[15.75rem]">
-          <p className="text-sm font-bold tracking-[0.04em] text-tc-brand-ink">
+    <section className="bg-tc-brand-haze px-4 py-20 sm:px-6 sm:py-[88px]" id="faq">
+      <div className="mx-auto grid max-w-[1184px] gap-10 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-14">
+        <div className="max-w-[20rem]">
+          <p className="text-[13px] font-semibold uppercase leading-5 tracking-[0.06em] text-tc-brand-muted">
             Common questions
           </p>
-          <h2 className="mt-5 text-[clamp(2.2rem,4vw,3rem)] font-normal leading-[1.1] tracking-[-0.05em] text-tc-brand-deep">
+          <h2 className="mt-3.5 text-[clamp(2rem,3.8vw,2.5rem)] font-semibold leading-[1.15] tracking-[-0.03em] text-tc-brand-ink">
             <span className="block">Stuff people</span>
             <span className="block text-tc-brand-ink">usually ask.</span>
           </h2>
-          <p className="mt-8 text-base leading-8 text-tc-brand-muted">
+          <p className="mt-3.5 text-[15px] leading-[22px] text-tc-brand-body">
             Can&apos;t see your question? Drop us a note at{' '}
-            <a className="font-semibold text-tc-brand-deep" href="mailto:hello@trucycle.co.uk">
+            <a className="font-semibold text-tc-brand-deep underline underline-offset-4 hover:text-black" href="mailto:hello@trucycle.co.uk">
               hello@trucycle.co.uk
             </a>.
           </p>
         </div>
 
-        <div className="border-t border-tc-brand-line">
+        <div className="flex flex-col gap-3">
           {faqItems.map((item, index) => {
             const isOpen = openIndex === index
 
             return (
-              <div className="border-b border-tc-brand-line py-6" key={item.question}>
+              <div className="rounded-tc-lg border border-tc-brand-line bg-white px-5 py-3 sm:px-6" key={item.question}>
                 <button
                   aria-expanded={isOpen}
-                  className="flex w-full items-start justify-between gap-6 bg-transparent p-0 text-left"
+                  className="flex min-h-11 w-full items-center justify-between gap-6 bg-transparent p-0 text-left"
                   onClick={() => setOpenIndex(isOpen ? -1 : index)}
                   type="button"
                 >
-                  <span className="max-w-3xl text-xl font-normal leading-8 text-tc-brand-deep sm:text-[1.12rem]">
+                  <span className="max-w-3xl text-lg font-semibold leading-6 text-tc-brand-ink">
                     {item.question}
                   </span>
                   <span
-                    className={`mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-colors ${
+                    className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-colors ${
                       isOpen
-                        ? 'border-tc-brand-mint bg-tc-brand-mint text-tc-brand-deep'
-                        : 'border-tc-brand-line bg-tc-brand-surface text-tc-brand-deep'
+                        ? 'border-tc-brand-deep bg-tc-brand-deep text-white'
+                        : 'border-tc-brand-mintLine bg-tc-brand-mintSoft text-tc-brand-deep'
                     }`}
                   >
                     {isOpen ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
@@ -108,7 +108,7 @@ export function LandingFaqSection() {
                 </button>
 
                 {isOpen ? (
-                  <p className="mt-4 max-w-3xl pr-12 text-base leading-8 text-tc-brand-muted">
+                  <p className="mb-2 mt-1 max-w-[640px] pr-12 text-[15px] leading-6 text-tc-brand-body">
                     {item.answer}
                   </p>
                 ) : null}

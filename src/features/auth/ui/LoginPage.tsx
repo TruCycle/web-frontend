@@ -114,12 +114,12 @@ export default function LoginPage() {
         </p>
       }
     >
-      {needsSignIn && <p role="status" className="mt-4 text-sm">Sign in to continue to your page.</p>}
-      {signOutNotice && <div className="mt-4 rounded-lg border border-slate-300 p-3 text-sm">
+      {needsSignIn && <p role="status" className="mt-4 text-sm leading-5 text-tc-brand-body">Sign in to continue to your page.</p>}
+      {signOutNotice && <div className="mt-4 rounded-tc-md border border-tc-brand-mintLine bg-tc-brand-mintSoft px-3.5 py-3 text-sm leading-5 text-tc-brand-ink">
         <p role="status">{signOutNotice}</p>
-        {canRetryServerSignOut && retryServerSignOut && <button type="button" className="mt-2 min-h-11 underline" onClick={() => void retryServerSignOut()}>Retry server sign-out</button>}
+        {canRetryServerSignOut && retryServerSignOut && <button type="button" className="mt-2 min-h-11 font-semibold text-tc-brand-deep underline underline-offset-4 hover:text-black" onClick={() => void retryServerSignOut()}>Retry server sign-out</button>}
       </div>}
-      <form className="mt-8 grid gap-4" onSubmit={onSubmit}>
+      <form className="mt-6 grid gap-4" onSubmit={onSubmit}>
         <label className={authFieldClassName}>
           <span className={authLabelClassName}>Email Address</span>
           <input
@@ -139,7 +139,7 @@ export default function LoginPage() {
           <div className="relative">
             <input
               autoComplete="current-password"
-              className={classNames(authInputClassName, 'pr-11')}
+              className={classNames(authInputClassName, 'pr-12')}
               minLength={8}
               name="password"
               onChange={(event) => onInputChange('password', event)}
@@ -168,7 +168,7 @@ export default function LoginPage() {
             onChange={onKeepLoggedInChange}
           />
           <Link
-            className={classNames('bg-transparent p-0 hover:underline', authInlineMetaClassName)}
+            className={classNames('bg-transparent p-0 font-semibold text-tc-brand-deep underline underline-offset-4 hover:text-black', authInlineMetaClassName)}
             to="/reset-password"
           >
             Forgot password?

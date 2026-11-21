@@ -161,21 +161,21 @@ export default function SignupPage({
       }
     >
       {verificationEmail ? (
-        <div className="mt-8 grid gap-5">
-          <div className="rounded-[0.9rem] border border-tc-auth-inputBorder bg-tc-brand-haze p-5">
+        <div className="mt-6 grid gap-4">
+          <div className="rounded-tc-md border border-tc-brand-mintLine bg-tc-brand-mintSoft p-4">
             <div className="flex items-start gap-3">
-              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tc-brand-mint/20 text-tc-shell-bg">
+              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-tc-brand-deep">
                 <Mail size={20} />
               </span>
               <div>
-                <p className="m-0 text-sm font-medium text-tc-auth-formText">Verification requested for</p>
-                <p className="mt-1 break-all text-base font-semibold text-tc-auth-formTitle">{verificationEmail}</p>
+                <p className="m-0 text-[13px] font-medium leading-5 text-tc-brand-body">Verification requested for</p>
+                <p className="mt-0.5 break-all text-base font-semibold leading-6 text-tc-brand-ink">{verificationEmail}</p>
               </div>
             </div>
           </div>
 
-          <p role="status" className="m-0 text-sm leading-7 text-tc-auth-formText">{verificationDeliveryMessage(deliveryStatus)}</p>
-          <div className="grid gap-3 rounded-[0.9rem] border border-tc-auth-inputBorder bg-white p-5 text-sm leading-7 text-tc-auth-formText">
+          <p role="status" className="m-0 text-sm leading-5 text-tc-brand-body">{verificationDeliveryMessage(deliveryStatus)}</p>
+          <div className="grid gap-2 rounded-tc-lg border border-tc-brand-line bg-white p-5 text-sm leading-6 text-tc-brand-body">
             <p className="m-0">1. Open your inbox and look for the TruCycle verification email.</p>
             <p className="m-0">2. Click the verification link in that email.</p>
             <p className="m-0">3. Once verified, return here and log in to continue.</p>
@@ -194,7 +194,7 @@ export default function SignupPage({
             </a>
             <button
               className={classNames(
-                'inline-flex h-[3.05rem] items-center justify-center gap-2 rounded-[0.55rem] border border-tc-auth-inputBorder bg-white px-4 text-base font-semibold text-tc-auth-formTitle transition hover:bg-slate-50 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-tc-auth-submitFocus disabled:cursor-not-allowed disabled:opacity-70 sm:flex-1',
+                'inline-flex h-12 items-center justify-center gap-2 rounded-full border border-tc-brand-control bg-white px-5 text-sm font-semibold text-tc-brand-ink transition hover:bg-tc-brand-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tc-brand-deep disabled:cursor-not-allowed disabled:opacity-50 sm:flex-1',
                 isResendingVerification && 'opacity-80',
               )}
               type="button"
@@ -216,12 +216,12 @@ export default function SignupPage({
             </button>
           </div>
 
-          <Link className="text-center text-sm font-medium text-tc-auth-link no-underline hover:underline" to="/login">
+          <Link className="text-center text-sm font-semibold text-tc-brand-deep underline underline-offset-4 hover:text-black" to="/login">
             I&apos;ve verified my email, continue to login
           </Link>
         </div>
       ) : (
-        <form className="mt-8 grid gap-4" onSubmit={onSubmit}>
+        <form className="mt-6 grid gap-4" onSubmit={onSubmit}>
           <label className={authFieldClassName}>
             <span className={authLabelClassName}>Full Name</span>
             <input
@@ -255,7 +255,7 @@ export default function SignupPage({
             <div className="relative">
               <input
                 autoComplete="new-password"
-                className={classNames(authInputClassName, 'pr-11')}
+                className={classNames(authInputClassName, 'pr-12')}
                 minLength={8}
                 name="password"
                 onChange={(event) => onInputChange('password', event)}
@@ -287,7 +287,7 @@ export default function SignupPage({
             />
           </label>
 
-          <p className="text-sm text-tc-auth-row">
+          <p className="text-[13px] leading-5 text-tc-brand-body">
             By continuing, you agree to our Terms of Service and Privacy Policy
           </p>
 

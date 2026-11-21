@@ -309,7 +309,7 @@ export default function PasswordResetPage() {
         <>
           <label className={authFieldClassName}>
             <span className={authLabelClassName}>OTP Code</span>
-            <div className="grid w-fit grid-cols-6 gap-4">
+            <div className="grid w-fit grid-cols-6 gap-2">
               {otpValues.map((value, index) => (
                 <input
                   key={`otp-${index + 1}`}
@@ -317,7 +317,7 @@ export default function PasswordResetPage() {
                     otpInputRefs.current[index] = element
                   }}
                   aria-label={`OTP digit ${index + 1}`}
-                  className="h-16 w-16 sm:h-20 sm:w-20 rounded-[8px] border border-tc-auth-inputBorder text-center text-lg font-semibold text-tc-app-text outline-none transition focus:border-tc-auth-inputFocus focus:ring-4 focus:ring-tc-auth-inputFocusRing"
+                  className="h-12 w-11 rounded-tc-md border border-tc-brand-control bg-white text-center text-xl font-semibold text-tc-brand-ink outline-none transition focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint sm:h-14 sm:w-[52px]"
                   inputMode="numeric"
                   maxLength={1}
                   onChange={(event) => onOtpChange(index, event)}
@@ -333,11 +333,11 @@ export default function PasswordResetPage() {
             </div>
           </label>
 
-          <p className="text-sm text-tc-auth-row">
+          <p className="text-sm leading-5 text-tc-brand-body">
             Didn&apos;t receive code? Click{' '}
             <button
               className={classNames(
-                'font-semibold text-tc-auth-link underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tc-auth-inputFocus',
+                'font-semibold text-tc-brand-deep underline underline-offset-4 hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tc-brand-deep',
               )}
               onClick={onResendCode}
               type="button"
@@ -357,7 +357,7 @@ export default function PasswordResetPage() {
           <div className="relative">
             <input
               autoComplete="new-password"
-              className={classNames(authInputClassName, 'pr-11')}
+              className={classNames(authInputClassName, 'pr-12')}
               minLength={8}
               name="password"
               onChange={(event) => onPasswordInputChange('password', event)}
@@ -382,7 +382,7 @@ export default function PasswordResetPage() {
           <div className="relative">
             <input
               autoComplete="new-password"
-              className={classNames(authInputClassName, 'pr-11')}
+              className={classNames(authInputClassName, 'pr-12')}
               minLength={8}
               name="confirmPassword"
               onChange={(event) => onPasswordInputChange('confirmPassword', event)}
@@ -415,7 +415,7 @@ export default function PasswordResetPage() {
           'TruCycle makes donating my unused items easy, secure, and straightforward.',
       }}
     >
-      <form className="mt-8 grid gap-4" onSubmit={onSubmit}>
+      <form className="mt-6 grid gap-4" onSubmit={onSubmit}>
         {renderStepContent()}
 
         <button
@@ -437,12 +437,12 @@ export default function PasswordResetPage() {
 
       <p
         className={classNames(
-          'mt-4 text-center text-tc-auth-muted',
+          'mt-4 text-center !text-tc-brand-body',
           authInlineMetaClassName,
         )}
       >
         Need help?{' '}
-        <span className={classNames('font-semibold text-tc-auth-link')}>
+        <span className={classNames('font-semibold text-tc-brand-deep')}>
           Contact Support
         </span>
       </p>

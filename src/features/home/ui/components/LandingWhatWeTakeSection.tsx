@@ -74,38 +74,38 @@ const categories: readonly Category[] = [
 
 export function LandingWhatWeTakeSection() {
   return (
-    <section className="bg-tc-brand-haze px-6 py-20 sm:py-24" id="what-we-take">
-      <div className="mx-auto max-w-7xl">
-        <div className="grid gap-8 lg:grid-cols-[460px_minmax(0,1fr)] lg:items-center lg:gap-8">
-          <div className="max-w-[28.75rem]">
-            <p className="text-sm font-bold tracking-[0.04em] text-tc-brand-ink">
+    <section className="border-y border-tc-brand-line bg-white px-4 py-20 sm:px-6 sm:py-[88px]" id="what-we-take">
+      <div className="mx-auto max-w-[1184px]">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,520px)_minmax(0,560px)] lg:items-end lg:justify-between lg:gap-10">
+          <div className="max-w-[520px]">
+            <p className="text-[13px] font-semibold uppercase leading-5 tracking-[0.06em] text-tc-brand-muted">
               Ideas for things to offer
             </p>
-            <h2 className="mt-5 text-[clamp(2.45rem,4.9vw,3.5rem)] font-normal leading-[0.98] tracking-[-0.05em] text-tc-brand-deep">
+            <h2 className="mt-3.5 text-[clamp(2rem,4.2vw,2.75rem)] font-semibold leading-[1.14] tracking-[-0.03em] text-tc-brand-ink">
               <span className="block">Useful pieces, ready</span>
               <span className="block">for another home.</span>
             </h2>
-            <p className="mt-6 max-w-[28rem] text-base leading-8 text-tc-brand-muted">
+            <p className="mt-3.5 max-w-[520px] text-base leading-[26px] text-tc-brand-body">
               These categories are examples, not current listings. Show the object, choose a
               category, and add the pickup detail that makes saying yes easy.
             </p>
           </div>
 
-          <aside className="rounded-[1rem] bg-tc-brand-hover px-6 py-5 text-white shadow-[0_24px_60px_rgba(15,42,30,0.16)] sm:px-7">
-            <div className="space-y-6">
+          <aside className="text-tc-brand-ink">
+            <div className="grid gap-3.5 sm:grid-cols-2 [&>div]:rounded-tc-lg [&>div]:border [&>div]:border-tc-brand-mintLine [&>div]:bg-tc-brand-mintSoft [&>div]:p-[18px]">
               <div>
-                <p className="text-sm font-bold tracking-[0.04em] text-tc-brand-mint">
+                <p className="text-[15px] font-semibold leading-[22px] text-tc-brand-ink">
                   List with light
                 </p>
-                <p className="mt-2 max-w-[18rem] text-base leading-8 text-white">
+                <p className="mt-1 text-sm leading-5 text-tc-brand-body">
                   Natural-light photos help neighbours judge size and condition.
                 </p>
               </div>
               <div>
-                <p className="text-sm font-bold tracking-[0.04em] text-tc-brand-mint">
+                <p className="text-[15px] font-semibold leading-[22px] text-tc-brand-ink">
                   Keep it practical
                 </p>
-                <p className="mt-2 max-w-[18rem] text-base leading-8 text-white">
+                <p className="mt-1 text-sm leading-5 text-tc-brand-body">
                   Describe what is included and agree collection details directly.
                 </p>
               </div>
@@ -113,39 +113,39 @@ export function LandingWhatWeTakeSection() {
           </aside>
         </div>
 
-        <div className="mt-10 grid gap-[1.125rem] md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {categories.map(({ Icon, badge, description, imageUrl, title, categoryQuery }) => (
             <Link
               to={`/browse?category=${encodeURIComponent(categoryQuery)}`}
-              className="group flex flex-col overflow-hidden rounded-[1.15rem] border border-tc-brand-line bg-white no-underline shadow-[0_18px_48px_rgba(15,42,30,0.06)] transition-all duration-200 hover:-translate-y-1 hover:border-tc-brand-deep/40 hover:shadow-[0_20px_50px_rgba(15,42,30,0.12)]"
+              className="group flex flex-col overflow-hidden rounded-tc-lg border border-tc-brand-line bg-tc-brand-haze text-tc-brand-ink no-underline transition-all duration-200 hover:-translate-y-1 hover:shadow-tc-card"
               key={title}
             >
               <div
-                className="relative h-36 bg-cover bg-center transition-transform duration-300 group-hover:scale-[1.02]"
+                className="relative h-[190px] bg-tc-brand-soft bg-cover bg-center transition-transform duration-300 group-hover:scale-[1.02]"
                 style={{ backgroundImage: `url(${imageUrl})` }}
               >
-                <div className="absolute inset-0 bg-tc-brand-deep/55 transition-colors group-hover:bg-tc-brand-hover/45" />
-                <div className="absolute left-4 top-4 rounded-full bg-white/15 px-3 py-1 text-sm font-bold tracking-[0.04em] text-white backdrop-blur-sm">
+                <div className="absolute inset-0 bg-tc-brand-deep/0 transition-colors group-hover:bg-tc-brand-deep/10" />
+                <div className="absolute left-3 top-3 rounded-full bg-white px-3 py-[5px] text-xs font-semibold leading-4 text-tc-brand-ink">
                   {badge}
                 </div>
-                <div className="absolute inset-y-0 right-5 flex items-center">
-                  <Icon className="h-10 w-10 text-white/90 transition-transform group-hover:scale-110" />
+                <div className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white text-tc-brand-deep">
+                  <Icon className="h-[18px] w-[18px] text-tc-brand-deep transition-transform group-hover:scale-110" />
                 </div>
               </div>
 
-              <div className="flex flex-1 flex-col justify-between space-y-3 p-5">
+              <div className="flex flex-1 flex-col justify-between space-y-3 p-[18px]">
                 <div>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-[1.45rem] font-normal leading-none tracking-[-0.04em] text-tc-brand-deep group-hover:text-tc-brand-deep">
+                    <h3 className="text-lg font-semibold leading-6 text-tc-brand-ink">
                       {title}
                     </h3>
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors group-hover:bg-tc-brand-hover group-hover:text-white">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-tc-brand-mintSoft text-tc-brand-deep transition-colors group-hover:bg-tc-brand-deep group-hover:text-white">
                       <ArrowUpRight className="h-4 w-4" />
                     </div>
                   </div>
-                  <p className="mt-2 text-base leading-7 text-tc-brand-muted">{description}</p>
+                  <p className="mt-1.5 text-[15px] leading-[22px] text-tc-brand-body">{description}</p>
                 </div>
-                <span className="text-xs font-bold text-tc-brand-deep opacity-0 transition-opacity group-hover:opacity-100">
+                <span className="text-xs font-semibold leading-4 text-tc-brand-deep opacity-0 transition-opacity group-hover:opacity-100">
                   Explore {title} listings →
                 </span>
               </div>
@@ -154,7 +154,7 @@ export function LandingWhatWeTakeSection() {
         </div>
         <div className="mt-8"><ReuseSafetyNotice /></div>
 
-        <div className="mt-6 flex items-center gap-3 text-sm font-semibold tracking-[0.04em] text-tc-brand-muted">
+        <div className="mt-6 flex items-center gap-3 text-[13px] font-medium leading-5 text-tc-brand-muted">
           <span className="h-px w-10 bg-tc-brand-line" />
           <span>
             Small categories make browsing feel like a neighbour&apos;s shelf, not a
