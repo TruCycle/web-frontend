@@ -392,24 +392,24 @@ export default function MessagingPage() {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-5">
+    <div className="flex h-full min-h-0 flex-col gap-6">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">Messaging</h1>
-        <p className="text-slate-500">Coordinate collections in real time.</p>
+        <h1 className="text-[30px] font-semibold leading-9 tracking-[-0.02em] text-tc-brand-ink">Messaging</h1>
+        <p className="mt-1 text-base leading-6 text-tc-brand-body">Coordinate collections in real time.</p>
       </div>
 
-      <div className="grid h-[calc(100vh-10rem)] min-h-[700px] flex-1 gap-4 rounded-2xl p-4 md:h-[calc(100vh-14rem)] md:min-h-[560px] xl:grid-cols-[400px_1fr]">
-        <div className="flex h-full min-h-0 flex-col rounded-xl bg-white p-7">
-          <div className="pb-5">
-            <h2 className="text-lg text-black">Conversations</h2>
-            <div className="relative mt-5">
+      <div className="grid h-[calc(100vh-10rem)] min-h-[700px] flex-1 gap-4 md:h-[calc(100vh-14rem)] md:min-h-[560px] xl:grid-cols-[320px_1fr]">
+        <div className="flex h-full min-h-0 flex-col rounded-tc-lg border border-tc-brand-line bg-white p-5">
+          <div className="pb-4">
+            <h2 className="text-lg font-semibold leading-6 text-tc-brand-ink">Conversations</h2>
+            <div className="relative mt-4">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B99]"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-tc-brand-muted"
                 size={18}
               />
               <input
                 type="text"
-                className="h-10 w-full rounded-xl border border-[#E2E8F0] pl-10 pr-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-[#A4F5A61A] focus:ring-offset-[-1px]"
+                className="h-11 w-full rounded-full border border-tc-brand-control bg-white pl-11 pr-4 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
                 placeholder="Search conversations"
                 value={searchValue}
                 onChange={(event) => setSearchValue(event.target.value)}
@@ -419,13 +419,13 @@ export default function MessagingPage() {
 
           <div className="min-h-0 flex-1 overflow-y-auto">
             {isLoadingRooms ? (
-              <p className="rounded-xl border border-slate-200 p-3 text-sm text-slate-500">
+              <p className="rounded-tc-md border border-tc-brand-line px-4 py-3.5 text-sm text-tc-brand-body">
                 Loading conversations...
               </p>
             ) : null}
 
             {!isLoadingRooms && filteredRooms.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-slate-300 p-3 text-sm text-slate-500">
+              <p className="rounded-tc-md border border-dashed border-tc-brand-control px-4 py-3.5 text-sm text-tc-brand-body">
                 No conversations found.
               </p>
             ) : null}
@@ -440,45 +440,45 @@ export default function MessagingPage() {
                   <button
                     key={room.id}
                     className={classNames(
-                      'mb-2 flex w-full items-start gap-3 rounded-lg border p-3 text-left transition',
+                      'mb-1.5 flex w-full items-start gap-3 rounded-tc-md border p-3 text-left transition',
                       isActiveRoom
-                        ? 'border-[#15A119] bg-[#A4F5A61A]'
+                        ? 'border-tc-brand-mintLine bg-tc-brand-mintSoft'
                         : isUnread
-                          ? 'border-[#86EFAC] bg-[#F0FDF4] hover:bg-[#ECFDF3]'
-                          : 'border-transparent hover:bg-slate-50',
+                          ? 'border-tc-brand-line bg-tc-brand-haze hover:bg-tc-brand-soft'
+                          : 'border-transparent hover:bg-tc-brand-soft',
                     )}
                     onClick={() => setActiveRoomId(room.id)}
                   >
-                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#15A1191A] text-xs font-semibold text-slate-700">
+                    <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tc-brand-deep text-xs font-semibold text-white">
                       {getRoomInitials(room, user?.id)}
                     </span>
                     <span className="flex min-w-0 flex-1 items-start justify-between gap-2">
                       <span className="flex min-w-0 flex-col items-start justify-between gap-1">
                         <span
                           className={classNames(
-                            'truncate text-sm text-slate-900',
-                            isUnread ? 'font-bold' : 'font-semibold',
+                            'max-w-full truncate text-sm text-tc-brand-ink',
+                            isUnread ? 'font-semibold' : 'font-medium',
                           )}
                         >
                           {getRoomDisplayName(room, user?.id)}
                         </span>
                         <span
                           className={classNames(
-                            'block truncate text-sm',
-                            isUnread ? 'font-medium text-slate-700' : 'text-slate-500',
+                            'block max-w-full truncate text-[13px] leading-5',
+                            isUnread ? 'font-medium text-tc-brand-ink' : 'text-tc-brand-body',
                           )}
                         >
                           {formatPreview(room.lastMessage)}
                         </span>
                       </span>
                       <span className="flex shrink-0 flex-col items-end gap-1">
-                        <span className="text-xs text-slate-400">
+                        <span className="text-xs text-tc-brand-muted">
                           {room.lastMessage
                             ? formatConversationTimestamp(room.lastMessage.createdAt)
                             : ''}
                         </span>
                         {isUnread ? (
-                          <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#15A119] px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">
+                          <span className="inline-flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-tc-brand-mint px-1.5 text-xs font-semibold leading-none text-tc-brand-onMint">
                             {unreadCount > 99 ? '99+' : unreadCount}
                           </span>
                         ) : null}
@@ -490,13 +490,13 @@ export default function MessagingPage() {
           </div>
         </div>
 
-        <div className="flex h-full min-h-0 flex-col rounded-xl bg-white">
-          <div className="flex items-center gap-3 border-b border-slate-200 p-5">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#15A1191A] text-xs font-semibold text-slate-700">
+        <div className="flex h-full min-h-0 flex-col rounded-tc-lg border border-tc-brand-line bg-white">
+          <div className="flex items-center gap-3 border-b border-tc-brand-line px-5 py-4">
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tc-brand-deep text-xs font-semibold text-white">
               {activeRoom ? getRoomInitials(activeRoom, user?.id) : '--'}
             </span>
             <div>
-              <span className="font-semibold text-slate-900">
+              <span className="text-sm font-semibold text-tc-brand-ink">
                 {activeRoom ? getRoomDisplayName(activeRoom, user?.id) : 'Select a room'}
               </span>
             </div>
@@ -508,23 +508,23 @@ export default function MessagingPage() {
               const list = event.currentTarget
               nearBottomRef.current = list.scrollHeight - list.scrollTop - list.clientHeight < 80
             }}
-            className="min-h-[520px] flex-1 space-y-3 overflow-y-auto p-4 md:min-h-0 md:p-7"
+            className="min-h-[520px] flex-1 space-y-3 overflow-y-auto p-4 md:min-h-0 md:p-5"
           >
-            {historyGap && <div role="status" className="space-y-2 rounded-xl border border-amber-300 p-3 text-sm">
+            {historyGap && <div role="status" className="space-y-2 rounded-tc-md border border-tc-brand-control bg-tc-brand-soft p-3 text-sm text-tc-brand-ink">
               <p>{historyGap === 'changed' ? 'The saved conversation has changed. Reload it to check the current history.' : 'Some missed messages have not loaded yet. Continue to check the gap.'}</p>
-              <button className="min-h-11 underline" disabled={isLoadingMessages} onClick={() => void (historyGap === 'changed' ? resetHistory() : reloadMessages())}>{historyGap === 'changed' ? 'Reload conversation' : 'Continue loading missed messages'}</button>
+              <button className="min-h-11 font-semibold text-tc-brand-deep underline underline-offset-4 hover:text-black disabled:cursor-not-allowed disabled:opacity-50" disabled={isLoadingMessages} onClick={() => void (historyGap === 'changed' ? resetHistory() : reloadMessages())}>{historyGap === 'changed' ? 'Reload conversation' : 'Continue loading missed messages'}</button>
             </div>}
-            {hasHistoryFailure && !historyGap && <p role="status">Conversation history is unavailable. <button className="min-h-11 underline" disabled={isLoadingMessages} onClick={() => void reloadMessages()}>Refresh conversation</button></p>}
+            {hasHistoryFailure && !historyGap && <p role="status">Conversation history is unavailable. <button className="min-h-11 font-semibold text-tc-brand-deep underline underline-offset-4 hover:text-black disabled:cursor-not-allowed disabled:opacity-50" disabled={isLoadingMessages} onClick={() => void reloadMessages()}>Refresh conversation</button></p>}
             {hasReadFailure ? (
               <p role="status">
                 Read status could not be saved.{' '}
-                <button type="button" className="min-h-11 underline" disabled={isLoadingMessages} onClick={retryReadStatus}>
+                <button type="button" className="min-h-11 font-semibold text-tc-brand-deep underline underline-offset-4 hover:text-black disabled:cursor-not-allowed disabled:opacity-50" disabled={isLoadingMessages} onClick={retryReadStatus}>
                   Retry read status
                 </button>
               </p>
             ) : null}
             {hasOlderMessages && !historyGap ? (
-              <button type="button" className="min-h-11 underline" disabled={isLoadingMessages} onClick={() => {
+              <button type="button" className="mx-auto flex min-h-11 w-fit items-center rounded-full border border-tc-brand-line bg-white px-4 text-[13px] font-semibold text-tc-brand-ink transition hover:bg-tc-brand-soft disabled:cursor-not-allowed disabled:opacity-50" disabled={isLoadingMessages} onClick={() => {
                 const list = messageListRef.current
                 if (list && activeRoomId) {
                   olderScrollRef.current = { roomId: activeRoomId, height: list.scrollHeight, top: list.scrollTop }
@@ -533,13 +533,13 @@ export default function MessagingPage() {
               }}>Load older messages</button>
             ) : null}
             {isLoadingMessages ? (
-              <p className="rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-500">
+              <p className="rounded-tc-md border border-tc-brand-line px-4 py-3.5 text-sm text-tc-brand-body">
                 Loading messages...
               </p>
             ) : null}
 
             {!isLoadingMessages && !hasHistoryFailure && messages.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-slate-300 bg-white p-3 text-sm text-slate-500">
+              <p className="rounded-tc-md border border-dashed border-tc-brand-control px-4 py-3.5 text-sm text-tc-brand-body">
                 No messages yet in this room.
               </p>
             ) : null}
@@ -547,9 +547,9 @@ export default function MessagingPage() {
             {messageRows.map((row) => {
               if (row.type === 'divider') {
                 return (
-                  <div key={row.key} className="my-1 flex items-center gap-3 text-xs text-slate-400">
+                  <div key={row.key} className="my-1 flex items-center gap-3 text-xs text-tc-brand-muted">
                     <span className="whitespace-nowrap">{row.label}</span>
-                    <span className="h-px flex-1 bg-slate-200" />
+                    <span className="h-px flex-1 bg-tc-brand-line" />
                   </div>
                 )
               }
@@ -558,7 +558,7 @@ export default function MessagingPage() {
                 return (
                   <div
                     key={row.key}
-                    className="mx-auto w-fit rounded-full bg-[#F8FAFC] px-5 py-2 text-center text-sm text-[#15A119]"
+                    className="mx-auto w-fit rounded-full bg-tc-brand-soft px-4 py-2 text-center text-[13px] leading-5 text-tc-brand-body"
                   >
                     {row.message.text ?? row.message.caption ?? 'System update'}
                   </div>
@@ -589,7 +589,7 @@ export default function MessagingPage() {
                   >
                     <div className={classNames('flex items-start', isOutgoing ? '' : 'gap-2')}>
                       {!isOutgoing ? (
-                        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#15A1191A] text-xs font-semibold text-slate-700">
+                        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tc-brand-deep text-xs font-semibold text-white">
                           {incomingSenderInitials}
                         </span>
                       ) : null}
@@ -597,16 +597,16 @@ export default function MessagingPage() {
                       <div className="flex max-w-[420px] flex-col items-start">
                         <div
                           className={classNames(
-                            'grid gap-2 rounded-2xl p-2',
+                            'grid gap-2 rounded-tc-lg p-2',
                             imageGridClassName,
-                            isOutgoing ? 'bg-[#A4F5A6]' : 'bg-[#F8FAFC]',
+                            isOutgoing ? 'bg-tc-brand-deep' : 'bg-tc-brand-mintSoft',
                           )}
                         >
                           {row.messages.map((message) => (
-                            <div key={message.id} data-read-message-id={message.category === 'direct' && message.sender && message.sender.id !== user?.id ? message.id : undefined} className="rounded-xl bg-white/80 p-1">
+                            <div key={message.id} data-read-message-id={message.category === 'direct' && message.sender && message.sender.id !== user?.id ? message.id : undefined} className="rounded-tc-md bg-white p-1">
                               <button
                                 type="button"
-                                className="block w-full overflow-hidden rounded-lg"
+                                className="block w-full overflow-hidden rounded-tc-sm"
                                 onClick={() =>
                                   setPreviewImage({
                                     src: message.imageUrl ?? '',
@@ -617,7 +617,7 @@ export default function MessagingPage() {
                                 <img
                                   src={message.imageUrl ?? ''}
                                   alt={message.caption ?? 'Message attachment'}
-                                  className="h-28 w-full rounded-lg object-cover sm:h-36"
+                                  className="h-28 w-full rounded-tc-sm object-cover sm:h-36"
                                 />
                               </button>
                             </div>
@@ -626,14 +626,14 @@ export default function MessagingPage() {
                         {groupedCaption ? (
                           <div
                             className={classNames(
-                              'mt-1 max-w-full rounded-2xl bg-[#A4F5A6] px-5 py-1.5 text-sm text-[#222222]',
-                              isOutgoing ? 'self-end text-right' : 'self-start text-left',
+                              'mt-1 max-w-full rounded-tc-lg px-4 py-3 text-sm leading-5 [overflow-wrap:anywhere]',
+                              isOutgoing ? 'self-end bg-tc-brand-deep text-right text-white' : 'self-start bg-tc-brand-mintSoft text-left text-tc-brand-ink',
                             )}
                           >
                             {groupedCaption}
                           </div>
                         ) : null}
-                        <div className="mt-1.5 pl-1 text-left text-xs text-[#222222BF]">
+                        <div className="mt-1 px-1.5 text-left text-xs text-tc-brand-muted">
                           {formatTime(lastMessage.createdAt)}
                         </div>
                       </div>
@@ -658,7 +658,7 @@ export default function MessagingPage() {
                 >
                   <div className={classNames('flex items-start', isOutgoing ? '' : 'gap-2')}>
                     {!isOutgoing ? (
-                      <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#15A1191A] text-xs font-semibold text-slate-700">
+                      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tc-brand-deep text-xs font-semibold text-white">
                         {incomingSenderInitials}
                       </span>
                     ) : null}
@@ -666,8 +666,8 @@ export default function MessagingPage() {
                     <div className="flex max-w-[420px] flex-col items-start">
                       <div
                         className={classNames(
-                          'rounded-2xl px-5 py-1.5 text-sm text-[#222222]',
-                          isOutgoing ? 'bg-[#A4F5A6]' : 'bg-[#F8FAFC]',
+                          'rounded-tc-lg px-4 py-3 text-sm leading-5 [overflow-wrap:anywhere]',
+                          isOutgoing ? 'bg-tc-brand-deep text-white' : 'bg-tc-brand-mintSoft text-tc-brand-ink',
                         )}
                       >
                         {message.hasAttachment && user ? (
@@ -680,7 +680,7 @@ export default function MessagingPage() {
                         ) : message.imageUrl ? (
                           <button
                             type="button"
-                            className="mb-2 block w-full overflow-hidden rounded-lg"
+                            className="mb-2 block w-full overflow-hidden rounded-tc-sm"
                             onClick={() =>
                               setPreviewImage({
                                 src: message.imageUrl ?? '',
@@ -691,13 +691,13 @@ export default function MessagingPage() {
                             <img
                               src={message.imageUrl}
                               alt={message.caption ?? 'Message attachment'}
-                              className="max-h-48 w-full rounded-lg object-cover"
+                              className="max-h-48 w-full rounded-tc-sm object-cover"
                             />
                           </button>
                         ) : null}
                         {message.text ?? message.caption ?? ''}
                       </div>
-                      <div className="mt-1.5 pl-1 text-left text-xs text-[#222222BF]">
+                      <div className="mt-1 px-1.5 text-left text-xs text-tc-brand-muted">
                         {formatTime(message.createdAt)}
                       </div>
                     </div>
@@ -707,18 +707,18 @@ export default function MessagingPage() {
             })}
           </div>
 
-          <div className="flex items-center gap-2 border-t border-[#F8FAFC] bg-white p-3">
+          <div className="flex items-center gap-2.5 rounded-b-tc-lg border-t border-tc-brand-line bg-white px-4 py-3 md:px-5 md:py-4">
             {import.meta.env.VITE_MESSAGE_ATTACHMENTS_ENABLED === 'true' && activeRoomId && user ? (
               <MessageImageComposer key={`${user.id}:${activeRoomId}`} disabled={isSending} send={sendImage} />
             ) : (
-              <button type="button" aria-label="Attach image" className="inline-flex h-10 w-10 items-center justify-center rounded-full" disabled title="Image attachments are unavailable">
+              <button type="button" aria-label="Attach image" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-tc-brand-control bg-white text-tc-brand-deep transition hover:bg-tc-brand-soft disabled:cursor-not-allowed disabled:opacity-50" disabled title="Image attachments are unavailable">
                 <Paperclip size={20} />
               </button>
             )}
-            <div className="flex flex-1 items-center rounded-xl border border-[#E2E8F0] px-3">
+            <div className="flex min-w-0 flex-1 items-center rounded-full border border-tc-brand-control bg-white px-4 focus-within:border-tc-brand-deep focus-within:ring-2 focus-within:ring-tc-brand-mint">
               <input
                 type="text"
-                className="h-11 w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+                className="h-[42px] w-full bg-transparent text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted"
                 placeholder="Type your message..."
                 aria-label="Message"
                 maxLength={4000}
@@ -734,7 +734,7 @@ export default function MessagingPage() {
             </div>
             <Button
               aria-label="Send message"
-              className="h-11 w-11 rounded-xl p-0 bg-[#15A119] hover:bg-[#15A119E0]"
+              className="h-11 w-11 shrink-0 !rounded-full p-0 !bg-tc-brand-deep hover:!bg-tc-brand-hover"
               onClick={() => {
                 void handleSendMessage()
               }}
@@ -748,7 +748,7 @@ export default function MessagingPage() {
 
       {previewImage ? (
         <div
-          className="fixed inset-0 z-[120] flex items-center justify-center bg-[#22222299] p-4 backdrop-blur-[16px]"
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-tc-brand-ink/55 p-4 backdrop-blur-[16px]"
           onClick={() => setPreviewImage(null)}
         >
           <div
@@ -757,7 +757,7 @@ export default function MessagingPage() {
           >
             <button
               type="button"
-              className="absolute right-2 top-2 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white transition hover:bg-black/60"
+              className="absolute right-2 top-2 inline-flex h-11 w-11 items-center justify-center rounded-full bg-tc-brand-deep text-white transition hover:bg-tc-brand-hover"
               onClick={() => setPreviewImage(null)}
             >
               <X size={18} />
@@ -765,13 +765,13 @@ export default function MessagingPage() {
             <img
               src={previewImage.src}
               alt={previewImage.alt}
-              className="max-h-[85vh] w-full rounded-2xl object-contain"
+              className="max-h-[85vh] w-full rounded-tc-xl object-contain"
             />
           </div>
         </div>
       ) : null}
 
-      {error ? <p className="text-sm text-rose-600">{error}</p> : null}
+      {error ? <p className="text-sm text-tc-brand-danger">{error}</p> : null}
     </div>
   )
 }
