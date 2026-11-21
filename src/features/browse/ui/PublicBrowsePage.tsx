@@ -165,33 +165,33 @@ export default function PublicBrowsePage() {
         postItemTo={isAuthenticated ? '/listings' : '/signup?intent=donor'}
       />
 
-      <main className="mx-auto w-full max-w-7xl flex-1 px-6 pb-24 pt-32">
+      <main className="mx-auto w-full max-w-[1184px] flex-1 px-4 pb-24 pt-32 sm:px-6">
         <header className="max-w-2xl">
-          <h1 className="text-4xl font-bold tracking-[-0.04em] text-tc-brand-deep sm:text-5xl">
+          <h1 className="text-4xl font-semibold tracking-[-0.03em] text-tc-brand-ink sm:text-5xl sm:leading-[54px]">
             {postcode.trim() ? 'Free items near your search area' : 'Free items to reuse'}
           </h1>
-          <p className="mt-4 text-lg leading-8 text-slate-600">
+          <p className="mt-4 text-base leading-[26px] text-tc-brand-body">
             Everything here is being given away for free by neighbours. Browse without an
             account — you only need to sign up when you want to request something.
           </p>
         </header>
 
-        <div className="mt-8 flex flex-wrap gap-3">
+        <div className="mt-6 flex flex-wrap items-center gap-3">
           <div className="relative min-w-[260px] flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-tc-brand-muted" size={20} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-tc-brand-muted" size={20} />
             <input
               type="text"
               aria-label="Search item names or categories"
               placeholder="Search item names or categories"
               maxLength={120}
-              className="h-12 w-full rounded-2xl border border-tc-brand-control bg-white pl-10 pr-3 text-sm text-slate-900 outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-4 focus:ring-tc-brand-deep/10 sm:text-base"
+              className="h-[52px] w-full rounded-full border border-tc-brand-control bg-white pl-12 pr-5 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint sm:text-base"
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
             />
           </div>
           <button
             type="button"
-            className="inline-flex h-12 items-center gap-2 rounded-2xl border border-tc-brand-control bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            className="inline-flex h-11 items-center gap-2 rounded-full border border-tc-brand-control bg-white px-5 text-sm font-semibold text-tc-brand-ink transition hover:bg-tc-brand-soft"
             onClick={() => setIsFiltersOpen((open) => !open)}
           >
             {isFiltersOpen ? <X size={18} /> : <SlidersHorizontal size={18} />}
@@ -208,10 +208,10 @@ export default function PublicBrowsePage() {
                 key={opt.value}
                 type="button"
                 onClick={() => setCategory(opt.value)}
-                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition sm:text-sm sm:px-4 sm:py-2 ${
+                className={`inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition sm:text-sm sm:px-4 sm:py-2 ${
                   isSelected
-                    ? 'bg-tc-brand-deep text-white shadow-sm'
-                    : 'border border-tc-brand-control bg-white text-tc-brand-deep hover:bg-tc-brand-haze'
+                    ? 'border-tc-brand-deep bg-tc-brand-deep font-semibold text-white'
+                    : 'border-tc-brand-control bg-white text-tc-brand-deep hover:bg-tc-brand-soft'
                 }`}
               >
                 <span>{opt.emoji}</span>
@@ -222,22 +222,22 @@ export default function PublicBrowsePage() {
         </div>
 
         {isFiltersOpen ? (
-          <div className="mt-4 grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 md:grid-cols-2">
-            <label className="space-y-2 text-sm">
-              <span className="font-semibold text-slate-800">Category</span>
+          <div className="mt-4 grid gap-4 rounded-tc-lg border border-tc-brand-line bg-white p-5 md:grid-cols-2">
+            <label className="space-y-1.5 text-sm">
+              <span className="font-medium text-tc-brand-ink">Category</span>
               <CustomSelect
                 value={category}
                 options={CATEGORY_OPTIONS}
                 onChange={setCategory}
-                buttonClassName="h-11 w-full rounded-xl border border-tc-brand-control bg-white px-3 text-sm"
+                buttonClassName="h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink"
               />
             </label>
-            <label className="space-y-2 text-sm">
-              <span className="font-semibold text-slate-800">Postcode or Area</span>
+            <label className="space-y-1.5 text-sm">
+              <span className="font-medium text-tc-brand-ink">Postcode or Area</span>
               <input
                 type="text"
                 placeholder="e.g. IG11 7FR, Hackney, Stratford"
-                className="h-11 w-full rounded-xl border border-tc-brand-control bg-white px-3 text-sm outline-none focus:border-tc-brand-deep focus:ring-4 focus:ring-tc-brand-deep/10"
+                className="h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
                 value={locationInput}
                 onChange={(event) => setLocationInput(event.target.value)}
               />
@@ -245,11 +245,11 @@ export default function PublicBrowsePage() {
           </div>
         ) : null}
 
-        <p className={error ? 'mt-6 min-h-10 text-sm text-rose-600' : 'mt-6 min-h-10 text-sm text-slate-500'} role={error ? 'alert' : 'status'}>
+        <p className={error ? 'mt-6 min-h-10 text-sm text-tc-brand-danger' : 'mt-6 min-h-10 text-sm text-tc-brand-body'} role={error ? 'alert' : 'status'}>
           {resultLabel}
         </p>
         {error ? (
-          <button type="button" className="min-h-11 text-sm underline" disabled={isLoading} onClick={() => setAttempt(value => value + 1)}>
+          <button type="button" className="min-h-11 text-sm font-semibold text-tc-brand-deep underline underline-offset-4 hover:text-black disabled:cursor-not-allowed disabled:opacity-50" disabled={isLoading} onClick={() => setAttempt(value => value + 1)}>
             Retry loading items
           </button>
         ) : null}
@@ -258,9 +258,9 @@ export default function PublicBrowsePage() {
           {!isLoading && items.map((item) => (
                 <article
                   key={item.id}
-                  className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-tc-brand-deep/30 hover:shadow-md"
+                  className="group flex flex-col overflow-hidden rounded-tc-lg border border-tc-brand-line bg-white transition-all duration-200 hover:-translate-y-1 hover:border-tc-brand-control hover:shadow-tc-card"
                 >
-                  <div className="relative h-56 w-full overflow-hidden bg-slate-100">
+                  <div className="relative h-56 w-full overflow-hidden bg-tc-brand-soft">
                     {item.image ? (
                       <img
                         src={item.image.url}
@@ -274,35 +274,35 @@ export default function PublicBrowsePage() {
                       </div>
                     )}
                     <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-                      <span className="rounded-full bg-white/95 px-2.5 py-0.5 text-xs font-bold text-tc-brand-deep shadow-sm backdrop-blur-sm">
+                      <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-tc-brand-deep">
                         {item.category}
                       </span>
-                      <span className="rounded-full bg-tc-brand-deep px-2.5 py-0.5 text-xs font-medium text-white shadow-sm">
+                      <span className="rounded-full bg-tc-brand-deep px-2.5 py-1 text-xs font-semibold text-white">
                         {item.condition}
                       </span>
                     </div>
 
                   </div>
 
-                  <div className="flex flex-1 flex-col p-5">
-                    <h2 className="line-clamp-1 text-base font-bold text-slate-900 group-hover:text-tc-brand-deep">
+                  <div className="flex flex-1 flex-col p-4">
+                    <h2 className="line-clamp-1 text-base font-semibold text-tc-brand-ink">
                       {item.title}
                     </h2>
 
-                    <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
+                    <div className="mt-2 flex items-center gap-1.5 text-[13px] leading-5 text-tc-brand-muted">
                       <MapPin className="h-3.5 w-3.5 text-tc-brand-muted" />
                       <span>{item.locationLabel}</span>
                       {item.distanceKm ? <span>· {item.distanceKm} km away</span> : null}
                     </div>
 
-                    <p className="mt-2 text-xs text-slate-500">
-                      Given by <span className="font-semibold text-slate-700">{item.ownerName}</span>
+                    <p className="mt-1 text-[13px] leading-5 text-tc-brand-muted">
+                      Given by <span className="font-semibold text-tc-brand-ink">{item.ownerName}</span>
                     </p>
 
                     <div className="mt-auto pt-4">
                       <Button
                         variant="secondary"
-                        className="w-full justify-center gap-2 rounded-xl border border-tc-brand-control bg-tc-brand-surface text-sm font-bold text-tc-brand-deep transition group-hover:border-tc-brand-deep group-hover:bg-tc-brand-hover group-hover:text-white"
+                        className="w-full justify-center gap-2 text-sm font-semibold"
                         onClick={() => setSelectedItem(item)}
                       >
                         <Eye className="h-4 w-4" />
@@ -319,7 +319,7 @@ export default function PublicBrowsePage() {
             <Button variant="secondary" disabled={isLoading || page === 1} onClick={() => setPageState({ filterKey, page: page - 1 })}>
               Previous page
             </Button>
-            <span className="text-sm text-slate-600">Page {page}</span>
+            <span className="text-sm text-tc-brand-body">Page {page}</span>
             <Button variant="secondary" disabled={isLoading || !hasNextPage} onClick={() => setPageState({ filterKey, page: page + 1 })}>
               Next page
             </Button>
@@ -335,17 +335,17 @@ export default function PublicBrowsePage() {
         {selectedItem ? (
           <div className="flex flex-col">
             {selectedItem.image ? (
-              <div className="relative h-64 w-full bg-slate-100 sm:h-72">
+              <div className="relative h-64 w-full bg-tc-brand-soft sm:h-72">
                 <img
                   src={selectedItem.image.url}
                   alt={selectedItem.image.altText ?? selectedItem.title}
-                  className="h-full w-full rounded-t-2xl object-cover"
+                  className="h-full w-full rounded-t-tc-xl object-cover"
                 />
                 <div className="absolute left-4 top-4 flex gap-2">
-                  <span className="rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-tc-brand-deep shadow">
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-tc-brand-deep">
                     {selectedItem.category}
                   </span>
-                  <span className="rounded-full bg-tc-brand-deep px-3 py-1 text-xs font-medium text-white shadow">
+                  <span className="rounded-full bg-tc-brand-deep px-3 py-1 text-xs font-semibold text-white">
                     {selectedItem.condition}
                   </span>
                 </div>
@@ -353,10 +353,10 @@ export default function PublicBrowsePage() {
             ) : null}
             <div className="space-y-4 p-6 sm:p-7">
               <div>
-                <h2 className="text-2xl font-bold text-slate-900">{selectedItem.title}</h2>
-                <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                <h2 className="text-2xl font-semibold tracking-[-0.02em] text-tc-brand-ink">{selectedItem.title}</h2>
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-tc-brand-body">
                   <div className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4 text-tc-brand-link" />
+                    <MapPin className="h-4 w-4 text-tc-brand-muted" />
                     <span>{selectedItem.locationLabel}</span>
                   </div>
                   <span>·</span>
@@ -364,24 +364,24 @@ export default function PublicBrowsePage() {
                   {selectedItem.pickupOption ? (
                     <>
                       <span>·</span>
-                      <span className="text-slate-500">{selectedItem.pickupOption}</span>
+                      <span className="text-tc-brand-muted">{selectedItem.pickupOption}</span>
                     </>
                   ) : null}
                 </div>
               </div>
 
               {selectedItem.estimatedCo2SavedKg ? (
-                <div className="flex items-center gap-2 rounded-xl bg-tc-brand-haze px-3.5 py-2.5 text-xs font-medium text-tc-brand-deep">
-                  <Leaf className="h-4 w-4 text-emerald-600" />
+                <div className="flex items-center gap-2 rounded-tc-md border border-tc-brand-mintLine bg-tc-brand-mintSoft px-3.5 py-2.5 text-xs font-medium text-tc-brand-deep">
+                  <Leaf className="h-4 w-4 text-tc-brand-deep" />
                   <span>
                     ~{selectedItem.estimatedCo2SavedKg.toFixed(1)} kg CO₂e potential reuse estimate
                   </span>
                 </div>
               ) : null}
 
-              <div className="rounded-xl border border-tc-brand-deep/15 bg-tc-brand-haze p-4 text-sm text-slate-700">
-                <p className="font-semibold text-tc-brand-deep">Ready to request or message the owner?</p>
-                <p className="mt-1 text-xs text-slate-600 leading-relaxed">
+              <div className="rounded-tc-md bg-tc-brand-soft p-4 text-sm text-tc-brand-body">
+                <p className="font-semibold text-tc-brand-ink">Ready to request or message the owner?</p>
+                <p className="mt-1 text-[13px] leading-5 text-tc-brand-body">
                   Open the full listing to check availability and request this item.
                 </p>
               </div>
@@ -389,7 +389,7 @@ export default function PublicBrowsePage() {
               <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                 <Link
                   to={`/items/${encodeURIComponent(selectedItem.id)}`}
-                  className="inline-flex flex-1 items-center justify-center rounded-full bg-tc-brand-deep px-5 py-3 text-sm font-bold text-white no-underline shadow transition hover:bg-tc-brand-hover"
+                  className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-tc-brand-deep px-5 py-3 text-sm font-semibold text-white no-underline transition hover:bg-tc-brand-hover"
                 >
                   View full listing
                 </Link>

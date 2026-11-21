@@ -65,9 +65,17 @@ const show = (ref, file) => {
 
 // `variant` picks one of a shared part's looks (for example Button), so it counts as styling.
 const STYLE_NAME = /(^class$|^cls$|class(name)?s?$|classes$|^variant$)/i
-const isStyleName = (name) => Boolean(name) && STYLE_NAME.test(name)
+// Some files keep class strings under other names (for example `tierColor`).
+// tools/restyle-guard.styles.json lists those names per file, so that they
+// count as styling in that file only.
+const extraStyleNames = existsSync('tools/restyle-guard.styles.json')
+  ? JSON.parse(readFileSync('tools/restyle-guard.styles.json', 'utf8'))
+  : {}
+let currentExtra = new Set()
+const isStyleName = (name) => Boolean(name) && (STYLE_NAME.test(name) || currentExtra.has(name))
 
 function normalise(source, fileName) {
+  currentExtra = new Set(extraStyleNames[fileName] ?? [])
   const file = ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
   const edits = []
   const blank = (node) => {

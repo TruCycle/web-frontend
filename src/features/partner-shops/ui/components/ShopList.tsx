@@ -18,19 +18,19 @@ export function ShopList({
     onSelectShop,
 }: ShopListProps) {
     return (
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-tc-lg border border-tc-brand-line bg-white p-5">
             <div className="space-y-3">
-                <p className="text-sm text-slate-500">
+                <p className="text-sm leading-5 text-tc-brand-body">
                     Select a shop to preview details and confirm your preferred shop
                 </p>
-                <div className="h-px bg-slate-200" />
+                <div className="h-px bg-tc-brand-line" />
             </div>
 
             <div className="relative mt-4">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-tc-brand-muted" size={18} />
                 <input
                     type="text"
-                    className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm outline-none placeholder:text-slate-400 focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+                    className="h-11 w-full rounded-full border border-tc-brand-control bg-white pl-10 pr-4 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
                     placeholder="Search shops by name, location, or postcode"
                     value={searchQuery}
                     onChange={(e) => onSearchChange(e.target.value)}
@@ -42,26 +42,26 @@ export function ShopList({
                     <button
                         key={shop.id}
                         className={classNames(
-                            'w-full rounded-xl border p-3 text-left transition',
+                            'w-full rounded-tc-md border p-3 text-left transition',
                             selectedShopId === shop.id
-                                ? 'border-lime-300 bg-lime-50'
-                                : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
+                                ? 'border-tc-brand-mintLine bg-tc-brand-mintSoft'
+                                : 'border-tc-brand-line bg-white hover:border-tc-brand-control hover:bg-tc-brand-soft',
                         )}
                         onClick={() => onSelectShop(shop.id)}
                     >
                         <div className="flex items-start justify-between gap-3">
                             <div>
-                                <h3 className="font-semibold text-slate-900">{shop.name}</h3>
-                                <p className="mt-1 text-sm text-slate-500">{shop.address}</p>
+                                <h3 className="font-semibold text-tc-brand-ink">{shop.name}</h3>
+                                <p className="mt-1 text-sm leading-5 text-tc-brand-body">{shop.address}</p>
                             </div>
-                            <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">
+                            <span className="shrink-0 rounded-full border border-tc-brand-line bg-white px-2.5 py-1 text-xs font-semibold text-tc-brand-body">
                                 {shop.distance}
                             </span>
                         </div>
                     </button>
                 ))}
                 {shops.length === 0 ? (
-                    <div className="rounded-xl border border-dashed border-slate-300 p-5 text-center text-sm text-slate-500">
+                    <div className="rounded-tc-md border border-dashed border-tc-brand-control bg-white px-4 py-3.5 text-sm text-tc-brand-body">
                         No shops found matching your search.
                     </div>
                 ) : null}

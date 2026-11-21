@@ -1,0 +1,22 @@
+{
+  "src/features/gamification/ui/components/IndividualLeaderboard.tsx": [
+    "tierColor"
+  ],
+  "src/features/gamification/ui/components/LevelTrack.tsx": [
+    "active",
+    "inactive",
+    "base"
+  ],
+  "src/features/gamification/ui/components/TierBadge.tsx": [
+    "TIER_STYLES"
+  ],
+  "src/features/gamification/ui/components/BadgeCard.tsx": [
+    "ICON_GRADIENTS"
+  ],
+  "src/features/home/ui/Dashboard.tsx": [
+    "statColor"
+  ],
+  "src/features/listings/ui/components/ListingOffcanvas.tsx": [
+    "statusTone"
+  ]
+}
