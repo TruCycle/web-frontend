@@ -84,15 +84,15 @@ export default function PartnerSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Partner Settings</h1>
-          <p className="text-slate-500">Manage your partner shops and create new pickup points.</p>
+          <h1 className="text-[30px] font-semibold leading-9 tracking-[-0.02em] text-tc-brand-ink">Partner Settings</h1>
+          <p className="mt-1 text-base leading-6 text-tc-brand-body">Manage your partner shops and create new pickup points.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="secondary"
-            className="h-11 w-11 rounded-xl p-0"
+            className="h-11 w-11 p-0"
             onClick={() => void reload()}
             aria-label="Refresh shops"
             title="Refresh shops"
@@ -100,8 +100,8 @@ export default function PartnerSettingsPage() {
             <RefreshCw size={18} />
           </Button>
           <Button
-            variant="highlight"
-            className="h-11 rounded-xl px-5 text-sm"
+            variant="primary"
+            className="h-11 px-5 text-sm font-semibold"
             onClick={() => setIsCreatePanelOpen(true)}
           >
             Create New Shop
@@ -110,21 +110,21 @@ export default function PartnerSettingsPage() {
       </div>
 
       {error ? (
-        <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <div className="flex items-center gap-2 rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft px-4 py-3 text-sm text-tc-brand-danger">
           <AlertCircle size={16} />
           {error}
         </div>
       ) : null}
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-slate-900">Your shops</h2>
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold leading-6 text-tc-brand-ink">Your shops</h2>
 
         {isLoading ? (
-          <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
+          <div className="rounded-tc-lg border border-tc-brand-line bg-white p-6 text-sm text-tc-brand-body">
             Loading partner shops...
           </div>
         ) : shops.length === 0 ? (
-          <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
+          <div className="rounded-tc-lg border border-dashed border-tc-brand-control bg-white p-8 text-center text-sm text-tc-brand-body">
             No shops yet. Create your first partner shop above.
           </div>
         ) : (
@@ -132,30 +132,30 @@ export default function PartnerSettingsPage() {
             {shops.map((shop) => (
               <article
                 key={shop.id}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                className="rounded-tc-lg border border-tc-brand-line bg-white p-6"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-900">{shop.name}</h3>
-                    <p className="text-xs text-slate-500">{shop.id}</p>
+                    <h3 className="text-base font-semibold leading-6 text-tc-brand-ink">{shop.name}</h3>
+                    <p className="break-all text-xs leading-4 text-tc-brand-muted">{shop.id}</p>
                   </div>
                   <span
-                    className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                    className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
                       shop.active
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-slate-200 text-slate-600'
+                        ? 'bg-tc-brand-deep text-white'
+                        : 'bg-tc-brand-soft text-tc-brand-body'
                     }`}
                   >
                     {shop.active ? 'Active' : 'Inactive'}
                   </span>
                 </div>
 
-                <div className="mt-4 space-y-2 text-sm text-slate-600">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Location</p>
-                      <p className="mt-1 inline-flex items-start gap-2 text-sm text-slate-700">
-                        <MapPin size={15} className="mt-0.5 shrink-0" />
+                <div className="mt-5 space-y-4 text-sm text-tc-brand-ink">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <section className="min-w-0">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-tc-brand-muted">Location</p>
+                      <p className="mt-1 inline-flex items-start gap-2 text-sm leading-5 text-tc-brand-ink">
+                        <MapPin size={15} className="mt-0.5 shrink-0 text-tc-brand-muted" />
                         <span>
                           {shop.addressLine}
                           <br />
@@ -164,20 +164,20 @@ export default function PartnerSettingsPage() {
                       </p>
                     </section>
 
-                    <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Contact</p>
-                      <p className="mt-1 inline-flex items-center gap-2 text-sm text-slate-700">
-                        <Phone size={15} className="shrink-0" />
+                    <section className="min-w-0">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-tc-brand-muted">Contact</p>
+                      <p className="mt-1 inline-flex items-center gap-2 text-sm leading-5 text-tc-brand-ink">
+                        <Phone size={15} className="shrink-0 text-tc-brand-muted" />
                         {shop.phoneNumber ?? 'No phone number set'}
                       </p>
                     </section>
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Opening Hours</p>
-                      <p className="mt-1 inline-flex items-center gap-2 text-sm text-slate-700">
-                        <Clock3 size={15} className="shrink-0" />
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <section className="min-w-0">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-tc-brand-muted">Opening Hours</p>
+                      <p className="mt-1 inline-flex items-center gap-2 text-sm leading-5 text-tc-brand-ink">
+                        <Clock3 size={15} className="shrink-0 text-tc-brand-muted" />
                         {formatOpeningHours(shop)}
                       </p>
                       <div className="mt-2 flex flex-wrap gap-1.5">
@@ -185,57 +185,57 @@ export default function PartnerSettingsPage() {
                           shop.openingHours.days.map((day) => (
                             <span
                               key={`${shop.id}-${day}`}
-                              className="rounded-md border border-lime-200 bg-lime-50 px-2 py-0.5 text-xs font-medium text-lime-800"
+                              className="rounded-tc-sm bg-tc-brand-soft px-2 py-0.5 text-xs font-medium text-tc-brand-body"
                             >
                               {day}
                             </span>
                           ))
                         ) : (
-                          <span className="text-xs text-slate-500">No days configured</span>
+                          <span className="text-xs leading-4 text-tc-brand-muted">No days configured</span>
                         )}
                       </div>
                     </section>
 
-                    <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Categories</p>
+                    <section className="min-w-0">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-tc-brand-muted">Categories</p>
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {shop.acceptableCategories.length > 0 ? (
                           shop.acceptableCategories.map((category) => (
                             <span
                               key={`${shop.id}-${category}`}
-                              className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-800"
+                              className="inline-flex items-center gap-1 rounded-full bg-tc-brand-mintSoft px-2.5 py-1 text-xs font-semibold text-tc-brand-deep"
                             >
                               <Store size={12} />
                               {formatCategoryLabel(category)}
                             </span>
                           ))
                         ) : (
-                          <span className="text-xs text-slate-500">No categories configured</span>
+                          <span className="text-xs leading-4 text-tc-brand-muted">No categories configured</span>
                         )}
                       </div>
                     </section>
                   </div>
 
-                  <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Operational Notes</p>
-                    <p className="mt-1 text-sm leading-relaxed text-slate-700">
+                  <section className="min-w-0">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-tc-brand-muted">Operational Notes</p>
+                    <p className="mt-1 text-sm leading-5 text-tc-brand-ink">
                       {shop.operationalNotes ?? 'No operational notes provided.'}
                     </p>
                   </section>
 
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-5 flex flex-wrap gap-2.5 border-t border-tc-brand-line pt-4">
                   <Button
                     variant="secondary"
-                    className="h-10 rounded-xl px-4 text-sm"
+                    className="h-11 px-5 text-sm font-semibold"
                     onClick={() => setEditingShop(shop)}
                   >
                     Edit details
                   </Button>
                   <Button
                     variant={shop.active ? 'danger' : 'primary'}
-                    className="h-10 rounded-xl px-4 text-sm"
+                    className="h-11 px-5 text-sm font-semibold"
                     disabled={isSaving}
                     onClick={() => void handleToggleShop(shop)}
                   >

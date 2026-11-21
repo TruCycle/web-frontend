@@ -44,20 +44,20 @@ export function PartnerShopOffcanvas({
   return createPortal(
     <>
       <div
-        className="fixed inset-0 z-[180] bg-[#E2E8F080]"
+        className="fixed inset-0 z-[180] bg-tc-brand-ink/55"
         onClick={onClose}
         aria-hidden
       />
-      <aside className="fixed right-10 top-[72px] z-[181] h-[90vh] w-full max-w-[720px] rounded-lg bg-white p-6 shadow-[0px_4px_20px_0px_#E2E8F080]">
+      <aside className="fixed right-2 top-[72px] z-[181] h-[calc(100dvh-88px)] w-[calc(100vw-1rem)] max-w-[720px] sm:right-10 sm:h-[90vh] sm:w-full sm:max-w-[min(720px,calc(100vw-5rem))] rounded-tc-xl bg-white p-4 shadow-tc-dialog sm:p-6">
         <div className="flex h-full flex-col gap-5">
-          <header className="flex items-start justify-between">
+          <header className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-lg font-bold text-[#121212]">{title}</h2>
-              <p className="max-w-[58ch] text-md text-[#12121299]">{subtitle}</p>
+              <h2 className="text-xl font-semibold leading-7 tracking-[-0.015em] text-tc-brand-ink">{title}</h2>
+              <p className="mt-1 max-w-[58ch] text-sm leading-5 text-tc-brand-body">{subtitle}</p>
             </div>
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#222222BF] hover:bg-slate-200"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tc-brand-soft text-tc-brand-ink transition hover:bg-tc-brand-line"
               onClick={onClose}
               aria-label="Close partner shop panel"
             >

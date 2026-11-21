@@ -180,7 +180,7 @@ export default function PartnerOnboardPage() {
         <label className={authFieldClassName}>
           <span className={authLabelClassName}>Operational notes (optional)</span>
           <textarea
-            className={classNames(authInputClassName, 'h-auto min-h-[110px] resize-y py-3')}
+            className={classNames(authInputClassName, 'h-auto min-h-[96px] resize-y py-3')}
             name="operationalNotes"
             onChange={(event) => onInputChange('operationalNotes', event)}
             placeholder="Share collection instructions for donors or staff"

@@ -66,20 +66,20 @@ const PRESETS = [
 ]
 
 function pulseClass(s: StatusPulse) {
-  if (s === 'running') return 'bg-amber-400 animate-ping'
-  if (s === 'success') return 'bg-emerald-500 animate-pulse'
-  if (s === 'error')   return 'bg-rose-500 animate-pulse'
-  if (s === 'warn')    return 'bg-amber-400 animate-pulse'
-  return 'bg-slate-300'
+  if (s === 'running') return 'bg-tc-brand-track animate-ping'
+  if (s === 'success') return 'bg-tc-brand-mint animate-pulse'
+  if (s === 'error')   return 'bg-tc-brand-danger animate-pulse'
+  if (s === 'warn')    return 'bg-tc-brand-track animate-pulse'
+  return 'bg-tc-brand-track'
 }
 
 function conditionStyle(c: string) {
   const lc = c.toLowerCase()
   if (lc.includes('excellent') || lc.includes('good'))
-    return { cls: 'bg-emerald-50 text-emerald-700 border-emerald-200', label: 'Resellable' }
+    return { cls: 'bg-tc-brand-mintSoft text-tc-brand-deep border-tc-brand-mintLine', label: 'Resellable' }
   if (lc.includes('fair'))
-    return { cls: 'bg-amber-50 text-amber-700 border-amber-200', label: 'Repairable' }
-  return   { cls: 'bg-rose-50 text-rose-700 border-rose-200', label: 'Downcycle' }
+    return { cls: 'bg-tc-brand-soft text-tc-brand-body border-tc-brand-line', label: 'Repairable' }
+  return   { cls: 'bg-tc-brand-dangerSoft text-tc-brand-danger border-tc-brand-dangerLine', label: 'Downcycle' }
 }
 
 // ── Vision tool ────────────────────────────────────────────────────────────────
@@ -187,23 +187,23 @@ function VisionTool() {
   const cStyle     = data ? conditionStyle(condition) : null
 
   return (
-    <div className="min-h-screen bg-tc-app-canvas">
+    <div className="min-h-screen bg-tc-brand-haze">
 
       {/* ── Sticky header ── */}
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 px-6 py-4 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-tc-brand-line bg-white/80 px-6 py-4 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D3B24] shadow-sm">
-              <Cpu size={20} className="text-[#A4F5A6]" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-tc-md bg-tc-brand-deep">
+              <Cpu size={20} className="text-tc-brand-mint" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold tracking-tight text-slate-900">TruCycle Vision</h1>
-                <span className="rounded-full bg-[#0D3B24]/8 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#0D3B24]">
+                <h1 className="text-lg font-semibold tracking-tight text-tc-brand-ink">TruCycle Vision</h1>
+                <span className="rounded-full bg-tc-brand-mintSoft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-tc-brand-deep">
                   Internal
                 </span>
               </div>
-              <p className="text-xs text-slate-400">Evaluation Sandbox · Llama 3.2 Vision · Not indexed</p>
+              <p className="text-xs leading-4 text-tc-brand-muted">Evaluation Sandbox · Llama 3.2 Vision · Not indexed</p>
             </div>
           </div>
 
@@ -215,17 +215,17 @@ function VisionTool() {
 
           {/* ── Left panel ── */}
           <div className="space-y-5 lg:col-span-5">
-            <div className="rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="rounded-tc-lg border border-tc-brand-line bg-white p-6">
 
-              <h2 className="mb-5 text-base font-semibold text-slate-800">Upload &amp; Configure</h2>
+              <h2 className="mb-5 text-lg font-semibold leading-6 text-tc-brand-ink">Upload &amp; Configure</h2>
 
               {/* Drop zone */}
               <div className="mb-5">
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-tc-brand-muted">
                   Garment / Item Photo
                 </label>
                 <div
-                  className="relative flex min-h-[180px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 transition-all hover:border-[#0D3B24]/30 hover:bg-[#0D3B24]/3"
+                  className="relative flex min-h-[180px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-tc-lg border-2 border-dashed border-tc-brand-control bg-tc-brand-haze transition-all hover:border-tc-brand-deep hover:bg-tc-brand-mintSoft"
                   onDrop={handleDrop}
                   onDragOver={(e) => e.preventDefault()}
                   onDragEnter={(e) => e.preventDefault()}
@@ -237,14 +237,14 @@ function VisionTool() {
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); clearFile() }}
-                        className="absolute right-2 top-2 z-10 rounded-full border border-slate-200 bg-white p-1.5 text-slate-400 shadow-sm transition-colors hover:text-rose-500"
+                        className="absolute right-2 top-2 z-10 rounded-full border border-tc-brand-line bg-white p-1.5 text-tc-brand-body shadow-tc-card transition-colors hover:text-tc-brand-danger"
                       >
                         <X size={16} />
                       </button>
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); document.getElementById('tc-file-input')?.click() }}
-                        className="relative z-10 rounded-full border border-white/60 bg-white/80 px-4 py-1.5 text-sm font-medium text-slate-700 shadow backdrop-blur"
+                        className="relative z-10 rounded-full border border-tc-brand-control bg-white/90 px-4 py-1.5 text-sm font-semibold text-tc-brand-deep shadow-tc-card backdrop-blur"
                       >
                         <RefreshCw size={13} className="mr-1.5 inline" />
                         Change
@@ -252,15 +252,15 @@ function VisionTool() {
                     </>
                   ) : (
                     <div className="pointer-events-none space-y-2 text-center">
-                      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400">
+                      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-tc-brand-line bg-white text-tc-brand-ink">
                         <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                       </div>
-                      <p className="text-sm text-slate-500">
-                        <span className="font-semibold text-[#0D3B24]">Click to upload</span> or drag and drop
+                      <p className="text-sm leading-5 text-tc-brand-body">
+                        <span className="font-semibold text-tc-brand-ink">Click to upload</span> or drag and drop
                       </p>
-                      <p className="text-xs text-slate-400">Auto-compressed in-browser · Max ~3 MB raw</p>
+                      <p className="text-xs leading-4 text-tc-brand-muted">Auto-compressed in-browser · Max ~3 MB raw</p>
                     </div>
                   )}
                   <input
@@ -274,11 +274,11 @@ function VisionTool() {
 
                 {/* Size badge */}
                 {rawFile && (
-                  <div className="mt-2 flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-500">
-                    <span>Raw: <span className="font-semibold text-slate-700">{rawSize}</span></span>
+                  <div className="mt-2 flex items-center justify-between rounded-tc-sm bg-tc-brand-soft px-3 py-2 text-xs font-medium text-tc-brand-body">
+                    <span>Raw: <span className="font-semibold text-tc-brand-ink">{rawSize}</span></span>
                     {cmpSize
-                      ? <span className="font-semibold text-emerald-600">Compressed: {cmpSize} ✓</span>
-                      : <span className="animate-pulse font-semibold text-amber-500">Compressing…</span>}
+                      ? <span className="font-semibold text-tc-brand-ink">Compressed: {cmpSize} ✓</span>
+                      : <span className="animate-pulse font-semibold text-tc-brand-body">Compressing…</span>}
                   </div>
                 )}
               </div>
@@ -286,28 +286,28 @@ function VisionTool() {
               {/* Prompt */}
               <div className="mb-5">
                 <div className="mb-1.5 flex items-center justify-between">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Analysis Prompt</label>
-                  <span className="text-[10px] font-semibold text-slate-400">Llama-3.2 Vision</span>
+                  <label className="text-xs font-semibold uppercase tracking-wider text-tc-brand-muted">Analysis Prompt</label>
+                  <span className="text-xs font-semibold text-tc-brand-muted">Llama-3.2 Vision</span>
                 </div>
                 <textarea
                   rows={3}
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Describe what attributes you are looking for…"
-                  className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-[#0D3B24]/40 focus:ring-2 focus:ring-[#0D3B24]/8"
+                  className="w-full resize-none rounded-tc-md border border-tc-brand-control bg-white px-3.5 py-3 text-sm text-tc-brand-ink outline-none transition placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
                 />
               </div>
 
               {/* Presets */}
               <div className="mb-6">
-                <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-400">Quick Presets</span>
-                <div className="flex flex-wrap gap-1.5">
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-tc-brand-muted">Quick Presets</span>
+                <div className="flex flex-wrap gap-2">
                   {PRESETS.map((p) => (
                     <button
                       key={p.label}
                       type="button"
                       onClick={() => { setPrompt(p.prompt); toastSuccess('Prompt loaded', `${p.label} template applied`) }}
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:text-slate-900"
+                      className="min-h-11 rounded-full border border-tc-brand-control bg-white px-4 py-2 text-sm font-semibold text-tc-brand-deep transition hover:bg-tc-brand-soft"
                     >
                       {p.icon} {p.label}
                     </button>
@@ -320,7 +320,7 @@ function VisionTool() {
                 type="button"
                 disabled={!blob || loading}
                 onClick={() => void handleSubmit()}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-tc-action-primary py-3.5 text-sm font-bold text-tc-action-primaryText shadow-sm transition hover:bg-tc-action-primaryHover disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex w-full items-center justify-center gap-2 min-h-12 rounded-tc-md bg-tc-brand-deep px-4 py-3 text-sm font-semibold text-white transition hover:bg-tc-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading
                   ? <><Loader2 size={16} className="animate-spin" />Analysing…</>
@@ -331,15 +331,15 @@ function VisionTool() {
 
           {/* ── Right panel ── */}
           <div className="lg:col-span-7">
-            <div className="flex min-h-[500px] flex-col rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex min-h-[500px] flex-col rounded-tc-lg border border-tc-brand-line bg-white p-6">
 
               {/* Panel header */}
-              <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
-                <h2 className="flex items-center gap-2 text-base font-semibold text-slate-800">
+              <div className="mb-6 flex items-center justify-between border-b border-tc-brand-line pb-4">
+                <h2 className="flex items-center gap-2.5 text-lg font-semibold leading-6 text-tc-brand-ink">
                   <span className={`inline-block h-2.5 w-2.5 rounded-full ${pulseClass(status)}`} />
                   Analysis Results
                 </h2>
-                <span className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-1 font-mono text-xs text-slate-400">
+                <span className="rounded-tc-sm border border-tc-brand-line bg-tc-brand-haze px-3 py-1 font-mono text-xs text-tc-brand-muted">
                   {latency} latency
                 </span>
               </div>
@@ -347,13 +347,13 @@ function VisionTool() {
               {/* Empty state */}
               {!response && (
                 <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 text-slate-300">
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-tc-brand-mintSoft text-tc-brand-deep">
                     <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
                     </svg>
                   </div>
-                  <h3 className="text-sm font-semibold text-slate-600">Awaiting Analysis</h3>
-                  <p className="mt-1 max-w-xs text-xs text-slate-400">
+                  <h3 className="text-lg font-semibold leading-6 text-tc-brand-ink">Awaiting Analysis</h3>
+                  <p className="mt-1 max-w-sm text-sm leading-5 text-tc-brand-body">
                     Upload an item image and run the pipeline to see AI results here.
                   </p>
                 </div>
@@ -362,10 +362,10 @@ function VisionTool() {
               {/* Worker error */}
               {response && !response.success && (
                 <div className="flex-1 space-y-3">
-                  <div className="rounded-xl border border-rose-200 bg-rose-50 p-4">
-                    <p className="text-sm font-semibold text-rose-700">Worker error</p>
-                    <p className="mt-1 font-mono text-xs text-rose-500">{response.error}</p>
-                    {response.model && <p className="mt-2 text-[10px] text-slate-400">Model: {response.model}</p>}
+                  <div className="rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft p-4">
+                    <p className="text-sm font-semibold text-tc-brand-danger">Worker error</p>
+                    <p className="mt-1 break-words font-mono text-xs text-tc-brand-danger">{response.error}</p>
+                    {response.model && <p className="mt-2 text-xs text-tc-brand-muted">Model: {response.model}</p>}
                   </div>
                 </div>
               )}
@@ -376,46 +376,46 @@ function VisionTool() {
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
 
                     {/* Item type */}
-                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                      <span className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-slate-400">Identified Item Type</span>
-                      <span className="text-base font-bold capitalize text-slate-900">
+                    <div className="rounded-tc-md bg-tc-brand-soft p-4">
+                      <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-tc-brand-muted">Identified Item Type</span>
+                      <span className="text-base font-semibold capitalize text-tc-brand-ink">
                         {String(data.item_type ?? data.garment_type ?? '-')}
                       </span>
                     </div>
 
                     {/* Category */}
-                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                      <span className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-slate-400">Suggested Category</span>
-                      <span className="text-sm font-bold text-[#0D3B24]">
+                    <div className="rounded-tc-md bg-tc-brand-soft p-4">
+                      <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-tc-brand-muted">Suggested Category</span>
+                      <span className="text-sm font-semibold text-tc-brand-ink">
                         {String(data.suggested_category ?? '-')}
                       </span>
                     </div>
 
                     {/* Condition */}
-                    <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4">
+                    <div className="flex items-center justify-between rounded-tc-md bg-tc-brand-soft p-4">
                       <div>
-                        <span className="mb-0.5 block text-[10px] font-bold uppercase tracking-widest text-slate-400">Condition</span>
-                        <span className="text-base font-bold text-slate-900">{condition}</span>
+                        <span className="mb-0.5 block text-xs font-semibold uppercase tracking-wider text-tc-brand-muted">Condition</span>
+                        <span className="text-base font-semibold text-tc-brand-ink">{condition}</span>
                       </div>
                       {cStyle && (
-                        <div className={`flex h-7 items-center rounded-lg border px-2.5 text-xs font-bold uppercase tracking-wider ${cStyle.cls}`}>
+                        <div className={`flex h-7 items-center rounded-full border px-2.5 text-xs font-semibold uppercase tracking-wider ${cStyle.cls}`}>
                           {cStyle.label}
                         </div>
                       )}
                     </div>
 
                     {/* Reusability */}
-                    <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4">
+                    <div className="flex items-center justify-between rounded-tc-md bg-tc-brand-soft p-4">
                       <div>
-                        <span className="mb-0.5 block text-[10px] font-bold uppercase tracking-widest text-slate-400">Reusability</span>
-                        <span className="text-base font-bold text-slate-900">
+                        <span className="mb-0.5 block text-xs font-semibold uppercase tracking-wider text-tc-brand-muted">Reusability</span>
+                        <span className="text-base font-semibold text-tc-brand-ink">
                           {isReusable ? 'Yes — Eligible' : 'No — Excluded'}
                         </span>
                       </div>
                       <div className={`flex h-8 w-8 items-center justify-center rounded-full border ${
                         isReusable
-                          ? 'border-emerald-200 bg-emerald-50 text-emerald-600'
-                          : 'border-rose-200 bg-rose-50 text-rose-500'
+                          ? 'border-tc-brand-mintLine bg-tc-brand-mintSoft text-tc-brand-deep'
+                          : 'border-tc-brand-dangerLine bg-tc-brand-dangerSoft text-tc-brand-danger'
                       }`}>
                         {isReusable ? <Check size={15} strokeWidth={2.5} /> : <X size={15} strokeWidth={2.5} />}
                       </div>
@@ -423,17 +423,17 @@ function VisionTool() {
                   </div>
 
                   {/* Material */}
-                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                    <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-slate-400">Material Composition</span>
-                    <p className="text-sm font-medium leading-relaxed text-slate-700">
+                  <div className="rounded-tc-md bg-tc-brand-soft p-4">
+                    <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-tc-brand-muted">Material Composition</span>
+                    <p className="text-sm font-medium leading-relaxed text-tc-brand-ink">
                       {String(data.material_composition ?? 'Evaluated by image analysis — no sub-fibers detected.')}
                     </p>
                   </div>
 
                   {/* Notes */}
-                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                    <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-slate-400">AI Notes</span>
-                    <p className="text-sm font-medium italic leading-relaxed text-slate-600">
+                  <div className="rounded-tc-md bg-tc-brand-soft p-4">
+                    <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-tc-brand-muted">AI Notes</span>
+                    <p className="text-sm font-medium italic leading-relaxed text-tc-brand-body">
                       "{String(data.notes ?? '-')}"
                     </p>
                   </div>
@@ -443,29 +443,29 @@ function VisionTool() {
               {/* Raw partial text */}
               {response?.success && response.raw && !data && (
                 <div className="flex-1 space-y-3">
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
-                    <p className="text-xs font-semibold text-amber-700">Model returned plain text — JSON extraction failed</p>
+                  <div className="rounded-tc-md border border-tc-brand-control bg-tc-brand-soft p-3">
+                    <p className="text-xs font-semibold text-tc-brand-ink">Model returned plain text — JSON extraction failed</p>
                   </div>
-                  <pre className="min-h-[260px] overflow-y-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-xs leading-7 text-slate-600">
+                  <pre className="min-h-[260px] overflow-y-auto whitespace-pre-wrap rounded-tc-md border border-tc-brand-line bg-tc-brand-haze p-4 font-mono text-xs leading-7 text-tc-brand-body">
                     {response.raw}
                   </pre>
                 </div>
               )}
 
               {/* JSON inspector */}
-              <div className="mt-auto border-t border-slate-100 pt-5">
+              <div className="mt-auto border-t border-tc-brand-line pt-5">
                 <div className="mb-2 flex items-center justify-between">
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Raw Response Payload</h3>
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-tc-brand-muted">Raw Response Payload</h3>
                   <button
                     type="button"
                     onClick={copyJson}
-                    className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-500 shadow-sm transition hover:border-slate-300 hover:text-slate-800"
+                    className="flex items-center gap-1.5 min-h-11 rounded-tc-md border border-tc-brand-control bg-white px-4 py-2 text-sm font-semibold text-tc-brand-deep transition hover:bg-tc-brand-soft"
                   >
                     {copied ? <Check size={11} /> : <Clipboard size={11} />}
                     {copied ? 'Copied!' : 'Copy JSON'}
                   </button>
                 </div>
-                <pre className="max-h-44 select-all overflow-x-auto rounded-xl border border-slate-100 bg-slate-50 p-4 font-mono text-xs text-slate-500">
+                <pre className="max-h-44 select-all overflow-x-auto rounded-tc-md border border-tc-brand-line bg-tc-brand-haze p-4 font-mono text-xs text-tc-brand-body">
                   {response ? JSON.stringify(response, null, 2) : '{}'}
                 </pre>
               </div>
@@ -475,7 +475,7 @@ function VisionTool() {
         </div>
       </main>
 
-      <footer className="mx-auto mt-8 max-w-7xl border-t border-slate-100 px-6 py-6 text-center text-xs text-slate-400">
+      <footer className="mx-auto mt-8 max-w-7xl border-t border-tc-brand-line px-6 py-6 text-center text-xs text-tc-brand-muted">
         © 2026 TruCycle Ltd · Internal · Not tracked · Not indexed
       </footer>
     </div>
@@ -493,8 +493,8 @@ export default function InternalVisionPage() {
     <>
       <NoIndex />
       {user.roles?.includes('admin') ? <VisionTool key={user.id} /> : (
-        <main className="p-8">
-          <h1 className="text-xl font-semibold">Administrator access required</h1>
+        <main className="min-h-screen bg-tc-brand-haze p-4 sm:p-8">
+          <h1 className="text-xl font-semibold leading-7 tracking-[-0.015em] text-tc-brand-ink">Administrator access required</h1>
         </main>
       )}
     </>

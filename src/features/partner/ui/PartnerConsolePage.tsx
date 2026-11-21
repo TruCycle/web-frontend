@@ -33,22 +33,22 @@ function activityStatusClassName(status: string): string {
   const normalized = status.toLowerCase()
 
   if (normalized.includes('pending_dropoff')) {
-    return 'bg-amber-50 text-amber-600'
+    return 'bg-tc-brand-mintSoft text-tc-brand-ink'
   }
 
   if (normalized.includes('awaiting_collection') || normalized.includes('approved')) {
-    return 'bg-violet-50 text-violet-600'
+    return 'bg-tc-brand-mintSoft text-tc-brand-ink'
   }
 
   if (normalized.includes('complete') || normalized.includes('collected')) {
-    return 'bg-emerald-50 text-emerald-600'
+    return 'bg-tc-brand-deep text-white'
   }
 
   if (normalized.includes('active')) {
-    return 'bg-sky-50 text-sky-600'
+    return 'bg-tc-brand-mint text-tc-brand-onMint'
   }
 
-  return 'bg-slate-100 text-slate-600'
+  return 'bg-tc-brand-soft text-tc-brand-body'
 }
 
 export default function PartnerConsolePage() {
@@ -57,15 +57,15 @@ export default function PartnerConsolePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-tc-header-text">Partner Dashboard</h1>
-          <p className="text-tc-header-labelText">Track shop activity and item handoff progress</p>
+          <h1 className="text-[30px] font-semibold leading-9 tracking-[-0.02em] text-tc-brand-ink">Partner Dashboard</h1>
+          <p className="mt-1 text-base leading-6 text-tc-brand-body">Track shop activity and item handoff progress</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
             variant="secondary"
-            className="h-[42px] w-[42px] rounded-xl p-0"
+            className="h-11 w-11 p-0"
             onClick={() => void reload()}
             disabled={isLoading}
             aria-label="Refresh dashboard"
@@ -74,8 +74,8 @@ export default function PartnerConsolePage() {
             <RefreshCw size={18} />
           </Button>
           <Button
-            variant="highlight"
-            className="h-[42px] rounded-xl px-6 text-sm font-semibold"
+            variant="primary"
+            className="h-11 px-5 text-sm font-semibold"
             onClick={() => setIsScanDialogOpen(true)}
           >
             Start Scan
@@ -84,55 +84,55 @@ export default function PartnerConsolePage() {
       </div>
 
       {error ? (
-        <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <div className="flex items-center gap-2 rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft px-4 py-3 text-sm text-tc-brand-danger">
           <AlertCircle size={16} />
           {error}
         </div>
       ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="flex items-center gap-4 rounded-xl bg-white p-5">
-          <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#2FC7491A] text-[#2FC749]">
+        <div className="flex items-center gap-3.5 rounded-tc-lg border border-tc-brand-line bg-white p-5">
+          <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tc-brand-mintSoft text-tc-brand-deep">
             <PackageCheck size={20} />
           </span>
           <div>
-            <p className="text-3xl font-semibold text-tc-header-text">{stats.activeItems}</p>
-            <p className="text-sm text-tc-header-labelText">Active Listings</p>
+            <p className="text-2xl font-semibold leading-7 tracking-[-0.02em] tabular-nums text-tc-brand-ink">{stats.activeItems}</p>
+            <p className="text-sm leading-5 text-tc-brand-body">Active Listings</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 rounded-xl bg-white p-5">
-          <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#2FC7491A] text-[#2FC749]">
+        <div className="flex items-center gap-3.5 rounded-tc-lg border border-tc-brand-line bg-white p-5">
+          <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tc-brand-mintSoft text-tc-brand-deep">
             <ScanLine size={20} />
           </span>
           <div>
-            <p className="text-3xl font-semibold text-tc-header-text">{stats.pendingDropOffs}</p>
-            <p className="text-sm text-tc-header-labelText">Pending Drop-offs</p>
+            <p className="text-2xl font-semibold leading-7 tracking-[-0.02em] tabular-nums text-tc-brand-ink">{stats.pendingDropOffs}</p>
+            <p className="text-sm leading-5 text-tc-brand-body">Pending Drop-offs</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 rounded-xl bg-white p-5">
-          <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#2FC7491A] text-[#2FC749]">
+        <div className="flex items-center gap-3.5 rounded-tc-lg border border-tc-brand-line bg-white p-5">
+          <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tc-brand-mintSoft text-tc-brand-deep">
             <Heart size={20} />
           </span>
           <div>
-            <p className="text-3xl font-semibold text-tc-header-text">{stats.awaitingCollection}</p>
-            <p className="text-sm text-tc-header-labelText">Awaiting Collection</p>
+            <p className="text-2xl font-semibold leading-7 tracking-[-0.02em] tabular-nums text-tc-brand-ink">{stats.awaitingCollection}</p>
+            <p className="text-sm leading-5 text-tc-brand-body">Awaiting Collection</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 rounded-xl bg-white p-5">
-          <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#2FC7491A] text-[#2FC749]">
+        <div className="flex items-center gap-3.5 rounded-tc-lg border border-tc-brand-line bg-white p-5">
+          <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tc-brand-mintSoft text-tc-brand-deep">
             <ShoppingBag size={20} />
           </span>
           <div>
-            <p className="text-3xl font-semibold text-tc-header-text">{stats.averageItemsPerShop}</p>
-            <p className="text-sm text-tc-header-labelText">Avg Items Per Shop</p>
+            <p className="text-2xl font-semibold leading-7 tracking-[-0.02em] tabular-nums text-tc-brand-ink">{stats.averageItemsPerShop}</p>
+            <p className="text-sm leading-5 text-tc-brand-body">Avg Items Per Shop</p>
           </div>
         </div>
       </div>
 
-      <section className="overflow-hidden rounded-xl bg-white">
-        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
-          <h2 className="text-2xl font-semibold text-tc-app-secondary">Recent Activity</h2>
-          <p className="text-sm text-tc-header-labelText">
+      <section className="overflow-hidden rounded-tc-lg border border-tc-brand-line bg-white">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-5 pb-2 pt-5">
+          <h2 className="text-lg font-semibold leading-6 text-tc-brand-ink">Recent Activity</h2>
+          <p className="text-[13px] leading-5 text-tc-brand-muted">
             {stats.totalItems} total item{stats.totalItems === 1 ? '' : 's'} across {stats.totalShops}{' '}
             shop{stats.totalShops === 1 ? '' : 's'}
           </p>
@@ -140,24 +140,24 @@ export default function PartnerConsolePage() {
         <div className="overflow-x-auto">
           <table className="min-w-full text-left">
             <thead>
-              <tr className="border-b border-slate-200 text-sm text-tc-header-labelText">
-                <th className="px-6 py-4 font-medium">Item Name</th>
-                <th className="px-6 py-4 font-medium">Date Listed</th>
-                <th className="px-6 py-4 font-medium">Category</th>
-                <th className="px-6 py-4 font-medium">Date Collected</th>
-                <th className="px-6 py-4 font-medium">Status</th>
+              <tr className="border-b border-tc-brand-line text-xs uppercase tracking-wide text-tc-brand-muted">
+                <th className="whitespace-nowrap px-4 py-3 font-semibold">Item Name</th>
+                <th className="whitespace-nowrap px-4 py-3 font-semibold">Date Listed</th>
+                <th className="whitespace-nowrap px-4 py-3 font-semibold">Category</th>
+                <th className="whitespace-nowrap px-4 py-3 font-semibold">Date Collected</th>
+                <th className="whitespace-nowrap px-4 py-3 font-semibold">Status</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-10 text-center text-sm text-slate-500">
+                  <td colSpan={5} className="px-4 py-10 text-center text-sm text-tc-brand-body">
                     Loading recent activity...
                   </td>
                 </tr>
               ) : recentItems.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-10 text-center text-sm text-slate-500">
+                  <td colSpan={5} className="px-4 py-10 text-center text-sm text-tc-brand-body">
                     No partner activity yet.
                   </td>
                 </tr>
@@ -165,14 +165,14 @@ export default function PartnerConsolePage() {
                 recentItems.map((item) => {
                   const statusText = toTitleCase(item.claimStatus ?? item.status)
                   return (
-                    <tr key={item.id} className="border-b border-slate-100 text-sm text-tc-app-secondary">
-                      <td className="px-6 py-5">{item.title}</td>
-                      <td className="px-6 py-5">{formatDate(item.createdAt)}</td>
-                      <td className="px-6 py-5">{item.category}</td>
-                      <td className="px-6 py-5">{formatDate(item.claimCompletedAt)}</td>
-                      <td className="px-6 py-5">
+                    <tr key={item.id} className="border-b border-tc-brand-line text-sm text-tc-brand-ink last:border-b-0">
+                      <td className="px-4 py-3.5">{item.title}</td>
+                      <td className="px-4 py-3.5">{formatDate(item.createdAt)}</td>
+                      <td className="px-4 py-3.5">{item.category}</td>
+                      <td className="px-4 py-3.5">{formatDate(item.claimCompletedAt)}</td>
+                      <td className="px-4 py-3.5">
                         <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${activityStatusClassName(item.claimStatus ?? item.status)}`}
+                          className={`inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${activityStatusClassName(item.claimStatus ?? item.status)}`}
                         >
                           {statusText}
                         </span>

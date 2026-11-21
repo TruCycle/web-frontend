@@ -145,22 +145,22 @@ function getStatusClassName(status: string): string {
   const normalizedStatus = status.toLowerCase()
 
   if (normalizedStatus.includes('pending_dropoff')) {
-    return 'border-amber-200 bg-amber-50 text-amber-700'
+    return 'border-tc-brand-mintLine bg-tc-brand-mintSoft text-tc-brand-ink'
   }
 
   if (normalizedStatus.includes('awaiting_collection') || normalizedStatus.includes('approved')) {
-    return 'border-violet-200 bg-violet-50 text-violet-700'
+    return 'border-tc-brand-mintLine bg-tc-brand-mintSoft text-tc-brand-ink'
   }
 
   if (normalizedStatus.includes('complete') || normalizedStatus.includes('collected')) {
-    return 'border-emerald-200 bg-emerald-50 text-emerald-700'
+    return 'border-tc-brand-deep bg-tc-brand-deep text-white'
   }
 
   if (normalizedStatus.includes('recycled') || normalizedStatus.includes('recycle')) {
-    return 'border-sky-200 bg-sky-50 text-sky-700'
+    return 'border-tc-brand-line bg-tc-brand-soft text-tc-brand-body'
   }
 
-  return 'border-slate-200 bg-slate-100 text-slate-700'
+  return 'border-tc-brand-line bg-tc-brand-soft text-tc-brand-body'
 }
 
 export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogProps) {
@@ -325,26 +325,26 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
   return (
     <Modal isOpen={isOpen} onClose={onClose} hideCloseButton containerClassName="max-w-[620px]">
       <div className="flex max-h-[88vh] flex-col">
-        <header className="flex items-start justify-between border-b border-slate-100 px-5 pb-4 pt-5">
+        <header className="flex items-start justify-between gap-4 border-b border-tc-brand-line px-6 pb-4 pt-6">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900">Scan Item</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <h2 className="text-lg font-semibold leading-6 text-tc-brand-ink">Scan Item</h2>
+            <p className="mt-1 text-sm leading-5 text-tc-brand-body">
               Scan once to load item details, then confirm drop-off or pick-up.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tc-brand-soft text-tc-brand-ink transition hover:bg-tc-brand-line"
             aria-label="Close scan dialog"
           >
             <X size={16} />
           </button>
         </header>
 
-        <div className="space-y-4 overflow-y-auto px-5 py-4">
-          <div className="space-y-1">
-            <label htmlFor="scan-shop" className="text-sm font-medium text-slate-700">
+        <div className="space-y-4 overflow-y-auto px-6 py-5">
+          <div className="space-y-1.5">
+            <label htmlFor="scan-shop" className="text-sm font-medium text-tc-brand-ink">
               Shop
             </label>
             <CustomSelect
@@ -354,16 +354,16 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
               onChange={setSelectedShopId}
               disabled={!hasActiveShops || isResolvingScan || isExecutingAction}
               placeholder={hasActiveShops ? 'Select a shop' : 'No active shop'}
-              buttonClassName="h-11 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700"
+              buttonClassName="h-11 rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink outline-none focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
             />
-            <p className="text-xs text-slate-500">
+            <p className="text-xs leading-4 text-tc-brand-muted">
               {hasActiveShops
                 ? 'Scans and actions are recorded against the selected active shop.'
                 : 'No active partner shop available. Activate or create one in settings.'}
             </p>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <div className="rounded-tc-lg bg-tc-brand-deep p-5">
             <div className="flex justify-center">
               <CameraQrScanner
                 key={scannerSession}
@@ -372,16 +372,16 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
                   void resolveQrPayload(payload)
                 }}
                 onError={(message) => errorToast('Scanner error', message)}
-                className="h-[160px] w-[160px] rounded-xl"
+                className="h-[160px] w-[160px] rounded-tc-lg"
               />
             </div>
-            <p className="mt-2 text-center text-xs text-slate-500">
+            <p className="mt-3 text-center text-xs leading-4 text-tc-brand-onDeep">
               Point camera at QR code. Payload is submitted automatically on detection.
             </p>
           </div>
 
-          <div className="space-y-1">
-            <label htmlFor="scan-code" className="text-sm font-medium text-slate-700">
+          <div className="space-y-1.5">
+            <label htmlFor="scan-code" className="text-sm font-medium text-tc-brand-ink">
               QR Code or Manual Code
             </label>
             <div className="flex gap-2">
@@ -390,17 +390,17 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
                   id="scan-code"
                   value={manualCode}
                   onChange={(event) => setManualCode(event.target.value)}
-                  className="h-11 w-full rounded-md border border-slate-200 bg-white px-3 pr-9 text-sm text-slate-700 outline-none focus:border-lime-400 focus:ring-2 focus:ring-lime-100"
+                  className="h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 pr-9 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="Paste QR payload or item link"
                   disabled={!hasActiveShops || isResolvingScan || isExecutingAction}
                 />
-                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tc-brand-muted">
                   <Link2 size={14} />
                 </span>
               </div>
               <Button
                 variant="secondary"
-                className="h-11 rounded-md px-4 text-sm"
+                className="h-11 px-4 text-sm"
                 disabled={
                   !hasActiveShops ||
                   manualCode.trim().length === 0 ||
@@ -420,45 +420,45 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
             </div>
           </div>
 
-          <section className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <h3 className="text-sm font-semibold text-slate-800">Item Details</h3>
+          <section className="rounded-tc-md bg-tc-brand-soft p-4">
+            <h3 className="text-sm font-semibold text-tc-brand-ink">Item Details</h3>
             {!itemContext ? (
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm leading-5 text-tc-brand-body">
                 Scan an item QR to view details and next action.
               </p>
             ) : (
               <div className="mt-2 space-y-3">
-                <div className="rounded-md border border-slate-200 bg-white p-3">
+                <div className="rounded-tc-md border border-tc-brand-line bg-white p-4">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
-                      <p className="text-base font-semibold text-slate-800">
+                      <p className="text-base font-semibold leading-6 text-tc-brand-ink">
                         {itemContext.title ?? `Item ${itemContext.id}`}
                       </p>
-                      <p className="text-xs text-slate-500">{itemContext.id}</p>
+                      <p className="break-all text-xs leading-4 text-tc-brand-muted">{itemContext.id}</p>
                     </div>
                     <span
-                      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getStatusClassName(itemContext.status)}`}
+                      className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${getStatusClassName(itemContext.status)}`}
                     >
                       {toTitleCase(itemContext.status)}
                     </span>
                   </div>
 
-                  <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-slate-600">
+                  <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-tc-brand-body">
                     <p>
-                      Pickup: <span className="font-medium text-slate-700">{toTitleCase(itemContext.pickupOption)}</span>
+                      Pickup: <span className="font-medium text-tc-brand-ink">{toTitleCase(itemContext.pickupOption)}</span>
                     </p>
                     <p>
-                      Claim: <span className="font-medium text-slate-700">{itemContext.claim?.status ? toTitleCase(itemContext.claim.status) : '-'}</span>
+                      Claim: <span className="font-medium text-tc-brand-ink">{itemContext.claim?.status ? toTitleCase(itemContext.claim.status) : '-'}</span>
                     </p>
                     <p>
-                      Category: <span className="font-medium text-slate-700">{itemContext.category ?? '-'}</span>
+                      Category: <span className="font-medium text-tc-brand-ink">{itemContext.category ?? '-'}</span>
                     </p>
                     <p>
-                      Condition: <span className="font-medium text-slate-700">{itemContext.condition ?? '-'}</span>
+                      Condition: <span className="font-medium text-tc-brand-ink">{itemContext.condition ?? '-'}</span>
                     </p>
                     <p className="col-span-2">
                       Created:{' '}
-                      <span className="font-medium text-slate-700">
+                      <span className="font-medium text-tc-brand-ink">
                         {formatScanTimestamp(itemContext.createdAt)}
                       </span>
                     </p>
@@ -468,7 +468,7 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
                 <div className="grid gap-2 sm:grid-cols-3">
                   <Button
                     variant="primary"
-                    className="h-10 rounded-md text-sm"
+                    className="h-11 text-sm font-semibold"
                     disabled={
                       pendingAction !== 'dropoff' || !canTriggerAction || isExecutingAction
                     }
@@ -483,7 +483,7 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
                   </Button>
                   <Button
                     variant="primary"
-                    className="h-10 rounded-md text-sm"
+                    className="h-11 text-sm font-semibold"
                     disabled={pendingAction !== 'pickup' || !canTriggerAction || isExecutingAction}
                     onClick={() => {
                       void handlePickup()
@@ -496,7 +496,7 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
                   </Button>
                   <Button
                     variant="secondary"
-                    className="h-10 rounded-md px-4 text-sm"
+                    className="h-11 px-4 text-sm font-semibold"
                     onClick={handleScanAnother}
                     disabled={isResolvingScan || isExecutingAction}
                   >
@@ -506,7 +506,7 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
                 </div>
 
                 {pendingAction === null ? (
-                  <p className="text-sm text-slate-500">
+                  <p className="text-[13px] leading-5 text-tc-brand-muted">
                     No pending drop-off or pick-up action for the current item status.
                   </p>
                 ) : null}
@@ -515,29 +515,29 @@ export function PartnerScanDialog({ isOpen, onClose, shops }: PartnerScanDialogP
           </section>
 
           <section>
-            <h3 className="text-sm font-semibold text-slate-800">Recent Scan Events</h3>
+            <h3 className="text-sm font-semibold text-tc-brand-ink">Recent Scan Events</h3>
             <div className="mt-2 space-y-2">
               {itemContext && sortedScanEvents.length > 0 ? (
                 sortedScanEvents.slice(0, 6).map((scanEvent, index) => (
                   <div
                     key={`${scanEvent.scanType}-${scanEvent.scannedAt ?? index}`}
-                    className="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2"
+                    className="flex items-center justify-between gap-3 rounded-tc-md border border-tc-brand-line bg-white px-4 py-2.5"
                   >
                     <div>
-                      <p className="text-sm font-medium text-slate-800">
+                      <p className="text-sm font-medium text-tc-brand-ink">
                         {toTitleCase(scanEvent.scanType)}
                       </p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs leading-4 text-tc-brand-muted">
                         {formatScanTimestamp(scanEvent.scannedAt)}
                       </p>
                     </div>
-                    <span className="text-xs font-medium text-slate-500">
+                    <span className="text-xs font-medium text-tc-brand-muted">
                       {scanEvent.shopId ?? selectedShop?.name ?? '-'}
                     </span>
                   </div>
                 ))
               ) : (
-                <div className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-500">
+                <div className="rounded-tc-md border border-dashed border-tc-brand-control bg-white px-4 py-3 text-sm text-tc-brand-body">
                   {lastScannedPayload
                     ? 'No scan events returned for this item yet.'
                     : 'Scan events appear here after QR is resolved.'}
