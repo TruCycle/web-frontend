@@ -399,7 +399,7 @@ export default function MessagingPage() {
       </div>
 
       <div className="grid h-[calc(100vh-10rem)] min-h-[700px] flex-1 gap-4 md:h-[calc(100vh-14rem)] md:min-h-[560px] xl:grid-cols-[320px_1fr]">
-        <div className="flex h-full min-h-0 flex-col rounded-tc-lg border border-tc-brand-line bg-white p-5">
+        <div className="flex h-full min-h-0 min-w-0 flex-col rounded-tc-lg border border-tc-brand-line bg-white p-5">
           <div className="pb-4">
             <h2 className="text-lg font-semibold leading-6 text-tc-brand-ink">Conversations</h2>
             <div className="relative mt-4">
@@ -490,7 +490,7 @@ export default function MessagingPage() {
           </div>
         </div>
 
-        <div className="flex h-full min-h-0 flex-col rounded-tc-lg border border-tc-brand-line bg-white">
+        <div className="flex h-full min-h-0 min-w-0 flex-col rounded-tc-lg border border-tc-brand-line bg-white">
           <div className="flex items-center gap-3 border-b border-tc-brand-line px-5 py-4">
             <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tc-brand-deep text-xs font-semibold text-white">
               {activeRoom ? getRoomInitials(activeRoom, user?.id) : '--'}

@@ -55,7 +55,7 @@ export function PaginationControls({
   const paginationTokens = buildPaginationTokens(currentPage, totalPages)
 
   return (
-    <div className={classNames('flex items-center justify-between gap-2 pt-4', className)}>
+    <div className={classNames('flex flex-wrap items-center justify-between gap-2 pt-4', className)}>
       <button
         type="button"
         disabled={!canGoPrevious}
@@ -66,7 +66,7 @@ export function PaginationControls({
         Previous
       </button>
 
-      <div className="flex items-center gap-4 max-md:gap-1">
+      <div className="flex items-center gap-4 max-md:order-last max-md:w-full max-md:justify-center max-md:gap-1">
         {paginationTokens.map((token, index) =>
           token === 'ellipsis-left' || token === 'ellipsis-right' ? (
             <span key={`${token}-${index}`} className="text-xl text-tc-brand-muted max-md:text-lg">
