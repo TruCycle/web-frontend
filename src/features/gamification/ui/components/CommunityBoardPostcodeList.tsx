@@ -21,13 +21,13 @@ export function CommunityBoardPostcodeList({
             key={entry.postcode}
             className={
               isActiveArea
-                ? 'grid grid-cols-[46px_minmax(0,1fr)_110px_82px] gap-4 rounded-2xl bg-tc-app-primary/15 px-4 py-4'
-                : 'grid grid-cols-[46px_minmax(0,1fr)_110px_82px] gap-4 rounded-2xl px-4 py-4 transition hover:bg-slate-50'
+                ? 'group is-you grid grid-cols-[32px_minmax(0,1fr)_80px_52px] items-center gap-2 rounded-tc-md bg-tc-brand-mintSoft px-2 py-4 sm:grid-cols-[46px_minmax(0,1fr)_110px_82px] sm:gap-4 sm:px-4'
+                : 'grid grid-cols-[32px_minmax(0,1fr)_80px_52px] items-center gap-2 rounded-tc-md px-2 py-4 transition hover:bg-tc-brand-soft sm:grid-cols-[46px_minmax(0,1fr)_110px_82px] sm:gap-4 sm:px-4'
             }
           >
-            <div className="flex items-start pt-1">
+            <div className="flex items-center">
               <span
-                className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${rankPillClassName(index)}`}
+                className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-semibold tabular-nums group-[.is-you]:bg-white sm:h-10 sm:w-10 ${rankPillClassName(index)}`}
               >
                 {index < 3 ? <Medal size={14} /> : index + 1}
               </span>
@@ -35,28 +35,28 @@ export function CommunityBoardPostcodeList({
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="text-lg font-semibold text-slate-900">{entry.postcode}</p>
+                <p className="text-base font-semibold leading-6 text-tc-brand-ink">{entry.postcode}</p>
                 {isActiveArea ? (
-                  <span className="rounded-full bg-tc-app-primary/25 px-2 py-0.5 text-[0.7rem] font-semibold uppercase tracking-wide text-tc-auth-link">
+                  <span className="rounded-full bg-tc-brand-deep px-2 py-0.5 text-xs font-semibold leading-4 text-white">
                     You
                   </span>
                 ) : null}
               </div>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-0.5 text-[13px] leading-5 text-tc-brand-muted">
                 {entry.spots} spots · {entry.rescues} rescues · {entry.activeSpots} live
               </p>
             </div>
 
-            <div className="text-right">
-              <p className="text-lg font-semibold text-slate-900">
+            <div className="min-w-0 text-right tabular-nums">
+              <p className="text-sm font-semibold leading-5 text-tc-brand-ink sm:text-xl sm:leading-7">
                 {entry.totalCo2eKg === null ? 'Unavailable' : `${entry.totalCo2eKg} kg`}
               </p>
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Est. CO2e</p>
+              <p className="text-[11px] font-semibold uppercase leading-4 tracking-[0.04em] text-tc-brand-muted sm:text-xs sm:tracking-[0.06em]">Est. CO2e</p>
             </div>
 
-            <div className="text-right">
-              <p className="text-lg font-semibold text-tc-app-text">{entry.impactPoints}</p>
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-400">score</p>
+            <div className="min-w-0 text-right tabular-nums">
+              <p className="text-sm font-semibold leading-5 text-tc-brand-ink sm:text-xl sm:leading-7">{entry.impactPoints}</p>
+              <p className="text-[11px] font-semibold uppercase leading-4 tracking-[0.04em] text-tc-brand-muted sm:text-xs sm:tracking-[0.06em]">score</p>
             </div>
           </div>
         )

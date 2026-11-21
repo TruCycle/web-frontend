@@ -19,12 +19,12 @@ export default function CommunityBoardPage() {
   const localArea = board?.activeArea ?? board?.postcodes[0]?.postcode ?? 'your area'
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6">
       <div className="space-y-2">
-        <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Leaderboard</h1>
-            <p className="text-slate-500">
+            <h1 className="text-[30px] font-semibold leading-9 tracking-[-0.02em] text-tc-brand-ink">Leaderboard</h1>
+            <p className="mt-1 text-base leading-6 text-tc-brand-body">
               {activeTab === 'community'
                 ? `Which London postcodes are rescuing the most ${activeDescriptor}.`
                 : 'Top individual spotters across TruCycle, ranked by lifetime points.'}
@@ -32,7 +32,7 @@ export default function CommunityBoardPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex flex-wrap gap-2 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
+            <div className="inline-flex flex-wrap gap-1 rounded-tc-xl border border-tc-brand-deepLine bg-tc-brand-hover p-1">
               {([
                 { key: 'community', label: 'Community' },
                 { key: 'individual', label: 'Individual' },
@@ -46,8 +46,8 @@ export default function CommunityBoardPage() {
                     onClick={() => setActiveTab(tab.key)}
                     className={
                       isActive
-                        ? 'rounded-full bg-tc-app-primary px-4 py-2 text-sm font-semibold text-tc-app-text shadow-sm transition'
-                        : 'rounded-full px-4 py-2 text-sm font-medium text-tc-app-slate500 transition hover:bg-tc-app-canvas'
+                        ? 'min-h-9 rounded-full bg-tc-brand-mint px-3.5 text-[13px] font-semibold text-tc-brand-onMint transition'
+                        : 'min-h-9 rounded-full px-3.5 text-[13px] font-medium text-tc-brand-onDeep transition hover:bg-tc-brand-deep hover:text-white'
                     }
                   >
                     {tab.label}
@@ -57,7 +57,7 @@ export default function CommunityBoardPage() {
             </div>
 
             {activeTab === 'community' ? (
-              <div className="inline-flex flex-wrap gap-2 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
+              <div className="inline-flex flex-wrap gap-1 rounded-tc-xl border border-tc-brand-deepLine bg-tc-brand-hover p-1">
                 {communityBoardWindows.map((entry) => {
                   const isActive = entry.key === activeWindow
                   return (
@@ -68,8 +68,8 @@ export default function CommunityBoardPage() {
                       onClick={() => setActiveWindow(entry.key)}
                       className={
                         isActive
-                          ? 'rounded-full bg-tc-app-primary px-4 py-2 text-sm font-semibold text-tc-app-text shadow-sm transition'
-                          : 'rounded-full px-4 py-2 text-sm font-medium text-tc-app-slate500 transition hover:bg-tc-app-canvas'
+                          ? 'min-h-9 rounded-full bg-tc-brand-mint px-3.5 text-[13px] font-semibold text-tc-brand-onMint transition'
+                          : 'min-h-9 rounded-full px-3.5 text-[13px] font-medium text-tc-brand-onDeep transition hover:bg-tc-brand-deep hover:text-white'
                       }
                     >
                       {entry.label}
@@ -85,38 +85,38 @@ export default function CommunityBoardPage() {
       {activeTab === 'individual' ? <IndividualLeaderboard /> : null}
       {activeTab === 'community' ? (
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.95fr)]">
-        <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <section className="min-w-0 rounded-tc-lg border border-tc-brand-line bg-white p-4 sm:p-6">
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 className="text-xl font-semibold text-slate-900">Top postcodes</h2>
-              <p className="text-sm text-slate-500">Ranked by catalog score {activeDescriptor}</p>
+              <h2 className="text-xl font-semibold leading-7 tracking-[-0.015em] text-tc-brand-ink">Top postcodes</h2>
+              <p className="text-[13px] leading-5 text-tc-brand-muted">Ranked by catalog score {activeDescriptor}</p>
             </div>
           </div>
 
           <div className="space-y-2">
-            <div className="grid grid-cols-[46px_minmax(0,1fr)_110px_82px] gap-4 px-4 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+            <div className="grid grid-cols-[32px_minmax(0,1fr)_80px_52px] gap-2 px-2 text-[11px] font-semibold uppercase leading-4 tracking-[0.04em] sm:text-xs sm:tracking-[0.06em] text-tc-brand-muted sm:grid-cols-[46px_minmax(0,1fr)_110px_82px] sm:gap-4 sm:px-4">
               <span>#</span>
               <span>Postcode Activity</span>
               <span className="text-right">Est. CO2e</span>
               <span className="text-right">Score</span>
             </div>
 
-            {isLoading ? <p className="px-4 py-4 text-sm text-slate-500">Loading rankings...</p> : null}
-            {error ? <p className="px-4 py-4 text-sm text-rose-600">{error}</p> : null}
+            {isLoading ? <p className="px-2 py-4 text-sm text-tc-brand-body sm:px-4">Loading rankings...</p> : null}
+            {error ? <p className="rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft px-4 py-3 text-sm text-tc-brand-danger">{error}</p> : null}
             {!isLoading && !error && board ? (
               <CommunityBoardPostcodeList entries={board.postcodes} activeArea={board.activeArea} />
             ) : null}
           </div>
         </section>
 
-        <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="mb-5">
-            <h2 className="text-xl font-semibold text-slate-900">Top spotters in {localArea}</h2>
-            <p className="text-sm text-slate-500">Catalog score {activeDescriptor}</p>
+        <section className="min-w-0 rounded-tc-lg border border-tc-brand-line bg-white p-4 sm:p-6">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold leading-7 tracking-[-0.015em] text-tc-brand-ink">Top spotters in {localArea}</h2>
+            <p className="text-[13px] leading-5 text-tc-brand-muted">Catalog score {activeDescriptor}</p>
           </div>
 
           <div className="space-y-1.5">
-            {isLoading ? <p className="px-4 py-4 text-sm text-slate-500">Loading spotters...</p> : null}
+            {isLoading ? <p className="px-2 py-4 text-sm text-tc-brand-body sm:px-4">Loading spotters...</p> : null}
             {!isLoading && !error && board ? (
               board.localSpotters.map((entry, index) => {
                 const isCurrentUser = board.currentUser.localSpotterRank === index + 1
@@ -126,35 +126,35 @@ export default function CommunityBoardPage() {
                     key={`${entry.userId}-${activeWindow}`}
                     className={
                       isCurrentUser
-                        ? 'flex items-center gap-3 rounded-2xl bg-tc-app-primary/15 px-4 py-4'
-                        : 'flex items-center gap-3 rounded-2xl px-4 py-4 transition hover:bg-slate-50'
+                        ? 'group is-you flex items-center gap-3 rounded-tc-md bg-tc-brand-mintSoft px-2 py-4 sm:gap-4 sm:px-4'
+                        : 'flex items-center gap-3 rounded-tc-md px-2 py-4 transition hover:bg-tc-brand-soft sm:gap-4 sm:px-4'
                     }
                   >
-                    <span className="w-9 text-sm font-semibold text-slate-500">#{index + 1}</span>
+                    <span className="w-7 shrink-0 text-[13px] leading-5 tabular-nums text-tc-brand-muted sm:w-9">#{index + 1}</span>
 
-                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-tc-app-primary/20 text-sm font-semibold text-tc-app-text">
+                    <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tc-brand-mintSoft text-[13px] font-semibold text-tc-brand-deep group-[.is-you]:bg-white">
                       {getInitials(entry.name)}
                     </span>
 
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-semibold text-slate-900">{entry.name}</p>
+                        <p className="text-sm font-semibold leading-5 text-tc-brand-ink [overflow-wrap:anywhere]">{entry.name}</p>
                         {isCurrentUser ? (
-                          <span className="text-[0.72rem] font-semibold uppercase tracking-wide text-tc-auth-link">
+                          <span className="rounded-full bg-tc-brand-deep px-2 py-0.5 text-xs font-semibold leading-4 text-white">
                             You
                           </span>
                         ) : null}
                       </div>
-                      <p className="text-sm text-slate-500">
+                      <p className="text-[13px] leading-5 text-tc-brand-muted">
                         {entry.spotsPosted} spots · {entry.rescues} rescues
                       </p>
                     </div>
 
-                    <div className="text-right">
-                      <p className="text-2xl font-semibold tracking-tight text-slate-900">
+                    <div className="shrink-0 text-right tabular-nums">
+                      <p className="text-xl font-semibold leading-7 text-tc-brand-ink">
                         {entry.impactPoints.toLocaleString()}
                       </p>
-                      <p className="text-xs uppercase tracking-[0.18em] text-slate-400">pts</p>
+                      <p className="text-xs font-semibold uppercase leading-4 tracking-[0.06em] text-tc-brand-muted">pts</p>
                     </div>
                   </div>
                 )

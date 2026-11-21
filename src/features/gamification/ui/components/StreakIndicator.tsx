@@ -28,11 +28,11 @@ export function StreakIndicator({ streak, size = 'md' }: StreakIndicatorProps) {
     <div className={`inline-flex items-center gap-2 ${sizeConfig.text}`}>
       <Flame
         size={sizeConfig.icon}
-        className={streak.isActive ? 'text-[#F97316]' : 'text-slate-300'}
+        className={streak.isActive ? 'text-tc-brand-deep' : 'text-tc-brand-muted'}
         fill={streak.isActive ? 'currentColor' : 'none'}
       />
-      <span className="font-semibold text-slate-900">{streak.currentStreak}</span>
-      <span className="text-slate-500">{streak.streakType === 'daily' ? 'day' : 'week'}</span>
+      <span className="font-semibold tabular-nums text-tc-brand-ink">{streak.currentStreak}</span>
+      <span className="text-tc-brand-body">{streak.streakType === 'daily' ? 'day' : 'week'}</span>
     </div>
   )
 }

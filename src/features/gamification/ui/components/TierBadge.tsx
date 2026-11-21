@@ -8,12 +8,12 @@ interface TierBadgeProps {
 }
 
 const TIER_STYLES: Record<string, { bg: string; text: string; ring: string }> = {
-  Seedling: { bg: 'bg-emerald-50', text: 'text-emerald-700', ring: 'ring-emerald-200' },
-  Sprout: { bg: 'bg-emerald-100', text: 'text-emerald-800', ring: 'ring-emerald-300' },
-  Sapling: { bg: 'bg-lime-100', text: 'text-lime-800', ring: 'ring-lime-300' },
-  Grove: { bg: 'bg-amber-100', text: 'text-amber-800', ring: 'ring-amber-300' },
-  Forest: { bg: 'bg-orange-100', text: 'text-orange-800', ring: 'ring-orange-300' },
-  Canopy: { bg: 'bg-rose-100', text: 'text-rose-800', ring: 'ring-rose-300' },
+  Seedling: { bg: 'bg-tc-brand-mintSoft', text: 'text-tc-brand-ink', ring: 'ring-tc-brand-mintLine' },
+  Sprout: { bg: 'bg-tc-brand-mintSoft', text: 'text-tc-brand-ink', ring: 'ring-tc-brand-mintLine' },
+  Sapling: { bg: 'bg-tc-brand-mintSoft', text: 'text-tc-brand-ink', ring: 'ring-tc-brand-mintLine' },
+  Grove: { bg: 'bg-tc-brand-mintSoft', text: 'text-tc-brand-ink', ring: 'ring-tc-brand-mintLine' },
+  Forest: { bg: 'bg-tc-brand-mintSoft', text: 'text-tc-brand-ink', ring: 'ring-tc-brand-mintLine' },
+  Canopy: { bg: 'bg-tc-brand-mintSoft', text: 'text-tc-brand-ink', ring: 'ring-tc-brand-mintLine' },
 }
 
 export function TierBadge({ tier, nextTier, pointsToNextTier, progressPercent }: TierBadgeProps) {
@@ -21,20 +21,20 @@ export function TierBadge({ tier, nextTier, pointsToNextTier, progressPercent }:
   const Icon = tier === 'Forest' || tier === 'Canopy' ? Trees : Sprout
 
   return (
-    <div className={`flex items-center gap-3 rounded-2xl ${styles.bg} px-4 py-3 ring-1 ${styles.ring}`}>
-      <span className={`flex h-10 w-10 items-center justify-center rounded-full bg-white/70 ${styles.text}`}>
+    <div className={`flex items-center gap-3 rounded-tc-md ${styles.bg} px-4 py-4 ring-1 ${styles.ring}`}>
+      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white ${styles.text}`}>
         <Icon size={18} />
       </span>
       <div className="min-w-0">
-        <p className={`text-xs font-semibold uppercase tracking-[0.18em] ${styles.text}`}>Tier</p>
-        <p className={`text-base font-semibold ${styles.text}`}>{tier}</p>
+        <p className={`text-xs font-semibold uppercase leading-4 tracking-[0.06em] ${styles.text}`}>Tier</p>
+        <p className={`text-base font-semibold leading-6 ${styles.text}`}>{tier}</p>
         {nextTier ? (
-          <p className="text-xs text-slate-600">
+          <p className="text-[13px] leading-5 tabular-nums text-tc-brand-body">
             {pointsToNextTier ?? 0} pts to {nextTier}
             {typeof progressPercent === 'number' ? ` · ${progressPercent}%` : ''}
           </p>
         ) : (
-          <p className="text-xs text-slate-600">Top tier reached</p>
+          <p className="text-[13px] leading-5 tabular-nums text-tc-brand-body">Top tier reached</p>
         )}
       </div>
     </div>

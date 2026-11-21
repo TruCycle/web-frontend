@@ -22,9 +22,9 @@ export function RescueTicker({ onItemClick }: RescueTickerProps) {
 
   if (events.length === 0) {
     return (
-      <div className="rounded-[20px] border border-dashed border-tc-app-primary/30 bg-tc-app-canvas px-4 py-3 text-sm text-tc-app-slate500">
+      <div className="rounded-tc-md bg-tc-brand-mintSoft p-4 text-sm leading-5 text-tc-brand-body">
         <span className="inline-flex items-center gap-2">
-          <Sparkles size={14} className="text-tc-shell-accent" />
+          <Sparkles size={14} className="shrink-0 text-tc-brand-deep" />
           Live rescues will appear here as the community spots and saves items.
         </span>
       </div>
@@ -33,10 +33,10 @@ export function RescueTicker({ onItemClick }: RescueTickerProps) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-tc-app-slate500">
+      <div className="flex items-center gap-2 text-xs font-semibold uppercase leading-4 tracking-[0.06em] text-tc-brand-muted">
         <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-tc-shell-accent opacity-60" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-tc-shell-accent" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-600 opacity-60" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-600" />
         </span>
         Live rescues
       </div>
@@ -49,22 +49,22 @@ export function RescueTicker({ onItemClick }: RescueTickerProps) {
                 type="button"
                 onClick={() => onItemClick?.(event)}
                 className={classNames(
-                  'tc-rescue-ticker-row flex w-full items-center justify-between gap-3 rounded-[16px] border bg-white px-3 py-2 text-left text-sm transition hover:-translate-y-0.5 hover:shadow-sm',
-                  isFlyTip ? 'border-rose-200 bg-rose-50/40' : 'border-tc-app-primary/25 bg-tc-app-canvas/40',
+                  'tc-rescue-ticker-row flex min-h-11 w-full items-center justify-between gap-3 rounded-tc-md border px-3 py-2 text-left text-sm transition hover:-translate-y-0.5 hover:shadow-tc-card',
+                  isFlyTip ? 'border-tc-brand-dangerLine bg-tc-brand-dangerSoft' : 'border-tc-brand-line bg-white',
                   index === 0 ? 'tc-rescue-ticker-pop' : '',
                 )}
               >
                 <div className="flex min-w-0 items-center gap-2">
                   {isFlyTip ? (
-                    <AlertTriangle size={16} className="shrink-0 text-rose-500" />
+                    <AlertTriangle size={16} className="shrink-0 text-tc-brand-danger" />
                   ) : (
-                    <Leaf size={16} className="shrink-0 text-tc-auth-link" />
+                    <Leaf size={16} className="shrink-0 text-tc-brand-deep" />
                   )}
-                  <span className="truncate font-medium text-slate-900">
+                  <span className="truncate font-medium text-tc-brand-ink">
                     {isFlyTip ? 'Fly-tip reported' : 'Rescued'}: {event.title}
                   </span>
                 </div>
-                <div className="flex shrink-0 items-center gap-2 text-xs text-slate-500">
+                <div className="flex shrink-0 items-center gap-2 text-xs tabular-nums text-tc-brand-muted">
                   {event.co2eKg != null ? (
                     <span className="hidden sm:inline">{event.co2eKg.toFixed(1)} kg CO2e</span>
                   ) : null}
