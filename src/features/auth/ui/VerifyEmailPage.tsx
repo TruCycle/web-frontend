@@ -107,17 +107,17 @@ export default function VerifyEmailPage() {
         </p>
       }
     >
-      <div className="mt-8 grid gap-5" aria-live="polite">
-        <div className="rounded-[0.9rem] border border-tc-auth-inputBorder bg-white p-6 text-center">
+      <div className="mt-6 grid gap-4" aria-live="polite">
+        <div className="rounded-tc-lg border border-tc-brand-line bg-white p-6 text-center">
           <div className="mx-auto flex max-w-md flex-col items-center gap-4">
             <span
               className={classNames(
                 'inline-flex h-14 w-14 items-center justify-center rounded-full',
                 status === 'success'
-                  ? 'bg-tc-shell-accent/20 text-tc-shell-bg'
+                  ? 'bg-tc-brand-mint text-tc-brand-onMint'
                   : status === 'error'
-                    ? 'bg-rose-100 text-rose-600'
-                    : 'bg-slate-100 text-slate-600',
+                    ? 'bg-tc-brand-dangerSoft text-tc-brand-danger'
+                    : 'bg-tc-brand-soft text-tc-brand-body',
               )}
             >
               {status === 'success' ? (
@@ -130,15 +130,15 @@ export default function VerifyEmailPage() {
             </span>
 
             {status === 'verifying' ? (
-              <p className="m-0 text-sm leading-7 text-tc-auth-formText">
+              <p className="m-0 text-sm leading-6 text-tc-brand-body">
                 Please wait while we verify your email address.
               </p>
             ) : status === 'success' ? (
-              <p className="m-0 text-sm leading-7 text-tc-auth-formText">
+              <p className="m-0 text-sm leading-6 text-tc-brand-body">
                 Verification complete. Sign in to start your session.
               </p>
             ) : (
-              <p className="m-0 text-sm leading-7 text-tc-auth-formText">
+              <p className="m-0 text-sm leading-6 text-tc-brand-body">
                 {errorMessage || 'We could not verify this email link.'}
               </p>
             )}
@@ -155,7 +155,7 @@ export default function VerifyEmailPage() {
           <div className="grid gap-4">
             {currentResult?.canRetry ? <button className={authPrimaryButtonClassName} type="button" onClick={() => setAttempt((value) => value + 1)}>Try this link again</button> : null}
             <form className="grid gap-3" onSubmit={(event) => { event.preventDefault(); void resend() }}>
-              <label className="grid gap-2 text-sm font-medium">Email address
+              <label className="grid gap-1.5 text-sm font-medium leading-5 text-tc-brand-ink">Email address
                 <input className={authInputClassName} type="email" autoComplete="email" required disabled={resendState === 'sending'} value={email} onChange={(event) => { setEmail(event.target.value); setResendState('idle') }} />
               </label>
               <button className={authPrimaryButtonClassName} type="submit" disabled={resendState === 'sending'} aria-busy={resendState === 'sending'}>

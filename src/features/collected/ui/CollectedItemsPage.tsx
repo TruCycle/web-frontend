@@ -118,31 +118,31 @@ export default function CollectedItemsPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="mx-auto w-full max-w-[1120px] space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">My Selected Items</h1>
-        <p className="text-slate-500">Track your claimed items and complete collections.</p>
+        <h1 className="text-[30px] font-semibold leading-9 tracking-[-0.02em] text-tc-brand-ink">My Selected Items</h1>
+        <p className="mt-1 text-base leading-6 text-tc-brand-body">Track your claimed items and complete collections.</p>
       </div>
 
-      {error ? <p className="text-sm text-rose-600">{error}</p> : null}
+      {error ? <p className="rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft px-4 py-3 text-sm text-tc-brand-danger">{error}</p> : null}
 
       {isLoading ? (
-        <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="space-y-3 rounded-tc-lg border border-tc-brand-line bg-white p-4 sm:p-6">
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={`collected-item-shimmer-${index}`}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-3"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-tc-md border border-tc-brand-line p-3"
             >
               <div className="flex items-center gap-3">
-                <span className="tc-shimmer-block block h-16 w-16 rounded-lg" />
+                <span className="tc-shimmer-block block h-16 w-16 rounded-tc-md" />
                 <div className="space-y-2">
                   <span className="tc-shimmer-block block h-5 w-40 rounded-md" />
                   <span className="tc-shimmer-block block h-4 w-48 rounded-md" />
                 </div>
               </div>
               <div className="flex gap-2">
-                <span className="tc-shimmer-block block h-9 w-24 rounded-xl" />
-                <span className="tc-shimmer-block block h-9 w-32 rounded-xl" />
+                <span className="tc-shimmer-block block h-9 w-24 rounded-tc-md" />
+                <span className="tc-shimmer-block block h-9 w-32 rounded-tc-md" />
               </div>
             </div>
           ))}
@@ -150,16 +150,16 @@ export default function CollectedItemsPage() {
       ) : null}
 
       {bannerItem ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#A6F4A5A6] bg-[#A4F5A60D] p-3">
-          <div className="flex items-start gap-3 ms-3">
-            <div className="inline-flex items-center justify-center rounded-full text-[#A4F5A6]">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-tc-lg border border-tc-brand-mintLine bg-tc-brand-mintSoft p-4">
+          <div className="flex items-start gap-3">
+            <div className="inline-flex items-center justify-center rounded-full text-tc-brand-deep">
               <CircleAlert size={20} strokeWidth={2} />
             </div>
             <div>
-              <h4 className="font-medium text-[#222222]">
+              <h4 className="font-semibold text-tc-brand-ink">
                 Item {bannerItem.item.title} is ready for pickup
               </h4>
-              <p className="text-sm text-[#222222BF]">
+              <p className="text-sm text-tc-brand-body">
                 Scan at pickup location to complete this collection.
               </p>
             </div>
@@ -169,12 +169,12 @@ export default function CollectedItemsPage() {
       ) : null}
 
       {!isLoading && !hasItems ? (
-        <div className="rounded-2xl bg-white p-8 text-center">
-          <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-lime-100">
-            <img src={cautionIcon} alt="Caution" className="h-7 w-7" />
+        <div className="rounded-tc-lg border border-tc-brand-line bg-white px-6 py-12 text-center">
+          <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-tc-brand-deep">
+            <img src={cautionIcon} alt="Caution" className="h-6 w-6" />
           </div>
-          <h2 className="mt-4 text-xl font-bold text-slate-900">No items collected yet</h2>
-          <p className="mx-auto mt-2 max-w-[45ch] text-sm text-slate-500">
+          <h2 className="mt-3 text-lg font-semibold leading-7 text-tc-brand-ink">No items collected yet</h2>
+          <p className="mx-auto mt-1 max-w-[45ch] text-sm leading-5 text-tc-brand-body">
             Once you claim an item and it&apos;s approved by the donor, it will appear here.
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
@@ -184,7 +184,7 @@ export default function CollectedItemsPage() {
       ) : null}
 
       {!isLoading && hasItems ? (
-        <div className="space-y-3 rounded-2xl bg-white p-4">
+        <div className="space-y-3 rounded-tc-lg border border-tc-brand-line bg-white p-4 sm:p-6">
           {items.map((item) => (
             <ItemRowCard
               key={item.claimId}
@@ -204,7 +204,7 @@ export default function CollectedItemsPage() {
                   {shouldShowQrPreviewAction(item) ? (
                     <Button
                       variant="primary"
-                      className="h-10 w-10 rounded-xl p-0"
+                      className="h-11 w-11 rounded-tc-md p-0"
                       onClick={() => setSelectedQrPreviewItem(item)}
                       aria-label="Open item QR code"
                       title="Open item QR code"
@@ -214,7 +214,7 @@ export default function CollectedItemsPage() {
                   ) : null}
                   <Button
                     variant="secondary"
-                    className="bg-[#F8FAFC] text-[#222222] ring-0 hover:bg-slate-100"
+                    className="shrink-0"
                     onClick={() => setSelectedItem(item)}
                   >
                     View Details
@@ -269,9 +269,9 @@ export default function CollectedItemsPage() {
         ariaLabel="Confirm collection"
       >
         <div className="space-y-5 p-6">
-          <h2 className="text-xl font-semibold">Confirm collection</h2>
+          <h2 className="text-xl font-semibold leading-7 tracking-[-0.015em] text-tc-brand-ink">Confirm collection</h2>
           <p>Confirm only after you have received {manualItem?.item.title} from the donor.</p>
-          {manualError ? <p role="alert" className="text-sm text-rose-700">{manualError}</p> : null}
+          {manualError ? <p role="alert" className="text-sm text-tc-brand-danger">{manualError}</p> : null}
           <div className="flex flex-wrap justify-end gap-3">
             <Button variant="secondary" disabled={isCollecting} onClick={() => setManualItem(null)}>Cancel</Button>
             <Button variant="primary" disabled={isCollecting} onClick={() => void confirmManualCollection()}>

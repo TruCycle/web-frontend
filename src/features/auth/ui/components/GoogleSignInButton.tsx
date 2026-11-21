@@ -98,10 +98,10 @@ export function GoogleSignInButton({
 
   return (
     <div className="grid gap-3">
-      <div className="flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-slate-400">
-        <span className="h-px flex-1 bg-slate-200" />
+      <div className="flex items-center gap-3 text-xs font-semibold uppercase leading-4 tracking-[0.06em] text-tc-brand-muted">
+        <span className="h-px flex-1 bg-tc-brand-line" />
         or
-        <span className="h-px flex-1 bg-slate-200" />
+        <span className="h-px flex-1 bg-tc-brand-line" />
       </div>
       <div ref={containerRef} className="flex justify-center" aria-busy={!isReady} />
     </div>

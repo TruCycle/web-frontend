@@ -12,14 +12,14 @@ export function ProfileBadges({ limit = 3 }: ProfileBadgesProps) {
   const visibleBadges = useMemo(() => earnedBadges.slice(0, limit), [earnedBadges, limit])
 
   return (
-    <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-5">
+    <section className="space-y-4 rounded-tc-lg border border-tc-brand-line bg-white p-6">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold text-slate-900">Badge Shelf</h2>
-        <span className="text-sm text-slate-500">{earnedBadges.length} earned</span>
+        <h2 className="text-xl font-semibold leading-7 tracking-[-0.015em] text-tc-brand-ink">Badge Shelf</h2>
+        <span className="text-[13px] leading-5 text-tc-brand-muted">{earnedBadges.length} earned</span>
       </div>
 
-      {isLoading ? <p className="text-sm text-slate-500">Loading badges...</p> : null}
-      {error ? <p className="text-sm text-rose-600">{error}</p> : null}
+      {isLoading ? <p className="text-sm text-tc-brand-body">Loading badges...</p> : null}
+      {error ? <p className="text-sm text-tc-brand-danger">{error}</p> : null}
 
       {!isLoading && !error ? (
         visibleBadges.length > 0 ? (
@@ -37,7 +37,7 @@ export function ProfileBadges({ limit = 3 }: ProfileBadgesProps) {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-slate-500">Your next badge will land here.</p>
+          <p className="text-sm text-tc-brand-body">Your next badge will land here.</p>
         )
       ) : null}
     </section>

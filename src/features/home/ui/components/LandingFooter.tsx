@@ -64,18 +64,18 @@ const socialLinks: readonly SocialLink[] = [
 
 export function LandingFooter() {
   return (
-    <footer className="bg-[#0B3322] px-6 py-14 text-white sm:py-16">
-      <div className="mx-auto max-w-7xl">
-        <div className="grid gap-12 lg:grid-cols-[310px_minmax(0,1fr)] lg:gap-[4.375rem]">
-          <div className="space-y-[1.125rem]">
-            <Link className="flex items-center gap-3 no-underline" to="/">
-              <img alt="TruCycle" className="h-9 w-9 rounded-full" src={logoSrc} />
-              <span className="text-[1.75rem] font-normal tracking-[-0.04em] text-white">
+    <footer className="bg-tc-brand-haze px-4 py-6 text-white sm:px-6">
+      <div className="mx-auto max-w-[1184px] rounded-tc-xl bg-tc-brand-deep px-6 pb-8 pt-10 sm:px-10 lg:px-16 lg:pt-14">
+        <div className="grid gap-10 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-14">
+          <div className="space-y-4">
+            <Link className="flex items-center gap-2.5 no-underline" to="/">
+              <img alt="TruCycle" className="h-8 w-8 rounded-full" src={logoSrc} />
+              <span className="text-lg font-semibold tracking-[-0.02em] text-white">
                 TruCycle
               </span>
             </Link>
 
-            <p className="max-w-[19rem] text-base leading-7 text-[#E8F6EE]">
+            <p className="max-w-[20rem] text-[15px] leading-6 text-tc-brand-onDeep">
               Neighbour-to-neighbour reuse for homes, studios, flats, and
               families.
             </p>
@@ -83,7 +83,7 @@ export function LandingFooter() {
           </div>
 
           <div className="flex flex-col gap-4 lg:items-end">
-            <p className="text-base font-semibold tracking-[0.02em] text-[#E8F6EE] lg:text-right">
+            <p className="text-sm font-semibold leading-5 text-white lg:text-right">
               Follow us on all social platforms
             </p>
 
@@ -92,7 +92,7 @@ export function LandingFooter() {
                 <a
                   key={label}
                   aria-label={label}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-[#E8F6EE] transition duration-200 hover:-translate-y-0.5 hover:border-tc-shell-accent hover:text-tc-shell-accent"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-tc-brand-deepLine bg-tc-brand-hover text-tc-brand-onDeep transition duration-200 hover:-translate-y-0.5 hover:border-tc-brand-mint hover:text-tc-brand-mint"
                   href={href}
                   rel="noreferrer"
                   target="_blank"
@@ -105,18 +105,18 @@ export function LandingFooter() {
           </div>
         </div>
 
-        <div className="mt-14 space-y-4">
-          <div className="h-px w-full bg-white/15" />
-          <div className="flex flex-col gap-4 text-sm font-medium tracking-[0.04em] text-[#E8F6EE] sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 space-y-5">
+          <div className="h-px w-full bg-tc-brand-deepLine" />
+          <div className="flex flex-col gap-4 text-[13px] leading-5 text-tc-brand-onDeep sm:flex-row sm:items-center sm:justify-between">
             <span>{new Date().getFullYear()} TruCycle. Free neighbour-to-neighbour handovers.</span>
-            <div className="flex flex-wrap gap-5">
-              <Link className="text-[#E8F6EE] no-underline" to="/privacy">
+            <div className="flex flex-wrap gap-x-5 gap-y-1">
+              <Link className="inline-flex min-h-11 items-center text-tc-brand-onDeep no-underline transition-colors hover:text-white" to="/privacy">
                 Privacy
               </Link>
-              <Link className="text-[#E8F6EE] no-underline" to="/terms">
+              <Link className="inline-flex min-h-11 items-center text-tc-brand-onDeep no-underline transition-colors hover:text-white" to="/terms">
                 Terms
               </Link>
-              <a className="text-[#E8F6EE] no-underline" href="mailto:hello@trucycle.co.uk?subject=Accessibility">
+              <a className="inline-flex min-h-11 items-center text-tc-brand-onDeep no-underline transition-colors hover:text-white" href="mailto:hello@trucycle.co.uk?subject=Accessibility">
                 Email us about accessibility
               </a>
             </div>

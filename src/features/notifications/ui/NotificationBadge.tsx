@@ -12,7 +12,7 @@ export function NotificationBadge({
   }
 
   return (
-    <span className="inline-flex h-[1.35rem] min-w-[1.35rem] items-center justify-center rounded-full bg-red-700 px-[0.35rem] text-xs font-bold text-white">
+    <span className="inline-flex h-[1.35rem] min-w-[1.35rem] items-center justify-center rounded-full bg-tc-brand-mint px-[0.35rem] text-xs font-semibold text-tc-brand-onMint">
       {unreadCount}
     </span>
   )

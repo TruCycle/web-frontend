@@ -44,8 +44,8 @@ export const QRCodeDialog = ({
     <Modal isOpen={isOpen} onClose={handleClose} position="center">
       <div className="flex flex-col gap-5 p-6">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Scan to collect</h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <h2 className="pr-12 text-xl leading-7 font-semibold tracking-[-0.015em] text-tc-brand-ink">Scan to collect</h2>
+          <p className="mt-1 text-sm leading-5 text-tc-brand-body">
             Point your camera at the item QR. We&apos;ll register your collection automatically.
           </p>
         </div>
@@ -62,28 +62,28 @@ export const QRCodeDialog = ({
             />
           </div>
 
-          {scannerError ? <p className="text-xs text-rose-600">{scannerError}</p> : null}
+          {scannerError ? <p className="text-[13px] leading-5 text-tc-brand-danger">{scannerError}</p> : null}
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-slate-200" />
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <div className="h-px flex-1 bg-tc-brand-line" />
+          <span className="text-xs font-semibold uppercase tracking-[0.06em] text-tc-brand-muted">
             scanned payload
           </span>
-          <div className="h-px flex-1 bg-slate-200" />
+          <div className="h-px flex-1 bg-tc-brand-line" />
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">QR payload or item id</label>
+          <label className="text-sm font-semibold text-tc-brand-ink">QR payload or item id</label>
           <input
             type="text"
-            className="h-11 w-full rounded-xl border border-slate-200 bg-slate-100 px-3 text-sm text-slate-800 outline-none disabled:cursor-not-allowed disabled:text-slate-500"
+            className="h-11 w-full rounded-tc-md border border-tc-brand-control bg-tc-brand-soft px-3.5 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted disabled:cursor-not-allowed disabled:text-tc-brand-muted"
             placeholder="Waiting for QR scan..."
             value={payload}
             disabled
             readOnly
           />
-          <p className="text-xs leading-5 text-slate-500">
+          <p className="text-[13px] leading-5 text-tc-brand-muted">
             This field is filled automatically from camera scan.
           </p>
         </div>
@@ -93,7 +93,7 @@ export const QRCodeDialog = ({
             Cancel
           </Button>
           <Button
-            className="min-w-[110px]"
+            className="min-w-[110px] !bg-tc-brand-deep !text-white hover:!bg-tc-brand-hover"
             disabled={!hasScannedPayload || isCollecting}
             onClick={() => {
               void handleCollect()

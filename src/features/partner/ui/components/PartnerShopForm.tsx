@@ -165,12 +165,12 @@ export function PartnerShopForm({
   return (
     <form className="grid gap-4" onSubmit={(event) => void handleSubmit(event)}>
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="grid gap-1 text-sm font-medium text-slate-700">
+        <label className="grid gap-1.5 text-sm font-medium text-tc-brand-ink">
           Shop name
           <input
             value={name}
             onChange={(event) => setName(event.currentTarget.value)}
-            className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+            className="h-11 rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
             placeholder="Enter shop name"
             minLength={2}
             maxLength={120}
@@ -178,12 +178,12 @@ export function PartnerShopForm({
           />
         </label>
 
-        <label className="grid gap-1 text-sm font-medium text-slate-700">
+        <label className="grid gap-1.5 text-sm font-medium text-tc-brand-ink">
           Postcode
           <input
             value={postcode}
             onChange={(event) => setPostcode(event.currentTarget.value)}
-            className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+            className="h-11 rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
             placeholder="SW1A 1AA"
             autoComplete="postal-code"
             maxLength={32}
@@ -192,12 +192,12 @@ export function PartnerShopForm({
         </label>
       </div>
 
-      <label className="grid gap-1 text-sm font-medium text-slate-700">
+      <label className="grid gap-1.5 text-sm font-medium text-tc-brand-ink">
         Address line
         <input
           value={addressLine}
           onChange={(event) => setAddressLine(event.currentTarget.value)}
-          className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+          className="h-11 rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
           placeholder="Street address or landmark"
           autoComplete="street-address"
           maxLength={255}
@@ -206,30 +206,30 @@ export function PartnerShopForm({
       </label>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="grid gap-1 text-sm font-medium text-slate-700">
+        <label className="grid gap-1.5 text-sm font-medium text-tc-brand-ink">
           Phone number
           <input
             value={phoneNumber}
             onChange={(event) => setPhoneNumber(event.currentTarget.value)}
-            className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+            className="h-11 rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
             placeholder="+44 20 7946 0958"
           />
         </label>
 
-        <label className="grid gap-1 text-sm font-medium text-slate-700">
+        <label className="grid gap-1.5 text-sm font-medium text-tc-brand-ink">
           Operational notes
           <input
             value={operationalNotes}
             onChange={(event) => setOperationalNotes(event.currentTarget.value)}
-            className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+            className="h-11 rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
             placeholder="Pickup instructions"
           />
         </label>
       </div>
 
-      <section className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-        <h3 className="text-sm font-semibold text-slate-800">Opening hours</h3>
-        <p className="mt-1 text-xs text-slate-500">Choose days and time window for this shop.</p>
+      <section className="border-t border-tc-brand-line pt-4">
+        <h3 className="text-sm font-semibold text-tc-brand-ink">Opening hours</h3>
+        <p className="mt-0.5 text-[13px] leading-5 text-tc-brand-body">Choose days and time window for this shop.</p>
 
         <div className="mt-3 flex flex-wrap gap-2">
           {dayOptions.map((day) => {
@@ -240,10 +240,10 @@ export function PartnerShopForm({
                 type="button"
                 onClick={() => toggleDay(day)}
                 className={classNames(
-                  'inline-flex h-9 min-w-11 items-center justify-center rounded-lg border px-3 text-sm font-medium transition',
+                  'inline-flex h-9 min-w-11 items-center justify-center rounded-full border px-3 text-[13px] font-semibold transition',
                   isSelected
-                    ? 'border-lime-500 bg-lime-100 text-lime-800'
-                    : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-100',
+                    ? 'border-tc-brand-deep bg-tc-brand-deep text-white'
+                    : 'border-tc-brand-control bg-white text-tc-brand-ink hover:bg-tc-brand-soft',
                 )}
               >
                 {day}
@@ -252,31 +252,31 @@ export function PartnerShopForm({
           })}
         </div>
 
-        <div className="mt-3 grid gap-3 md:grid-cols-2">
-          <label className="grid gap-1 text-sm font-medium text-slate-700">
+        <div className="mt-3 grid gap-4 md:grid-cols-2">
+          <label className="grid gap-1.5 text-sm font-medium text-tc-brand-ink">
             Open time
             <input
               type="time"
               value={openTime}
               onChange={(event) => setOpenTime(event.currentTarget.value)}
-              className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+              className="h-11 rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
             />
           </label>
-          <label className="grid gap-1 text-sm font-medium text-slate-700">
+          <label className="grid gap-1.5 text-sm font-medium text-tc-brand-ink">
             Close time
             <input
               type="time"
               value={closeTime}
               onChange={(event) => setCloseTime(event.currentTarget.value)}
-              className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+              className="h-11 rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
             />
           </label>
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-        <h3 className="text-sm font-semibold text-slate-800">Acceptable categories</h3>
-        <p className="mt-1 text-xs text-slate-500">Select default categories and add custom ones.</p>
+      <section className="border-t border-tc-brand-line pt-4">
+        <h3 className="text-sm font-semibold text-tc-brand-ink">Acceptable categories</h3>
+        <p className="mt-0.5 text-[13px] leading-5 text-tc-brand-body">Select default categories and add custom ones.</p>
 
         <div className="mt-3 flex flex-wrap gap-2">
           {categoryOptions.map((category) => {
@@ -287,10 +287,10 @@ export function PartnerShopForm({
                 type="button"
                 onClick={() => toggleCategory(category)}
                 className={classNames(
-                  'inline-flex h-9 items-center rounded-lg border px-3 text-sm font-medium transition',
+                  'inline-flex h-9 items-center rounded-full border px-3.5 text-[13px] font-semibold transition',
                   isSelected
-                    ? 'border-lime-500 bg-lime-100 text-lime-800'
-                    : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-100',
+                    ? 'border-tc-brand-deep bg-tc-brand-deep text-white'
+                    : 'border-tc-brand-control bg-white text-tc-brand-ink hover:bg-tc-brand-soft',
                 )}
               >
                 {category}
@@ -303,7 +303,7 @@ export function PartnerShopForm({
           <input
             value={customCategory}
             onChange={(event) => setCustomCategory(event.currentTarget.value)}
-            className="h-10 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+            className="h-11 min-w-0 flex-1 rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
             placeholder="Add custom category"
             onKeyDown={(event) => {
               if (event.key === 'Enter') {
@@ -315,7 +315,7 @@ export function PartnerShopForm({
           <Button
             type="button"
             variant="secondary"
-            className="h-10 rounded-xl px-4"
+            className="h-11 px-4 text-sm font-semibold"
             onClick={addCustomCategory}
           >
             <Plus size={14} />
@@ -328,12 +328,12 @@ export function PartnerShopForm({
             {selectedCategories.map((category) => (
               <span
                 key={category}
-                className="inline-flex items-center gap-1 rounded-full border border-lime-200 bg-lime-50 px-3 py-1 text-xs font-medium text-lime-800"
+                className="inline-flex items-center gap-1 rounded-full bg-tc-brand-mintSoft py-1 pl-2.5 pr-1.5 text-xs font-semibold text-tc-brand-deep"
               >
                 {category}
                 <button
                   type="button"
-                  className="inline-flex h-4 w-4 items-center justify-center rounded-full text-lime-700 hover:bg-lime-200"
+                  className="inline-flex h-4 w-4 items-center justify-center rounded-full text-tc-brand-deep hover:bg-tc-brand-mintLine"
                   onClick={() => toggleCategory(category)}
                   aria-label={`Remove ${category}`}
                 >
@@ -346,18 +346,18 @@ export function PartnerShopForm({
       </section>
 
       {validationError ? (
-        <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+        <p className="rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft px-4 py-3 text-sm text-tc-brand-danger">
           {validationError}
         </p>
       ) : null}
 
-      <div className="flex flex-wrap justify-end gap-2">
+      <div className="flex flex-wrap justify-end gap-2.5 border-t border-tc-brand-line pt-4">
         {onCancel ? (
-          <Button type="button" variant="secondary" className="h-11 rounded-xl px-5" onClick={onCancel}>
+          <Button type="button" variant="secondary" className="h-11 px-5 text-sm font-semibold" onClick={onCancel}>
             Cancel
           </Button>
         ) : null}
-        <Button type="submit" variant="primary" className="h-11 rounded-xl px-5" disabled={isSubmitting}>
+        <Button type="submit" variant="primary" className="h-11 px-5 text-sm font-semibold" disabled={isSubmitting}>
           {submitLabel}
         </Button>
       </div>

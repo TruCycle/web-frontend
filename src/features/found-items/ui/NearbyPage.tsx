@@ -34,10 +34,10 @@ function Chip({ label, isActive, onClick }: ChipProps) {
       type="button"
       onClick={onClick}
       className={classNames(
-        'whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold transition',
+        'min-h-9 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm font-medium transition',
         isActive
-          ? 'bg-[#34DA45] text-[#0F1F08] shadow-sm'
-          : 'bg-white text-slate-600 hover:bg-[#F4FAEA]',
+          ? 'border-tc-brand-deep bg-tc-brand-deep text-white'
+          : 'border-tc-brand-control bg-white text-tc-brand-deep hover:bg-tc-brand-soft',
       )}
     >
       {label}
@@ -66,14 +66,14 @@ export default function NearbyPage() {
     : 'Within 5 km of your area'
 
   return (
-    <div className="space-y-5">
+    <div className="mx-auto w-full max-w-[1120px] space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="flex items-center gap-2 text-3xl font-bold tracking-[-0.03em] text-slate-950">
-            <Compass size={26} className="text-[#3A7618]" />
+          <h1 className="flex items-center gap-2 text-[30px] leading-9 font-semibold tracking-[-0.02em] text-tc-brand-ink">
+            <Compass size={26} className="text-tc-brand-ink" />
             Nearby
           </h1>
-          <p className="mt-1 text-sm text-slate-500">{headerSubtitle} &middot; sorted by distance</p>
+          <p className="mt-1 text-base leading-6 text-tc-brand-body">{headerSubtitle} &middot; sorted by distance</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -81,7 +81,7 @@ export default function NearbyPage() {
             onClick={() => {
               void refresh()
             }}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:text-slate-950"
+            className="inline-flex min-h-11 items-center gap-2 rounded-tc-md border border-tc-brand-control bg-white px-4 py-2 text-sm font-semibold text-tc-brand-deep transition hover:bg-tc-brand-soft"
           >
             {isLoading ? <LoaderCircle size={14} className="animate-spin" /> : <RefreshCw size={14} />}
             Refresh
@@ -89,7 +89,7 @@ export default function NearbyPage() {
           <button
             type="button"
             onClick={() => navigate('/found-items/post')}
-            className="inline-flex items-center gap-2 rounded-full bg-[#111611] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1B231B]"
+            className="inline-flex min-h-11 items-center gap-2 rounded-tc-md bg-tc-brand-deep px-4 py-2 text-sm font-semibold text-white transition hover:bg-tc-brand-hover"
           >
             <Camera size={14} />
             Spot one yourself
@@ -98,12 +98,12 @@ export default function NearbyPage() {
       </div>
 
       <div className="space-y-2">
-        <div className="flex flex-wrap gap-2 rounded-full bg-[#F2F4EC] p-1.5">
+        <div className="flex flex-wrap gap-2">
           <Chip label="All" isActive={statusChip === 'all'} onClick={() => setStatusChip('all')} />
           <Chip label="Live" isActive={statusChip === 'available'} onClick={() => setStatusChip('available')} />
           <Chip label="Claimed" isActive={statusChip === 'claimed'} onClick={() => setStatusChip('claimed')} />
         </div>
-        <div className="flex flex-wrap gap-2 rounded-full bg-[#F2F4EC] p-1.5">
+        <div className="flex flex-wrap gap-2">
           <Chip
             label="All categories"
             isActive={categoryChip === 'all'}
@@ -120,17 +120,17 @@ export default function NearbyPage() {
         </div>
       </div>
 
-      {error ? <p className="text-sm text-rose-600">{error}</p> : null}
+      {error ? <p className="rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft px-4 py-3 text-sm text-tc-brand-danger">{error}</p> : null}
 
       {isLoading && visibleItems.length === 0 ? (
-        <div className="flex items-center justify-center rounded-[24px] border border-dashed border-slate-200 bg-white p-12 text-sm text-slate-500">
+        <div className="flex items-center justify-center rounded-tc-lg border border-dashed border-tc-brand-control bg-white p-12 text-sm text-tc-brand-body">
           <LoaderCircle size={16} className="mr-2 animate-spin" />
           Finding spots near you...
         </div>
       ) : visibleItems.length === 0 ? (
-        <div className="rounded-[24px] border border-dashed border-slate-200 bg-white p-10 text-center">
-          <p className="text-base font-semibold text-slate-900">No spots within 5 km right now</p>
-          <p className="mt-1 text-sm text-slate-500">
+        <div className="rounded-tc-lg border border-dashed border-tc-brand-control bg-white p-8 text-center">
+          <p className="text-base font-semibold text-tc-brand-ink">No spots within 5 km right now</p>
+          <p className="mt-1 text-base leading-6 text-tc-brand-body">
             Be the first &mdash; tap "Spot one yourself" to add the next item to your community board.
           </p>
         </div>
@@ -148,11 +148,11 @@ export default function NearbyPage() {
         </div>
       )}
 
-      <p className="text-center text-xs text-slate-400">
+      <p className="text-center text-xs text-tc-brand-muted">
         Tap a card to open it on the live map &middot;{' '}
         <button
           type="button"
-          className="underline-offset-2 hover:underline"
+          className="font-semibold text-tc-brand-deep underline underline-offset-4 hover:text-black"
           onClick={() => navigate('/map')}
         >
           See full map

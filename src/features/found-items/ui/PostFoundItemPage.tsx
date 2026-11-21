@@ -83,14 +83,14 @@ const categoryMeta: Record<
 }
 
 const confettiPieces = [
-  { left: '7%', top: '16%', rotate: -12, color: 'bg-[#9EDB7D]' },
-  { left: '31%', top: '9%', rotate: 9, color: 'bg-[#7CC54D]' },
-  { left: '63%', top: '23%', rotate: -14, color: 'bg-[#F0B23B]' },
-  { left: '84%', top: '18%', rotate: 15, color: 'bg-[#5172E4]' },
-  { left: '13%', top: '58%', rotate: -18, color: 'bg-[#8ACD73]' },
-  { left: '47%', top: '67%', rotate: 4, color: 'bg-[#5A79E9]' },
-  { left: '76%', top: '52%', rotate: 16, color: 'bg-[#9EDB7D]' },
-  { left: '32%', top: '31%', rotate: -24, color: 'bg-[#EF5F5F]' },
+  { left: '7%', top: '16%', rotate: -12, color: 'bg-tc-brand-mint' },
+  { left: '31%', top: '9%', rotate: 9, color: 'bg-tc-brand-deep' },
+  { left: '63%', top: '23%', rotate: -14, color: 'bg-tc-brand-mintSoft' },
+  { left: '84%', top: '18%', rotate: 15, color: 'bg-tc-brand-mint' },
+  { left: '13%', top: '58%', rotate: -18, color: 'bg-tc-brand-mintLine' },
+  { left: '47%', top: '67%', rotate: 4, color: 'bg-tc-brand-deep' },
+  { left: '76%', top: '52%', rotate: 16, color: 'bg-tc-brand-mint' },
+  { left: '32%', top: '31%', rotate: -24, color: 'bg-tc-brand-mintSoft' },
 ] as const
 
 function scaleCatalogMetric(metric: number, typicalWeightKg: number, resolvedWeightKg: number): number {
@@ -139,20 +139,20 @@ function buildDescription(
 
 function DesktopOnlyNotice() {
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-14rem)] max-w-[560px] items-center justify-center px-4 py-8">
-      <div className="w-full rounded-[32px] border border-slate-200 bg-white p-8 text-center shadow-sm">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-lime-100 text-[#305B1D]">
+    <div className="mx-auto flex min-h-[calc(100vh-14rem)] max-w-[480px] items-center justify-center px-4 py-8">
+      <div className="w-full rounded-tc-lg border border-tc-brand-line bg-white px-6 py-12 text-center sm:px-10 sm:py-14">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-tc-brand-mintSoft text-tc-brand-deep">
           <Smartphone size={28} />
         </div>
-        <h1 className="mt-6 text-2xl font-bold text-slate-900">Use a mobile device to post</h1>
-        <p className="mt-3 text-sm leading-6 text-slate-500">
+        <h1 className="mt-4 text-lg leading-7 font-semibold text-tc-brand-ink">Use a mobile device to post</h1>
+        <p className="mx-auto mt-2.5 max-w-[380px] text-sm leading-5 text-tc-brand-body">
           Found-item posting now uses the mobile camera and live GPS flow. Open this page on your
           phone to capture the item and lock the location.
         </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
           <Link
             to="/found-items"
-            className="inline-flex items-center justify-center rounded-full bg-[#111611] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#1C241C]"
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-tc-brand-deep px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-tc-brand-hover"
           >
             Back to found items
           </Link>
@@ -608,7 +608,7 @@ export default function PostFoundItemPage() {
     const postedImpactPoints = createdItem?.impactPoints ?? 0
 
     return (
-      <div className="min-h-[100dvh] bg-[linear-gradient(180deg,#F4F9E8_0%,#F8FBF0_100%)] px-4 pb-10 pt-16 text-center text-slate-900">
+      <div className="min-h-[100dvh] bg-tc-brand-haze px-4 pb-10 pt-16 text-center text-tc-brand-ink">
         {/* Off-screen rescue card used to render a PNG for sharing. */}
         <div
           aria-hidden
@@ -637,30 +637,30 @@ export default function PostFoundItemPage() {
         </div>
 
         <div className="relative mx-auto flex max-w-[420px] flex-col items-center pt-28">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#CFF1A4] text-[#101610] shadow-[0_18px_40px_rgba(154,214,104,0.35)]">
+          <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-tc-brand-mint text-tc-brand-onMint">
             <Check size={34} strokeWidth={3} />
           </div>
-          <p className="mt-7 text-[0.86rem] font-bold uppercase tracking-[0.22em] text-[#55741D]">
+          <p className="mt-6 text-xs leading-4 font-semibold uppercase tracking-[0.06em] text-tc-brand-muted">
             Spot posted
           </p>
-          <h1 className="mt-3 text-[2.4rem] font-bold leading-[1.02] tracking-[-0.03em] text-[#111611]">
+          <h1 className="mt-2 text-[26px] leading-8 font-semibold tracking-[-0.02em] text-tc-brand-ink">
             Board impact confirmed
           </h1>
-          <p className="mt-4 max-w-[320px] text-base leading-7 text-slate-700">
+          <p className="mt-3 max-w-[320px] text-sm leading-6 text-tc-brand-body">
             {postedTitle} is now posted in {postedPostcode}. A post does not confirm that an item has been handed over.
           </p>
 
-          <p className="mt-10 rounded-[24px] bg-white px-4 py-4 text-left text-sm leading-6 text-slate-600">Keep the post up to date if the item is no longer available. Confirm its condition and the owner&apos;s permission before arranging a handover.</p>
+          <p className="mt-8 rounded-tc-lg border border-tc-brand-mintLine bg-tc-brand-mintSoft p-4 text-left text-[13px] leading-5 text-tc-brand-body">Keep the post up to date if the item is no longer available. Confirm its condition and the owner&apos;s permission before arranging a handover.</p>
 
-          <p className="mt-5 max-w-[320px] text-sm leading-6 text-slate-500">
+          <p className="mt-4 max-w-[320px] text-[13px] leading-5 text-tc-brand-muted">
             You can review your recorded activity in My Impact.
           </p>
 
-          <div className="mt-16 w-full space-y-4">
+          <div className="mt-10 w-full space-y-2.5">
             <button
               type="button"
               disabled={isPreparingShare}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#111611] px-5 py-4 text-base font-semibold text-white transition hover:bg-[#1B231B] disabled:opacity-60"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-tc-brand-deep px-5 py-3 text-base font-semibold text-white transition hover:bg-tc-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
               onClick={() => {
                 void handleShare()
               }}
@@ -675,7 +675,7 @@ export default function PostFoundItemPage() {
 
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-4 text-base font-semibold text-[#111611] transition hover:bg-slate-50"
+              className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-tc-brand-control bg-white px-5 py-3 text-base font-semibold text-tc-brand-ink transition hover:bg-tc-brand-soft"
               onClick={resetDraft}
             >
               Spot another
@@ -684,7 +684,7 @@ export default function PostFoundItemPage() {
 
           <button
             type="button"
-            className="mt-7 text-sm font-medium text-[#446B16] transition hover:text-[#29470C]"
+            className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold text-tc-brand-deep underline underline-offset-4 transition hover:text-black"
             onClick={() => {
               navigate(createdItem ? `/map?highlight=${encodeURIComponent(createdItem.id)}` : '/map')
             }}
@@ -697,12 +697,12 @@ export default function PostFoundItemPage() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-white px-4 pb-8 pt-5 text-slate-900">
+    <div className="min-h-[100dvh] bg-tc-brand-haze px-4 pb-8 pt-5 text-tc-brand-ink">
       <div className="mx-auto max-w-[440px] space-y-5">
         <div className="flex items-center gap-3 pt-1">
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F2F3EC] text-slate-900 transition hover:bg-[#E8EADF]"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-tc-brand-control bg-white text-tc-brand-ink transition hover:bg-tc-brand-soft"
             onClick={() => {
               if (step === 'details') {
                 setStep('capture')
@@ -716,19 +716,19 @@ export default function PostFoundItemPage() {
             <ArrowLeft size={18} />
           </button>
           <div>
-            <h1 className="mb-0 text-[1.95rem] font-bold tracking-[-0.03em] text-slate-950">
+            <h1 className="mb-0 text-xl leading-7 font-semibold tracking-[-0.015em] text-tc-brand-ink">
               {step === 'review' ? 'Ready to post' : 'Confirm details'}
             </h1>
           </div>
         </div>
 
         {postcodeStatus === 'loading' ? (
-          <p role="status" className="inline-flex items-center gap-2 text-sm text-slate-500">
+          <p role="status" className="inline-flex items-center gap-2 text-[13px] leading-5 text-tc-brand-muted">
             <LoaderCircle size={14} className="animate-spin" />
             Identifying postcode for this pin…
           </p>
         ) : postcodeStatus === 'error' ? (
-          <div role="alert" className="space-y-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+          <div role="alert" className="space-y-3 rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft p-4 text-sm text-tc-brand-danger">
             <p>{postcodeError}</p>
             <Button type="button" variant="secondary" onClick={retryPostcode}>Retry postcode</Button>
           </div>
@@ -738,16 +738,16 @@ export default function PostFoundItemPage() {
           <>
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-semibold text-slate-700">Captured photo</span>
+                <span className="text-sm font-semibold text-tc-brand-ink">Captured photo</span>
                 <button
                   type="button"
                   onClick={() => setStep('capture')}
-                  className="text-xs font-semibold text-[#446B16] transition hover:text-[#29470C] hover:underline"
+                  className="-my-2 inline-flex min-h-11 items-center text-[13px] font-semibold text-tc-brand-deep underline underline-offset-4 transition hover:text-black"
                 >
                   Retake photo
                 </button>
               </div>
-              <div className="relative h-60 w-full overflow-hidden rounded-[22px] border border-slate-200 bg-slate-100 shadow-sm">
+              <div className="relative h-60 w-full overflow-hidden rounded-tc-lg border border-tc-brand-line bg-tc-brand-soft">
                 {previewUrl || uploadedImageUrl ? (
                   <img
                     src={previewUrl || uploadedImageUrl}
@@ -755,16 +755,16 @@ export default function PostFoundItemPage() {
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
+                  <div className="flex h-full w-full items-center justify-center text-sm text-tc-brand-muted">
                     No preview available
                   </div>
                 )}
               </div>
               {adjustedLocation ? (
-                <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                  <MapPin size={14} className="shrink-0 text-[#446B16]" />
+                <div className="flex items-center gap-1.5 text-xs leading-4 text-tc-brand-body">
+                  <MapPin size={14} className="shrink-0 text-tc-brand-deep" />
                   <span>
-                    <span className="font-semibold text-slate-800">{displayPostcode}</span>
+                    <span className="font-semibold text-tc-brand-ink">{displayPostcode}</span>
                     {' · '}
                     {adjustedLocation.latitude.toFixed(5)}, {adjustedLocation.longitude.toFixed(5)}
                   </span>
@@ -773,23 +773,23 @@ export default function PostFoundItemPage() {
             </div>
 
             {locationError ? (
-              <div className="flex items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              <div className="flex items-center justify-between gap-3 rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft px-4 py-3 text-sm text-tc-brand-danger">
                 <span>{locationError}</span>
                 <Button type="button" variant="secondary" onClick={requestLiveLocation}>
                   Retry
                 </Button>
               </div>
             ) : isLocating ? (
-              <div className="inline-flex items-center gap-2 rounded-full bg-[#F5F7EE] px-3 py-2 text-sm text-slate-500">
+              <div className="inline-flex items-center gap-2 rounded-full bg-tc-brand-soft px-3 py-2 text-[13px] leading-5 text-tc-brand-body">
                 <LoaderCircle size={14} className="animate-spin" />
                 Locking your location...
               </div>
             ) : null}
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700">Catalog search</span>
+              <span className="text-sm font-semibold text-tc-brand-ink">Catalog search</span>
               <input
-                className="h-14 w-full rounded-[18px] border border-slate-200 px-4 text-lg text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
+                className="h-12 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-base text-tc-brand-ink outline-none transition placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
                 value={itemName}
                 onChange={(event) => setItemName(event.target.value)}
                 placeholder={categoryMeta[category].searchPlaceholder}
@@ -797,10 +797,10 @@ export default function PostFoundItemPage() {
             </label>
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700">Item category</span>
+              <span className="text-sm font-semibold text-tc-brand-ink">Item category</span>
               <div className="relative">
                 <select
-                  className="h-14 w-full appearance-none rounded-[18px] border border-slate-200 bg-white px-4 pr-12 text-lg text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
+                  className="h-12 w-full appearance-none rounded-tc-md border border-tc-brand-control bg-white px-3.5 pr-12 text-base text-tc-brand-ink outline-none transition placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
                   value={category}
                   onChange={(event) => {
                     setCategory(event.target.value as FoundItemCategory)
@@ -822,14 +822,14 @@ export default function PostFoundItemPage() {
                 </select>
                 <ChevronRight
                   size={20}
-                  className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 rotate-90 text-slate-400"
+                  className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 rotate-90 text-tc-brand-muted"
                 />
               </div>
-              <p className="text-sm text-slate-500">Only categories with carbon catalog coverage can be posted from this flow.</p>
+              <p className="text-[13px] leading-5 text-tc-brand-muted">Only categories with carbon catalog coverage can be posted from this flow.</p>
             </label>
 
             {(isClassifying || smartHint) && env.enableSmartSpot ? (
-              <div className="flex items-center justify-between gap-3 rounded-[18px] border border-[#D7E8C2] bg-[#F4FAEA] px-4 py-3 text-sm text-[#3A5C12]">
+              <div className="flex items-center justify-between gap-3 rounded-tc-md border border-tc-brand-mintLine bg-tc-brand-mintSoft px-3.5 py-2.5 text-sm text-tc-brand-ink">
                 {isClassifying ? (
                   <span className="inline-flex items-center gap-2">
                     <LoaderCircle size={14} className="animate-spin" />
@@ -840,13 +840,13 @@ export default function PostFoundItemPage() {
                     <span>
                       <span className="font-semibold">Auto-detected:</span>{' '}
                       {smartHint.displayLabel}
-                      <span className="ml-2 text-xs text-[#55741D]">
+                      <span className="ml-2 text-xs text-tc-brand-body">
                         {Math.round(smartHint.confidence * 100)}% confident
                       </span>
                     </span>
                     <button
                       type="button"
-                      className="text-xs font-semibold text-[#3A5C12] underline-offset-4 hover:underline"
+                      className="-my-2 inline-flex min-h-11 shrink-0 items-center text-[13px] font-semibold text-tc-brand-deep underline underline-offset-4 hover:text-black"
                       onClick={() => setSmartHint(null)}
                     >
                       Change
@@ -858,16 +858,16 @@ export default function PostFoundItemPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-semibold text-slate-700">Catalog matches</span>
+                <span className="text-sm font-semibold text-tc-brand-ink">Catalog matches</span>
                 {isLoadingCatalog ? (
-                  <span className="inline-flex items-center gap-2 text-xs text-slate-500">
+                  <span className="inline-flex items-center gap-2 text-xs text-tc-brand-muted">
                     <LoaderCircle size={12} className="animate-spin" />
                     Loading
                   </span>
                 ) : null}
               </div>
 
-              {catalogError ? <p className="text-sm text-amber-700">{catalogError}</p> : null}
+              {catalogError ? <p className="text-[13px] leading-5 text-tc-brand-danger">{catalogError}</p> : null}
 
               <div className="grid gap-2">
                 {catalogEntries.map((entry) => {
@@ -878,10 +878,10 @@ export default function PostFoundItemPage() {
                       key={`${entry.sourceCategory}-${entry.subcategory}-${entry.item}`}
                       type="button"
                       className={classNames(
-                        'rounded-[18px] border px-4 py-3 text-left transition',
+                        'min-h-11 rounded-tc-md border px-3.5 py-3 text-left transition',
                         isSelected
-                          ? 'border-[#87C15F] bg-[#F4FAEA] shadow-sm'
-                          : 'border-slate-200 bg-white hover:border-[#D7E8C2] hover:bg-[#FAFCF6]',
+                          ? 'border-tc-brand-deep bg-tc-brand-mintSoft'
+                          : 'border-tc-brand-line bg-white hover:border-tc-brand-control hover:bg-tc-brand-soft',
                       )}
                       onClick={() => {
                         setSelectedCatalogEntry(entry)
@@ -891,13 +891,13 @@ export default function PostFoundItemPage() {
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <p className="font-semibold text-slate-950">{entry.item}</p>
-                          <p className="mt-1 text-sm text-slate-500">
+                          <p className="text-sm font-semibold text-tc-brand-ink">{entry.item}</p>
+                          <p className="mt-0.5 text-[13px] leading-5 text-tc-brand-muted">
                             {entry.sourceCategory} · {entry.subcategory}
                           </p>
                         </div>
-                        <div className="text-right text-sm text-slate-500">
-                          <p className="font-semibold text-[#55741D]">{entry.impactPoints} pts</p>
+                        <div className="shrink-0 text-right text-[13px] leading-5 text-tc-brand-muted">
+                          <p className="font-semibold tabular-nums text-tc-brand-ink">{entry.impactPoints} pts</p>
                           <p>Item profile</p>
                         </div>
                       </div>
@@ -907,18 +907,18 @@ export default function PostFoundItemPage() {
               </div>
 
               {selectedCatalogEntry ? (
-                <p className="text-sm text-slate-500">
+                <p className="text-[13px] leading-5 text-tc-brand-muted">
                   Selected profile: {selectedCatalogEntry.item} · typical weight {selectedCatalogEntry.typicalWeightKg} kg
                 </p>
               ) : null}
             </div>
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700">Estimated weight</span>
+              <span className="text-sm font-semibold text-tc-brand-ink">Estimated weight</span>
               <div className="relative">
                 <input
                   inputMode="numeric"
-                  className="h-14 w-full rounded-[18px] border border-slate-200 px-4 pr-12 text-lg text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
+                  className="h-12 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 pr-12 text-base text-tc-brand-ink outline-none transition placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
                   value={estimatedWeightKg}
                   onChange={(event) => {
                     setHasEditedWeight(true)
@@ -926,49 +926,49 @@ export default function PostFoundItemPage() {
                   }}
                   placeholder={selectedCatalogEntry ? String(selectedCatalogEntry.typicalWeightKg) : '0'}
                 />
-                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg text-slate-400">
+                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-base text-tc-brand-muted">
                   kg
                 </span>
               </div>
-              <p className="text-sm text-slate-500">Auto-filled from the selected catalog match · tap to override</p>
+              <p className="text-[13px] leading-5 text-tc-brand-muted">Auto-filled from the selected catalog match · tap to override</p>
             </label>
 
             <button
               type="button"
               className={classNames(
-                'flex w-full items-start gap-3 rounded-[18px] border px-4 py-4 text-left transition',
+                'flex w-full flex-row-reverse items-center justify-between gap-4 rounded-tc-md border p-4 text-left transition',
                 isFlyTipped
-                  ? 'border-[#F15A43] bg-[#FFF0EC]'
-                  : 'border-slate-200 bg-[#FBFBFA] hover:border-[#E3E7DA] hover:bg-[#F7F8F4]',
+                  ? 'border-tc-brand-dangerLine bg-tc-brand-dangerSoft'
+                  : 'border-tc-brand-line bg-white hover:border-tc-brand-control',
               )}
               onClick={() => setIsFlyTipped((currentValue) => !currentValue)}
               aria-pressed={isFlyTipped}
             >
               <span
                 className={classNames(
-                  'mt-1 inline-flex h-7 w-12 items-center rounded-full px-1 transition',
-                  isFlyTipped ? 'bg-[#D3543D]' : 'bg-slate-300',
+                  'inline-flex h-[26px] w-11 shrink-0 items-center rounded-full px-[3px] transition',
+                  isFlyTipped ? 'bg-tc-brand-danger' : 'bg-tc-brand-track',
                 )}
               >
                 <span
                   className={classNames(
                     'h-5 w-5 rounded-full bg-white transition',
-                    isFlyTipped ? 'translate-x-5' : 'translate-x-0',
+                    isFlyTipped ? 'translate-x-[18px]' : 'translate-x-0',
                   )}
                 />
               </span>
               <span>
-                <span className="block text-lg font-semibold text-slate-950">Fly-tipped item</span>
-                <span className="block text-sm text-slate-500">
+                <span className="block text-sm font-semibold text-tc-brand-ink">Fly-tipped item</span>
+                <span className="mt-0.5 block text-[13px] leading-5 text-tc-brand-body">
                   Flag suspected dumping. This does not send a report to your council.
                 </span>
               </span>
             </button>
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700">Notes (optional)</span>
+              <span className="text-sm font-semibold text-tc-brand-ink">Notes (optional)</span>
               <textarea
-                className="min-h-[116px] w-full rounded-[18px] border border-slate-200 px-4 py-4 text-base text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
+                className="min-h-[116px] w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 py-3 text-base text-tc-brand-ink outline-none transition placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
                 value={notes}
                 onChange={(event) => setNotes(event.target.value)}
                 placeholder="Condition, size, any warnings..."
@@ -977,7 +977,7 @@ export default function PostFoundItemPage() {
 
             <button
               type="button"
-              className="mt-10 inline-flex w-full items-center justify-center rounded-full bg-[#111611] px-5 py-4 text-lg font-semibold text-white transition hover:bg-[#1B231B]"
+              className="mt-10 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-tc-brand-deep px-5 py-3 text-base font-semibold text-white transition hover:bg-tc-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
               onClick={handleContinueToReview}
               disabled={isUploadingImage || postcodeStatus !== 'resolved' || !postcode}
             >
@@ -987,42 +987,42 @@ export default function PostFoundItemPage() {
           </>
         ) : (
           <>
-            <div className="overflow-hidden rounded-[24px] bg-[linear-gradient(180deg,#F0F5E4_0%,#EFF7E6_100%)]">
+            <div className="overflow-hidden rounded-tc-xl border border-tc-brand-line bg-tc-brand-soft">
               {previewUrl ? (
                 <img src={previewUrl} alt={title} className="h-[360px] w-full object-cover" />
               ) : (
-                <div className="flex h-[360px] items-center justify-center bg-[#E7EFD6] text-slate-400">
+                <div className="flex h-[360px] items-center justify-center bg-tc-brand-soft text-sm text-tc-brand-muted">
                   No preview
                 </div>
               )}
             </div>
 
             <div>
-              <h2 className="mb-1 text-[2rem] font-bold tracking-[-0.03em] text-slate-950">{title}</h2>
-              <p className="text-lg text-slate-500">
+              <h2 className="mb-1 text-xl leading-7 font-semibold tracking-[-0.015em] text-tc-brand-ink">{title}</h2>
+              <p className="text-sm leading-5 tabular-nums text-tc-brand-body">
                 {safeWeightKg} kg · {displayPostcode}
               </p>
               {selectedCatalogEntry ? (
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mt-1 text-[13px] leading-5 text-tc-brand-muted">
                   {selectedCatalogEntry.sourceCategory} · {selectedCatalogEntry.subcategory}
                 </p>
               ) : null}
             </div>
 
-            <div className="rounded-[24px] bg-[linear-gradient(90deg,#F4F8EA_0%,#EEF6DE_100%)] px-5 py-5 text-slate-950">
-              <p className="text-[0.82rem] font-bold uppercase tracking-[0.18em] text-[#55741D]">
+            <div className="rounded-tc-lg border border-tc-brand-mintLine bg-tc-brand-mintSoft p-4 text-tc-brand-ink">
+              <p className="text-sm font-semibold text-tc-brand-ink">
                 Before the handover
               </p>
-              <p className="mt-3 text-sm leading-6 text-slate-700">Check availability, condition and owner permission. Agree any minor repair with the next owner before the item moves. Posting an item is not a completed handover or a measurement of environmental savings.</p>
+              <p className="mt-1 text-[13px] leading-5 text-tc-brand-body">Check availability, condition and owner permission. Agree any minor repair with the next owner before the item moves. Posting an item is not a completed handover or a measurement of environmental savings.</p>
             </div>
 
-            <p className="pt-2 text-center text-sm leading-6 text-slate-500">
-              A location does not establish ownership or permission to take an item. For suspected dumping, use the{' '}<a className="underline underline-offset-4" href="https://www.gov.uk/report-flytipping">official reporting guidance</a>.
+            <p className="pt-2 text-center text-[13px] leading-5 text-tc-brand-muted">
+              A location does not establish ownership or permission to take an item. For suspected dumping, use the{' '}<a className="font-semibold text-tc-brand-deep underline underline-offset-4 hover:text-black" href="https://www.gov.uk/report-flytipping">official reporting guidance</a>.
             </p>
 
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center rounded-full bg-[#111611] px-5 py-4 text-lg font-semibold text-white transition hover:bg-[#1B231B] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-tc-brand-deep px-5 py-3 text-base font-semibold text-white transition hover:bg-tc-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
               onClick={() => {
                 void handleSubmit()
               }}

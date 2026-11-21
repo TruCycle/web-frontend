@@ -26,13 +26,13 @@ export const ActiveListingDialog: React.FC<ActiveListingDialogProps> = ({ isOpen
 
                 <div className="flex items-start justify-between gap-4">
                     <div>
-                        <h2 className="text-xl font-bold text-slate-900">{item.title}</h2>
-                        <p className="text-sm text-slate-500">
+                        <h2 className="text-xl leading-7 font-semibold tracking-[-0.015em] text-tc-brand-ink">{item.title}</h2>
+                        <p className="mt-1 text-sm leading-5 text-tc-brand-body">
                             Review the full listing, manage collector requests, and keep track of hand-offs.
                         </p>
                     </div>
                     <button
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
+                        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tc-brand-soft text-tc-brand-ink transition hover:bg-tc-brand-line"
                         onClick={onClose}
                     >
                         <X size={20} />
@@ -40,45 +40,45 @@ export const ActiveListingDialog: React.FC<ActiveListingDialogProps> = ({ isOpen
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
-                    <div className="rounded-xl border border-lime-200 bg-lime-50/30 p-3">
-                        <span className="text-xs font-semibold tracking-wide text-slate-500">LISTED</span>
-                        <p className="mt-1 text-sm font-bold text-slate-800">JAN 17</p>
+                    <div className="rounded-tc-md bg-tc-brand-mintSoft p-3">
+                        <span className="text-[11px] font-semibold tracking-[0.06em] text-tc-brand-body">LISTED</span>
+                        <p className="mt-1 text-sm font-semibold text-tc-brand-ink">JAN 17</p>
                     </div>
-                    <div className="rounded-xl border border-lime-200 bg-lime-50/30 p-3">
-                        <span className="text-xs font-semibold tracking-wide text-slate-500">STATUS</span>
-                        <p className="mt-1 inline-flex rounded-full bg-lime-100 px-2.5 py-1 text-xs font-semibold text-lime-700">
+                    <div className="rounded-tc-md bg-tc-brand-mintSoft p-3">
+                        <span className="block text-[11px] font-semibold tracking-[0.06em] text-tc-brand-body">STATUS</span>
+                        <p className="mt-1 inline-flex rounded-full bg-tc-brand-deep px-2.5 py-1 text-xs font-semibold text-white">
                             {item.status}
                         </p>
                     </div>
-                    <div className="rounded-xl border border-lime-200 bg-lime-50/30 p-3">
-                        <span className="text-xs font-semibold tracking-wide text-slate-500">REWARD</span>
-                        <p className="mt-1 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                    <div className="rounded-tc-md bg-tc-brand-mintSoft p-3">
+                        <span className="block text-[11px] font-semibold tracking-[0.06em] text-tc-brand-body">REWARD</span>
+                        <p className="mt-1 inline-flex rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-tc-brand-body">
                             Pending
                         </p>
                     </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
-                    <span className="text-xs font-semibold tracking-wide text-slate-500">LISTING OVERVIEW</span>
+                <div className="rounded-tc-md bg-tc-brand-soft p-4">
+                    <span className="text-xs font-semibold tracking-[0.06em] text-tc-brand-muted">LISTING OVERVIEW</span>
                     <div className="mt-3 grid gap-4 md:grid-cols-[1fr_160px]">
                         <div className="space-y-2">
-                            <p className="font-semibold text-slate-900">Used {item.title}</p>
-                            <p className="text-sm text-slate-600">
-                                <span className="text-slate-500">Category:</span> <strong>{item.category}</strong>
+                            <p className="font-semibold text-tc-brand-ink">Used {item.title}</p>
+                            <p className="text-sm text-tc-brand-ink [&>strong]:font-semibold">
+                                <span className="text-tc-brand-body">Category:</span> <strong>{item.category}</strong>
                             </p>
-                            <p className="text-sm text-slate-600">
-                                <span className="text-slate-500">Condition:</span> <strong>{item.condition || 'Like New'}</strong>
+                            <p className="text-sm text-tc-brand-ink [&>strong]:font-semibold">
+                                <span className="text-tc-brand-body">Condition:</span> <strong>{item.condition || 'Like New'}</strong>
                             </p>
-                            <p className="text-sm text-slate-600">
-                                <span className="text-slate-500">Drop-off Location:</span> <strong>Fixars Shop 50 Abbey Road</strong>
+                            <p className="text-sm text-tc-brand-ink [&>strong]:font-semibold">
+                                <span className="text-tc-brand-body">Drop-off Location:</span> <strong>Fixars Shop 50 Abbey Road</strong>
                             </p>
-                            <p className="text-sm text-slate-600">
-                                <span className="text-slate-500">Pick-up Location:</span> <strong>Fixars Shop 50 Abbey Road</strong>
+                            <p className="text-sm text-tc-brand-ink [&>strong]:font-semibold">
+                                <span className="text-tc-brand-body">Pick-up Location:</span> <strong>Fixars Shop 50 Abbey Road</strong>
                             </p>
                         </div>
                         <div>
-                            <p className="mb-2 text-xs font-semibold tracking-wide text-slate-500">Photos</p>
-                            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                            <p className="mb-2 text-xs font-semibold tracking-[0.06em] text-tc-brand-muted">Photos</p>
+                            <div className="overflow-hidden rounded-tc-md border border-tc-brand-line bg-white">
                                 {item.image ? (
                                     <img src={item.image} alt={item.title} className="h-28 w-full object-cover" />
                                 ) : (
@@ -90,24 +90,24 @@ export const ActiveListingDialog: React.FC<ActiveListingDialogProps> = ({ isOpen
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
-                        <p className="mb-3 text-xs font-semibold tracking-wide text-slate-500">QR DELIVERY</p>
-                        <div className="flex h-44 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-300 to-emerald-500">
-                            <QrCode size={140} className="text-white" strokeWidth={1.5} />
+                    <div className="rounded-tc-md bg-tc-brand-soft p-4">
+                        <p className="mb-3 text-xs font-semibold tracking-[0.06em] text-tc-brand-muted">QR DELIVERY</p>
+                        <div className="flex h-44 items-center justify-center rounded-tc-md bg-tc-brand-deep">
+                            <QrCode size={140} className="text-tc-brand-mint" strokeWidth={1.5} />
                         </div>
                     </div>
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
-                        <p className="mb-3 text-xs font-semibold tracking-wide text-slate-500">COLLECTOR REQUESTS</p>
-                        <div className="flex h-44 flex-col items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white text-center">
-                            <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-lime-100 text-lime-700">
+                    <div className="rounded-tc-md bg-tc-brand-soft p-4">
+                        <p className="mb-3 text-xs font-semibold tracking-[0.06em] text-tc-brand-muted">COLLECTOR REQUESTS</p>
+                        <div className="flex h-44 flex-col items-center justify-center gap-3 rounded-tc-md border border-dashed border-tc-brand-control bg-white px-3 text-center">
+                            <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-tc-brand-mintSoft text-tc-brand-deep">
                                 <AlertTriangle size={22} strokeWidth={1.5} />
                             </div>
-                            <p className="max-w-[26ch] text-sm text-slate-600">No collectors have requested this item yet.</p>
+                            <p className="max-w-[26ch] text-sm text-tc-brand-body">No collectors have requested this item yet.</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex justify-end gap-3 border-t border-slate-200 pt-3">
+                <div className="flex justify-end gap-3 border-t border-tc-brand-line pt-4">
                     <Button variant="secondary" onClick={onClose}>Back</Button>
                     <Button>Edit Listing</Button>
                 </div>

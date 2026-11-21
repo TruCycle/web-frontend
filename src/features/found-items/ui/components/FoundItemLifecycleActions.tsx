@@ -30,14 +30,14 @@ export function FoundItemLifecycleActions({ item, currentUserId, viewerClaim, cl
     }
     await observeFoundItem(item.id, kind, origin)
   }
-  return <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4" aria-label="Spot availability">
-    <p className="text-sm text-slate-600">{item.lastSeenAt ? `Last seen ${new Date(item.lastSeenAt).toLocaleString()}` : 'Last seen not confirmed'}</p>
-    <p className="text-xs text-slate-500">{item.expiresAt ? `Expiry: ${new Date(item.expiresAt).toLocaleString()}` : 'No expiry scheduled'}</p>
-    {active ? <><p className="text-xs text-slate-500">Nearby observations use your self-reported location. Location is not stored and does not verify physical presence. Gone signals award no pickup points.</p>
-      <div className="flex flex-wrap gap-2"><button disabled={busy} className="rounded-xl border px-3 py-2 text-sm disabled:opacity-50" onClick={() => { void act(() => own ? reconfirmFoundItem(item.id) : observe('still_there')) }}>Still there</button>
-      <button disabled={busy} className="rounded-xl border px-3 py-2 text-sm disabled:opacity-50" onClick={() => { void act(() => observe('gone')) }}>{viewerClaim ? 'Not there when I arrived' : 'Gone'}</button></div></> : null}
-    {own && (item.status === 'gone' || item.status === 'expired') ? <button disabled={busy} className="rounded-xl border px-3 py-2 text-sm" onClick={() => { void act(() => reconfirmFoundItem(item.id)) }}>{item.status === 'gone' ? 'Dispute gone: still available' : 'Reconfirm available'}</button> : null}
-    {own ? claims.filter(claim => claim.status === 'pending').map(claim => <button key={claim.id} disabled={busy} className="block rounded-xl border px-3 py-2 text-sm" onClick={() => { void act(() => acknowledgeFoundItemClaim(item.id, claim.id)) }}>Acknowledge pickup request</button>) : null}
-    {message ? <p role="status" className="text-sm text-slate-600">{message}</p> : null}
+  return <section className="space-y-3 rounded-tc-md bg-tc-brand-soft p-4" aria-label="Spot availability">
+    <p className="text-sm leading-5 font-semibold text-tc-brand-ink">{item.lastSeenAt ? `Last seen ${new Date(item.lastSeenAt).toLocaleString()}` : 'Last seen not confirmed'}</p>
+    <p className="text-[13px] leading-5 text-tc-brand-muted">{item.expiresAt ? `Expiry: ${new Date(item.expiresAt).toLocaleString()}` : 'No expiry scheduled'}</p>
+    {active ? <><p className="text-[13px] leading-5 text-tc-brand-muted">Nearby observations use your self-reported location. Location is not stored and does not verify physical presence. Gone signals award no pickup points.</p>
+      <div className="flex flex-wrap gap-2"><button disabled={busy} className="min-h-11 rounded-tc-md border border-tc-brand-control bg-white px-4 py-2 text-sm font-semibold text-tc-brand-deep transition hover:bg-tc-brand-soft disabled:cursor-not-allowed disabled:opacity-50" onClick={() => { void act(() => own ? reconfirmFoundItem(item.id) : observe('still_there')) }}>Still there</button>
+      <button disabled={busy} className="min-h-11 rounded-tc-md border border-tc-brand-control bg-white px-4 py-2 text-sm font-semibold text-tc-brand-deep transition hover:bg-tc-brand-soft disabled:cursor-not-allowed disabled:opacity-50" onClick={() => { void act(() => observe('gone')) }}>{viewerClaim ? 'Not there when I arrived' : 'Gone'}</button></div></> : null}
+    {own && (item.status === 'gone' || item.status === 'expired') ? <button disabled={busy} className="min-h-11 rounded-tc-md border border-tc-brand-control bg-white px-4 py-2 text-sm font-semibold text-tc-brand-deep transition hover:bg-tc-brand-soft disabled:cursor-not-allowed disabled:opacity-50" onClick={() => { void act(() => reconfirmFoundItem(item.id)) }}>{item.status === 'gone' ? 'Dispute gone: still available' : 'Reconfirm available'}</button> : null}
+    {own ? claims.filter(claim => claim.status === 'pending').map(claim => <button key={claim.id} disabled={busy} className="block min-h-11 rounded-tc-md border border-tc-brand-control bg-white px-4 py-2 text-sm font-semibold text-tc-brand-deep transition hover:bg-tc-brand-soft disabled:cursor-not-allowed disabled:opacity-50" onClick={() => { void act(() => acknowledgeFoundItemClaim(item.id, claim.id)) }}>Acknowledge pickup request</button>) : null}
+    {message ? <p role="status" className="text-[13px] leading-5 text-tc-brand-body">{message}</p> : null}
   </section>
 }

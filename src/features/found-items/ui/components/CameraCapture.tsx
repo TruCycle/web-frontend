@@ -171,7 +171,7 @@ export function CameraCapture({
     onLostPointerCapture: (event: PointerEvent<HTMLDivElement>) => { pointersRef.current.delete(event.pointerId) },
   }
 
-  const framingControls = <div className="mt-3 space-y-2 px-2 text-xs text-white/80">
+  const framingControls = <div className="mt-3 space-y-2 px-2 text-xs text-tc-brand-onDeep">
     <label className="flex items-center gap-3">
       <span>Frame zoom</span>
       <input aria-label="Frame zoom" type="range" min="1" max="4" step="0.05" value={frame?.zoom ?? 1}
@@ -181,7 +181,7 @@ export function CameraCapture({
     <div className="flex items-center justify-between gap-3">
       <span>Drag or use arrow keys to reframe. Pinch or slide to zoom.</span>
       <button type="button" onClick={() => setTransform(INITIAL_CAMERA_TRANSFORM)} disabled={isBusy}
-        className="shrink-0 rounded-md border border-white/30 px-2 py-1 disabled:opacity-50">Reset frame</button>
+        className="shrink-0 rounded-tc-sm border border-white/30 px-2.5 py-1.5 font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50">Reset frame</button>
     </div>
   </div>
 
@@ -265,13 +265,13 @@ export function CameraCapture({
 
   if (variant === 'immersive') {
     return (
-      <div className="relative min-h-[100dvh] overflow-hidden bg-[#081008] px-4 pb-10 pt-4 text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(139,221,100,0.12),transparent_46%)]" />
+      <div className="relative min-h-[100dvh] overflow-hidden bg-tc-brand-ink px-4 pb-10 pt-4 text-white">
+        <div className="absolute inset-0 bg-transparent" />
 
         <div className="relative z-10 flex items-center justify-between">
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/8 text-white transition hover:bg-white/12 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => {
               stopCamera()
               onCancel()
@@ -284,7 +284,7 @@ export function CameraCapture({
 
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/8 text-white transition hover:bg-white/12 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => fileInputRef.current?.click()}
             aria-label="Upload image instead"
             disabled={isBusy}
@@ -295,7 +295,7 @@ export function CameraCapture({
 
         {error ? (
           <div className="relative z-10 flex min-h-[calc(100dvh-5rem)] flex-col items-center justify-center gap-4 px-6 text-center">
-            <p className="max-w-sm text-sm text-white/75">{error}</p>
+            <p className="max-w-sm text-sm leading-5 text-tc-brand-onDeep">{error}</p>
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Button type="button" variant="secondary" onClick={() => {
                 if (typeof navigator.mediaDevices?.getUserMedia !== 'function') {
@@ -355,7 +355,7 @@ export function CameraCapture({
             <div className="relative z-10 mt-10 flex items-center justify-center gap-5">
               <button
                 type="button"
-                className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={onSwitchCamera}
                 aria-label="Switch camera"
                 disabled={isBusy}
@@ -370,12 +370,12 @@ export function CameraCapture({
                 aria-label="Take photo"
                 disabled={isBusy}
               >
-                <span className="h-[58px] w-[58px] rounded-full bg-white shadow-[inset_0_0_0_2px_rgba(8,16,8,0.28)]" />
+                <span className="h-[58px] w-[58px] rounded-full bg-white shadow-[inset_0_0_0_2px_rgba(10,13,10,0.28)]" />
               </button>
 
               <button
                 type="button"
-                className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => fileInputRef.current?.click()}
                 aria-label="Upload from gallery"
                 disabled={isBusy}
@@ -384,7 +384,7 @@ export function CameraCapture({
               </button>
             </div>
 
-            <p className="relative z-10 mt-4 text-center text-xs text-white/55">
+            <p className="relative z-10 mt-4 text-center text-xs text-tc-brand-onDeep">
               Take a photo or upload one from your gallery
             </p>
           </>
@@ -405,13 +405,13 @@ export function CameraCapture({
   return (
     <div
       className={classNames(
-        'space-y-3 rounded-2xl bg-slate-950 p-3 text-white',
+        'space-y-3 rounded-tc-lg bg-tc-brand-ink p-3 text-white',
         isBusy && 'pointer-events-none opacity-95',
       )}
     >
       {error ? (
         <div className="flex min-h-[280px] flex-col items-center justify-center gap-4 p-6 text-center">
-          <p className="max-w-sm text-sm text-white/80">{error}</p>
+          <p className="max-w-sm text-sm leading-5 text-tc-brand-onDeep">{error}</p>
           <Button type="button" variant="secondary" onClick={() => fileInputRef.current?.click()}>
             <Upload size={16} />
             Upload Instead
@@ -459,7 +459,7 @@ export function CameraCapture({
             </div>
           </div>
 
-          {isBusy ? <p className="text-sm text-slate-500">Uploading image...</p> : null}
+          {isBusy ? <p className="text-[13px] leading-5 text-tc-brand-onDeep">Uploading image...</p> : null}
         </>
       )}
 

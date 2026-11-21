@@ -17,18 +17,18 @@ export function ListingsLoadingState({
       {Array.from({ length: count }).map((_, index) => (
         <div
           key={`listing-loading-row-${index}`}
-          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-3"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-tc-md border border-tc-brand-line p-3"
         >
           <div className="flex items-center gap-3">
-            <span className="tc-shimmer-block block h-16 w-16 rounded-lg" />
+            <span className="tc-shimmer-block block h-16 w-16 rounded-tc-md" />
             <div className="space-y-2">
               <span className="tc-shimmer-block block h-5 w-44 rounded-md" />
               <span className="tc-shimmer-block block h-4 w-52 rounded-md" />
             </div>
           </div>
           <div className="flex gap-2">
-            <span className="tc-shimmer-block block h-9 w-24 rounded-xl" />
-            <span className="tc-shimmer-block block h-9 w-24 rounded-xl" />
+            <span className="tc-shimmer-block block h-9 w-24 rounded-tc-md" />
+            <span className="tc-shimmer-block block h-9 w-24 rounded-tc-md" />
           </div>
         </div>
       ))}

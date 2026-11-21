@@ -34,9 +34,9 @@ export default function CookiesPage() {
       intro="This page explains how TruCycle uses cookies and similar technologies, what they help us do, and how your choices affect optional tracking."
       sections={cookieSections}
     >
-      <section className="rounded-[22px] border border-slate-200 bg-white p-6" aria-labelledby="cookie-preferences">
-        <h2 id="cookie-preferences" className="text-xl font-semibold">Cookie preferences</h2>
-        <p className="my-3 text-sm text-slate-600" role="status">
+      <section className="rounded-tc-lg border border-tc-brand-line bg-white p-5 sm:p-6" aria-labelledby="cookie-preferences">
+        <h2 id="cookie-preferences" className="text-lg font-semibold leading-6 text-tc-brand-ink">Cookie preferences</h2>
+        <p className="my-3 text-sm leading-6 text-tc-brand-body" role="status">
           Optional tracking is {status === 'accepted' ? 'allowed' : 'off'}. You can change your choice here.
         </p>
         <div className="flex flex-wrap gap-3">

@@ -37,11 +37,11 @@ export default function PartnerShopsPage() {
     selectedShop.longitude !== null
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className="mx-auto w-full max-w-[1120px] space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Partner Shops</h1>
-          <p className="text-slate-500">Browse nearby handoff locations connected to TruCycle.</p>
+          <h1 className="text-[30px] font-semibold leading-9 tracking-[-0.02em] text-tc-brand-ink">Partner Shops</h1>
+          <p className="mt-1 text-base leading-6 text-tc-brand-body">Browse nearby handoff locations connected to TruCycle.</p>
         </div>
         <NewItemButton
           onClick={() => {
@@ -51,15 +51,15 @@ export default function PartnerShopsPage() {
         />
       </div>
 
-      {error ? <p className="text-sm text-rose-600">{error}</p> : null}
-      <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-        <div className="flex flex-wrap items-end gap-2">
+      {error ? <p className="rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft px-4 py-3 text-sm text-tc-brand-danger">{error}</p> : null}
+      <div className="rounded-tc-lg border border-tc-brand-line bg-white p-5">
+        <div className="flex flex-wrap items-end gap-3">
           <label className="min-w-[220px] flex-1">
-            <span className="mb-1 block text-sm font-medium text-slate-700">Search by postcode</span>
+            <span className="mb-1.5 block text-sm font-medium text-tc-brand-ink">Search by postcode</span>
             <input
               value={locationPostcode}
               onChange={(event) => setLocationPostcode(event.target.value)}
-              className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+              className="h-11 w-full rounded-tc-md border border-tc-brand-control bg-white text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint px-3.5"
               placeholder="Enter postcode"
               onKeyDown={(event) => {
                 if (event.key === 'Enter') {
@@ -69,7 +69,7 @@ export default function PartnerShopsPage() {
             />
           </label>
           <Button
-            className="inline-flex h-11 items-center gap-2"
+            className="inline-flex h-11 items-center gap-2 !bg-tc-brand-deep !text-white hover:!bg-tc-brand-hover"
             onClick={() => searchByPostcode(locationPostcode)}
           >
             <Search size={16} />
@@ -79,7 +79,7 @@ export default function PartnerShopsPage() {
       </div>
 
       {needsLocation ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600" role="status">
+        <div className="rounded-tc-lg border border-dashed border-tc-brand-control bg-white p-8 text-center text-sm text-tc-brand-body" role="status">
           Enter a postcode and select Search to find nearby partner shops.
         </div>
       ) : (
@@ -106,13 +106,13 @@ export default function PartnerShopsPage() {
               }}
             />
           ) : (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
+            <div className="rounded-tc-lg border border-tc-brand-line bg-white p-5 text-sm text-tc-brand-body">
               {isLoading ? 'Loading nearby shops...' : 'No partner shops found nearby.'}
             </div>
           )}
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-tc-lg border border-tc-brand-line bg-tc-brand-soft">
           {hasMappableCoordinates ? (
             <iframe
               src={`https://www.google.com/maps?q=${selectedShop.latitude},${selectedShop.longitude}&z=14&output=embed`}
@@ -126,7 +126,7 @@ export default function PartnerShopsPage() {
               title="Map view of selected shop location"
             />
           ) : (
-            <div className="flex min-h-[620px] items-center justify-center p-6 text-center text-sm text-slate-500">
+            <div className="flex min-h-[620px] items-center justify-center bg-tc-brand-mintSoft p-6 text-center text-sm text-tc-brand-body">
               Map preview unavailable for this shop.
             </div>
           )}

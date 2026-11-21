@@ -33,10 +33,10 @@ import { StreakIndicator } from '@/features/gamification/ui/components/StreakInd
 import { RescueTicker } from '@/features/gamification/ui/components/RescueTicker'
 
 function statColor(index: number): string {
-  if (index === 0) return 'bg-tc-app-primary/10'
-  if (index === 1) return 'bg-tc-app-primary/25'
-  if (index === 2) return 'bg-tc-app-primary/10'
-  return 'bg-tc-app-primary/25'
+  if (index === 0) return 'bg-tc-brand-mintSoft'
+  if (index === 1) return 'bg-tc-brand-mintSoft'
+  if (index === 2) return 'bg-tc-brand-mintSoft'
+  return 'bg-tc-brand-mintSoft'
 }
 
 export default function Dashboard() {
@@ -175,11 +175,11 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-tc-header-text">Welcome back!</h1>
-          <p className="text-tc-header-labelText">Track your impact and manage your listings</p>
+          <h1 className="text-[30px] font-semibold leading-9 tracking-[-0.02em] text-tc-brand-ink">Welcome back!</h1>
+          <p className="mt-1 text-base leading-6 text-tc-brand-body">Track your impact and manage your listings</p>
         </div>
         {isDonorMode ? (
           <NewItemButton onClick={() => setIsListItemDialogOpen(true)} />
@@ -187,7 +187,7 @@ export default function Dashboard() {
       </div>
 
       {showStats ? (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
             {
               value: shouldShowStatsLoading ? '-' : String(dashboardStats.itemsCollected),
@@ -216,16 +216,16 @@ export default function Dashboard() {
           ].map((item, index) => (
             <div
               key={item.label}
-              className="flex gap-5 rounded-xl bg-white p-5"
+              className="flex min-w-0 items-center gap-4 rounded-tc-lg border border-tc-brand-line bg-white p-5"
             >
               <div
-                className={`inline-flex p-4 items-center justify-center rounded-full ${statColor(index)}`}
+                className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${statColor(index)}`}
               >
-                <img src={item.icon} alt="" aria-hidden className="h-5.2 w-5.2" />
+                <img src={item.icon} alt="" aria-hidden className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-tc-app-secondary">{item.value}</p>
-                <p className="text-sm text-tc-app-secondary">{item.label}</p>
+                <p className="text-xl font-semibold leading-7 tabular-nums text-tc-brand-ink">{item.value}</p>
+                <p className="text-[13px] leading-5 text-tc-brand-muted">{item.label}</p>
               </div>
             </div>
           ))}
@@ -233,31 +233,31 @@ export default function Dashboard() {
       ) : null}
 
       {showStats ? (
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-          <section className="space-y-4 rounded-xl bg-white p-5">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+          <section className="min-w-0 space-y-4 rounded-tc-lg border border-tc-brand-line bg-white p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold text-tc-app-secondary">My Impact</h2>
-                <p className="text-sm text-slate-500">Current pace</p>
+                <h2 className="text-xl font-semibold leading-7 tracking-[-0.015em] text-tc-brand-ink">My Impact</h2>
+                <p className="text-[13px] leading-5 text-tc-brand-muted">Current pace</p>
               </div>
               {userProgress ? <LevelBadge progress={userProgress} /> : null}
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-tc-app-canvas p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-tc-md bg-tc-brand-mintSoft p-4">
               <div>
-                <p className="text-sm text-slate-500">Streak</p>
-                {primaryStreak ? <StreakIndicator streak={primaryStreak} size="lg" /> : <p className="text-sm text-slate-400">-</p>}
+                <p className="text-[13px] leading-5 text-tc-brand-muted">Streak</p>
+                {primaryStreak ? <StreakIndicator streak={primaryStreak} size="lg" /> : <p className="text-sm text-tc-brand-muted">-</p>}
               </div>
               <div className="text-right">
-                <p className="text-sm text-slate-500">Points</p>
-                <p className="text-2xl font-bold text-slate-900">
+                <p className="text-[13px] leading-5 text-tc-brand-muted">Points</p>
+                <p className="text-xl font-semibold leading-7 tabular-nums text-tc-brand-ink">
                   {isLoadingProgress ? '-' : userProgress?.totalPoints ?? 0}
                 </p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between gap-3 text-sm text-slate-500">
+              <div className="flex items-center justify-between gap-3 text-[13px] leading-5 tabular-nums text-tc-brand-body">
                 <span>Level progress</span>
                 <span>{isLoadingProgress ? '-' : `${userProgress?.pointsToNextLevel ?? 0} pts left`}</span>
               </div>
@@ -266,12 +266,12 @@ export default function Dashboard() {
 
             <div className="flex flex-wrap gap-2">
               {isLoadingBadges ? (
-                <p className="text-sm text-slate-500">Loading badges...</p>
+                <p className="text-sm text-tc-brand-body">Loading badges...</p>
               ) : (
                 earnedBadges.slice(0, 3).map((entry) => (
                   <span
                     key={entry.badge.id}
-                    className="inline-flex items-center rounded-full border border-tc-app-primary/25 bg-tc-app-primary/10 px-3 py-1.5 text-sm font-medium text-tc-app-text shadow-sm"
+                    className="inline-flex items-center rounded-full bg-tc-brand-mintSoft px-3 py-1.5 text-[13px] font-medium text-tc-brand-deep"
                   >
                     {entry.badge.name}
                   </span>
@@ -281,17 +281,17 @@ export default function Dashboard() {
 
             <Link
               to="/impact"
-              className="inline-flex items-center gap-1 text-sm font-medium text-tc-app-secondary transition hover:underline"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-tc-brand-ink underline-offset-4 transition hover:underline"
             >
               View All <ChevronRight size={16} />
             </Link>
           </section>
 
-          <section className="space-y-4 rounded-xl bg-white p-5">
+          <section className="min-w-0 space-y-4 rounded-tc-lg border border-tc-brand-line bg-white p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold text-tc-app-secondary">Live rescue ticker</h2>
-                <p className="text-sm text-slate-500">Real-time community saves</p>
+                <h2 className="text-xl font-semibold leading-7 tracking-[-0.015em] text-tc-brand-ink">Live rescue ticker</h2>
+                <p className="text-[13px] leading-5 text-tc-brand-muted">Real-time community saves</p>
               </div>
             </div>
             <RescueTicker
@@ -307,22 +307,22 @@ export default function Dashboard() {
       {isDonorMode && showStats ? (
         <>
           <DonorEnvironmentalImpactCard />
-          <section className="relative rounded-xl bg-white p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900">Your Listings</h2>
+          <section className="relative rounded-tc-lg border border-tc-brand-line bg-white p-4 sm:p-6">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <h2 className="text-xl font-semibold leading-7 tracking-[-0.015em] text-tc-brand-ink">Your Listings</h2>
               <Link
                 to="/listings"
-                className="inline-flex items-center gap-1 text-sm font-medium text-tc-auth-link hover:underline"
+                className="inline-flex items-center gap-1 text-sm font-semibold text-tc-brand-ink underline-offset-4 hover:underline"
               >
                 View All <ChevronRight size={16} />
               </Link>
             </div>
-            {donorError ? <p className="mb-2 text-sm text-rose-600">{donorError}</p> : null}
+            {donorError ? <p className="mb-2 text-sm text-tc-brand-danger">{donorError}</p> : null}
             {isLoadingDonorListings ? (
               <ListingsLoadingState count={5} />
             ) : null}
             {!isLoadingDonorListings && donorListings.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-slate-300 p-3 text-sm text-slate-500">
+              <p className="rounded-tc-md border border-dashed border-tc-brand-control p-4 text-sm text-tc-brand-body">
                 You have not listed any items yet.
               </p>
             ) : null}
@@ -361,12 +361,12 @@ export default function Dashboard() {
       ) : null}
 
       {!isDonorMode ? (
-        <section className="space-y-4 rounded-xl bg-white px-8 py-4 text-tc-app-secondary">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-lg font-semibold text-tc-app-secondary">Browse Available Items</h2>
+        <section className="space-y-4 rounded-tc-lg border border-tc-brand-line bg-white p-4 text-tc-brand-body sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <h2 className="text-xl font-semibold leading-7 tracking-[-0.015em] text-tc-brand-ink">Browse Available Items</h2>
             <Link
               to="/browse"
-              className="inline-flex items-center gap-1 text-sm font-medium text-tc-app-secondary transition hover:underline"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-tc-brand-ink underline-offset-4 transition hover:underline"
             >
               View All <ChevronRight size={16} />
             </Link>
@@ -375,20 +375,20 @@ export default function Dashboard() {
           <div className="flex flex-wrap gap-3">
             <div className="relative min-w-[260px] flex-1">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-tc-app-secondary/70"
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-tc-brand-muted"
                 size={20}
               />
               <input
                 type="text"
                 placeholder="Search by category, location or keyword"
-                className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-tc-app-secondary outline-none placeholder:text-tc-app-secondary/70 focus:border-tc-app-primary focus:ring-4 focus:ring-tc-app-primary/20"
+                className="h-11 w-full rounded-tc-md border border-tc-brand-control bg-white pl-11 pr-3.5 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
                 value={filters.search}
                 onChange={(event) => updateSearch(event.target.value)}
               />
             </div>
             <button
               type="button"
-              className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-300 px-4 text-sm font-medium text-tc-app-secondary transition hover:bg-tc-app-canvas"
+              className="inline-flex h-11 items-center gap-2 rounded-tc-md border border-tc-brand-control bg-white px-4 text-sm font-semibold text-tc-brand-deep transition hover:bg-tc-brand-soft"
               onClick={() => {
                 if (isFiltersOpen) {
                   clearFilters()
@@ -414,11 +414,11 @@ export default function Dashboard() {
           </div>
 
           {isFiltersOpen ? (
-            <div className="space-y-4 rounded-xl border border-slate-200 p-4 md:p-5">
-              <h3 className="text-3xl font-semibold text-tc-app-secondary">Filters</h3>
+            <div className="space-y-4 rounded-tc-md border border-tc-brand-line p-4 md:p-5">
+              <h3 className="text-xl font-semibold leading-7 tracking-[-0.015em] text-tc-brand-ink">Filters</h3>
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
-                  <label htmlFor="browse-filter-category" className="block text-xl text-tc-app-secondary">
+                  <label htmlFor="browse-filter-category" className="block text-sm font-semibold text-tc-brand-ink">
                     Category
                   </label>
                   <CustomSelect
@@ -426,12 +426,12 @@ export default function Dashboard() {
                     value={selectedCategoryFilterValue}
                     options={categoryFilterOptions}
                     onChange={updateCategory}
-                    buttonClassName="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary focus:border-tc-app-primary focus:ring-4 focus:ring-tc-app-primary/20"
+                    buttonClassName="h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="browse-filter-condition" className="block text-xl text-tc-app-secondary">
+                  <label htmlFor="browse-filter-condition" className="block text-sm font-semibold text-tc-brand-ink">
                     Condition
                   </label>
                   <CustomSelect
@@ -439,19 +439,19 @@ export default function Dashboard() {
                     value={selectedConditionFilterValue}
                     options={conditionFilterOptions}
                     onChange={updateCondition}
-                    buttonClassName="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary focus:border-tc-app-primary focus:ring-4 focus:ring-tc-app-primary/20"
+                    buttonClassName="h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="browse-filter-location" className="block text-xl text-tc-app-secondary">
+                  <label htmlFor="browse-filter-location" className="block text-sm font-semibold text-tc-brand-ink">
                     Location
                   </label>
                   <input
                     id="browse-filter-location"
                     type="text"
                     placeholder="Enter location or postal code"
-                    className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-tc-app-secondary outline-none placeholder:text-tc-app-secondary/70 focus:border-tc-app-primary focus:ring-4 focus:ring-tc-app-primary/20"
+                    className="h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:ring-2 focus:ring-tc-brand-mint"
                     value={filters.location}
                     onChange={(event) => updateLocation(event.target.value)}
                   />
@@ -460,13 +460,13 @@ export default function Dashboard() {
             </div>
           ) : null}
 
-          <div className="flex gap-2 overflow-x-auto rounded-md bg-tc-app-canvas/80 p-1">
+          <div className="flex gap-2 overflow-x-auto p-1">
             {categories.map((category) => (
               <button
                 key={category}
-                className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition ${category === filters.category
-                    ? 'bg-white text-tc-app-text ring-1 ring-tc-app-primary/20 shadow-sm'
-                    : 'bg-transparent text-tc-app-secondary hover:bg-white/80'
+                className={`min-h-11 whitespace-nowrap rounded-full border px-4 text-sm font-medium transition ${category === filters.category
+                    ? 'border-tc-brand-deep bg-tc-brand-deep text-white'
+                    : 'border-tc-brand-control bg-white text-tc-brand-deep hover:bg-tc-brand-soft'
                   }`}
                 onClick={() => updateCategory(category)}
               >
@@ -475,10 +475,10 @@ export default function Dashboard() {
             ))}
           </div>
 
-          {collectorError ? <p className="text-sm text-tc-app-secondary">{collectorError}</p> : null}
+          {collectorError ? <p className="text-sm text-tc-brand-danger">{collectorError}</p> : null}
 
           {!isLoadingItems && items.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-tc-app-secondary">
+            <p className="rounded-tc-md border border-dashed border-tc-brand-control p-4 text-sm text-tc-brand-body">
               No matching items found right now.
             </p>
           ) : null}
@@ -488,7 +488,7 @@ export default function Dashboard() {
               {Array.from({ length: 6 }).map((_, index) => (
                 <div
                   key={`browse-item-shimmer-${index}`}
-                  className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+                  className="overflow-hidden rounded-tc-lg border border-tc-brand-line bg-white"
                 >
                   <div className="tc-shimmer-block h-60 w-full" />
                   <div className="space-y-2 p-3">
@@ -499,8 +499,8 @@ export default function Dashboard() {
                     </div>
                     <span className="tc-shimmer-block block h-4 w-3/4 rounded-md" />
                     <div className="space-y-2 pt-2">
-                      <span className="tc-shimmer-block block h-10 w-full rounded-[6px]" />
-                      <span className="tc-shimmer-block block h-10 w-full rounded-[6px]" />
+                      <span className="tc-shimmer-block block h-10 w-full rounded-tc-md" />
+                      <span className="tc-shimmer-block block h-10 w-full rounded-tc-md" />
                     </div>
                   </div>
                 </div>
@@ -513,29 +513,29 @@ export default function Dashboard() {
                 const claimAlreadyCreated = Boolean(item.claimStatus)
 
                 return (
-                  <div key={item.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                  <div key={item.id} className="overflow-hidden rounded-tc-lg border border-tc-brand-line bg-white">
                     {item.image ? (
                       <img src={item.image.url} alt={item.title} className="h-60 w-full object-cover" />
                     ) : (
-                      <div className="flex h-44 w-full items-center justify-center bg-slate-100 text-sm text-tc-app-secondary">
+                      <div className="flex h-44 w-full items-center justify-center bg-tc-brand-soft text-sm text-tc-brand-muted">
                         No image available
                       </div>
                     )}
-                    <div className="space-y-2 p-3">
-                      <h3 className="font-semibold text-tc-app-text">{item.title}</h3>
+                    <div className="space-y-2 p-4">
+                      <h3 className="text-base font-semibold leading-6 text-tc-brand-ink">{item.title}</h3>
                       <div className="flex gap-2">
-                        <span className="rounded-full border border-tc-app-badgeOutline px-2 py-0.5 text-xs text-tc-app-badgeText">
+                        <span className="rounded-full bg-tc-brand-soft px-2.5 py-1 text-xs font-semibold leading-4 text-tc-brand-body">
                           {item.category}
                         </span>
-                        <span className="rounded-full bg-tc-app-primary px-2 py-0.5 text-xs text-tc-app-text">
+                        <span className="rounded-full bg-tc-brand-mintSoft px-2.5 py-1 text-xs font-semibold leading-4 text-tc-brand-deep">
                           {item.condition}
                         </span>
                       </div>
-                      <p className="text-sm text-tc-app-slate500">{item.locationLabel}</p>
+                      <p className="text-[13px] leading-5 text-tc-brand-muted">{item.locationLabel}</p>
                       <div className="space-y-2 pt-2">
                         <Button
                           variant='primary'
-                          className="w-full rounded-[6px]"
+                          className="w-full rounded-tc-md"
                           disabled={claimInProgress || claimAlreadyCreated}
                           onClick={() => {
                             void handleClaimItem(item.id)
@@ -549,7 +549,7 @@ export default function Dashboard() {
                         </Button>
                         <Button
                           variant="secondary"
-                          className="w-full rounded-[6px]"
+                          className="w-full rounded-tc-md"
                           onClick={() => setSelectedBrowseItem(item)}
                         >
                           View Item

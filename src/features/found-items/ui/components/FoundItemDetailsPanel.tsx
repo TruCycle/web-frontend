@@ -18,16 +18,16 @@ function StatTile({
   readonly icon: ReactNode
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5">
+    <div className="rounded-tc-md bg-tc-brand-soft px-4 py-3.5">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-slate-400">
+        <span className="text-xs leading-4 font-semibold text-tc-brand-muted">
           {label}
         </span>
-        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm">
+        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-tc-brand-mintSoft text-tc-brand-deep">
           {icon}
         </span>
       </div>
-      <p className="mt-2 text-lg font-semibold tracking-[-0.02em] text-slate-950 sm:text-xl">{value}</p>
+      <p className="mt-2 text-lg font-semibold tracking-[-0.015em] tabular-nums text-tc-brand-ink sm:text-xl">{value}</p>
     </div>
   )
 }
@@ -91,20 +91,20 @@ function FoundItemDetailsContent({
     viewerClaim !== null && (viewerClaim.status === 'pending' || viewerClaim.status === 'acknowledged')
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Found item details" containerClassName="max-w-[860px]">
+    <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Found item details" containerClassName="max-w-[860px] rounded-tc-xl">
       <div className="space-y-5 p-5 sm:p-6">
-        {isLoading ? <p role="status" className="text-sm text-slate-500">Loading item...</p> : null}
+        {isLoading ? <p role="status" className="text-sm text-tc-brand-body">Loading item...</p> : null}
 
-        {!isLoading && !item ? <p className="text-sm text-slate-500">Choose an item to inspect.</p> : null}
+        {!isLoading && !item ? <p className="text-sm text-tc-brand-body">Choose an item to inspect.</p> : null}
 
         {!isLoading && item ? (
           <>
             <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(300px,0.95fr)]">
               <div className="space-y-5">
                 {primaryImage ? (
-                  <img src={primaryImage.url} alt={item.title} className="h-72 w-full rounded-[28px] object-cover" />
+                  <img src={primaryImage.url} alt={item.title} className="h-72 w-full rounded-tc-lg object-cover" />
                 ) : (
-                  <div className="flex h-72 items-center justify-center rounded-[28px] bg-slate-100 text-sm text-slate-500">
+                  <div className="flex h-72 items-center justify-center rounded-tc-lg bg-tc-brand-soft text-sm text-tc-brand-muted">
                     No image
                   </div>
                 )}
@@ -133,19 +133,19 @@ function FoundItemDetailsContent({
                 </div>
 
                 {isOwnPost ? (
-                  <div className="space-y-3 rounded-[24px] bg-[#F8FAFC] p-4">
-                    <p className="text-sm font-medium text-slate-900">Your post</p>
+                  <div className="space-y-3 rounded-tc-md bg-tc-brand-soft p-4">
+                    <p className="text-sm font-semibold text-tc-brand-ink">Your post</p>
                     {claims.length > 0 ? (
                       <div className="space-y-2">
                         {claims.map((claim) => (
-                          <div key={claim.id} className="rounded-xl border border-slate-200 bg-white px-3 py-3">
-                            <p className="text-sm font-medium text-slate-900">{claim.claimerName}</p>
-                            <p className="text-xs text-slate-500">{claim.message || 'No note added.'}</p>
+                          <div key={claim.id} className="rounded-tc-md border border-tc-brand-line bg-white px-3 py-3">
+                            <p className="text-sm font-semibold text-tc-brand-ink">{claim.claimerName}</p>
+                            <p className="text-[13px] leading-5 text-tc-brand-muted">{claim.message || 'No note added.'}</p>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-slate-500">No pickup requests yet.</p>
+                      <p className="text-sm text-tc-brand-body">No pickup requests yet.</p>
                     )}
                   </div>
                 ) : null}
@@ -154,16 +154,16 @@ function FoundItemDetailsContent({
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="text-[2rem] font-semibold tracking-[-0.04em] text-slate-950">
+                      <h2 className="text-xl leading-7 font-semibold tracking-[-0.015em] text-tc-brand-ink">
                         {item.title}
                       </h2>
                       <FoundItemStatusBadge status={item.status} />
                     </div>
-                    <p className="mt-2 text-sm text-slate-500">{formatFoundItemAttribution(item)}</p>
+                    <p className="mt-1 text-[13px] leading-5 text-tc-brand-muted">{formatFoundItemAttribution(item)}</p>
                   </div>
                 </div>
 
-                <div className="space-y-3 rounded-[24px] border border-slate-200 p-5 text-sm text-slate-500">
+                <div className="space-y-2 rounded-tc-lg border border-tc-brand-line p-5 text-sm text-tc-brand-body">
                   <div className="flex items-start gap-2 leading-6">
                     <MapPin size={16} className="mt-0.5 shrink-0" />
                     <span>{formatFoundItemLocationSummary(item)}</span>
@@ -184,19 +184,19 @@ function FoundItemDetailsContent({
 
                 <FoundItemLifecycleActions item={item} currentUserId={currentUserId} claims={claims} viewerClaim={viewerClaim} onChanged={onLifecycleChange} />
                 <div>
-                  <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  <h3 className="text-sm font-semibold text-tc-brand-ink">
                     Notes
                   </h3>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
+                  <p className="mt-1.5 text-sm leading-6 text-tc-brand-body">{item.description}</p>
                 </div>
 
                 {!isOwnPost ? (
-                  <div className="space-y-4 rounded-[24px] border border-slate-200 bg-[#F8FAFC] p-4">
+                  <div className="space-y-4 rounded-tc-lg border border-tc-brand-line bg-white p-4">
                     <div>
-                        <h3 id={pickupNoteLabel} className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        <h3 id={pickupNoteLabel} className="text-sm font-semibold text-tc-brand-ink">
                         Pickup note
                       </h3>
-                      <p className="mt-2 text-sm leading-6 text-slate-500">
+                      <p className="mt-1 text-[13px] leading-5 text-tc-brand-muted">
                         {hasActiveViewerClaim
                           ? 'Your request is live. You can cancel it here while the spot is still open.'
                           : 'Add a short note so the poster knows what you need before pickup.'}
@@ -208,7 +208,7 @@ function FoundItemDetailsContent({
                       value={claimMessage}
                       onChange={(event) => setClaimMessage(event.target.value)}
                       disabled={hasActiveViewerClaim}
-                      className="min-h-[104px] w-full rounded-[18px] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA] disabled:cursor-not-allowed disabled:bg-slate-100"
+                      className="min-h-[104px] w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:outline-none focus:ring-2 focus:ring-tc-brand-mint py-3 transition disabled:cursor-not-allowed disabled:bg-tc-brand-soft"
                       placeholder="Interested in picking this up today. Happy to message before I head over."
                     />
 
@@ -241,23 +241,23 @@ function FoundItemDetailsContent({
                     )}
 
                     {item.status !== 'reported' ? (
-                      <div className="space-y-3 rounded-[20px] border border-slate-200 bg-white p-4">
+                      <div className="space-y-3 rounded-tc-md bg-tc-brand-soft p-4">
                         <div>
-                          <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+                          <h3 className="text-sm font-semibold text-tc-brand-ink">
                             Report this post
                           </h3>
-                          <p className="mt-2 text-sm leading-6 text-slate-500">
+                          <p className="mt-1 text-[13px] leading-5 text-tc-brand-muted">
                             Report what you observed. A report does not confirm a pickup or award pickup points.
                           </p>
                         </div>
 
-                        <label className="block text-sm font-medium text-slate-700">
+                        <label className="block text-sm font-semibold text-tc-brand-ink">
                           Report reason
                           <select
                             aria-label="Report reason"
                             value={reportReason}
                             onChange={(event) => setReportReason(event.target.value)}
-                            className="mt-1 h-12 w-full rounded-[16px] border border-slate-200 px-4 text-sm text-slate-900"
+                            className="mt-1.5 min-h-11 font-normal w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:outline-none focus:ring-2 focus:ring-tc-brand-mint"
                           >
                             <option value="">Choose a reason</option>
                             <option value="already_gone">Already gone</option>
@@ -269,12 +269,12 @@ function FoundItemDetailsContent({
                           </select>
                         </label>
 
-                        <label className="block space-y-1 text-sm font-medium text-slate-700">
+                        <label className="block space-y-1.5 text-sm font-semibold text-tc-brand-ink">
                           <span>Extra details (optional)</span>
                           <textarea
                             value={reportDetails}
                             onChange={(event) => setReportDetails(event.target.value)}
-                            className="block min-h-[96px] w-full rounded-[16px] border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
+                            className="block min-h-[96px] font-normal w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:outline-none focus:ring-2 focus:ring-tc-brand-mint py-3 transition"
                           />
                         </label>
 

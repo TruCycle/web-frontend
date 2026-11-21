@@ -66,33 +66,33 @@ export function LandingFeaturedItemsSection() {
   }, [activeCategory])
 
   return (
-    <section className="relative overflow-hidden bg-white px-6 py-20 sm:py-24" id="explore-items">
-      <div className="mx-auto max-w-7xl">
+    <section className="relative overflow-hidden border-y border-tc-brand-line bg-white px-4 py-20 sm:px-6" id="explore-items">
+      <div className="mx-auto max-w-[1184px]">
         <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
-          <div className="max-w-2xl">
-            <span className="inline-flex items-center gap-2 rounded-full bg-[#0B3322]/5 px-3.5 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[#0B3322]">
-              <Sparkles className="h-3.5 w-3.5 text-[#2f9d7e]" />
+          <div className="max-w-[640px]">
+            <span className="inline-flex items-center gap-2 text-[13px] font-semibold uppercase leading-5 tracking-[0.06em] text-tc-brand-muted">
+              <Sparkles className="h-3.5 w-3.5 text-tc-brand-muted" />
               Live Community Listings
             </span>
-            <h2 className="mt-4 text-3xl font-bold tracking-[-0.04em] text-[#0B3322] sm:text-4xl lg:text-[2.75rem]">
+            <h2 className="mt-2.5 text-[clamp(2rem,4.2vw,2.75rem)] font-semibold leading-[1.14] tracking-[-0.03em] text-tc-brand-ink">
               See what neighbours are giving away
             </h2>
-            <p className="mt-3 text-base leading-7 text-slate-600 sm:text-lg">
+            <p className="mt-2.5 text-base leading-[26px] text-tc-brand-body">
               Explore recent free items listed across local neighbourhoods. Feel free to inspect details freely before signing up.
             </p>
           </div>
 
           <Link
             to={`/browse?category=${encodeURIComponent(activeCategory)}`}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-[#0B3322] no-underline shadow-sm transition hover:border-[#0B3322] hover:bg-slate-50"
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-full px-[22px] text-[15px] font-semibold no-underline transition duration-200 hover:-translate-y-0.5 border border-tc-brand-control bg-transparent text-tc-brand-ink hover:bg-tc-brand-soft"
           >
             <span>Browse all in {activeCategory}</span>
-            <ArrowRight className="h-4 w-4 text-[#0B3322]" />
+            <ArrowRight className="h-4 w-4 text-tc-brand-ink" />
           </Link>
         </div>
 
         {/* Category Filter Pills */}
-        <div className="mt-8 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <div className="mt-7 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           {TOP_CATEGORIES.map((cat) => {
             const isActive = activeCategory === cat.id
             return (
@@ -100,10 +100,10 @@ export function LandingFeaturedItemsSection() {
                 key={cat.id}
                 type="button"
                 onClick={() => setActiveCategory(cat.id)}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                className={`inline-flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-medium transition ${
                   isActive
-                    ? 'bg-[#0B3322] text-white shadow-md shadow-[#0B3322]/15'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    ? 'border-tc-brand-deep bg-tc-brand-deep text-white'
+                    : 'border-tc-brand-control bg-white text-tc-brand-ink hover:bg-tc-brand-soft'
                 }`}
               >
                 <span>{cat.emoji}</span>
@@ -114,9 +114,9 @@ export function LandingFeaturedItemsSection() {
         </div>
 
         {/* Items Grid */}
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {!isLoading && items.length === 0 ? (
-            <p className="col-span-full text-sm text-slate-600" role="status">
+            <p className="col-span-full rounded-tc-lg border border-dashed border-tc-brand-control bg-white p-8 text-center text-sm text-tc-brand-body" role="status">
               {loadError ? 'Unable to load listings right now.' : 'No listings available in this category.'}
             </p>
           ) : null}
@@ -124,22 +124,22 @@ export function LandingFeaturedItemsSection() {
             ? Array.from({ length: 6 }).map((_, index) => (
                 <div
                   key={`skeleton-card-${index}`}
-                  className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+                  className="overflow-hidden rounded-tc-lg border border-tc-brand-line bg-white"
                 >
-                  <div className="tc-shimmer-block h-52 w-full bg-slate-200" />
-                  <div className="space-y-3 p-5">
-                    <div className="tc-shimmer-block h-5 w-3/4 rounded-md bg-slate-200" />
-                    <div className="tc-shimmer-block h-4 w-1/2 rounded-md bg-slate-200" />
-                    <div className="tc-shimmer-block h-9 w-full rounded-xl bg-slate-200" />
+                  <div className="tc-shimmer-block h-[200px] w-full bg-tc-brand-soft" />
+                  <div className="space-y-2.5 p-4">
+                    <div className="tc-shimmer-block h-5 w-3/4 rounded-tc-sm bg-tc-brand-soft" />
+                    <div className="tc-shimmer-block h-4 w-1/2 rounded-tc-sm bg-tc-brand-soft" />
+                    <div className="tc-shimmer-block h-11 w-full rounded-full bg-tc-brand-soft" />
                   </div>
                 </div>
               ))
             : items.map((item) => (
                 <article
                   key={item.id}
-                  className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-200 hover:-translate-y-1 hover:border-[#0B3322]/30 hover:shadow-[0_16px_40px_rgba(11,51,34,0.10)]"
+                  className="group flex flex-col overflow-hidden rounded-tc-lg border border-tc-brand-line bg-white transition-all duration-200 hover:-translate-y-1 hover:shadow-tc-card"
                 >
-                  <div className="relative h-52 w-full overflow-hidden bg-slate-100">
+                  <div className="relative h-[200px] w-full overflow-hidden bg-tc-brand-soft">
                     {item.image ? (
                       <img
                         src={item.image.url}
@@ -148,41 +148,41 @@ export function LandingFeaturedItemsSection() {
                         loading="lazy"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-sm font-medium text-slate-400">
+                      <div className="flex h-full w-full items-center justify-center text-sm font-medium text-tc-brand-muted">
                         No image available
                       </div>
                     )}
                     <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-                      <span className="rounded-full bg-white/95 px-2.5 py-0.5 text-xs font-bold text-[#0B3322] shadow-sm backdrop-blur-sm">
+                      <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold leading-4 text-tc-brand-ink">
                         {item.category}
                       </span>
-                      <span className="rounded-full bg-[#0B3322] px-2.5 py-0.5 text-xs font-medium text-white shadow-sm">
+                      <span className="rounded-full bg-tc-brand-deep px-2.5 py-1 text-xs font-semibold leading-4 text-white">
                         {item.condition}
                       </span>
                     </div>
 
                   </div>
 
-                  <div className="flex flex-1 flex-col p-5">
-                    <h3 className="line-clamp-1 text-base font-bold text-slate-900 group-hover:text-[#0B3322]">
+                  <div className="flex flex-1 flex-col p-4">
+                    <h3 className="line-clamp-1 text-base font-semibold leading-6 text-tc-brand-ink">
                       {item.title}
                     </h3>
 
-                    <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
-                      <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                    <div className="mt-2 flex items-center gap-1.5 text-[13px] leading-5 text-tc-brand-muted">
+                      <MapPin className="h-3.5 w-3.5 text-tc-brand-muted" />
                       <span>{item.locationLabel}</span>
                       {item.distanceKm ? <span>· {item.distanceKm} km away</span> : null}
                     </div>
 
-                    <p className="mt-2 text-xs text-slate-500">
-                      Given by <span className="font-semibold text-slate-700">{item.ownerName}</span>
+                    <p className="mt-1 text-[13px] leading-5 text-tc-brand-muted">
+                      Given by <span className="font-semibold text-tc-brand-body">{item.ownerName}</span>
                     </p>
 
-                    <div className="mt-4 pt-2">
+                    <div className="mt-auto pt-3.5">
                       <Button
                         type="button"
                         variant="secondary"
-                        className="w-full justify-center gap-2 rounded-xl border border-slate-300 bg-[#F8FCF7] text-sm font-bold text-[#0B3322] transition group-hover:border-[#0B3322] group-hover:bg-[#0B3322] group-hover:text-white"
+                        className="min-h-11 w-full justify-center gap-2 rounded-full border border-tc-brand-control bg-white text-sm font-semibold text-tc-brand-ink transition hover:bg-tc-brand-soft group-hover:border-tc-brand-deep"
                         onClick={() => setSelectedItem(item)}
                       >
                         <Eye className="h-4 w-4" />
@@ -195,16 +195,16 @@ export function LandingFeaturedItemsSection() {
         </div>
 
         {/* Big Bottom Explore CTA */}
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 rounded-2xl bg-[#0B3322] p-8 text-white sm:flex-row sm:p-10">
+        <div className="mt-7 flex flex-col items-center justify-between gap-4 rounded-tc-lg border border-tc-brand-mintLine bg-tc-brand-mintSoft px-6 py-5 text-tc-brand-ink sm:flex-row">
           <div className="space-y-1 text-center sm:text-left">
-            <h3 className="text-xl font-bold sm:text-2xl">Want to see all items in your local area?</h3>
-            <p className="text-sm text-white/80 sm:text-base">
+            <h3 className="text-base font-semibold leading-6 text-tc-brand-ink">Want to see all items in your local area?</h3>
+            <p className="text-[15px] leading-[22px] text-tc-brand-body">
               Browse by postcode or category. No account needed to browse.
             </p>
           </div>
           <Link
             to="/browse"
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-tc-shell-accent px-7 py-3 text-base font-bold text-[#0B3322] no-underline shadow-lg transition duration-200 hover:-translate-y-0.5 hover:bg-tc-shell-accentHover"
+            className="shrink-0 inline-flex h-12 items-center justify-center gap-2 rounded-full px-[22px] text-[15px] font-semibold no-underline transition duration-200 hover:-translate-y-0.5 bg-tc-brand-deep text-white hover:bg-tc-brand-hover"
           >
             <span>Explore all free items</span>
             <ArrowRight className="h-4 w-4" />
@@ -216,34 +216,34 @@ export function LandingFeaturedItemsSection() {
       <Modal
         isOpen={Boolean(selectedItem)}
         onClose={() => setSelectedItem(null)}
-        containerClassName="max-w-[540px]"
+        containerClassName="max-w-[540px] rounded-tc-xl shadow-tc-dialog"
       >
         {selectedItem ? (
           <div className="flex flex-col">
             {selectedItem.image ? (
-              <div className="relative h-64 w-full bg-slate-100 sm:h-72">
+              <div className="relative h-64 w-full bg-tc-brand-soft sm:h-72">
                 <img
                   src={selectedItem.image.url}
                   alt={selectedItem.image.altText ?? selectedItem.title}
-                  className="h-full w-full rounded-t-2xl object-cover"
+                  className="h-full w-full rounded-t-tc-xl object-cover"
                 />
                 <div className="absolute left-4 top-4 flex gap-2">
-                  <span className="rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-[#0B3322] shadow">
+                  <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold leading-4 text-tc-brand-ink">
                     {selectedItem.category}
                   </span>
-                  <span className="rounded-full bg-[#0B3322] px-3 py-1 text-xs font-medium text-white shadow">
+                  <span className="rounded-full bg-tc-brand-deep px-2.5 py-1 text-xs font-semibold leading-4 text-white">
                     {selectedItem.condition}
                   </span>
                 </div>
               </div>
             ) : null}
 
-            <div className="space-y-4 p-6 sm:p-7">
+            <div className="space-y-4 p-6">
               <div>
-                <h2 className="text-2xl font-bold text-slate-900">{selectedItem.title}</h2>
-                <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                <h2 className="text-xl font-semibold leading-7 tracking-[-0.015em] text-tc-brand-ink">{selectedItem.title}</h2>
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-sm leading-5 text-tc-brand-body">
                   <div className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4 text-[#2f9d7e]" />
+                    <MapPin className="h-4 w-4 text-tc-brand-muted" />
                     <span>{selectedItem.locationLabel}</span>
                   </div>
                   <span>·</span>
@@ -251,15 +251,15 @@ export function LandingFeaturedItemsSection() {
                   {selectedItem.pickupOption ? (
                     <>
                       <span>·</span>
-                      <span className="text-slate-500">{selectedItem.pickupOption}</span>
+                      <span className="text-tc-brand-muted">{selectedItem.pickupOption}</span>
                     </>
                   ) : null}
                 </div>
               </div>
 
-              <div className="rounded-xl border border-[#0B3322]/15 bg-[#F7FBF4] p-4 text-sm text-slate-700">
-                <p className="font-semibold text-[#0B3322]">Ready to collect this item?</p>
-                <p className="mt-1 text-xs text-slate-600 leading-relaxed">
+              <div className="rounded-tc-md border border-tc-brand-mintLine bg-tc-brand-mintSoft p-4 text-sm text-tc-brand-body">
+                <p className="font-semibold text-tc-brand-ink">Ready to collect this item?</p>
+                <p className="mt-1 text-[13px] leading-5 text-tc-brand-body">
                   Open the full listing to check availability and request this item.
                 </p>
               </div>
@@ -267,7 +267,7 @@ export function LandingFeaturedItemsSection() {
               <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                 <Link
                   to={`/items/${encodeURIComponent(selectedItem.id)}`}
-                  className="inline-flex flex-1 items-center justify-center rounded-full bg-[#0B3322] px-5 py-3 text-sm font-bold text-white no-underline shadow transition hover:bg-[#0D3B24]"
+                  className="inline-flex h-11 flex-1 items-center justify-center rounded-full bg-tc-brand-deep px-5 text-sm font-semibold text-white no-underline transition hover:bg-tc-brand-hover"
                 >
                   View full listing
                 </Link>

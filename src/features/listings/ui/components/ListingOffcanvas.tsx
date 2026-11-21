@@ -41,14 +41,14 @@ function toTitleCase(value: string): string {
 
 function statusTone(status: DonorListingItem['status']): string {
   if (status === 'Active') {
-    return 'bg-[#A4F5A6] text-[#121212]'
+    return 'bg-tc-brand-mint text-tc-brand-onMint'
   }
 
   if (status === 'Claimed') {
-    return 'bg-slate-200 text-slate-700'
+    return 'bg-amber-100 text-amber-900'
   }
 
-  return 'bg-emerald-100 text-emerald-700'
+  return 'bg-tc-brand-mintSoft text-tc-brand-ink'
 }
 
 function formatRelativeTime(value: string | null): string {
@@ -170,24 +170,24 @@ function CollectorCard({
   readonly actionSlot: ReactNode
 }) {
   return (
-    <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 px-5">
+    <div className="rounded-tc-md border border-tc-brand-line bg-white px-4 py-3.5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <span className="inline-flex shrink-0 items-center justify-center rounded-full bg-[#A4F5A61A] p-4 text-xl font-bold text-[#15A119]">
+          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tc-brand-deep text-[13px] font-semibold text-white">
             {toInitials(request.name)}
           </span>
           <div className="min-w-0">
-            <p className="text-base font-medium text-[#121212]">{request.name}</p>
-            <p className="text-sm tracking-wide text-[#121212BF]">{request.message}</p>
-            <p className="mt-1 text-[11px] tracking-wide text-[#121212BF]">{request.timeLabel}</p>
+            <p className="text-sm font-semibold text-tc-brand-ink">{request.name}</p>
+            <p className="break-words text-[13px] leading-5 text-tc-brand-body">{request.message}</p>
+            <p className="mt-1 text-xs leading-4 text-tc-brand-muted">{request.timeLabel}</p>
           </div>
         </div>
         <span
           className={classNames(
-            'rounded-full px-2.5 py-0.5 text-[11px] tracking-wide',
+            'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold',
             request.status === 'Pending'
-              ? 'bg-[#FBBC051A] text-[#FBBC05]'
-              : 'bg-[#A4F5A61A] text-[#15A119]',
+              ? 'bg-tc-brand-soft text-tc-brand-body'
+              : 'bg-tc-brand-mintSoft text-tc-brand-deep',
           )}
         >
           {request.status}
@@ -311,20 +311,20 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
   return createPortal(
     <>
       <div
-        className="fixed inset-0 z-[180] bg-[#E2E8F080]"
+        className="fixed inset-0 z-[180] bg-tc-brand-ink/55"
         onClick={onClose}
         aria-hidden
       />
-      <aside className="fixed right-10 top-[72px] z-[181] h-[90vh] w-full max-w-[600px] rounded-lg bg-white p-6 shadow-[0px_4px_20px_0px_#E2E8F080]">
+      <aside className="fixed right-2 top-[72px] z-[181] h-[90vh] max-h-[calc(100vh-80px)] w-full max-w-[calc(100vw-16px)] rounded-tc-xl bg-white p-5 shadow-tc-dialog sm:right-10 sm:max-w-[600px] sm:p-6">
         <div className="flex h-full flex-col gap-5">
-          <header className="flex items-start justify-between">
+          <header className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-lg font-bold text-[#121212]">{panelTitle}</h2>
-              <p className="max-w-[58ch] text-md text-[#12121299]">{panelSubtitle}</p>
+              <h2 className="text-lg font-semibold leading-6 text-tc-brand-ink">{panelTitle}</h2>
+              <p className="mt-1 max-w-[58ch] text-sm leading-5 text-tc-brand-body">{panelSubtitle}</p>
             </div>
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#222222BF] hover:bg-slate-200"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tc-brand-soft text-tc-brand-ink transition hover:bg-tc-brand-line"
               onClick={onClose}
               aria-label="Close listing panel"
             >
@@ -337,53 +337,53 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
           <div className="flex-1 overflow-y-auto">
             {view === 'details' ? (
               <div className="space-y-4">
-                <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+                <div className="overflow-hidden rounded-tc-lg bg-tc-brand-soft">
                   {item.imageUrl ? (
                     <img src={item.imageUrl} alt={item.title} className="h-60 w-full object-cover" />
                   ) : (
-                    <div className="flex h-60 items-center justify-center text-sm text-[#222222BF]">
+                    <div className="flex h-60 items-center justify-center text-sm text-tc-brand-muted">
                       No image available
                     </div>
                   )}
                 </div>
 
                 <div>
-                  <h3 className="text-2xl font-bold text-[#121212]">{item.title}</h3>
+                  <h3 className="text-xl font-semibold leading-7 tracking-[-0.015em] text-tc-brand-ink">{item.title}</h3>
                   <div className="mt-2 flex items-center gap-2">
-                    <span className="rounded-md bg-[#A4F5A61A] p-2 text-xs font-medium uppercase tracking-wide text-[#15A119]">
+                    <span className="rounded-full bg-tc-brand-mintSoft px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-tc-brand-deep">
                       {conditionLabel}
                     </span>
-                    <span className="text-sm text-[#121212BF]">{item.category}</span>
+                    <span className="text-sm text-tc-brand-body">{item.category}</span>
                   </div>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-xl border border-[#A4F5A6] bg-[#F8FAFC] px-6 py-5">
-                    <p className="text-xs tracking-wide text-[#222222BF]">LISTED</p>
-                    <p className="mt-2 text-sm text-[#121212]">{formatListedDate(item.createdAt)}</p>
+                  <div className="rounded-tc-md bg-tc-brand-mintSoft p-3">
+                    <p className="text-[11px] font-semibold tracking-[0.06em] text-tc-brand-body">LISTED</p>
+                    <p className="mt-1 text-sm font-semibold text-tc-brand-ink">{formatListedDate(item.createdAt)}</p>
                   </div>
-                  <div className="rounded-xl border border-[#A4F5A6] bg-[#F8FAFC] px-6 py-5">
-                    <p className="text-xs tracking-wide text-[#222222BF]">STATUS</p>
+                  <div className="rounded-tc-md bg-tc-brand-mintSoft p-3">
+                    <p className="text-[11px] font-semibold tracking-[0.06em] text-tc-brand-body">STATUS</p>
                     <p
                       className={classNames(
-                        'mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold',
+                        'mt-1 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold',
                         statusTone(item.status),
                       )}
                     >
                       {donorListingStatusLabel(item)}
                     </p>
                   </div>
-                  <div className="rounded-xl border border-[#A4F5A6] bg-[#F8FAFC] px-6 py-5">
-                    <p className="text-xs tracking-wide text-[#222222BF]">REWARD</p>
-                    <p className="mt-2 inline-flex rounded-full border border-[#E2E8F0] px-2.5 py-1 text-xs font-semibold text-[#121212]">
+                  <div className="rounded-tc-md bg-tc-brand-mintSoft p-3">
+                    <p className="text-[11px] font-semibold tracking-[0.06em] text-tc-brand-body">REWARD</p>
+                    <p className="mt-1 inline-flex rounded-full border border-tc-brand-mintLine bg-white px-2.5 py-1 text-xs font-semibold text-tc-brand-ink">
                       {formatReward(item)}
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-2 border-t border-slate-200 pt-3">
-                  <h4 className="text-lg font-semibold text-[#121212]">Description</h4>
-                  <p className="text-sm text-[#121212BF]">{item.description ?? item.meta}</p>
+                <div className="space-y-1.5 border-t border-tc-brand-line pt-4">
+                  <h4 className="text-xs font-semibold uppercase tracking-[0.06em] text-tc-brand-muted">Description</h4>
+                  <p className="text-sm leading-6 text-tc-brand-ink">{item.description ?? item.meta}</p>
                 </div>
 
                 <div className="space-y-3 pb-5 pt-1">
@@ -400,7 +400,7 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
             {view === 'requests' ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold text-[#121212]">
+                  <h3 className="text-base font-semibold leading-6 text-tc-brand-ink">
                     Pending Requests ({pendingRequests.length})
                   </h3>
                 </div>
@@ -411,7 +411,7 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
                       key={request.id}
                       request={request}
                       actionSlot={
-                        <div className="flex gap-3">
+                        <div className="flex flex-wrap gap-3">
                           <Button
                             variant="primary"
                             className="min-w-[130px]"
@@ -434,12 +434,12 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
                     />
                   ))
                 ) : (
-                  <div className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
+                  <div className="rounded-tc-md border border-dashed border-tc-brand-control bg-white px-4 py-3.5 text-sm text-tc-brand-body">
                     No pending collector requests for this listing.
                   </div>
                 )}
 
-                <div className="flex gap-3 pt-2">
+                <div className="flex flex-wrap gap-3 pt-2">
                   <Button variant="secondary" onClick={() => setView('details')}>
                     Back
                   </Button>
@@ -456,7 +456,7 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
 
             {view === 'approved' ? (
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-[#121212]">
+                <h3 className="text-base font-semibold leading-6 text-tc-brand-ink">
                   Approved Collectors ({approvedRequests.length})
                 </h3>
                 {approvedRequests.length > 0 ? (
@@ -479,12 +479,12 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
                     />
                   ))
                 ) : (
-                  <div className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
+                  <div className="rounded-tc-md border border-dashed border-tc-brand-control bg-white px-4 py-3.5 text-sm text-tc-brand-body">
                     No approved collectors yet.
                   </div>
                 )}
 
-                <div className="flex gap-3 pt-2">
+                <div className="flex flex-wrap gap-3 pt-2">
                   <Button variant="secondary" onClick={() => setView('requests')}>
                     Back
                   </Button>

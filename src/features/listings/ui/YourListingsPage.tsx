@@ -67,32 +67,32 @@ export default function YourListingsPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className="mx-auto w-full max-w-[1120px] space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">My Listed Items</h1>
-          <p className="text-slate-500">Manage active, claimed and completed donor listings.</p>
+          <h1 className="text-[30px] font-semibold leading-9 tracking-[-0.02em] text-tc-brand-ink">My Listed Items</h1>
+          <p className="mt-1 text-base leading-6 text-tc-brand-body">Manage active, claimed and completed donor listings.</p>
         </div>
         <NewItemButton onClick={() => setIsListItemDialogOpen(true)} />
       </div>
 
-      {error ? <p className="text-sm text-rose-600">{error}</p> : null}
+      {error ? <p className="rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft px-4 py-3 text-sm text-tc-brand-danger">{error}</p> : null}
 
       {isLoading ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-tc-lg border border-tc-brand-line bg-white p-4 sm:p-6">
           <ListingsLoadingState count={3} showHeading />
         </div>
       ) : !hasListings ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-lime-100 text-lime-700">
+        <div className="rounded-tc-lg border border-tc-brand-line bg-white px-6 py-12 text-center">
+          <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-tc-brand-mintSoft text-tc-brand-deep">
             <Plus size={24} />
           </div>
-          <p className="mt-4 text-lg font-semibold text-slate-900">Your listed items will be displayed here</p>
-          <div className="mt-5 flex flex-wrap justify-center gap-3">
+          <p className="mt-3 text-lg font-semibold leading-7 text-tc-brand-ink">Your listed items will be displayed here</p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
             <NewItemButton onClick={() => setIsListItemDialogOpen(true)} />
             <Button
-              variant="danger"
-              className="h-12 w-12 p-0"
+              variant="secondary"
+              className="h-11 w-11 p-0"
               aria-label="Refresh listings"
               title="Refresh listings"
               onClick={() => {
@@ -104,8 +104,8 @@ export default function YourListingsPage() {
           </div>
         </div>
       ) : (
-        <div className="relative space-y-3 rounded-2xl bg-white p-5 px-8 shadow-sm">
-          <h2 className="text-xl font-bold text-slate-900">Your Listings</h2>
+        <div className="relative space-y-3 rounded-tc-lg border border-tc-brand-line bg-white p-4 sm:p-6">
+          <h2 className="text-xl font-semibold leading-7 tracking-[-0.015em] text-tc-brand-ink">Your Listings</h2>
           {listings.map((item) => (
             <ListingRow
               key={item.id}

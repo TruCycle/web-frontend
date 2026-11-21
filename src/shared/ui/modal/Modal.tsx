@@ -56,10 +56,10 @@ export const Modal: React.FC<ModalProps> = ({
     const overlayClass = classNames(
         'fixed inset-0 z-[1200] flex',
         'items-start justify-center p-4 pt-8 sm:pt-10 md:pt-12',
-        overlayClassName ?? 'bg-[#22222299] backdrop-blur-[16px]',
+        overlayClassName ?? 'bg-tc-brand-ink/55',
     );
     const containerClass = classNames(
-        'relative w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl',
+        'relative w-full overflow-hidden rounded-tc-xl bg-white shadow-tc-dialog',
         isRight ? 'max-w-[640px]' : 'max-w-[560px]',
         containerClassName,
     );
@@ -74,7 +74,7 @@ export const Modal: React.FC<ModalProps> = ({
                 {!hideCloseButton && (
                     <button
                         type="button"
-                        className="absolute right-3 top-3 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                        className="absolute right-4 top-4 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full bg-tc-brand-soft text-tc-brand-ink transition hover:bg-tc-brand-line"
                         onClick={onClose}
                         aria-label="Close modal"
                     >

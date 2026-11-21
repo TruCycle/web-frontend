@@ -55,21 +55,21 @@ export function PaginationControls({
   const paginationTokens = buildPaginationTokens(currentPage, totalPages)
 
   return (
-    <div className={classNames('flex items-center justify-between pt-4', className)}>
+    <div className={classNames('flex flex-wrap items-center justify-between gap-2 pt-4', className)}>
       <button
         type="button"
         disabled={!canGoPrevious}
         onClick={onPrevious}
-        className="inline-flex items-center gap-1 rounded-lg border border-[#64748B40] bg-white px-3 py-2 text-base font-medium text-[#12121299] transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex min-h-11 items-center gap-1 rounded-tc-md border border-tc-brand-control bg-white px-3 py-2 text-sm font-semibold text-tc-brand-deep transition hover:bg-tc-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
       >
         <ChevronLeft size={20} />
         Previous
       </button>
 
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-4 max-md:order-last max-md:w-full max-md:justify-center max-md:gap-1">
         {paginationTokens.map((token, index) =>
           token === 'ellipsis-left' || token === 'ellipsis-right' ? (
-            <span key={`${token}-${index}`} className="text-2xl text-[#12121299] max-md:text-xl">
+            <span key={`${token}-${index}`} className="text-xl text-tc-brand-muted max-md:text-lg">
               ...
             </span>
           ) : (
@@ -79,8 +79,8 @@ export function PaginationControls({
               onClick={() => onPageChange(token)}
               className={
                 token === currentPage
-                  ? 'inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#17A61A] px-3 text-base font-semibold text-white'
-                  : 'inline-flex h-10 w-10 items-center justify-center rounded-lg px-3 text-base font-medium text-[#12121299] hover:bg-slate-100'
+                  ? 'inline-flex h-11 w-11 items-center justify-center rounded-tc-md bg-tc-brand-deep px-3 text-sm font-semibold text-white max-md:w-9 max-md:px-0'
+                  : 'inline-flex h-11 w-11 items-center justify-center rounded-tc-md px-3 text-sm font-medium text-tc-brand-body transition hover:bg-tc-brand-soft max-md:w-9 max-md:px-0'
               }
               aria-current={token === currentPage ? 'page' : undefined}
             >
@@ -94,7 +94,7 @@ export function PaginationControls({
         type="button"
         disabled={!canGoNext}
         onClick={onNext}
-        className="inline-flex items-center gap-1 rounded-lg border border-[#64748B40] bg-white px-3 py-2 text-base font-medium text-[#12121299] transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 max-md:px-4"
+        className="inline-flex min-h-11 items-center gap-1 rounded-tc-md border border-tc-brand-control bg-white px-3 py-2 text-sm font-semibold text-tc-brand-deep transition hover:bg-tc-brand-soft disabled:cursor-not-allowed disabled:opacity-50 max-md:px-4"
       >
         Next
         <ChevronRight size={20} />

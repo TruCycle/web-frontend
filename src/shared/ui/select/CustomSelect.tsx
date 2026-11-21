@@ -19,7 +19,7 @@ export interface CustomSelectProps {
 }
 
 const defaultButtonClassName =
-  'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none'
+  'h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink outline-none'
 
 export function CustomSelect({
   id,
@@ -72,8 +72,8 @@ export function CustomSelect({
         disabled={disabled}
         className={classNames(
           defaultButtonClassName,
-          'flex items-center justify-between text-left transition disabled:cursor-not-allowed disabled:opacity-60',
-          isOpen && 'border-lime-400 ring-4 ring-lime-100',
+          'flex items-center justify-between gap-2 text-left transition disabled:cursor-not-allowed disabled:opacity-50',
+          isOpen && 'border-tc-brand-deep ring-2 ring-tc-brand-mint',
           buttonClassName,
         )}
         onClick={() => {
@@ -83,10 +83,10 @@ export function CustomSelect({
           setIsOpen((current) => !current)
         }}
       >
-        <span className={showsPlaceholder ? 'text-slate-400' : ''}>{displayLabel}</span>
+        <span className={showsPlaceholder ? 'text-tc-brand-muted' : ''}>{displayLabel}</span>
         <ChevronDown
           size={18}
-          className={classNames('text-slate-500 transition', isOpen && 'rotate-180')}
+          className={classNames('shrink-0 text-tc-brand-muted transition', isOpen && 'rotate-180')}
         />
       </button>
 
@@ -94,7 +94,7 @@ export function CustomSelect({
         <div
           role="listbox"
           className={classNames(
-            'absolute z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg',
+            'absolute z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-tc-md border border-tc-brand-line bg-white p-1 shadow-tc-raised',
             menuClassName,
           )}
         >
@@ -103,8 +103,8 @@ export function CustomSelect({
               key={option.value}
               type="button"
               className={classNames(
-                'w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50',
-                value === option.value && 'bg-lime-50 font-semibold text-lime-700',
+                'min-h-11 w-full rounded-tc-sm px-3 py-2 text-left text-sm text-tc-brand-ink hover:bg-tc-brand-soft',
+                value === option.value && 'bg-tc-brand-mintSoft font-semibold text-tc-brand-deep',
               )}
               onClick={() => {
                 onChange(option.value)

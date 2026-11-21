@@ -271,26 +271,26 @@ export default function SupportFaqPage() {
 
   return (
     <div className="w-full">
-      <header className="mb-[1.1rem]">
-        <h1 className="m-0 text-[2.1rem] font-extrabold leading-[1.1] tracking-[-0.02em] text-slate-900 max-[1024px]:text-[1.8rem] max-md:text-[1.5rem]">
+      <header className="mb-6">
+        <h1 className="m-0 text-[30px] font-semibold leading-9 tracking-[-0.02em] text-tc-brand-ink max-[1024px]:text-[1.8rem] max-md:text-[1.5rem]">
           {firstName ? `Welcome back, ${firstName}!` : 'Welcome back!'}
         </h1>
-        <p className="mt-[0.45rem] text-base text-slate-500 max-md:text-[0.92rem]">
+        <p className="mt-1 text-base leading-6 text-tc-brand-body max-md:text-[0.92rem]">
           Track your impact and manage your listings
         </p>
       </header>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-[1.4rem] max-md:rounded-xl max-md:p-4">
-        <h2 className="m-0 text-[1.05rem] font-bold text-slate-900">Frequently Asked Questions</h2>
+      <section className="rounded-tc-lg border border-tc-brand-line bg-white p-6 max-md:rounded-tc-md max-md:p-4">
+        <h2 className="m-0 text-lg font-semibold leading-6 text-tc-brand-ink">Frequently Asked Questions</h2>
 
         <label
-          className="mt-4 flex h-11 items-center gap-[0.55rem] rounded-lg border border-slate-200 bg-white px-3 text-slate-400"
+          className="mt-4 flex h-11 items-center gap-[0.55rem] rounded-full border border-tc-brand-control bg-white px-4 text-tc-brand-muted focus-within:border-tc-brand-deep focus-within:ring-2 focus-within:ring-tc-brand-mint"
           htmlFor="support-faq-search"
         >
           <Search aria-hidden size={16} className="shrink-0" />
           <input
             id="support-faq-search"
-            className="h-full w-full border-0 bg-transparent text-[0.92rem] text-slate-700 outline-none placeholder:text-slate-400"
+            className="h-full w-full border-0 bg-transparent text-sm text-tc-brand-ink outline-none placeholder:text-tc-brand-muted"
             onChange={(event) => setSearchQuery(event.currentTarget.value)}
             placeholder="Search FAQ..."
             type="search"
@@ -298,14 +298,14 @@ export default function SupportFaqPage() {
           />
         </label>
 
-        <div className="mt-4 grid gap-3">
+        <div className="mt-4 grid gap-2.5">
           {filteredSections.map((section) => {
             const isOpen = expandedSectionId === section.id
 
             return (
-              <article className="overflow-hidden rounded-xl border border-[#64748B40] bg-white shadow-[0px_3px_3.75px_0px_#64748B1A]" key={section.id}>
+              <article className="overflow-hidden rounded-tc-md border border-tc-brand-line bg-white transition has-[ul]:border-tc-brand-mintLine has-[ul]:bg-tc-brand-mintSoft" key={section.id}>
                 <button
-                  className="flex w-full items-center justify-between gap-3 border-0 bg-transparent px-[2rem] py-[0.95rem] text-left text-[0.99rem] font-medium text-slate-900 max-md:px-4 max-md:py-[0.85rem] max-md:text-[0.94rem]"
+                  className="flex min-h-11 w-full items-center justify-between gap-3 border-0 bg-transparent px-5 py-4 text-left text-sm font-semibold leading-5 text-tc-brand-ink max-md:px-4 max-md:py-[0.85rem]"
                   onClick={() =>
                     setExpansionState((current) => {
                       return {
@@ -320,7 +320,7 @@ export default function SupportFaqPage() {
                   <ChevronDown
                     aria-hidden
                     className={classNames(
-                      'shrink-0 text-[#46B3A7] transition',
+                      'shrink-0 text-tc-brand-deep transition',
                       isOpen && 'rotate-180',
                     )}
                     size={16}
@@ -328,14 +328,14 @@ export default function SupportFaqPage() {
                 </button>
 
                 {isOpen && section.faqs.length > 0 && (
-                  <ul className="m-0 list-none px-[2rem] pb-3 max-md:px-4 max-md:pb-[0.65rem]">
+                  <ul className="m-0 grid list-none gap-2.5 px-5 pb-4 max-md:px-4 max-md:pb-3 [&>li]:rounded-tc-md [&>li]:border [&>li]:border-tc-brand-line [&>li]:bg-white [&>li]:px-4">
                     {section.faqs.map((faq) => {
                       const isFaqOpen = expandedFaqId === faq.id
 
                       return (
                         <li key={faq.id}>
                           <button
-                            className="flex w-full items-center justify-between gap-3 border-0 bg-transparent py-[0.6rem] text-left text-[0.92rem] text-slate-700 max-md:py-[0.52rem] max-md:text-[0.89rem]"
+                            className="flex min-h-11 w-full items-center justify-between gap-3 border-0 bg-transparent py-3 text-left text-sm font-medium leading-5 text-tc-brand-ink"
                             onClick={() =>
                               setExpansionState((current) => {
                                 return {
@@ -350,14 +350,14 @@ export default function SupportFaqPage() {
                             <ChevronDown
                               aria-hidden
                               className={classNames(
-                                'shrink-0 text-slate-400 transition',
+                                'shrink-0 text-tc-brand-muted transition',
                                 isFaqOpen && 'rotate-180',
                               )}
                               size={14}
                             />
                           </button>
                           {isFaqOpen && (
-                            <p className="mb-2 pr-2 text-[0.9rem] leading-[1.5] text-slate-500">
+                            <p className="mb-3 pr-2 text-sm leading-5 text-tc-brand-body">
                               {faq.answer}
                             </p>
                           )}
@@ -371,15 +371,15 @@ export default function SupportFaqPage() {
           })}
         </div>
 
-        <section className="mt-[2rem] rounded-xl border border-[#64748B40] bg-white shadow-[0px_3px_3.75px_0px_#64748B1A] p-[2rem] max-md:p-4">
-          <h3 className="m-0 text-[0.95rem] font-bold text-slate-900">General questions</h3>
-          <div className="mt-5">
+        <section className="mt-6 rounded-tc-md border border-tc-brand-line bg-tc-brand-haze p-5 max-md:p-4">
+          <h3 className="m-0 text-base font-semibold leading-6 text-tc-brand-ink">General questions</h3>
+          <div className="mt-3">
             <article>
-              <p className="mb-[0.45rem] inline-flex items-center gap-1.5 text-[0.86rem] font-bold text-slate-900">
+              <p className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-tc-brand-ink">
                 <Mail aria-hidden size={14} className="shrink-0" />
                 Email TruCycle
               </p>
-              <a href="mailto:hello@trucycle.co.uk" className="text-[0.86rem] leading-[1.45] underline">hello@trucycle.co.uk</a>
+              <a href="mailto:hello@trucycle.co.uk" className="inline-flex min-h-11 items-center text-sm font-semibold text-tc-brand-deep underline underline-offset-4 hover:text-black">hello@trucycle.co.uk</a>
             </article>
           </div>
         </section>

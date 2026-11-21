@@ -23,8 +23,8 @@ export function AuthCheckbox({
   return (
     <label
       className={classNames(
-        'inline-flex cursor-pointer items-center gap-[0.55rem]',
-        disabled && 'cursor-not-allowed opacity-70',
+        'inline-flex min-h-11 cursor-pointer items-center gap-2',
+        disabled && 'cursor-not-allowed opacity-50',
         className,
       )}
       htmlFor={id}
@@ -38,10 +38,10 @@ export function AuthCheckbox({
         onChange={onChange}
         type="checkbox"
       />
-      <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-[0.35rem] border border-tc-auth-inputBorder bg-white transition peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-tc-auth-inputFocus peer-checked:border-tc-auth-submit peer-checked:bg-tc-auth-submit peer-disabled:border-slate-200 peer-disabled:bg-slate-100">
+      <span className="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded border border-tc-brand-control bg-white transition peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-tc-brand-deep peer-checked:border-tc-brand-deep peer-checked:bg-tc-brand-deep peer-checked:[&>svg]:opacity-100 peer-disabled:border-tc-brand-line peer-disabled:bg-tc-brand-soft">
         <svg
           aria-hidden
-          className="h-3.5 w-3.5 opacity-0 transition-opacity peer-checked:opacity-100"
+          className="h-3 w-3 opacity-0 transition-opacity"
           viewBox="0 0 20 20"
         >
           <path

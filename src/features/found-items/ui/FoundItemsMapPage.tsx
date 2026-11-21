@@ -102,24 +102,24 @@ function markerPalette(status: FoundItemStatus): {
 } {
   if (status === 'claimed') {
     return {
-      fill: '#F0A338',
-      text: '#FFFFFF',
-      shadow: 'rgba(240, 163, 56, 0.28)',
+      fill: '#FFFFFF',
+      text: '#232323',
+      shadow: 'rgba(10, 13, 10, 0.22)',
     }
   }
 
   if (status === 'picked_up') {
     return {
-      fill: '#A8B0AA',
+      fill: '#232323',
       text: '#FFFFFF',
-      shadow: 'rgba(148, 163, 184, 0.22)',
+      shadow: 'rgba(10, 13, 10, 0.22)',
     }
   }
 
   return {
-    fill: '#2FB463',
-    text: '#FFFFFF',
-    shadow: 'rgba(47, 180, 99, 0.26)',
+    fill: '#8EE3A8',
+    text: '#0B1F16',
+    shadow: 'rgba(10, 13, 10, 0.22)',
   }
 }
 
@@ -135,10 +135,10 @@ function buildMarkerIcon(item: FoundItem, isSelected: boolean) {
     iconAnchor: point((size + 8) / 2, size + 18),
     html: `
       <div style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 10px 18px ${palette.shadow});">
-        <div style="display:flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:999px;background:${palette.fill};color:${palette.text};font:700 13px/1 system-ui, sans-serif;border:3px solid #FFFFFF;box-shadow:${isSelected ? '0 0 0 5px rgba(255,255,255,0.75)' : 'none'};">
+        <div style="display:flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:999px;background:${palette.fill};color:${palette.text};font:600 13px/1 Inter, system-ui, sans-serif;border:2px solid #232323;box-shadow:${isSelected ? '0 0 0 4px rgba(142,227,168,0.9)' : 'none'};">
           ${label}
         </div>
-        <div style="width:${pointerSize}px;height:${pointerSize}px;margin-top:-4px;transform:rotate(45deg);background:${palette.fill};border-right:3px solid #FFFFFF;border-bottom:3px solid #FFFFFF;"></div>
+        <div style="width:${pointerSize}px;height:${pointerSize}px;margin-top:-4px;transform:rotate(45deg);background:${palette.fill};border-right:2px solid #232323;border-bottom:2px solid #232323;"></div>
       </div>
     `,
   })
@@ -184,8 +184,8 @@ function FilterChip({
     <button
       type="button"
       className={classNames(
-        'rounded-full px-4 py-2 text-sm font-semibold transition',
-        isActive ? 'bg-[#111611] text-white shadow-[0_10px_20px_rgba(17,22,17,0.2)]' : 'text-slate-500 hover:text-slate-900',
+        'min-h-9 shrink-0 whitespace-nowrap rounded-full px-3 py-2 text-[13px] leading-5 transition sm:px-3.5',
+        isActive ? 'bg-tc-brand-deep font-semibold text-white' : 'font-medium text-tc-brand-body hover:bg-tc-brand-soft hover:text-tc-brand-ink',
       )}
       onClick={onClick}
     >
@@ -237,10 +237,10 @@ function SelectedItemDetails({
 
   if (!item) {
     return (
-      <div className="flex h-full min-h-[420px] flex-col items-center justify-center rounded-[24px] bg-[#F7FAF1] px-6 text-center">
-        <p className="text-sm font-semibold text-slate-400">No spots yet</p>
-        <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-slate-950">Nothing matches this view</h2>
-        <p className="mt-2 max-w-[240px] text-sm leading-6 text-slate-500">
+      <div className="flex h-full min-h-[420px] flex-col items-center justify-center rounded-tc-lg bg-white px-6 py-10 text-center">
+        <p className="rounded-full bg-tc-brand-mintSoft px-3 py-1.5 text-xs leading-4 font-semibold text-tc-brand-deep">No spots yet</p>
+        <h2 className="mt-3 text-lg leading-7 font-semibold tracking-[-0.015em] text-tc-brand-ink">Nothing matches this view</h2>
+        <p className="mt-2 max-w-[380px] text-sm leading-6 text-tc-brand-body">
           Switch filters or refresh the board to pull in more nearby finds.
         </p>
       </div>
@@ -248,15 +248,15 @@ function SelectedItemDetails({
   }
 
   return (
-    <div className="space-y-2.5">
-      <div className="aspect-square overflow-hidden rounded-[24px] bg-[linear-gradient(180deg,#E3F0C7_0%,#F2F7E6_100%)] sm:aspect-auto">
+    <div className="space-y-3">
+      <div className="aspect-square overflow-hidden rounded-tc-lg bg-tc-brand-soft sm:aspect-auto">
         {item.images[0] ? (
           <img src={item.images[0].url} alt={item.title} className="h-full w-full object-cover sm:h-[196px]" />
         ) : (
-          <div className="flex h-full items-center justify-center text-center text-[#446B16] sm:h-[196px]">
+          <div className="flex h-full items-center justify-center px-4 text-center text-tc-brand-ink sm:h-[196px]">
             <div>
-              <p className="text-xs font-semibold tracking-[0.01em]">No image yet</p>
-              <p className="mt-2 text-lg font-bold tracking-[-0.03em]">{item.title}</p>
+              <p className="text-xs leading-4 font-semibold text-tc-brand-muted">No image yet</p>
+              <p className="mt-2 text-lg font-semibold tracking-[-0.015em]">{item.title}</p>
             </div>
           </div>
         )}
@@ -264,55 +264,55 @@ function SelectedItemDetails({
 
       <div className="flex items-start justify-between gap-2.5">
         <div>
-          <h2 className="text-[0.95rem] font-semibold leading-snug tracking-[-0.02em] text-slate-950 sm:text-[1.02rem]">
+          <h2 className="text-base leading-6 font-semibold text-tc-brand-ink sm:text-lg">
             {item.title}
           </h2>
-          <p className="mt-0.5 text-[0.78rem] leading-5 text-slate-500">{formatFoundItemLocationSummary(item)}</p>
+          <p className="mt-0.5 text-[13px] leading-5 text-tc-brand-muted">{formatFoundItemLocationSummary(item)}</p>
         </div>
         <FoundItemStatusBadge status={item.status} />
       </div>
 
       <div className="grid grid-cols-3 gap-2">
-        <div className="rounded-2xl bg-[#F3F5EE] px-3 py-2.5">
-          <p className="text-[0.62rem] font-semibold tracking-[0.01em] text-slate-400">Weight</p>
-          <p className="mt-0.5 text-[0.78rem] font-semibold tracking-[-0.01em] text-slate-950 sm:text-[0.86rem]">{item.weightKg ?? 0} kg</p>
+        <div className="rounded-tc-md bg-tc-brand-soft px-3 py-2.5">
+          <p className="text-xs leading-4 font-semibold text-tc-brand-muted">Weight</p>
+          <p className="mt-0.5 text-[13px] leading-5 font-semibold tabular-nums text-tc-brand-ink sm:text-sm">{item.weightKg ?? 0} kg</p>
         </div>
-        <div className="rounded-2xl bg-[#F3F5EE] px-3 py-2.5">
-          <p className="text-[0.62rem] font-semibold tracking-[0.01em] text-slate-400">CO2e</p>
-          <p className="mt-0.5 text-[0.78rem] font-semibold tracking-[-0.01em] text-slate-950 sm:text-[0.86rem]">{item.estimatedCo2eKg} kg</p>
+        <div className="rounded-tc-md bg-tc-brand-soft px-3 py-2.5">
+          <p className="text-xs leading-4 font-semibold text-tc-brand-muted">CO2e</p>
+          <p className="mt-0.5 text-[13px] leading-5 font-semibold tabular-nums text-tc-brand-ink sm:text-sm">{item.estimatedCo2eKg} kg</p>
         </div>
-        <div className="rounded-2xl bg-[#F3F5EE] px-3 py-2.5">
-          <p className="text-[0.62rem] font-semibold tracking-[0.01em] text-slate-400">Distance</p>
-          <p className="mt-0.5 text-[0.78rem] font-semibold tracking-[-0.01em] text-slate-950 sm:text-[0.86rem]">{formatDistance(distanceKm)}</p>
+        <div className="rounded-tc-md bg-tc-brand-soft px-3 py-2.5">
+          <p className="text-xs leading-4 font-semibold text-tc-brand-muted">Distance</p>
+          <p className="mt-0.5 text-[13px] leading-5 font-semibold tabular-nums text-tc-brand-ink sm:text-sm">{formatDistance(distanceKm)}</p>
         </div>
       </div>
 
-      <div className="rounded-2xl bg-[#F7FAF1] px-3.5 py-3 text-[0.8rem] leading-5 text-slate-600">
+      <div className="rounded-tc-md border border-tc-brand-line px-3.5 py-3 text-[13px] leading-5 text-tc-brand-body">
         <p className="italic">“{item.description}”</p>
       </div>
 
-      <div className="flex items-center justify-between gap-2 text-[0.72rem] text-slate-500">
+      <div className="flex items-center justify-between gap-2 text-xs leading-4 text-tc-brand-muted">
         <span>{formatFoundItemAttribution(item)}</span>
-        {isLocating ? <span className="font-medium text-[#446B16]">Tracking live location…</span> : null}
+        {isLocating ? <span className="font-semibold text-tc-brand-ink">Tracking live location…</span> : null}
       </div>
 
-      {isLoadingDetails ? <p className="text-xs text-slate-400">Loading request status…</p> : null}
-      {detailsError ? <p className="text-xs text-rose-600">{detailsError}</p> : null}
+      {isLoadingDetails ? <p className="text-xs leading-4 text-tc-brand-muted">Loading request status…</p> : null}
+      {detailsError ? <p className="text-[13px] leading-5 text-tc-brand-danger">{detailsError}</p> : null}
 
       <FoundItemLifecycleActions item={item} currentUserId={currentUserId} viewerClaim={viewerClaim} onChanged={onLifecycleChange} />
       {isOwnPost ? (
         <Link
           to="/found-items/my-posts"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#111611] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#1B231B]"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-tc-md bg-tc-brand-deep px-4 py-3 text-sm font-semibold text-white transition hover:bg-tc-brand-hover"
         >
           Open my posts
           <ArrowRight size={16} />
         </Link>
       ) : (
-        <div className="space-y-3 rounded-[24px] border border-slate-200 bg-white p-4">
+        <div className="space-y-3 rounded-tc-lg border border-tc-brand-line bg-white p-4">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900">Pickup note</h3>
-            <p className="mt-1 text-xs leading-5 text-slate-500">
+            <h3 className="text-sm font-semibold text-tc-brand-ink">Pickup note</h3>
+            <p className="mt-1 text-[13px] leading-5 text-tc-brand-muted">
               {viewerHasActiveClaim
                 ? 'Your request is already live for this spot.'
                 : 'Add a short note for the poster before you send your request.'}
@@ -323,14 +323,14 @@ function SelectedItemDetails({
             value={claimMessage}
             onChange={(event) => setClaimMessage(event.target.value)}
             disabled={viewerHasActiveClaim}
-            className="min-h-[88px] w-full rounded-[16px] border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA] disabled:cursor-not-allowed disabled:bg-slate-100"
+            className="min-h-[88px] w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:outline-none focus:ring-2 focus:ring-tc-brand-mint py-3 transition disabled:cursor-not-allowed disabled:bg-tc-brand-soft"
             placeholder="Can collect this today after work. Happy to confirm by message."
           />
 
           {!viewerHasActiveClaim ? (
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#111611] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#1B231B] disabled:cursor-not-allowed disabled:bg-slate-300"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-tc-md bg-tc-brand-deep px-4 py-3 text-sm font-semibold text-white transition hover:bg-tc-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isClaiming || item.status !== 'available'}
               onClick={() => {
                 onClaim(claimMessage)
@@ -342,7 +342,7 @@ function SelectedItemDetails({
           ) : (
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-tc-md border border-tc-brand-control bg-white px-4 py-3 text-sm font-semibold text-tc-brand-deep transition hover:bg-tc-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isCancelling || (item.status !== 'available' && item.status !== 'claimed')}
               onClick={onCancelClaim}
             >
@@ -351,16 +351,16 @@ function SelectedItemDetails({
           )}
 
           {item.status !== 'reported' ? (
-            <div className="space-y-3 rounded-[20px] bg-[#F8FAFC] p-3.5">
+            <div className="space-y-3 rounded-tc-md bg-tc-brand-soft p-4">
               <div>
-                <h3 className="text-sm font-semibold text-slate-900">Report this spot</h3>
-                <p className="mt-1 text-xs leading-5 text-slate-500">
+                <h3 className="text-sm font-semibold text-tc-brand-ink">Report this spot</h3>
+                <p className="mt-1 text-[13px] leading-5 text-tc-brand-muted">
                   Report what you observed. Reports do not confirm pickup or award pickup points.
                 </p>
               </div>
 
-              <label className="block text-sm font-medium text-slate-700">Report reason
-                <select aria-label="Report reason" value={reportReason} onChange={(event) => setReportReason(event.target.value)} className="mt-1 h-11 w-full rounded-[14px] border border-slate-200 px-3 text-sm text-slate-900">
+              <label className="block text-sm font-semibold text-tc-brand-ink">Report reason
+                <select aria-label="Report reason" value={reportReason} onChange={(event) => setReportReason(event.target.value)} className="mt-1.5 min-h-11 font-normal w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:outline-none focus:ring-2 focus:ring-tc-brand-mint">
                   <option value="">Choose a reason</option>
                   <option value="already_gone">Already gone</option>
                   {viewerHasActiveClaim ? <option value="not_there">Not there when I arrived</option> : null}
@@ -374,13 +374,13 @@ function SelectedItemDetails({
               <textarea
                 value={reportDetails}
                 onChange={(event) => setReportDetails(event.target.value)}
-                className="min-h-[80px] w-full rounded-[14px] border border-slate-200 px-3 py-3 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
+                className="min-h-[80px] w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:outline-none focus:ring-2 focus:ring-tc-brand-mint py-3 transition"
                 placeholder="Extra details (optional)"
               />
 
               <button
                 type="button"
-                className="inline-flex w-full items-center justify-center rounded-full bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-rose-300"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-tc-md border border-tc-brand-dangerLine bg-white px-4 py-3 text-sm font-semibold text-tc-brand-danger transition hover:bg-tc-brand-dangerSoft disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={isReporting || !reportReason.trim()}
                 onClick={() => {
                   onReport(reportReason, reportDetails)
@@ -681,36 +681,36 @@ export default function FoundItemsMapPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className="mx-auto w-full max-w-[1120px] space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-[-0.03em] text-slate-950">Map</h1>
-          <p className="mt-1 text-sm text-slate-500">{locationLabel}</p>
+          <h1 className="text-[30px] leading-9 font-semibold tracking-[-0.02em] text-tc-brand-ink">Map</h1>
+          <p className="mt-1 text-base leading-6 text-tc-brand-body">{locationLabel}</p>
         </div>
         <button
           type="button"
           onClick={centreOnMe}
           disabled={isLocating}
-          className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm ring-1 ring-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-60"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-tc-brand-control bg-white px-5 py-2 text-sm font-semibold text-tc-brand-ink transition hover:bg-tc-brand-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tc-brand-deep disabled:cursor-not-allowed disabled:opacity-50"
         >
           <LocateFixed aria-hidden="true" size={16} />
           {isLocating ? 'Finding your location…' : 'Centre on me'}
         </button>
       </div>
 
-      {itemsError ? <p className="text-sm text-rose-600">{itemsError}</p> : null}
-      {locationError ? <p role="status" className="text-sm text-amber-700">{locationError}</p> : null}
+      {itemsError ? <p className="rounded-tc-md border border-tc-brand-dangerLine bg-tc-brand-dangerSoft px-4 py-3 text-sm text-tc-brand-danger">{itemsError}</p> : null}
+      {locationError ? <p role="status" className="w-fit rounded-tc-md border border-tc-brand-mintLine bg-tc-brand-mintSoft px-3.5 py-2.5 text-sm leading-5 text-tc-brand-ink">{locationError}</p> : null}
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.38fr)_340px] 2xl:grid-cols-[minmax(0,1.26fr)_360px]">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.38fr)_340px] 2xl:grid-cols-[minmax(0,1.26fr)_360px]">
         <div className="min-w-0 space-y-2">
-          <div className="relative isolate overflow-hidden rounded-[30px] border border-[#E4E8D8] bg-[#EEF3E6] shadow-sm">
+          <div className="relative isolate overflow-hidden rounded-tc-xl border border-tc-brand-line bg-tc-brand-soft">
             <div className="absolute left-4 top-4 z-[700] flex max-w-[calc(100%-7rem)] flex-col items-start gap-2">
-              <div className="inline-flex items-center gap-1 rounded-full bg-white/95 p-1 shadow-[0_12px_30px_rgba(148,163,184,0.16)] backdrop-blur">
+              <div className="inline-flex items-center gap-1 rounded-full border border-tc-brand-line bg-white shadow-tc-card p-1">
                 <FilterChip isActive={mapFilter === 'all'} label="All" onClick={() => setMapFilter('all')} />
                 <FilterChip isActive={mapFilter === 'available'} label="Live" onClick={() => setMapFilter('available')} />
                 <FilterChip isActive={mapFilter === 'fly_tipped'} label="Fly-tipped" onClick={() => setMapFilter('fly_tipped')} />
               </div>
-              <div className="inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full bg-white/95 p-1 shadow-[0_12px_30px_rgba(148,163,184,0.16)] backdrop-blur">
+              <div className="inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-tc-brand-line bg-white shadow-tc-card p-1">
                 <FilterChip
                   isActive={categoryFilter === 'all'}
                   label="All categories"
@@ -729,7 +729,7 @@ export default function FoundItemsMapPage() {
 
             <button
               type="button"
-              className="absolute right-4 top-4 z-[700] inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-slate-700 shadow-[0_12px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:text-slate-950"
+              className="absolute right-4 top-4 z-[700] inline-flex min-h-11 items-center gap-1.5 rounded-full border border-tc-brand-control bg-white px-3 py-2 sm:gap-2 sm:px-4 text-sm font-semibold text-tc-brand-ink shadow-tc-card transition hover:bg-tc-brand-soft"
               onClick={() => {
                 void loadBoard()
               }}
@@ -799,17 +799,17 @@ export default function FoundItemsMapPage() {
             </MapContainer>
 
             <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[700] flex flex-wrap items-end justify-between gap-3 p-4">
-              <div className="pointer-events-auto inline-flex flex-wrap items-center gap-4 rounded-full bg-white/95 px-4 py-3 text-sm text-slate-600 shadow-[0_12px_30px_rgba(148,163,184,0.16)] backdrop-blur">
-                <span className="inline-flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-full bg-[#2FB463]" />
+              <div className="pointer-events-auto inline-flex flex-wrap items-center gap-3.5 rounded-full border border-tc-brand-line bg-white shadow-tc-card px-4 py-2.5 text-[13px] leading-5 text-tc-brand-ink">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full border border-tc-brand-deep bg-tc-brand-mint" />
                   Live
                 </span>
-                <span className="inline-flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-full bg-[#F0A338]" />
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full border border-tc-brand-deep bg-white" />
                   Claimed
                 </span>
-                <span className="inline-flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-full bg-[#A8B0AA]" />
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full border border-tc-brand-deep bg-tc-brand-deep" />
                   Rescued
                 </span>
               </div>
@@ -817,14 +817,14 @@ export default function FoundItemsMapPage() {
             </div>
           </div>
 
-          <p className="text-xs text-slate-400">Map data © OpenStreetMap contributors</p>
+          <p className="text-xs leading-4 text-tc-brand-muted">Map data © OpenStreetMap contributors</p>
           {nearbyItems.some(({ item }) => !toGeoPoint(item)) ? (
-            <section className="rounded-2xl border border-slate-200 bg-white p-4">
-              <h2 className="font-semibold text-slate-900">Spots without a map location</h2>
-              <p className="mt-1 text-sm text-slate-500">These spots are still available to view. A map location isn't available for them yet.</p>
+            <section className="rounded-tc-lg border border-tc-brand-line bg-white p-6">
+              <h2 className="text-base leading-6 font-semibold text-tc-brand-ink">Spots without a map location</h2>
+              <p className="mt-1 text-[13px] leading-5 text-tc-brand-muted">These spots are still available to view. A map location isn't available for them yet.</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {nearbyItems.filter(({ item }) => !toGeoPoint(item)).map(({ item }) => (
-                  <button key={item.id} type="button" className="rounded-lg border border-slate-200 px-3 py-2 text-sm underline"
+                  <button key={item.id} type="button" className="min-h-11 rounded-tc-md border border-tc-brand-control bg-white px-3.5 py-2 text-sm font-semibold text-tc-brand-deep underline underline-offset-4 hover:bg-tc-brand-soft"
                     onClick={() => {
                       setSelectedItemId(item.id)
                       if (isMobileViewport) setIsMobileItemModalOpen(true)
@@ -835,7 +835,7 @@ export default function FoundItemsMapPage() {
           ) : null}
         </div>
 
-        <aside className="relative z-10 hidden rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm md:block lg:p-5">
+        <aside className="relative z-10 hidden rounded-tc-lg border border-tc-brand-line bg-white p-4 md:block lg:p-5">
           <SelectedItemDetails
             key={selectedItemForPanel?.id ?? 'no-item'}
             item={selectedItemForPanel}
@@ -867,7 +867,7 @@ export default function FoundItemsMapPage() {
       <Modal
         isOpen={isMobileViewport && isMobileItemModalOpen && Boolean(selectedItem)}
         onClose={() => setIsMobileItemModalOpen(false)}
-        containerClassName="max-w-[420px] rounded-[28px]"
+        containerClassName="max-w-[420px] rounded-tc-xl"
         contentClassName="max-h-[calc(100vh-3.5rem)] overflow-y-auto p-4"
       >
         <SelectedItemDetails

@@ -34,9 +34,9 @@ export function NearbyCard({ item, onClick }: NearbyCardProps) {
     <button
       type="button"
       onClick={onClick}
-      className="group flex w-full overflow-hidden rounded-[24px] border border-slate-200 bg-white text-left transition hover:-translate-y-0.5 hover:border-[#34DA45] hover:shadow-md"
+      className="group flex w-full overflow-hidden rounded-tc-lg border border-tc-brand-line bg-white text-left transition hover:-translate-y-0.5 hover:border-tc-brand-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tc-brand-mint"
     >
-      <div className="h-[120px] w-[120px] shrink-0 overflow-hidden bg-[#EEF5E3] sm:h-[140px] sm:w-[140px]">
+      <div className="h-[120px] w-[120px] shrink-0 overflow-hidden bg-tc-brand-soft sm:h-[140px] sm:w-[140px]">
         {primaryImage ? (
           <img
             src={primaryImage.thumbnailUrl || primaryImage.url}
@@ -44,23 +44,23 @@ export function NearbyCard({ item, onClick }: NearbyCardProps) {
             className="h-full w-full object-cover transition group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-xs text-slate-500">No image</div>
+          <div className="flex h-full items-center justify-center text-xs text-tc-brand-muted">No image</div>
         )}
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col justify-between gap-2 p-3 sm:p-4">
         <div className="space-y-1.5">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-[#F2F7E8] px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#55741D]">
+            <span className="rounded-full bg-tc-brand-soft px-2.5 py-1 text-xs leading-4 font-semibold text-tc-brand-body">
               {categoryLabel}
             </span>
             <FoundItemStatusBadge status={item.status} />
           </div>
-          <h3 className="truncate text-[1.05rem] font-semibold tracking-[-0.02em] text-slate-950">
+          <h3 className="truncate text-base leading-6 font-semibold text-tc-brand-ink">
             {item.title}
           </h3>
           {distanceLabel ? (
-            <p className="inline-flex items-center gap-1 text-xs text-slate-500">
+            <p className="inline-flex items-center gap-1 text-[13px] leading-5 text-tc-brand-muted">
               <MapPin size={12} />
               {distanceLabel} away
             </p>
@@ -68,17 +68,17 @@ export function NearbyCard({ item, onClick }: NearbyCardProps) {
         </div>
 
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 text-[0.78rem]">
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#E8F5DC] px-2 py-1 font-semibold text-[#3A5C12]">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="inline-flex items-center gap-1 rounded-full bg-tc-brand-mintSoft px-2.5 py-1 font-semibold tabular-nums text-tc-brand-deep">
               <Leaf size={12} />
               {item.estimatedCo2eKg.toFixed(1)} kg CO2e
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#FFF4D6] px-2 py-1 font-semibold text-[#8A6A00]">
+            <span className="inline-flex items-center gap-1 rounded-full bg-tc-brand-soft px-2.5 py-1 font-semibold tabular-nums text-tc-brand-body">
               <Award size={12} />
               {item.impactPoints} pts
             </span>
           </div>
-          <ArrowUpRight size={16} className="text-slate-400 transition group-hover:text-slate-700" />
+          <ArrowUpRight size={16} className="text-tc-brand-muted transition group-hover:text-tc-brand-ink" />
         </div>
       </div>
     </button>

@@ -117,9 +117,9 @@ export function PostFoundItemForm({
     >
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-700">Title</span>
+          <span className="block text-sm font-semibold text-tc-brand-ink">Title</span>
           <input
-            className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-700 outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+            className="min-h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:outline-none focus:ring-2 focus:ring-tc-brand-mint"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             placeholder="What did you spot?"
@@ -127,20 +127,20 @@ export function PostFoundItemForm({
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-700">Category</span>
+          <span className="block text-sm font-semibold text-tc-brand-ink">Category</span>
           <CustomSelect
             value={category}
             options={categoryOptions}
             onChange={(value) => setCategory(value as FoundItemCategory)}
-            buttonClassName="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700"
+            buttonClassName="h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink"
           />
         </label>
       </div>
 
       <label className="space-y-2 block">
-        <span className="text-sm font-medium text-slate-700">Description</span>
+        <span className="block text-sm font-semibold text-tc-brand-ink">Description</span>
         <textarea
-          className="min-h-28 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm text-slate-700 outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+          className="min-h-28 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:outline-none focus:ring-2 focus:ring-tc-brand-mint py-3"
           value={description}
           onChange={(event) => setDescription(event.target.value)}
           placeholder="Short, useful details only."
@@ -149,9 +149,9 @@ export function PostFoundItemForm({
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-700">Condition</span>
+          <span className="block text-sm font-semibold text-tc-brand-ink">Condition</span>
           <input
-            className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-700 outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+            className="min-h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:outline-none focus:ring-2 focus:ring-tc-brand-mint"
             value={condition}
             onChange={(event) => setCondition(event.target.value)}
             placeholder="Good, fair, etc."
@@ -159,9 +159,9 @@ export function PostFoundItemForm({
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-700">Address hint</span>
+          <span className="block text-sm font-semibold text-tc-brand-ink">Address hint</span>
           <input
-            className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-700 outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+            className="min-h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:outline-none focus:ring-2 focus:ring-tc-brand-mint"
             value={address}
             onChange={(event) => setAddress(event.target.value)}
             placeholder="Outside the gate"
@@ -169,24 +169,24 @@ export function PostFoundItemForm({
         </label>
       </div>
 
-      {isLocating ? <p className="text-sm text-slate-500">Getting your live location...</p> : null}
+      {isLocating ? <p className="text-[13px] leading-5 text-tc-brand-muted">Getting your live location...</p> : null}
       {locationError ? (
         <div className="flex flex-wrap items-center gap-3">
-          <p className="text-sm text-rose-600">{locationError}</p>
+          <p className="text-[13px] leading-5 text-tc-brand-danger">{locationError}</p>
           <Button type="button" variant="secondary" onClick={requestLiveLocation}>
             Retry location
           </Button>
         </div>
       ) : null}
 
-      <div className="space-y-3 rounded-2xl border border-dashed border-slate-300 p-4">
-        <div className="flex items-center gap-3 text-slate-600">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
+      <div className="space-y-3 rounded-tc-lg border border-dashed border-tc-brand-control p-4">
+        <div className="flex items-center gap-3 text-tc-brand-deep">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-tc-brand-mintSoft">
             <ImagePlus size={18} />
           </span>
           <div>
-            <p className="text-sm font-medium text-slate-900">Photo</p>
-            <p className="text-xs text-slate-500">One clear shot is enough.</p>
+            <p className="text-sm font-semibold text-tc-brand-ink">Photo</p>
+            <p className="text-[13px] leading-5 text-tc-brand-muted">One clear shot is enough.</p>
           </div>
         </div>
 
@@ -210,9 +210,9 @@ export function PostFoundItemForm({
           </div>
         )}
 
-        {isUploading ? <p className="text-sm text-slate-500">Uploading image...</p> : null}
+        {isUploading ? <p className="text-[13px] leading-5 text-tc-brand-muted">Uploading image...</p> : null}
         {imageUrl ? (
-          <img src={imageUrl} alt="Selected item" className="h-44 w-full rounded-xl object-cover" />
+          <img src={imageUrl} alt="Selected item" className="h-44 w-full rounded-tc-md object-cover" />
         ) : null}
       </div>
 

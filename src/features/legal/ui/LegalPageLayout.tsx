@@ -30,32 +30,32 @@ export function LegalPageLayout({
   const primaryCtaLabel = isAuthenticated ? 'Open dashboard' : 'Get Started'
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(164,245,166,0.18)_0%,_rgba(248,250,252,0.98)_28%,_#f8fafc_100%)] text-slate-900">
-      <nav className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between rounded-full border border-white/70 bg-white/75 px-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:px-6">
+    <main className="min-h-screen overflow-x-hidden bg-tc-brand-haze text-tc-brand-ink">
+      <nav className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6">
+        <div className="mx-auto flex h-16 w-full max-w-[1184px] items-center justify-between gap-3 rounded-full bg-tc-brand-deep pl-4 pr-2.5 shadow-tc-raised sm:pl-5 sm:pr-3">
           <Link className="inline-flex items-center gap-2.5 no-underline" to="/">
-            <img alt="TruCycle" className="h-10 w-10 rounded-2xl" src={logoSrc} />
-            <span className="hidden text-lg font-semibold tracking-[-0.03em] text-slate-950 sm:inline">TruCycle</span>
+            <img alt="TruCycle" className="h-8 w-8 rounded-full" src={logoSrc} />
+            <span className="hidden text-lg font-semibold tracking-[-0.02em] text-white sm:inline">TruCycle</span>
           </Link>
 
-          <div className="hidden items-center gap-8 text-sm font-medium text-tc-app-slate500 md:flex">
-            <a className="transition-colors hover:text-slate-950" href="/#how">
+          <div className="hidden items-center gap-1 text-sm font-medium text-tc-brand-onDeep md:flex">
+            <a className="rounded-full px-3.5 py-2.5 text-tc-brand-onDeep no-underline transition-colors hover:text-white" href="/#how">
               How it works
             </a>
-            <Link className="transition-colors hover:text-slate-950" to="/browse">Browse items</Link>
+            <Link className="rounded-full px-3.5 py-2.5 text-tc-brand-onDeep no-underline transition-colors hover:text-white" to="/browse">Browse items</Link>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1 sm:gap-2">
             {!isAuthenticated ? (
               <Link
-                className="inline-flex min-h-11 items-center rounded-full px-3 py-2.5 text-sm font-medium text-tc-app-slate500 no-underline transition-colors hover:text-slate-950"
+                className="inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-2.5 text-sm font-semibold text-white no-underline transition-colors hover:text-tc-brand-mint sm:px-3.5"
                 to="/login"
               >
                 Log in
               </Link>
             ) : null}
             <Link
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-tc-shell-accent px-3 py-2.5 text-sm font-semibold text-tc-shell-roleActiveText no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-tc-shell-accentHover sm:px-5"
+              className="inline-flex h-11 items-center gap-1.5 whitespace-nowrap rounded-full bg-tc-brand-mint px-3.5 text-sm font-semibold text-tc-brand-onMint no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-tc-brand-mintHover sm:px-[18px]"
               to={primaryCtaTo}
             >
               {primaryCtaLabel}
@@ -65,27 +65,27 @@ export function LegalPageLayout({
         </div>
       </nav>
 
-      <div className="mx-auto flex min-h-screen w-full max-w-[980px] flex-col gap-6 px-4 pb-10 pt-28 sm:px-6 sm:pb-12 sm:pt-32">
-        <section className="rounded-[22px] border border-white/70 bg-white/82 px-5 py-6 shadow-[0_18px_48px_rgba(15,23,42,0.09)] backdrop-blur sm:px-8 sm:py-8">
-          <p className="m-0 text-xs font-medium uppercase tracking-[0.18em] text-tc-shell-bg sm:text-sm">{eyebrow}</p>
-          <h1 className="mt-3 max-w-[12ch] text-[clamp(2.4rem,8vw,4.6rem)] font-bold leading-[0.95] tracking-[-0.05em] text-slate-950">
+      <div className="mx-auto flex min-h-screen w-full max-w-[868px] flex-col gap-4 px-4 pb-6 pt-28 sm:px-6 sm:pt-[136px]">
+        <section className="rounded-tc-xl border border-tc-brand-mintLine bg-tc-brand-mintSoft p-6 sm:p-8">
+          <p className="m-0 text-[13px] font-semibold uppercase leading-5 tracking-[0.06em] text-tc-brand-body">{eyebrow}</p>
+          <h1 className="mt-2 text-[clamp(2.25rem,6vw,3rem)] font-semibold leading-[1.125] tracking-[-0.03em] text-tc-brand-ink">
             {title}
           </h1>
-          <p className="mt-4 max-w-[48rem] text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
+          <p className="mt-3 max-w-[48rem] text-base leading-[26px] text-tc-brand-body">
             {intro}
           </p>
         </section>
 
-        <section className="grid gap-4 pb-4">
+        <section className="grid gap-4">
           {sections.map((section) => (
             <article
               key={section.title}
-              className="rounded-[22px] border border-white/70 bg-white/78 px-5 py-5 shadow-[0_14px_40px_rgba(15,23,42,0.08)] backdrop-blur sm:px-6"
+              className="rounded-tc-lg border border-tc-brand-line bg-white p-5 sm:p-6"
             >
-              <h2 className="m-0 text-xl font-semibold tracking-[-0.03em] text-slate-950 sm:text-2xl">
+              <h2 className="m-0 text-lg font-semibold leading-6 text-tc-brand-ink">
                 {section.title}
               </h2>
-              <p className="m-0 mt-3 text-sm leading-7 text-slate-600 sm:text-base">
+              <p className="m-0 mt-2 text-sm leading-6 text-tc-brand-body">
                 {section.body}
               </p>
             </article>
@@ -93,23 +93,23 @@ export function LegalPageLayout({
         </section>
 
         {children}
-        <div className="rounded-[22px] border border-slate-200 bg-white px-5 py-5 sm:px-6"><CompanyDetails /></div>
-        <footer className="relative mt-auto overflow-hidden rounded-[22px] px-6 py-24">
-          <div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,rgba(164,245,166,0.16)_0%,rgba(248,250,252,0.92)_52%,rgba(164,245,166,0.08)_100%)]" />
-          <div className="absolute inset-x-0 top-0 -z-10 h-40 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.8),transparent_70%)]" />
+        <div className="rounded-tc-lg border border-tc-brand-line bg-white p-5 text-sm leading-6 text-tc-brand-body sm:p-6"><CompanyDetails /></div>
+        <footer className="relative mt-auto overflow-hidden rounded-tc-xl bg-tc-brand-deep px-6 pb-8 pt-12 text-tc-brand-onDeep sm:px-10 sm:pt-14">
+          <div className="absolute inset-0 -z-10 bg-tc-brand-deep" />
+          <div className="absolute inset-x-0 top-0 -z-10 h-40 bg-tc-brand-deep" />
 
           <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-[1.2rem] bg-tc-shell-bg text-white shadow-[0_14px_30px_rgba(35,35,35,0.14)]">
-              <Recycle className="h-7 w-7" />
+            <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-full bg-tc-brand-mint text-tc-brand-onMint">
+              <Recycle className="h-6 w-6" />
             </div>
-            <h2 className="text-4xl font-bold tracking-[-0.04em] text-slate-950 sm:text-5xl">
+            <h2 className="text-[clamp(1.75rem,4.6vw,2.5rem)] font-semibold leading-[1.15] tracking-[-0.03em] text-white">
               Start moving things forward.
             </h2>
-            <p className="mx-auto mb-8 mt-4 max-w-xl text-lg leading-8 text-slate-600">
+            <p className="mx-auto mb-6 mt-3 max-w-xl text-base leading-[26px] text-tc-brand-onDeep">
               Offer something useful, describe it clearly, and agree a handover with its next owner.
             </p>
             <Link
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-tc-shell-accent px-8 py-4 text-base font-semibold text-tc-shell-roleActiveText no-underline shadow-[0_18px_40px_rgba(164,245,166,0.32)] transition duration-200 hover:-translate-y-0.5 hover:bg-tc-shell-accentHover"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-tc-brand-mint px-[22px] text-[15px] font-semibold text-tc-brand-onMint no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-tc-brand-mintHover"
               to={primaryCtaTo}
             >
               {isAuthenticated ? primaryCtaLabel : 'Create your account'}
@@ -117,19 +117,19 @@ export function LegalPageLayout({
             </Link>
           </div>
 
-          <div className="mx-auto mt-20 flex max-w-7xl flex-col items-center justify-between gap-4 border-t border-slate-900/10 pt-8 text-sm text-slate-500 sm:flex-row">
+          <div className="mx-auto mt-10 flex max-w-7xl flex-col items-center justify-between gap-3 border-t border-tc-brand-deepLine pt-5 text-[13px] leading-5 text-tc-brand-onDeep sm:flex-row">
             <span>© {new Date().getFullYear()} TruCycle Ltd. All rights reserved.</span>
-            <div className="flex flex-wrap items-center justify-center gap-6">
-              <Link className="no-underline transition-colors hover:text-slate-950" to="/cookies">
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
+              <Link className="inline-flex min-h-11 items-center text-white no-underline transition-colors hover:text-tc-brand-mint" to="/cookies">
                 Cookies
               </Link>
-              <Link className="no-underline transition-colors hover:text-slate-950" to="/privacy">
+              <Link className="inline-flex min-h-11 items-center text-white no-underline transition-colors hover:text-tc-brand-mint" to="/privacy">
                 Privacy
               </Link>
-              <Link className="no-underline transition-colors hover:text-slate-950" to="/terms">
+              <Link className="inline-flex min-h-11 items-center text-white no-underline transition-colors hover:text-tc-brand-mint" to="/terms">
                 Terms
               </Link>
-              <Link className="no-underline transition-colors hover:text-slate-950" to={isAuthenticated ? '/dashboard' : '/login'}>
+              <Link className="inline-flex min-h-11 items-center text-white no-underline transition-colors hover:text-tc-brand-mint" to={isAuthenticated ? '/dashboard' : '/login'}>
                 {isAuthenticated ? 'Dashboard' : 'Log in'}
               </Link>
             </div>

@@ -16,7 +16,7 @@ type PasswordStep = 'request' | 'confirm'
 const codeLength = 6
 const passwordMinLength = 8
 const inputClassName =
-  'h-11 w-full rounded-md border border-[#E2E8F0] px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100'
+  'min-h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:outline-none focus:ring-2 focus:ring-tc-brand-mint'
 
 export function ChangePasswordModal({
   isOpen,
@@ -111,10 +111,10 @@ export function ChangePasswordModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={!isSubmitting}>
-      <div className="space-y-5 p-6 sm:p-7">
+      <div className="space-y-5 p-6">
         <header className="space-y-1 pr-9">
-          <h3 className="text-xl font-semibold text-slate-900">Change Password</h3>
-          <p className="text-sm text-[#22222299]">
+          <h3 className="text-lg font-semibold leading-6 text-tc-brand-ink">Change Password</h3>
+          <p className="text-sm leading-5 text-tc-brand-body">
             {step === 'request'
               ? 'Request a verification code to securely update your password.'
               : 'Enter the code from your email and set your new password.'}
@@ -122,10 +122,10 @@ export function ChangePasswordModal({
         </header>
 
         <div className="space-y-4">
-          <label className="block space-y-1">
-            <span className="text-sm font-medium text-slate-700">Account Email</span>
+          <label className="block space-y-1.5">
+            <span className="block text-sm font-medium text-tc-brand-ink">Account Email</span>
             <input
-              className="h-11 w-full cursor-not-allowed rounded-md border border-[#E2E8F0] bg-slate-100 px-3 text-sm text-slate-500"
+              className="min-h-11 w-full cursor-not-allowed rounded-tc-md border border-tc-brand-control bg-tc-brand-soft px-3.5 text-sm text-tc-brand-ink"
               type="email"
               value={email}
               readOnly
@@ -134,8 +134,8 @@ export function ChangePasswordModal({
 
           {step === 'confirm' ? (
             <>
-              <label className="block space-y-1">
-                <span className="text-sm font-medium text-slate-700">Verification Code</span>
+              <label className="block space-y-1.5">
+                <span className="block text-sm font-medium text-tc-brand-ink">Verification Code</span>
                 <input
                   className={inputClassName}
                   type="text"
@@ -150,8 +150,8 @@ export function ChangePasswordModal({
                 />
               </label>
 
-              <label className="block space-y-1">
-                <span className="text-sm font-medium text-slate-700">New Password</span>
+              <label className="block space-y-1.5">
+                <span className="block text-sm font-medium text-tc-brand-ink">New Password</span>
                 <input
                   className={inputClassName}
                   type="password"
@@ -163,8 +163,8 @@ export function ChangePasswordModal({
                 />
               </label>
 
-              <label className="block space-y-1">
-                <span className="text-sm font-medium text-slate-700">Confirm New Password</span>
+              <label className="block space-y-1.5">
+                <span className="block text-sm font-medium text-tc-brand-ink">Confirm New Password</span>
                 <input
                   className={inputClassName}
                   type="password"
@@ -178,7 +178,7 @@ export function ChangePasswordModal({
 
               <button
                 type="button"
-                className="text-sm font-medium text-[#15A119] underline-offset-2 hover:underline"
+                className="min-h-11 text-sm font-semibold text-tc-brand-deep underline underline-offset-4 hover:text-black disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => void onResendCode()}
                 disabled={isSubmitting}
               >
@@ -188,7 +188,7 @@ export function ChangePasswordModal({
           ) : null}
         </div>
 
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2.5">
           <Button
             variant="secondary"
             onClick={onClose}

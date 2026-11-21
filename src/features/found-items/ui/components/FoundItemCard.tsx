@@ -16,46 +16,46 @@ export function FoundItemCard({ item, isSelected = false, onClick }: FoundItemCa
   return (
     <button
       type="button"
-      className={`w-full overflow-hidden rounded-[24px] border bg-white text-left transition ${
+      className={`w-full overflow-hidden rounded-tc-lg border bg-white text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tc-brand-mint ${
         isSelected
-          ? 'border-[#34DA45] shadow-[0_0_0_4px_rgba(52,218,69,0.12)]'
-          : 'border-slate-200 hover:border-slate-300 hover:shadow-sm'
+          ? 'border-tc-brand-deep ring-2 ring-tc-brand-mint'
+          : 'border-tc-brand-line hover:border-tc-brand-control'
       }`}
       onClick={onClick}
     >
-      <div className="flex flex-col gap-4 p-3 sm:flex-row sm:items-center sm:gap-5 sm:p-4">
-        <div className="h-[92px] w-full shrink-0 overflow-hidden rounded-[18px] bg-[#EEF5E3] sm:w-[126px]">
+      <div className="flex h-full flex-col sm:grid sm:grid-cols-[180px_minmax(0,1fr)_auto] sm:grid-rows-[1fr_auto]">
+        <div className="relative h-40 w-full shrink-0 overflow-hidden bg-tc-brand-soft sm:row-span-2 sm:h-auto sm:min-h-[168px] sm:w-[180px]">
           {primaryImage ? (
             <img
               src={primaryImage.thumbnailUrl || primaryImage.url}
               alt={item.title}
-              className="h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-sm text-slate-500">No image</div>
+            <div className="flex h-full items-center justify-center text-sm text-tc-brand-muted">No image</div>
           )}
         </div>
 
-        <div className="min-w-0 flex-1 space-y-2.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-[1.65rem] font-semibold tracking-[-0.03em] text-slate-950 sm:text-[1.5rem]">
+        <div className="min-w-0 flex-1 space-y-2 px-5 pt-5 sm:col-span-2">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <h3 className="min-w-0 break-words text-base leading-6 font-semibold text-tc-brand-ink">
               {item.title}
             </h3>
             <FoundItemStatusBadge status={item.status} />
           </div>
 
-          <p className="text-[0.97rem] text-slate-500">{formatFoundItemLocationSummary(item)}</p>
-          <p className="text-[0.97rem] text-slate-500">{formatFoundItemAttribution(item)}</p>
-          <p className="text-xs text-slate-500">{item.lastSeenAt ? `Last seen ${new Date(item.lastSeenAt).toLocaleString()} · ` : 'Last seen not confirmed · '}{item.expiresAt ? `Expiry: ${new Date(item.expiresAt).toLocaleString()}` : 'No expiry scheduled'}</p>
+          <p className="text-[13px] leading-5 text-tc-brand-muted">{formatFoundItemLocationSummary(item)}</p>
+          <p className="text-[13px] leading-5 text-tc-brand-muted">{formatFoundItemAttribution(item)}</p>
+          <p className="text-xs leading-4 text-tc-brand-muted">{item.lastSeenAt ? `Last seen ${new Date(item.lastSeenAt).toLocaleString()} · ` : 'Last seen not confirmed · '}{item.expiresAt ? `Expiry: ${new Date(item.expiresAt).toLocaleString()}` : 'No expiry scheduled'}</p>
         </div>
 
-        <div className="flex shrink-0 items-end justify-between gap-4 sm:block sm:min-w-[126px]">
+        <div className="flex shrink-0 items-end justify-between gap-4 px-5 pb-5 pt-4 sm:flex sm:min-w-[126px]">
           {item.location.approximateDistance !== null ? (
-            <div className="text-right">
-              <p className="text-[2rem] font-semibold leading-none tracking-[-0.04em] text-slate-950">
+            <div className="text-left">
+              <p className="text-base leading-6 font-semibold tabular-nums text-tc-brand-ink">
                 {item.location.approximateDistance.toFixed(1)} km
               </p>
-              <p className="mt-1 inline-flex items-center gap-1 text-xs text-slate-400 sm:justify-end">
+              <p className="inline-flex items-center gap-1 text-xs leading-4 text-tc-brand-muted sm:justify-start">
                 <MapPin size={12} />
                 nearby
               </p>
@@ -68,7 +68,7 @@ export function FoundItemCard({ item, isSelected = false, onClick }: FoundItemCa
           />
         </div>
 
-        <span className="hidden items-center gap-1 text-xs text-slate-400 sm:inline-flex">
+        <span className="mb-5 mr-5 hidden min-h-11 items-center gap-1.5 self-end rounded-tc-md border border-tc-brand-control bg-white px-4 text-sm font-semibold text-tc-brand-deep sm:inline-flex">
           View
           <ArrowUpRight size={12} />
         </span>

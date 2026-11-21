@@ -27,47 +27,47 @@ export function FoundItemsFilterBar({ filters, onUpdate }: FoundItemsFilterBarPr
   ]
 
   return (
-    <div className="grid gap-3 rounded-2xl bg-white p-4 shadow-sm md:grid-cols-4">
-      <label className="space-y-1">
-        <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Category</span>
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <label className="space-y-1.5">
+        <span className="block text-sm font-semibold text-tc-brand-ink">Category</span>
         <CustomSelect
           value={filters.category ?? ''}
           options={categoryOptions}
           onChange={(value) => {
             onUpdate({ category: value === '' ? undefined : (value as FoundItemsFilter['category']) })
           }}
-          buttonClassName="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700"
+          buttonClassName="h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink"
         />
       </label>
 
-      <label className="space-y-1">
-        <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Sort</span>
+      <label className="space-y-1.5">
+        <span className="block text-sm font-semibold text-tc-brand-ink">Sort</span>
         <CustomSelect
           value={filters.sortBy ?? 'newest'}
           options={sortOptions}
           onChange={(value) => {
             onUpdate({ sortBy: value as FoundItemsFilter['sortBy'] })
           }}
-          buttonClassName="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700"
+          buttonClassName="h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink"
         />
       </label>
 
-      <label className="space-y-1">
-        <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Distance</span>
+      <label className="space-y-1.5">
+        <span className="block text-sm font-semibold text-tc-brand-ink">Distance</span>
         <CustomSelect
           value={String(filters.maxDistance ?? 5)}
           options={distanceOptions}
           onChange={(value) => {
             onUpdate({ maxDistance: Number(value) })
           }}
-          buttonClassName="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700"
+          buttonClassName="h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink"
         />
       </label>
 
-      <label className="space-y-1">
-        <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Postcode</span>
+      <label className="space-y-1.5">
+        <span className="block text-sm font-semibold text-tc-brand-ink">Postcode</span>
         <input
-          className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+          className="min-h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:outline-none focus:ring-2 focus:ring-tc-brand-mint"
           placeholder="Near you"
           type="text"
           value={filters.postcode ?? ''}

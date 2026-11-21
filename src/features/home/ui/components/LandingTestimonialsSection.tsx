@@ -6,27 +6,27 @@ const examples = [
 
 export function LandingTestimonialsSection() {
   return (
-    <section className="bg-[#F7FBF4] px-6 py-20 sm:py-24">
-      <div className="mx-auto max-w-7xl">
+    <section className="bg-tc-brand-haze px-4 py-20 sm:px-6">
+      <div className="mx-auto max-w-[1184px]">
         <div className="flex flex-col items-center gap-3 text-center">
-          <p className="text-sm font-bold tracking-[0.04em] text-[#172033]">
+          <p className="text-[13px] font-semibold uppercase leading-5 tracking-[0.06em] text-tc-brand-muted">
             Ideas for reuse
           </p>
-          <h2 className="text-[clamp(2.35rem,4.4vw,3.2rem)] font-normal leading-[1.08] tracking-[-0.05em] text-[#0B3322]">
-            <span className="text-[#0B3322]">Useful things,</span>{' '}
-            <span className="text-[#172033]">another home.</span>
+          <h2 className="text-[clamp(2rem,4.2vw,2.75rem)] font-semibold leading-[1.14] tracking-[-0.03em] text-tc-brand-ink">
+            <span className="text-tc-brand-ink">Useful things,</span>{' '}
+            <span className="text-tc-brand-ink">another home.</span>
           </h2>
-          <p className="text-base text-[#121212B3]">Illustrative scenarios, not customer testimonials.</p>
+          <p className="text-xs leading-4 text-tc-brand-muted">Illustrative scenarios, not customer testimonials.</p>
         </div>
 
-        <div className="mt-12 grid gap-5 lg:grid-cols-3">
+        <div className="mt-10 grid gap-5 lg:grid-cols-3">
           {examples.map((example) => (
             <article
-              className="rounded-[1.15rem] border border-[#CBD5E1] bg-white p-6 shadow-[0_18px_48px_rgba(11,51,34,0.06)]"
+              className="rounded-tc-lg border border-tc-brand-line bg-white p-7 transition duration-200 hover:-translate-y-0.5 hover:shadow-tc-card"
               key={example.title}
             >
-              <h3 className="text-xl font-semibold text-[#0B3322]">{example.title}</h3>
-              <p className="mt-6 text-[1.02rem] leading-8 text-[#0B3322]">{example.description}</p>
+              <h3 className="text-xl font-semibold leading-7 text-tc-brand-ink">{example.title}</h3>
+              <p className="mt-2 text-[15px] leading-6 text-tc-brand-body">{example.description}</p>
             </article>
           ))}
         </div>

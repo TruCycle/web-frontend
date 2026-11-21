@@ -50,7 +50,7 @@ export function PrivateMessageImage({ roomId, messageId, alt }: {
         aria-expanded={Boolean(src)}
         aria-controls={previewId}
         aria-disabled={loading}
-        className="min-h-11 underline"
+        className="min-h-11 font-semibold underline underline-offset-4"
         onClick={() => {
           if (src) closeImage()
           else if (!loading) void openImage()
@@ -60,7 +60,7 @@ export function PrivateMessageImage({ roomId, messageId, alt }: {
       </button>
       <div id={previewId} hidden={!src}>
         {src ? (
-          <img src={src} alt={alt} className="mb-2 max-h-72 max-w-full rounded-lg object-contain" onError={() => {
+          <img src={src} alt={alt} className="mb-2 max-h-72 max-w-full rounded-tc-sm object-contain" onError={() => {
             if (objectUrl.current !== src) return
             closeImage()
             setError(true)

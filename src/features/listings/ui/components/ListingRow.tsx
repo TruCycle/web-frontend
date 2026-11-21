@@ -32,7 +32,7 @@ export function ListingRow({
   const actions =
     item.status === 'Active' ? (
       <>
-        <Button className="bg-[#F8FAFC] text-[#222222] ring-0 hover:bg-slate-100" onClick={() => onOpenActive(item)}>
+        <Button className="border border-tc-brand-control !bg-white !text-tc-brand-deep ring-0 hover:!bg-tc-brand-soft" onClick={() => onOpenActive(item)}>
           View
         </Button>
         <Button
@@ -48,7 +48,7 @@ export function ListingRow({
         {showQrAction && onOpenQr ? (
           <Button
             variant="primary"
-            className="h-10 w-10 rounded-xl p-0"
+            className="h-11 w-11 rounded-tc-md p-0"
             onClick={() => onOpenQr(item)}
             aria-label="Open item QR code"
             title="Open item QR code"

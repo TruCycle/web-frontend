@@ -22,15 +22,15 @@ function Toggle({
       type="button"
       onClick={() => onChange(!checked)}
       className={classNames(
-        'relative inline-flex h-7 w-12 items-center rounded-full transition',
-        checked ? 'bg-[#34DA45]' : 'bg-[#00537A0D]',
+        'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tc-brand-mint focus-visible:ring-offset-2',
+        checked ? 'bg-tc-brand-deep' : 'bg-tc-brand-track',
       )}
       aria-pressed={checked}
     >
       <span
         className={classNames(
-          'inline-block h-5 w-5 transform rounded-full bg-white shadow transition',
-          checked ? 'translate-x-6' : 'translate-x-1',
+          'inline-block h-5 w-5 transform rounded-full transition',
+          checked ? 'translate-x-6 bg-tc-brand-mint' : 'translate-x-1 bg-white',
         )}
       />
     </button>
@@ -88,21 +88,21 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="w-full space-y-5">
+    <div className="w-full space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">Settings</h1>
-        <p className="text-slate-500">Manage your profile, security and preferences.</p>
+        <h1 className="text-[30px] font-semibold leading-9 tracking-[-0.02em] text-tc-brand-ink">Settings</h1>
+        <p className="mt-1 text-base leading-6 text-tc-brand-body">Manage your profile, security and preferences.</p>
       </div>
 
-      <div className="flex flex-wrap gap-1 rounded-xl bg-[#E2E8F040] p-2 w-fit">
+      <div className="flex w-fit flex-wrap gap-1 rounded-full border border-tc-brand-line bg-white p-1">
         {(['profile', 'security', 'notifications'] as const).map((tab) => (
           <button
             key={tab}
             className={classNames(
-              'rounded-md px-4 py-3 text-sm font-medium capitalize transition',
+              'min-h-11 rounded-full px-4 text-[13px] capitalize transition',
               activeTab === tab
-                ? 'bg-white text-slate-900'
-                : 'text-[#22222299] hover:bg-slate-100 hover:text-slate-800',
+                ? 'bg-tc-brand-mint font-semibold text-tc-brand-onMint'
+                : 'font-medium text-tc-brand-body hover:bg-tc-brand-soft hover:text-tc-brand-ink',
             )}
             onClick={() => setActiveTab(tab)}
           >
@@ -111,15 +111,15 @@ export default function SettingsPage() {
         ))}
       </div>
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm">
+      <div className="rounded-tc-lg border border-tc-brand-line bg-white p-5 sm:p-6">
         {activeTab === 'profile' ? (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-slate-900">Your Profile</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            <h2 className="text-lg font-semibold leading-6 text-tc-brand-ink md:col-span-2">Your Profile</h2>
 
-            <label className="block space-y-1">
-              <span className="text-sm font-medium text-slate-700">Full Name</span>
+            <label className="block space-y-1.5">
+              <span className="block text-sm font-medium text-tc-brand-ink">Full Name</span>
               <input
-                className="h-11 w-full rounded-md border border-[#E2E8F0] px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+                className="min-h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:outline-none focus:ring-2 focus:ring-tc-brand-mint"
                 type="text"
                 value={profileForm.fullName}
                 onChange={(event) =>
@@ -131,10 +131,10 @@ export default function SettingsPage() {
               />
             </label>
 
-            <label className="block space-y-1">
-              <span className="text-sm font-medium text-slate-700">Phone (optional)</span>
+            <label className="block space-y-1.5">
+              <span className="block text-sm font-medium text-tc-brand-ink">Phone (optional)</span>
               <input
-                className="h-11 w-full rounded-md border border-[#E2E8F0] px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+                className="min-h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:outline-none focus:ring-2 focus:ring-tc-brand-mint"
                 type="tel"
                 placeholder="Enter your phone number"
                 value={profileForm.phone}
@@ -147,20 +147,20 @@ export default function SettingsPage() {
               />
             </label>
 
-            <label className="block space-y-1">
-              <span className="text-sm font-medium text-slate-700">Email</span>
+            <label className="block space-y-1.5">
+              <span className="block text-sm font-medium text-tc-brand-ink">Email</span>
               <input
-                className="h-11 w-full cursor-not-allowed rounded-md border border-[#E2E8F0] bg-slate-100 px-3 text-sm text-slate-500"
+                className="min-h-11 w-full cursor-not-allowed rounded-tc-md border border-tc-brand-control bg-tc-brand-soft px-3.5 text-sm text-tc-brand-ink"
                 type="email"
                 value={user?.email ?? ''}
                 disabled
               />
             </label>
 
-            <label className="block space-y-1">
-              <span className="text-sm font-medium text-slate-700">Postcode</span>
+            <label className="block space-y-1.5">
+              <span className="block text-sm font-medium text-tc-brand-ink">Postcode</span>
               <input
-                className="h-11 w-full rounded-md border border-[#E2E8F0] px-3 text-sm outline-none focus:border-lime-400 focus:ring-4 focus:ring-lime-100"
+                className="min-h-11 w-full rounded-tc-md border border-tc-brand-control bg-white px-3.5 text-sm text-tc-brand-ink placeholder:text-tc-brand-muted focus:border-tc-brand-deep focus:outline-none focus:ring-2 focus:ring-tc-brand-mint"
                 type="text"
                 value={profileForm.postcode}
                 onChange={(event) =>
@@ -172,7 +172,7 @@ export default function SettingsPage() {
               />
             </label>
 
-            <Button variant='primary' disabled={isSaving} className="mt-2" onClick={() => void handleProfileUpdate()}>
+            <Button variant='primary' disabled={isSaving} className="mt-1 justify-self-start md:col-span-2" onClick={() => void handleProfileUpdate()}>
               {isSaving ? 'Saving...' : 'Update Profile'}
             </Button>
           </div>
@@ -180,26 +180,26 @@ export default function SettingsPage() {
 
         {activeTab === 'security' ? (
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-slate-900">Security</h2>
+            <h2 className="text-lg font-semibold leading-6 text-tc-brand-ink">Security</h2>
 
-            <div className="flex items-center justify-between rounded-md border border-[#E2E8F0] p-4">
-              <div className='flex flex-col gap-2'>
-                <h3 className="font-medium text-slate-900">Password</h3>
-                <p className="text-sm text-[#22222299]">Update your password</p>
+            <div className="flex items-center justify-between gap-4 rounded-tc-md border border-tc-brand-line p-4">
+              <div className='flex min-w-0 flex-col gap-0.5'>
+                <h3 className="text-sm font-semibold text-tc-brand-ink">Password</h3>
+                <p className="text-[13px] leading-5 text-tc-brand-body">Update your password</p>
               </div>
               <button
                 type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-tc-brand-control bg-white text-tc-brand-deep transition hover:bg-tc-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => setIsChangePasswordModalOpen(true)}
               >
                 <Edit2 size={18} />
               </button>
             </div>
 
-            <div className="flex items-center justify-between rounded-md border border-[#E2E8F0] p-4">
-              <div className='flex flex-col gap-2'>
-                <h3 className="font-medium text-slate-900">2FA</h3>
-                <p className="text-sm text-[#22222299]">
+            <div className="flex items-center justify-between gap-4 rounded-tc-md border border-tc-brand-line p-4">
+              <div className='flex min-w-0 flex-col gap-0.5'>
+                <h3 className="text-sm font-semibold text-tc-brand-ink">2FA</h3>
+                <p className="text-[13px] leading-5 text-tc-brand-body">
                   Enable or disable two-factor authentication
                 </p>
               </div>
@@ -210,22 +210,22 @@ export default function SettingsPage() {
 
         {activeTab === 'notifications' ? (
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-slate-900">Notifications</h2>
+            <h2 className="text-lg font-semibold leading-6 text-tc-brand-ink">Notifications</h2>
 
-            <div className="flex items-center justify-between rounded-md border border-[#E2E8F0] p-4">
-              <div className='flex flex-col gap-2'>
-                <h3 className="font-medium text-slate-900">Email Notifications</h3>
-                <p className="text-sm text-[#22222299]">
+            <div className="flex items-center justify-between gap-4 rounded-tc-md border border-tc-brand-line p-4">
+              <div className='flex min-w-0 flex-col gap-0.5'>
+                <h3 className="text-sm font-semibold text-tc-brand-ink">Email Notifications</h3>
+                <p className="text-[13px] leading-5 text-tc-brand-body">
                   Receive email notifications when updates happen
                 </p>
               </div>
               <Toggle checked={emailNotifications} onChange={setEmailNotifications} />
             </div>
 
-            <div className="flex items-center justify-between rounded-md border border-[#E2E8F0] p-4">
-              <div className='flex flex-col gap-2'>
-                <h3 className="font-medium text-slate-900">In-App Notifications</h3>
-                <p className="text-sm text-[#22222299]">
+            <div className="flex items-center justify-between gap-4 rounded-tc-md border border-tc-brand-line p-4">
+              <div className='flex min-w-0 flex-col gap-0.5'>
+                <h3 className="text-sm font-semibold text-tc-brand-ink">In-App Notifications</h3>
+                <p className="text-[13px] leading-5 text-tc-brand-body">
                   Receive notifications in the dashboard
                 </p>
               </div>
