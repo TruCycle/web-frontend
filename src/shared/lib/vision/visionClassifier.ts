@@ -11,7 +11,6 @@ export interface CatalogHint {
   readonly category: (typeof CATEGORY_MAP)[keyof typeof CATEGORY_MAP]
   readonly keyword: string
   readonly displayLabel: string
-  readonly confidence: number
 }
 
 const MAX_DIMENSION = 1000
@@ -140,9 +139,6 @@ export async function classifyImageWithWorker(file: File, context: 'spot' | 'lis
     category,
     keyword: itemType,
     displayLabel: itemType ? toTitleCase(itemType) : toTitleCase(suggested || 'item'),
-    // The worker doesn't return a probability; treat a structured answer as
-    // high-confidence so the existing threshold check passes.
-    confidence: 0.9,
   }
 }
 
