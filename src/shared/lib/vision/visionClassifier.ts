@@ -104,9 +104,10 @@ export async function classifyImageWithWorker(file: File, context: 'spot' | 'lis
   const compressed = await compressImage(file)
   const formData = new FormData()
   formData.append('image', compressed, 'spot.jpg')
-  formData.append('prompt', context === 'listing'
-    ? 'Identify the main item offered for reuse in this TruCycle listing photo.'
-    : 'Analyze this item spotted on a UK street for TruCycle.')
+  // Listings use the worker's default prompt and its structured analysis contract.
+  if (context === 'spot') {
+    formData.append('prompt', 'Analyze this item spotted on a UK street for TruCycle.')
+  }
 
   const response = await fetch(env.visionWorkerUrl.trim(), {
     method: 'POST',
