@@ -11,6 +11,7 @@ import { unwrapApiData } from '@/shared/lib/api/envelope';
 import { env } from '@/shared/lib/config/env';
 import { classifyImageWithWorker, isVisionWorkerEnabled, type CatalogHint } from '@/shared/lib/vision/visionClassifier';
 import { CameraCapture } from '@/shared/ui/camera/CameraCapture';
+import { PhotoCutoutPreview } from '@/shared/ui/camera/PhotoCutoutPreview';
 
 interface ListItemDialogProps {
   isOpen: boolean;
@@ -54,6 +55,7 @@ interface UploadedPhoto {
   readonly id: string;
   readonly previewUrl: string;
   readonly cloudinaryUrl: string | null;
+  readonly cutoutUrl: string | null;
   readonly deleteToken: string | null;
   readonly isUploading: boolean;
   readonly error: string | null;
@@ -400,6 +402,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
         id,
         previewUrl: URL.createObjectURL(file),
         cloudinaryUrl: null,
+        cutoutUrl: null,
         deleteToken: null,
         isUploading: true,
         error: null,
@@ -557,7 +560,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
     }
 
     const uploadedImages = photos
-      .map((photo) => photo.cloudinaryUrl)
+      .map((photo) => photo.cutoutUrl ?? photo.cloudinaryUrl)
       .filter((photoUrl): photoUrl is string => Boolean(photoUrl))
       .map((photoUrl) => ({
         url: photoUrl,
@@ -767,7 +770,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
             <div className="flex flex-wrap gap-3">
               {photos.map((photo, index) => (
                 <div key={photo.id} className="relative h-20 w-20 overflow-hidden rounded-xl border border-slate-200">
-                  <img src={photo.previewUrl} alt={`Upload ${index + 1}`} className="h-full w-full object-cover" />
+                  <img src={photo.cutoutUrl ?? photo.previewUrl} alt={`Upload ${index + 1}`} className="h-full w-full object-cover" />
                   {photo.isUploading ? (
                     <div className="absolute inset-0 flex items-center justify-center bg-slate-900/40">
                       <span className="text-[10px] font-semibold text-white">Uploading...</span>
@@ -811,6 +814,14 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
                 </>
               ) : null}
             </div>
+            {photos[0]?.cloudinaryUrl ? (
+              <PhotoCutoutPreview key={photos[0].id} originalUrl={photos[0].cloudinaryUrl}
+                selectedUrl={photos[0].cutoutUrl} disabled={isSubmitting}
+                onChange={(cutoutUrl) => {
+                  const coverId = photos[0].id;
+                  setPhotos((current) => current.map((photo) => photo.id === coverId ? { ...photo, cutoutUrl } : photo));
+                }} />
+            ) : null}
             {isCameraOpen ? <CameraCapture onCancel={() => setIsCameraOpen(false)} onCapture={(file) => {
               setIsCameraOpen(false);
               void addPhotos([file]);

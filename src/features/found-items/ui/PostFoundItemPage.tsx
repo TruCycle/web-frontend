@@ -24,6 +24,7 @@ import type {
   FoundItemCategory,
 } from '../types'
 import { CameraCapture } from '@/shared/ui/camera/CameraCapture'
+import { PhotoCutoutPreview } from '@/shared/ui/camera/PhotoCutoutPreview'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
 import { env } from '@/shared/lib/config/env'
@@ -179,6 +180,7 @@ export default function PostFoundItemPage() {
   const [estimatedWeightKg, setEstimatedWeightKg] = useState('')
   const [hasEditedWeight, setHasEditedWeight] = useState(false)
   const [catalogEntries, setCatalogEntries] = useState<FoundItemCatalogEntry[]>([])
+  const [catalogResultsFor, setCatalogResultsFor] = useState('')
   const [selectedCatalogEntry, setSelectedCatalogEntry] = useState<FoundItemCatalogEntry | null>(null)
   const [supportedCatalogCategories, setSupportedCatalogCategories] = useState<FoundItemCategory[]>([])
   const [isLoadingCatalog, setIsLoadingCatalog] = useState(false)
@@ -187,6 +189,7 @@ export default function PostFoundItemPage() {
   const [notes, setNotes] = useState('')
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [uploadedImageUrl, setUploadedImageUrl] = useState('')
+  const [cutoutUrl, setCutoutUrl] = useState<string | null>(null)
   const [liveLocation, setLiveLocation] = useState<LocationPoint | null>(null)
   // The exact spot the item was seen. Seeded from the live GPS fix, then the
   // user can fine-tune it by dragging the map pin.
@@ -201,6 +204,9 @@ export default function PostFoundItemPage() {
   const [createdItem, setCreatedItem] = useState<FoundItem | null>(null)
   const [smartHint, setSmartHint] = useState<CatalogHint | null>(null)
   const [isClassifying, setIsClassifying] = useState(false)
+  const photoGeneration = useRef(0)
+  const catalogSearchKey = JSON.stringify([category, itemName])
+  const catalogIsCurrent = catalogResultsFor === catalogSearchKey
 
   const defaultPostcode = formatPostcode(user?.postcode?.trim() || env.defaultSearchPostcode)
   const displayPostcode = identifiedPostcode || defaultPostcode
@@ -227,12 +233,13 @@ export default function PostFoundItemPage() {
 
         setSupportedCatalogCategories(response.supportedCategories)
         setCatalogEntries(response.entries)
+        setCatalogResultsFor(catalogSearchKey)
         setSelectedCatalogEntry((currentEntry) => {
           if (currentEntry && response.entries.some((entry) => isSameCatalogEntry(currentEntry, entry))) {
             return currentEntry
           }
 
-          return response.entries[0] ?? null
+          return null
         })
 
         if (response.entries.length === 0) {
@@ -244,6 +251,7 @@ export default function PostFoundItemPage() {
         }
 
         setCatalogEntries([])
+        setCatalogResultsFor(catalogSearchKey)
         setSelectedCatalogEntry(null)
         setCatalogError('Unable to load the carbon catalog right now.')
       } finally {
@@ -258,7 +266,7 @@ export default function PostFoundItemPage() {
     return () => {
       isMounted = false
     }
-  }, [category, itemName])
+  }, [catalogSearchKey, category, itemName])
 
   useEffect(() => {
     if (!hasEditedWeight && selectedCatalogEntry) {
@@ -369,6 +377,7 @@ export default function PostFoundItemPage() {
   }, [estimatedWeightKg, selectedCatalogEntry?.typicalWeightKg])
 
   const title = selectedCatalogEntry?.item ?? (itemName.trim() || 'Found item')
+  const photoForPost = cutoutUrl ?? uploadedImageUrl
   const co2e = useMemo(() => {
     if (!selectedCatalogEntry) {
       return 0
@@ -413,29 +422,26 @@ export default function PostFoundItemPage() {
 
   const handleCapturedFile = useCallback(
     async (file: File, retry = false) => {
-      if (!retry) setNextPreviewUrl(URL.createObjectURL(file))
+      if (!retry) {
+        photoGeneration.current += 1
+        setCutoutUrl(null)
+        setSmartHint(null)
+        setNextPreviewUrl(URL.createObjectURL(file))
+      }
+      const generation = photoGeneration.current
 
-      // Smart pre-fill: classify via the Cloudflare Vision Worker in parallel
-      // with the Cloudinary upload so we don't add latency. The hint is applied
-      // to the form state when ready.
+      // Recognise in parallel with upload and keep catalogue selection explicit.
       const classifyTask =
         !retry && env.enableSmartSpot && isVisionWorkerEnabled()
         ? (async () => {
             try {
               setIsClassifying(true)
               const hint = await classifyImageWithWorker(file)
-              if (hint) {
-                setSmartHint(hint)
-                setCategory(hint.category)
-                if (hint.keyword) {
-                  setItemName(hint.keyword)
-                }
-                info('Smart pre-fill applied', `Detected ${hint.displayLabel} \u2014 tap to change.`)
-              }
+              if (photoGeneration.current === generation) setSmartHint(hint)
             } catch {
               // Silent: smart pre-fill is a nice-to-have, never block posting.
             } finally {
-              setIsClassifying(false)
+              if (photoGeneration.current === generation) setIsClassifying(false)
             }
           })()
         : Promise.resolve()
@@ -453,10 +459,12 @@ export default function PostFoundItemPage() {
         await classifyTask
       }
     },
-    [info, setNextPreviewUrl],
+    [setNextPreviewUrl],
   )
 
   const resetDraft = useCallback(() => {
+    photoGeneration.current += 1
+    setIsClassifying(false)
     setStep('capture')
     setCategory('furniture')
     setItemName('')
@@ -468,6 +476,7 @@ export default function PostFoundItemPage() {
     setIsFlyTipped(false)
     setNotes('')
     setUploadedImageUrl('')
+    setCutoutUrl(null)
     setFailedPhoto(null)
     setCreatedItem(null)
     setPinnedLocation(null)
@@ -483,7 +492,7 @@ export default function PostFoundItemPage() {
       return
     }
 
-    if (!selectedCatalogEntry) {
+    if (!catalogIsCurrent || !selectedCatalogEntry) {
       error('Choose a catalog match', 'Select a carbon catalog item before you continue.')
       return
     }
@@ -513,7 +522,7 @@ export default function PostFoundItemPage() {
         subcategory: selectedCatalogEntry.subcategory,
         item: selectedCatalogEntry.item,
       },
-      images: [{ url: uploadedImageUrl, altText: title }],
+      images: [{ url: photoForPost, altText: title }],
       location: {
         latitude: adjustedLocation.latitude,
         longitude: adjustedLocation.longitude,
@@ -674,7 +683,7 @@ export default function PostFoundItemPage() {
             ref={shareCardRef}
             data={{
               title: postedTitle,
-              imageUrl: createdItem?.images?.[0]?.url ?? uploadedImageUrl,
+              imageUrl: createdItem?.images?.[0]?.url ?? photoForPost,
               postcode: postedPostcode,
               co2eKg: Number(postedEstimatedCo2eKg) || 0,
               impactPoints: Number(postedImpactPoints) || 0,
@@ -814,7 +823,7 @@ export default function PostFoundItemPage() {
               <div className="relative h-60 w-full overflow-hidden rounded-[22px] border border-slate-200 bg-slate-100 shadow-sm">
                 {previewUrl || uploadedImageUrl ? (
                   <img
-                    src={previewUrl || uploadedImageUrl}
+                    src={cutoutUrl || previewUrl || uploadedImageUrl}
                     alt={title || 'Captured item'}
                     className="h-full w-full object-cover"
                   />
@@ -824,6 +833,8 @@ export default function PostFoundItemPage() {
                   </div>
                 )}
               </div>
+              {uploadedImageUrl ? <PhotoCutoutPreview key={uploadedImageUrl} originalUrl={uploadedImageUrl}
+                selectedUrl={cutoutUrl} onChange={setCutoutUrl} /> : null}
               {adjustedLocation ? (
                 <div className="flex items-center gap-1.5 text-xs text-slate-600">
                   <MapPin size={14} className="shrink-0 text-[#446B16]" />
@@ -856,7 +867,10 @@ export default function PostFoundItemPage() {
               <input
                 className="h-14 w-full rounded-[18px] border border-slate-200 px-4 text-lg text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
                 value={itemName}
-                onChange={(event) => setItemName(event.target.value)}
+                onChange={(event) => {
+                  setItemName(event.target.value)
+                  setSelectedCatalogEntry(null)
+                }}
                 placeholder={categoryMeta[category].searchPlaceholder}
               />
             </label>
@@ -903,18 +917,23 @@ export default function PostFoundItemPage() {
                 ) : smartHint ? (
                   <>
                     <span>
-                      <span className="font-semibold">Auto-detected:</span>{' '}
+                      <span className="font-semibold">Suggested item</span>{' '}
                       {smartHint.displayLabel}
-                      <span className="ml-2 text-xs text-[#55741D]">
-                        {Math.round(smartHint.confidence * 100)}% confident
-                      </span>
                     </span>
                     <button
                       type="button"
                       className="text-xs font-semibold text-[#3A5C12] underline-offset-4 hover:underline"
-                      onClick={() => setSmartHint(null)}
+                      onClick={() => {
+                        if (supportedCatalogCategories.length === 0 || supportedCatalogCategorySet.has(smartHint.category)) {
+                          setCategory(smartHint.category)
+                        }
+                        setItemName(smartHint.keyword)
+                        setSelectedCatalogEntry(null)
+                        setHasEditedWeight(false)
+                        setSmartHint(null)
+                      }}
                     >
-                      Change
+                      Search catalogue
                     </button>
                   </>
                 ) : null}
@@ -935,7 +954,7 @@ export default function PostFoundItemPage() {
               {catalogError ? <p className="text-sm text-amber-700">{catalogError}</p> : null}
 
               <div className="grid gap-2">
-                {catalogEntries.map((entry) => {
+                {(catalogIsCurrent ? catalogEntries : []).map((entry) => {
                   const isSelected = isSameCatalogEntry(selectedCatalogEntry, entry)
 
                   return (
@@ -975,7 +994,7 @@ export default function PostFoundItemPage() {
                 <p className="text-sm text-slate-500">
                   Selected profile: {selectedCatalogEntry.item} · typical weight {selectedCatalogEntry.typicalWeightKg} kg
                 </p>
-              ) : null}
+              ) : <p className="text-sm text-slate-500">Choose the profile that best matches your item.</p>}
             </div>
 
             <label className="block space-y-2">
@@ -1053,8 +1072,8 @@ export default function PostFoundItemPage() {
         ) : (
           <>
             <div className="overflow-hidden rounded-[24px] bg-[linear-gradient(180deg,#F0F5E4_0%,#EFF7E6_100%)]">
-              {previewUrl ? (
-                <img src={previewUrl} alt={title} className="h-[360px] w-full object-cover" />
+              {cutoutUrl || previewUrl ? (
+                <img src={cutoutUrl || previewUrl || uploadedImageUrl} alt={title} className="h-[360px] w-full object-cover" />
               ) : (
                 <div className="flex h-[360px] items-center justify-center bg-[#E7EFD6] text-slate-400">
                   No preview
