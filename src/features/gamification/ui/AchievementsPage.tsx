@@ -65,6 +65,28 @@ function ImpactMetricCard({
   )
 }
 
+const CELEBRATED_BADGES_KEY = 'tc.celebratedBadges'
+
+function readCelebratedBadgeIds(): Set<string> {
+  try {
+    const raw = window.localStorage.getItem(CELEBRATED_BADGES_KEY)
+    const parsed: unknown = raw ? JSON.parse(raw) : []
+    return new Set(Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [])
+  } catch {
+    return new Set()
+  }
+}
+
+function rememberCelebratedBadgeIds(ids: readonly string[]): void {
+  if (ids.length === 0) return
+  try {
+    const next = new Set([...readCelebratedBadgeIds(), ...ids])
+    window.localStorage.setItem(CELEBRATED_BADGES_KEY, JSON.stringify([...next].slice(-200)))
+  } catch {
+    // Storage can be unavailable (private mode). Confetti then follows the old behaviour.
+  }
+}
+
 export default function AchievementsPage() {
   useAuthSession()
   const { progress, isLoading: isLoadingProgress, error: progressError } = useUserProgress()
@@ -102,11 +124,17 @@ export default function AchievementsPage() {
   // Fire confetti when new badges are present or when the level increments
   useEffect(() => {
     if (isLoadingBadges || isLoadingProgress || confettiFiredRef.current) return
-    const hasNewBadge = earnedBadges.some((b) => b.isNew)
+    // A badge stays "new" until it is opened, so remember which ones have
+    // already been celebrated. Confetti then marks a new reward, not a visit.
+    const uncelebratedBadgeIds = earnedBadges
+      .filter((b) => b.isNew)
+      .map((b) => b.badge.id)
+      .filter((id) => !readCelebratedBadgeIds().has(id))
     const currentLevel = progress?.currentLevel ?? null
     const leveledUp = prevLevelRef.current !== null && currentLevel !== null && currentLevel > prevLevelRef.current
-    if (hasNewBadge || leveledUp) {
+    if (uncelebratedBadgeIds.length > 0 || leveledUp) {
       confettiFiredRef.current = true
+      rememberCelebratedBadgeIds(uncelebratedBadgeIds)
       fireMilestone()
     }
     prevLevelRef.current = currentLevel

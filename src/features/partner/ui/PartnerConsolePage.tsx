@@ -138,10 +138,10 @@ export default function PartnerConsolePage() {
           </p>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full text-left">
+          <table className="w-full min-w-[640px] text-left">
             <thead>
               <tr className="border-b border-slate-200 text-sm text-tc-header-labelText">
-                <th className="px-6 py-4 font-medium">Item Name</th>
+                <th className="min-w-[220px] whitespace-nowrap px-6 py-4 font-medium">Item Name</th>
                 <th className="px-6 py-4 font-medium">Date Listed</th>
                 <th className="px-6 py-4 font-medium">Category</th>
                 <th className="px-6 py-4 font-medium">Date Collected</th>
