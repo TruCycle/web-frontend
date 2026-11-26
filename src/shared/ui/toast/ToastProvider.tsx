@@ -120,7 +120,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={contextValue}>
       {children}
 
-      {typeof document !== 'undefined' && createPortal(<div role="region" aria-label="Notifications" data-modal-feedback className="pointer-events-none fixed bottom-[calc(1rem+env(safe-area-inset-bottom)+var(--tc-consent-offset,0px))] right-4 z-[1300] flex max-h-[calc(100dvh-7rem)] w-[min(calc(100vw-2rem),22rem)] flex-col gap-2 overflow-y-auto md:bottom-auto md:top-24">
+      {typeof document !== 'undefined' && createPortal(<div role="region" aria-label="Notifications" data-modal-feedback className="pointer-events-none fixed right-4 top-[calc(0.5rem+env(safe-area-inset-top))] z-[1300] flex max-h-[calc(100dvh-7rem)] w-[min(calc(100vw-2rem),22rem)] flex-col gap-2 overflow-y-auto max-md:[&>article:not(:last-child)]:hidden md:top-24">
         {toasts.map((toast, index) => {
           const resolvedTone = toast.tone === 'error' ? 'danger' : toast.tone
 
