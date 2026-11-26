@@ -398,7 +398,7 @@ export default function MessagingPage() {
         <p className="text-slate-500">Coordinate collections in real time.</p>
       </div>
 
-      <div className="grid h-[calc(100vh-10rem)] min-h-[700px] flex-1 gap-4 rounded-2xl p-4 md:h-[calc(100vh-14rem)] md:min-h-[560px] xl:grid-cols-[400px_1fr]">
+      <div className="grid h-[calc(100vh-10rem)] min-h-[700px] flex-1 grid-rows-[minmax(0,2fr)_minmax(0,3fr)] gap-4 rounded-2xl p-4 md:h-[calc(100vh-14rem)] md:min-h-[560px] xl:grid-cols-[400px_1fr] xl:grid-rows-1">
         <div className="flex h-full min-h-0 min-w-0 flex-col rounded-xl bg-white p-7">
           <div className="pb-5">
             <h2 className="text-lg text-black">Conversations</h2>
@@ -508,7 +508,7 @@ export default function MessagingPage() {
               const list = event.currentTarget
               nearBottomRef.current = list.scrollHeight - list.scrollTop - list.clientHeight < 80
             }}
-            className="min-h-[520px] flex-1 space-y-3 overflow-y-auto p-4 md:min-h-0 md:p-7"
+            className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 md:p-7"
           >
             {historyGap && <div role="status" className="space-y-2 rounded-xl border border-amber-300 p-3 text-sm">
               <p>{historyGap === 'changed' ? 'The saved conversation has changed. Reload it to check the current history.' : 'Some missed messages have not loaded yet. Continue to check the gap.'}</p>
