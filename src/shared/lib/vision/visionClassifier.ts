@@ -105,10 +105,8 @@ export async function classifyImageWithWorker(file: File, context: 'spot' | 'lis
   const compressed = await compressImage(file)
   const formData = new FormData()
   formData.append('image', compressed, 'spot.jpg')
-  // Listings use the worker's default prompt and its structured analysis contract.
-  if (context === 'spot') {
-    formData.append('prompt', 'Analyze this item spotted on a UK street for TruCycle.')
-  }
+  // The API chooses the prompt for each context; only admins may send a custom prompt.
+  formData.append('context', context)
   const response = await apiRequest<WorkerResponse, FormData>('/found-items/vision', {
     method: 'POST',
     body: formData,
