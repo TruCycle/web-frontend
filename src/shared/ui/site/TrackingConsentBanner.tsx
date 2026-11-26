@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'react'
 import { Button } from '@/shared/ui/button/Button'
 import { Link } from 'react-router-dom'
 
@@ -7,8 +8,23 @@ type TrackingConsentBannerProps = {
 }
 
 export function TrackingConsentBanner({ onAccept, onReject }: TrackingConsentBannerProps) {
+  const bannerRef = useRef<HTMLDivElement>(null)
+  // Publish the banner height so bottom-anchored toasts can stack above it.
+  useLayoutEffect(() => {
+    const banner = bannerRef.current
+    if (!banner) return
+    const root = document.documentElement
+    const update = () => root.style.setProperty('--tc-consent-offset', `${banner.offsetHeight}px`)
+    update()
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(update)
+    observer?.observe(banner)
+    return () => {
+      observer?.disconnect()
+      root.style.removeProperty('--tc-consent-offset')
+    }
+  }, [])
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[90] flex justify-center px-4 pb-4 sm:px-6 sm:pb-6">
+    <div ref={bannerRef} className="pointer-events-none fixed inset-x-0 bottom-0 z-[90] flex justify-center px-4 pb-4 sm:px-6 sm:pb-6">
       <section aria-label="Cookie preferences" className="pointer-events-auto max-h-[calc(100dvh-2rem)] w-full max-w-4xl overflow-y-auto rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,rgba(18,18,18,0.96)_0%,rgba(34,34,34,0.94)_100%)] px-4 py-4 text-white shadow-[0_24px_80px_rgba(15,23,42,0.28)] backdrop-blur sm:px-5 sm:py-5 xl:px-7">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">

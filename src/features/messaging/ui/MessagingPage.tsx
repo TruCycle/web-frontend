@@ -202,6 +202,14 @@ export default function MessagingPage() {
   const [searchValue, setSearchValue] = useState('')
   const [drafts, setDrafts] = useState<Record<string, string>>({})
   const inputValue = activeRoomId ? drafts[activeRoomId] ?? '' : ''
+  const chatCardRef = useRef<HTMLDivElement>(null)
+  // Below xl the panels stack; bring the open conversation (newest message and
+  // composer) into view so it can be read and marked as read without scrolling.
+  useEffect(() => {
+    if (!activeRoomId || typeof window === 'undefined' || !window.matchMedia('(max-width: 1279.98px)').matches) return
+    const frame = window.requestAnimationFrame(() => chatCardRef.current?.scrollIntoView({ block: 'end' }))
+    return () => window.cancelAnimationFrame(frame)
+  }, [activeRoomId])
   const [previewImage, setPreviewImage] = useState<{ readonly src: string; readonly alt: string } | null>(null)
   const requestedRoomId = searchParams.get('roomId')
 
@@ -490,7 +498,7 @@ export default function MessagingPage() {
           </div>
         </div>
 
-        <div className="flex h-full min-h-0 min-w-0 flex-col rounded-xl bg-white">
+        <div ref={chatCardRef} className="flex h-full min-h-0 min-w-0 scroll-mb-4 flex-col rounded-xl bg-white">
           <div className="flex items-center gap-3 border-b border-slate-200 p-5">
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#15A1191A] text-xs font-semibold text-slate-700">
               {activeRoom ? getRoomInitials(activeRoom, user?.id) : '--'}
