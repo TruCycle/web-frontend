@@ -153,7 +153,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               <p className="mt-1 text-xs/5 text-current/90">{toast.message}</p>
               <button
                 className="mt-2 min-h-11 min-w-11 rounded-md border border-current/35 px-2 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.05em] text-current/90 hover:bg-white/10"
-                onClick={() => dismissToast(toast.id)}
+                onClick={() => {
+                  // Phones show only the newest toast; dismissing it should not reveal stale ones.
+                  const isPhone = typeof window !== 'undefined' && window.matchMedia('(max-width: 767.98px)').matches
+                  if (isPhone && index === toasts.length - 1) clearToasts()
+                  else dismissToast(toast.id)
+                }}
                 type="button"
               >
                 Dismiss
