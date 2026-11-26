@@ -17,6 +17,7 @@ const parseFlag = (value: string | undefined, fallback: boolean): boolean => {
 
 const enableSmartSpot = parseFlag(import.meta.env.VITE_ENABLE_SMART_SPOT, false)
 const enableMetaPixelSdk = import.meta.env.VITE_ENABLE_META_PIXEL_SDK === 'true'
+const enablePhotoCutout = parseFlag(import.meta.env.VITE_ENABLE_PHOTO_CUTOUT, false)
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() || ''
 
 export const env = {
@@ -30,5 +31,6 @@ export const env = {
   metaPixelId,
   enableMetaPixelSdk,
   enableSmartSpot,
+  enablePhotoCutout,
   googleClientId,
 } as const

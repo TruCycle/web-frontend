@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { X, Upload, Plus, MapPin, QrCode, Search } from 'lucide-react';
+import { Camera, X, Upload, Plus, MapPin, QrCode, Search } from 'lucide-react';
 import { Modal } from './Modal';
 import { Button } from '../button/Button';
 import { CustomSelect } from '@/shared/ui/select';
@@ -10,6 +10,9 @@ import { apiRequest } from '@/shared/lib/api/client';
 import { unwrapApiData } from '@/shared/lib/api/envelope';
 import { env } from '@/shared/lib/config/env';
 import { ReuseSafetyNotice } from '@/shared/ui/reuse/ReuseSafetyNotice';
+import { classifyImageWithWorker, isVisionWorkerEnabled, type CatalogHint } from '@/shared/lib/vision/visionClassifier';
+import { CameraCapture } from '@/shared/ui/camera/CameraCapture';
+import { PhotoCutoutPreview } from '@/shared/ui/camera/PhotoCutoutPreview';
 
 interface ListItemDialogProps {
   isOpen: boolean;
@@ -48,6 +51,7 @@ interface UploadedPhoto {
   readonly id: string;
   readonly previewUrl: string;
   readonly cloudinaryUrl: string | null;
+  readonly cutoutUrl: string | null;
   readonly deleteToken: string | null;
   readonly isUploading: boolean;
   readonly error: string | null;
@@ -62,6 +66,10 @@ const CATEGORIES = [
   'Home Decor',
   'Other',
 ];
+
+const LISTING_CATEGORIES: Partial<Record<CatalogHint['category'], string>> = {
+  electronics: 'Electronics', furniture: 'Furniture', clothing: 'Clothing', books: 'Books',
+};
 
 const CONDITIONS = [
   { value: 'new', label: 'New' },
@@ -171,6 +179,9 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
     preselectedShop ? 'shop' : 'address',
   );
   const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [photoHint, setPhotoHint] = useState<CatalogHint | null>(null);
+  const [isIdentifyingPhoto, setIsIdentifyingPhoto] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedCondition, setSelectedCondition] = useState<string>('');
   const [itemName, setItemName] = useState('');
@@ -192,6 +203,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const removedPhotoIdsRef = useRef<Set<string>>(new Set());
+  const identifyingPhotoId = useRef<string | null>(null);
 
   const selectedConditionLabel =
     CONDITIONS.find((condition) => condition.value === selectedCondition)?.label ?? '';
@@ -282,8 +294,12 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
   const resetFormState = () => {
     photos.forEach((photo) => {
       URL.revokeObjectURL(photo.previewUrl);
+      if (photo.isUploading) removedPhotoIdsRef.current.add(photo.id);
     });
-    removedPhotoIdsRef.current.clear();
+    identifyingPhotoId.current = null;
+    setIsIdentifyingPhoto(false);
+    setPhotoHint(null);
+    setIsCameraOpen(false);
     setPhotos([]);
     setSelectedCategory('');
     setSelectedCondition('');
@@ -350,10 +366,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
     onClose();
   };
 
-  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files) return;
-
+  const addPhotos = async (files: readonly File[]) => {
     const availableSlots = Math.max(0, 4 - photos.length);
     if (availableSlots === 0) {
       if (fileInputRef.current) {
@@ -372,7 +385,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
       return;
     }
 
-    const selectedFiles = Array.from(files).slice(0, availableSlots);
+    const selectedFiles = files.slice(0, availableSlots);
     const nextPhotos = selectedFiles.map((file) => {
       const id = typeof crypto.randomUUID === 'function'
         ? crypto.randomUUID()
@@ -382,6 +395,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
         id,
         previewUrl: URL.createObjectURL(file),
         cloudinaryUrl: null,
+        cutoutUrl: null,
         deleteToken: null,
         isUploading: true,
         error: null,
@@ -389,6 +403,19 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
     });
     setSubmitError(null);
     setPhotos((currentPhotos) => [...currentPhotos, ...nextPhotos].slice(0, 4));
+
+    const sourcePhoto = nextPhotos[0];
+    if (photos.length === 0 && sourcePhoto && env.enableSmartSpot && isVisionWorkerEnabled()) {
+      identifyingPhotoId.current = sourcePhoto.id;
+      setIsIdentifyingPhoto(true);
+      void classifyImageWithWorker(selectedFiles[0], 'listing').then((hint) => {
+        if (identifyingPhotoId.current === sourcePhoto.id) setPhotoHint(hint);
+      }).catch(() => {
+        // Listing remains available if recognition fails.
+      }).finally(() => {
+        if (identifyingPhotoId.current === sourcePhoto.id) setIsIdentifyingPhoto(false);
+      });
+    }
 
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -453,6 +480,11 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
     const targetPhoto = photos.find((photo) => photo.id === photoId);
     if (!targetPhoto) {
       return;
+    }
+    if (identifyingPhotoId.current === photoId) {
+      identifyingPhotoId.current = null;
+      setPhotoHint(null);
+      setIsIdentifyingPhoto(false);
     }
 
     removedPhotoIdsRef.current.add(photoId);
@@ -521,7 +553,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
     }
 
     const uploadedImages = photos
-      .map((photo) => photo.cloudinaryUrl)
+      .map((photo) => photo.cutoutUrl ?? photo.cloudinaryUrl)
       .filter((photoUrl): photoUrl is string => Boolean(photoUrl))
       .map((photoUrl) => ({
         url: photoUrl,
@@ -709,7 +741,11 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
             <input
               type="file"
               ref={fileInputRef}
-              onChange={handlePhotoUpload}
+              onChange={(event) => {
+                const files = Array.from(event.currentTarget.files ?? []);
+                event.currentTarget.value = '';
+                if (files.length > 0) void addPhotos(files);
+              }}
               multiple
               accept="image/*"
               className="hidden"
@@ -717,7 +753,7 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
             <div className="flex flex-wrap gap-3">
               {photos.map((photo, index) => (
                 <div key={photo.id} className="relative h-20 w-20 overflow-hidden rounded-xl border border-slate-200">
-                  <img src={photo.previewUrl} alt={`Upload ${index + 1}`} className="h-full w-full object-cover" />
+                  <img src={photo.cutoutUrl ?? photo.previewUrl} alt={`Upload ${index + 1}`} className="h-full w-full object-cover" />
                   {photo.isUploading ? (
                     <div className="absolute inset-0 flex items-center justify-center bg-slate-900/40">
                       <span className="text-[10px] font-semibold text-white">Uploading...</span>
@@ -740,17 +776,51 @@ export const ListItemDialog: React.FC<ListItemDialogProps> = ({
                   </button>
                 </div>
               ))}
-              {photos.length < 4 ? (
-                <button
-                  className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-slate-300 text-slate-500 transition hover:border-lime-300 hover:text-slate-700"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isSubmitting}
-                >
-                  <Upload size={20} />
-                  <span className="text-[11px] font-medium">Add photo</span>
-                </button>
+              {photos.length < 4 && !isCameraOpen ? (
+                <>
+                  <button type="button"
+                    className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-slate-300 text-slate-500 transition hover:border-lime-300 hover:text-slate-700"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isSubmitting}
+                  >
+                    <Upload size={20} />
+                    <span className="text-[11px] font-medium">Add photo</span>
+                  </button>
+                  <button type="button"
+                    className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-slate-300 text-slate-500 transition hover:border-lime-300 hover:text-slate-700"
+                    onClick={() => setIsCameraOpen(true)}
+                    disabled={isSubmitting}
+                  >
+                    <Camera size={20} />
+                    <span className="text-[11px] font-medium">Take photo</span>
+                  </button>
+                </>
               ) : null}
             </div>
+            {photos[0]?.cloudinaryUrl ? (
+              <PhotoCutoutPreview key={photos[0].id} originalUrl={photos[0].cloudinaryUrl}
+                selectedUrl={photos[0].cutoutUrl} disabled={isSubmitting}
+                onChange={(cutoutUrl) => {
+                  const coverId = photos[0].id;
+                  setPhotos((current) => current.map((photo) => photo.id === coverId ? { ...photo, cutoutUrl } : photo));
+                }} />
+            ) : null}
+            {isCameraOpen ? <CameraCapture onCancel={() => setIsCameraOpen(false)} onCapture={(file) => {
+              setIsCameraOpen(false);
+              void addPhotos([file]);
+            }} /> : null}
+            {isIdentifyingPhoto ? <p role="status" className="text-xs text-slate-600">Identifying the item…</p> : null}
+            {photoHint ? (
+              <div className="flex flex-wrap items-center gap-2 text-sm text-slate-700">
+                <span>Suggested item: {photoHint.displayLabel}</span>
+                <Button type="button" variant="secondary" disabled={isSubmitting} onClick={() => {
+                  setItemName((current) => current.trim() ? current : photoHint.displayLabel);
+                  setSelectedCategory((current) => current || LISTING_CATEGORIES[photoHint.category] || '');
+                  setPhotoHint(null);
+                }}>Use suggestion</Button>
+                <Button type="button" variant="secondary" onClick={() => setPhotoHint(null)}>Dismiss suggestion</Button>
+              </div>
+            ) : null}
             <p className="text-xs text-slate-400">You can upload up to 4 photos. First photo will be the cover image.</p>
           </div>
 

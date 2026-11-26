@@ -47,8 +47,6 @@ function FoundItemsBoard() {
     refresh: refreshDetails,
   } = useFoundItemDetails(selectedItemId, user?.id)
 
-
-
   const actor = useMemo(
     () => ({
       id: user?.id ?? 'current-user',
@@ -148,6 +146,7 @@ function FoundItemsBoard() {
 
       {pagination && pagination.page < pagination.totalPages ? <button disabled={isLoading} onClick={() => { void loadMore() }} className="rounded-xl border px-4 py-3">Load more spots</button> : null}
       <FoundItemDetailsPanel
+        key={JSON.stringify([selectedItem?.id, viewerClaim?.id, viewerClaim?.message])}
         isOpen={Boolean(selectedItemId)}
         onClose={() => setSelectedItemId(null)}
         onLifecycleChange={() => { void Promise.all([refresh(), refreshDetails()]) }}

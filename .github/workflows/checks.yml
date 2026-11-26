@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main, stage, codex/stabilisation-baseline]
   push:
-    branches: ['codex/**']
+    branches: [main, 'codex/**']
   workflow_dispatch:
 
 permissions:

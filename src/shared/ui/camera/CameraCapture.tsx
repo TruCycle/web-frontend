@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ChangeEvent, type Keyboa
 import { Camera, Image as ImageIcon, LoaderCircle, MapPin, RotateCw, Upload, X } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
 import { classNames } from '@/shared/utils/classNames'
-import { INITIAL_CAMERA_TRANSFORM, resolveCameraFrame, zoomCameraAt, type CameraTransform } from '@/features/found-items/lib/cameraFraming'
+import { INITIAL_CAMERA_TRANSFORM, resolveCameraFrame, zoomCameraAt, type CameraTransform } from './cameraFraming'
 
 interface CameraCaptureProps {
   readonly onCapture: (file: File) => void
