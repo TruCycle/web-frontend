@@ -1,9 +1,10 @@
-import { useState, type ReactNode } from 'react'
+import { useId, useState, type ReactNode } from 'react'
 import { Clock3, Flag, MapPin, Scale, Sparkles, Users } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
 import { Modal } from '@/shared/ui/modal/Modal'
 import { formatRelativeTime } from '@/shared/utils/formatRelativeTime'
 import type { FoundItem, FoundItemClaim } from '../../types'
+import { FoundItemLifecycleActions } from './FoundItemLifecycleActions'
 import { FoundItemStatusBadge } from './FoundItemStatusBadge'
 import { formatFoundItemAttribution, formatFoundItemLocationSummary } from './foundItemDisplay'
 
@@ -42,12 +43,22 @@ interface FoundItemDetailsPanelProps {
   readonly isClaiming?: boolean
   readonly isCancelling?: boolean
   readonly isReporting?: boolean
+  readonly onLifecycleChange?: () => void
   readonly onClaim?: (itemId: string, message?: string) => void
   readonly onCancelClaim?: (itemId: string) => void
   readonly onReport?: (itemId: string, reason: string, details?: string) => void
 }
 
-export function FoundItemDetailsPanel({
+export function FoundItemDetailsPanel(props: FoundItemDetailsPanelProps) {
+  const formKey = JSON.stringify([
+    props.item?.id,
+    props.viewerClaim?.id,
+    props.viewerClaim?.message,
+  ])
+  return <FoundItemDetailsContent key={formKey} {...props} />
+}
+
+function FoundItemDetailsContent({
   isOpen,
   onClose,
   item,
@@ -58,10 +69,12 @@ export function FoundItemDetailsPanel({
   isClaiming = false,
   isCancelling = false,
   isReporting = false,
+  onLifecycleChange,
   onClaim,
   onCancelClaim,
   onReport,
 }: FoundItemDetailsPanelProps) {
+  const pickupNoteLabel = useId()
   const [claimMessage, setClaimMessage] = useState(viewerClaim?.message ?? '')
   const [reportReason, setReportReason] = useState('')
   const [reportDetails, setReportDetails] = useState('')
@@ -73,14 +86,14 @@ export function FoundItemDetailsPanel({
   const primaryImage = item?.images[0]
   const isOwnPost = item ? currentUserId === item.poster.id : false
   const isClosed =
-    item?.status === 'picked_up' || item?.status === 'expired' || item?.status === 'reported'
+    item?.status === 'gone' || item?.status === 'picked_up' || item?.status === 'expired' || item?.status === 'reported'
   const hasActiveViewerClaim =
     viewerClaim !== null && (viewerClaim.status === 'pending' || viewerClaim.status === 'acknowledged')
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} containerClassName="max-w-[860px]">
+    <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Found item details" containerClassName="max-w-[860px]">
       <div className="space-y-5 p-5 sm:p-6">
-        {isLoading ? <p className="text-sm text-slate-500">Loading item...</p> : null}
+        {isLoading ? <p role="status" className="text-sm text-slate-500">Loading item...</p> : null}
 
         {!isLoading && !item ? <p className="text-sm text-slate-500">Choose an item to inspect.</p> : null}
 
@@ -113,8 +126,8 @@ export function FoundItemDetailsPanel({
                     icon={<Scale size={16} />}
                   />
                   <StatTile
-                    label="Postcode"
-                    value={item.location.postcode}
+                    label={item.location.precision === 'exact' ? 'Postcode' : 'Area'}
+                    value={item.location.postcode || 'Unavailable'}
                     icon={<MapPin size={16} />}
                   />
                 </div>
@@ -157,7 +170,7 @@ export function FoundItemDetailsPanel({
                   </div>
                   <div className="flex items-center gap-2 leading-6">
                     <Clock3 size={16} />
-                    {formatRelativeTime(item.postedAt)}
+                    Posted {formatRelativeTime(item.postedAt)}
                   </div>
                   <div className="flex items-center gap-2 leading-6">
                     <Users size={16} />
@@ -169,6 +182,7 @@ export function FoundItemDetailsPanel({
                   </div>
                 </div>
 
+                <FoundItemLifecycleActions item={item} currentUserId={currentUserId} claims={claims} viewerClaim={viewerClaim} onChanged={onLifecycleChange} />
                 <div>
                   <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
                     Notes
@@ -179,7 +193,7 @@ export function FoundItemDetailsPanel({
                 {!isOwnPost ? (
                   <div className="space-y-4 rounded-[24px] border border-slate-200 bg-[#F8FAFC] p-4">
                     <div>
-                      <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        <h3 id={pickupNoteLabel} className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
                         Pickup note
                       </h3>
                       <p className="mt-2 text-sm leading-6 text-slate-500">
@@ -190,6 +204,7 @@ export function FoundItemDetailsPanel({
                     </div>
 
                     <textarea
+                      aria-labelledby={pickupNoteLabel}
                       value={claimMessage}
                       onChange={(event) => setClaimMessage(event.target.value)}
                       disabled={hasActiveViewerClaim}
@@ -207,7 +222,7 @@ export function FoundItemDetailsPanel({
                         }}
                       >
                         {item.status === 'claimed'
-                          ? 'Interest sent'
+                          ? 'Another pickup request is active'
                           : isClaiming
                             ? 'Sending...'
                             : 'Send pickup request'}
@@ -232,23 +247,36 @@ export function FoundItemDetailsPanel({
                             Report this post
                           </h3>
                           <p className="mt-2 text-sm leading-6 text-slate-500">
-                            Flag unsafe, misleading or duplicate spots so they can be reviewed.
+                            Report what you observed. A report does not confirm a pickup or award pickup points.
                           </p>
                         </div>
 
-                        <input
-                          value={reportReason}
-                          onChange={(event) => setReportReason(event.target.value)}
-                          className="h-12 w-full rounded-[16px] border border-slate-200 px-4 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
-                          placeholder="Reason for reporting"
-                        />
+                        <label className="block text-sm font-medium text-slate-700">
+                          Report reason
+                          <select
+                            aria-label="Report reason"
+                            value={reportReason}
+                            onChange={(event) => setReportReason(event.target.value)}
+                            className="mt-1 h-12 w-full rounded-[16px] border border-slate-200 px-4 text-sm text-slate-900"
+                          >
+                            <option value="">Choose a reason</option>
+                            <option value="already_gone">Already gone</option>
+                            {hasActiveViewerClaim ? <option value="not_there">Not there when I arrived</option> : null}
+                            <option value="unsafe">Unsafe</option>
+                            <option value="misleading">Misleading</option>
+                            <option value="duplicate">Duplicate</option>
+                            <option value="other">Other</option>
+                          </select>
+                        </label>
 
-                        <textarea
-                          value={reportDetails}
-                          onChange={(event) => setReportDetails(event.target.value)}
-                          className="min-h-[96px] w-full rounded-[16px] border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
-                          placeholder="Extra details (optional)"
-                        />
+                        <label className="block space-y-1 text-sm font-medium text-slate-700">
+                          <span>Extra details (optional)</span>
+                          <textarea
+                            value={reportDetails}
+                            onChange={(event) => setReportDetails(event.target.value)}
+                            className="block min-h-[96px] w-full rounded-[16px] border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
+                          />
+                        </label>
 
                         <Button
                           variant="danger"

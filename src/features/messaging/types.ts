@@ -14,6 +14,7 @@ export interface RoomMessage {
   readonly direction: MessageDirection
   readonly category: 'direct' | 'general'
   readonly imageUrl: string | null
+  readonly hasAttachment?: boolean
   readonly caption: string | null
   readonly text: string | null
   readonly createdAt: string

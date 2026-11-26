@@ -152,11 +152,11 @@ export default function PartnerItemsPage() {
 
       <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
-          <table className="min-w-full text-left">
+          <table className="w-full min-w-[860px] text-left">
             <thead>
               <tr className="border-b border-slate-200 text-sm text-slate-500">
-                <th className="px-6 py-4 font-medium">Item</th>
-                <th className="px-6 py-4 font-medium">Shop</th>
+                <th className="min-w-[240px] whitespace-nowrap px-6 py-4 font-medium">Item</th>
+                <th className="min-w-[180px] whitespace-nowrap px-6 py-4 font-medium">Shop</th>
                 <th className="px-6 py-4 font-medium">Category</th>
                 <th className="px-6 py-4 font-medium">Pickup</th>
                 <th className="px-6 py-4 font-medium">Status</th>

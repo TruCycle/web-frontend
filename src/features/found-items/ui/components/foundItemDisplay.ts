@@ -1,7 +1,14 @@
 import { formatRelativeTime } from '@/shared/utils/formatRelativeTime'
 import type { FoundItem } from '../../types'
+import { outwardPostcode } from '../../lib/foundItemLocation'
 
 export function formatFoundItemLocationSummary(item: Pick<FoundItem, 'location'>): string {
+  if (item.location.precision !== 'exact') {
+    const area = outwardPostcode(item.location.postcode)
+    return item.location.precision === 'approximate'
+      ? area ? `Approximate area · ${area}` : 'Approximate area'
+      : area ? `Area ${area} · map location unavailable` : 'Location unavailable'
+  }
   const address = item.location.address?.trim() ?? ''
   const neighborhood = item.location.neighborhood?.trim() ?? ''
   const postcode = item.location.postcode.trim()

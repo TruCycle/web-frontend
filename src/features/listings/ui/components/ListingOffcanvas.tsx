@@ -8,6 +8,7 @@ import { classNames } from '@/shared/utils/classNames'
 import { approveDonorListingClaim } from '@/features/listings/api/listingsApi'
 import { createOrFindRoom } from '@/features/messaging/api/messagingApi'
 import { useToast } from '@/shared/ui/toast/useToast'
+import { donorListingStatusLabel } from '@/features/listings/ui/listingStatus'
 
 type PanelView = 'details' | 'requests' | 'approved'
 
@@ -369,7 +370,7 @@ export function ListingOffcanvas({ isOpen, item, onClose }: ListingOffcanvasProp
                         statusTone(item.status),
                       )}
                     >
-                      {item.status}
+                      {donorListingStatusLabel(item)}
                     </p>
                   </div>
                   <div className="rounded-xl border border-[#A4F5A6] bg-[#F8FAFC] px-6 py-5">

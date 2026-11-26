@@ -4,3 +4,11 @@ compatibility_date = "2024-09-23"
 
 [ai]
 binding = "AI"
+
+[env.staging]
+name = "trucycle-vision-staging"
+workers_dev = true
+preview_urls = false
+
+[env.staging.ai]
+binding = "AI"

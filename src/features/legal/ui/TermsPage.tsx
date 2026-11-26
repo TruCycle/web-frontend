@@ -11,6 +11,10 @@ const termsSections = [
     body: 'Users are responsible for the accuracy of item details, availability, and any arrangements made through the platform. TruCycle helps coordinate the flow but does not guarantee each exchange outcome.',
   },
   {
+    title: 'Permission And Item Condition',
+    body: 'Only offer an item you own or have permission from its owner to pass on. Describe its condition and any damage or minor repair accurately. Do not assume that an item left on the street is available to take. Agree the item’s intended reuse and any repair with the next owner before it moves.',
+  },
+  {
     title: 'Accounts And Access',
     body: 'We may suspend or limit access where necessary to protect users, prevent misuse, or maintain the security and reliability of the service.',
   },

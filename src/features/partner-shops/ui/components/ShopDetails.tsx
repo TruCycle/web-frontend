@@ -30,6 +30,7 @@ export function ShopDetails({ shop, onPlanHandoff }: ShopDetailsProps) {
                 <div>
                     <h4 className="text-xs font-semibold tracking-wide text-slate-500">ACCEPTED ITEMS</h4>
                     <div className="mt-2 flex flex-wrap gap-2">
+                        {shop.acceptedItems.length === 0 ? <p className="text-sm text-slate-500">Ask the shop which items it accepts before planning a handoff.</p> : null}
                         {shop.acceptedItems.map((item) => (
                             <span key={item} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
                                 {item}
@@ -38,7 +39,7 @@ export function ShopDetails({ shop, onPlanHandoff }: ShopDetailsProps) {
                     </div>
                 </div>
 
-                <div>
+                {shop.amenities.length > 0 ? <div>
                     <h4 className="text-xs font-semibold tracking-wide text-slate-500">AMENITIES</h4>
                     <div className="mt-2 space-y-2">
                         {shop.amenities.map((amenity) => (
@@ -48,11 +49,12 @@ export function ShopDetails({ shop, onPlanHandoff }: ShopDetailsProps) {
                             </div>
                         ))}
                     </div>
-                </div>
+                </div> : null}
             </div>
 
             <div className="mt-5 flex flex-wrap gap-3">
-                <Button variant="secondary">Get Direction</Button>
+                {shop.directionsUrl ? <a href={shop.directionsUrl} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-800">Get directions</a> : null}
                 <Button onClick={() => onPlanHandoff(shop)}>Plan Handoff Here</Button>
             </div>
         </div>

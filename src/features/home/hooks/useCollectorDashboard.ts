@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   createItemClaim,
   fetchBrowseItems,
-  fetchImpactMetrics,
-  fetchWalletBalance,
+  fetchCollectedItems,
 } from '@/features/items/api/itemsApi'
 import type { BrowseItem } from '@/features/items/types'
 
@@ -22,6 +21,8 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
     location: '',
   })
   const [items, setItems] = useState<BrowseItem[]>([])
+  const itemRequest = useRef<AbortController | null>(null)
+  const statsRequest = useRef<AbortController | null>(null)
   const [allCategories, setAllCategories] = useState<string[]>(['All Items'])
   const [isLoadingItems, setIsLoadingItems] = useState(true)
   const [isLoadingStats, setIsLoadingStats] = useState(true)
@@ -29,13 +30,16 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
   const [error, setError] = useState<string | null>(null)
   const [stats, setStats] = useState({
     itemsCollected: 0,
-    itemsExchanged: 0,
-    totalCo2SavedKg: 0,
+    itemsExchanged: null as number | null,
+    totalCo2SavedKg: null as number | null,
     rewardsEarned: 0,
     rewardsCurrency: '£',
   })
 
   const loadItems = useCallback(async () => {
+    itemRequest.current?.abort()
+    const request = new AbortController()
+    itemRequest.current = request
     try {
       setIsLoadingItems(true)
       setError(null)
@@ -43,7 +47,9 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
         category: filters.category,
         search: filters.search,
         postcode,
+        signal: request.signal,
       })
+      if (request.signal.aborted) return
       setItems(result)
       if (filters.category === 'All Items' && filters.search.trim().length === 0) {
         const computedCategories = new Set<string>(['All Items'])
@@ -56,27 +62,40 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
         setAllCategories([...computedCategories])
       }
     } catch {
+      if (request.signal.aborted) return
       setError('Unable to load available items right now.')
     } finally {
-      setIsLoadingItems(false)
+      if (itemRequest.current === request) {
+        itemRequest.current = null
+        if (!request.signal.aborted) setIsLoadingItems(false)
+      }
     }
   }, [filters.category, filters.search, postcode])
 
   const loadStats = useCallback(async () => {
+    statsRequest.current?.abort()
+    const request = new AbortController()
+    statsRequest.current = request
     try {
       setIsLoadingStats(true)
-      const [impact, wallet] = await Promise.all([fetchImpactMetrics(), fetchWalletBalance()])
+      // This endpoint is collector-scoped; /items/me/impact is donor-scoped.
+      const completed = await fetchCollectedItems({ claimStatus: 'complete', page: 1, limit: 1, signal: request.signal })
+      if (request.signal.aborted) return
       setStats({
-        itemsCollected: impact.itemsDonated + impact.itemsExchanged,
-        itemsExchanged: impact.itemsExchanged,
-        totalCo2SavedKg: impact.totalCo2SavedKg,
-        rewardsEarned: wallet.balance,
-        rewardsCurrency: wallet.currency,
+        itemsCollected: completed.pagination.total,
+        itemsExchanged: null,
+        totalCo2SavedKg: null,
+        rewardsEarned: 0,
+        rewardsCurrency: 'PTS',
       })
     } catch {
+      if (request.signal.aborted) return
       setError('Unable to load your impact metrics right now.')
     } finally {
-      setIsLoadingStats(false)
+      if (statsRequest.current === request) {
+        statsRequest.current = null
+        if (!request.signal.aborted) setIsLoadingStats(false)
+      }
     }
   }, [])
 
@@ -85,6 +104,7 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
       return
     }
     void loadItems()
+    return () => { itemRequest.current?.abort() }
   }, [enabled, loadItems])
 
   useEffect(() => {
@@ -92,6 +112,7 @@ export function useCollectorDashboard(enabled: boolean = true, postcode?: string
       return
     }
     void loadStats()
+    return () => { statsRequest.current?.abort() }
   }, [enabled, loadStats])
 
   const categoriesFromItems = useMemo(() => {

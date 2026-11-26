@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Check, Clipboard, Cpu, Loader2, RefreshCw, ShieldCheck, X } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { Check, Clipboard, Cpu, Loader2, RefreshCw, X } from 'lucide-react'
+import { Navigate } from 'react-router-dom'
+import { apiRequest } from '@/shared/lib/api/client'
+import { unwrapApiData } from '@/shared/lib/api/envelope'
+import { useAuthSession } from '@/shared/context/useAuthSession'
+import { LoadingState } from '@/shared/ui/loading/LoadingState'
 import { useToast } from '@/shared/ui/toast/useToast'
 
-const CORRECT_PIN = import.meta.env.VITE_INTERNAL_PIN ?? '12345678'
-const SESSION_KEY  = 'tc_internal_vision_unlocked'
-const DEFAULT_WORKER = 'https://imgrc.trucycle01.workers.dev/'
 const MAX_DIMENSION  = 1000
 const JPEG_QUALITY   = 0.85
 
@@ -43,98 +45,6 @@ async function compressImage(file: File): Promise<Blob> {
     }
     reader.readAsDataURL(file)
   })
-}
-
-// ── PIN gate ───────────────────────────────────────────────────────────────────
-
-function PinGate({ onUnlock }: { readonly onUnlock: () => void }) {
-  const [digits, setDigits] = useState<string[]>(Array(8).fill(''))
-  const [error, setError]   = useState(false)
-  const [shake, setShake]   = useState(false)
-  const refs = useRef<(HTMLInputElement | null)[]>([])
-
-  const verify = useCallback((pin: string) => {
-    if (pin === CORRECT_PIN) {
-      sessionStorage.setItem(SESSION_KEY, '1')
-      onUnlock()
-    } else {
-      setError(true); setShake(true)
-      setDigits(Array(8).fill(''))
-      setTimeout(() => { setShake(false); refs.current[0]?.focus() }, 600)
-    }
-  }, [onUnlock])
-
-  const handleChange = (i: number, v: string) => {
-    if (!/^\d?$/.test(v)) return
-    const next = [...digits]; next[i] = v.slice(-1)
-    setDigits(next); setError(false)
-    if (v && i < 7) refs.current[i + 1]?.focus()
-    if (next.every(Boolean)) verify(next.join(''))
-  }
-
-  const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !digits[i] && i > 0) refs.current[i - 1]?.focus()
-  }
-
-  const handlePaste = (e: React.ClipboardEvent) => {
-    const p = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 8)
-    if (!p) return
-    e.preventDefault()
-    const next = Array(8).fill('') as string[]
-    p.split('').forEach((ch, i) => { next[i] = ch })
-    setDigits(next)
-    if (p.length === 8) verify(p)
-    else refs.current[p.length]?.focus()
-  }
-
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-tc-app-canvas px-6">
-      <div
-        className="w-full max-w-sm rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_20px_60px_rgba(0,0,0,0.06)]"
-        style={shake ? { animation: 'shake 0.5s ease' } : {}}
-      >
-        <div className="mb-6 flex justify-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-[1.1rem] bg-[#0D3B24] shadow-[0_12px_32px_rgba(13,59,36,0.25)]">
-            <ShieldCheck size={26} className="text-[#A4F5A6]" />
-          </div>
-        </div>
-        <h1 className="mb-1 text-center text-xl font-bold tracking-tight text-slate-900">Internal access</h1>
-        <p className="mb-8 text-center text-sm text-slate-500">Enter the 8-digit PIN to continue</p>
-
-        <div className="flex justify-center gap-2" onPaste={handlePaste}>
-          {digits.map((digit, i) => (
-            <input
-              key={i}
-              ref={(el) => { refs.current[i] = el }}
-              type="password"
-              inputMode="numeric"
-              maxLength={1}
-              value={digit}
-              autoFocus={i === 0}
-              onChange={(e) => handleChange(i, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(i, e)}
-              className={[
-                'h-12 w-10 rounded-xl border bg-slate-50 text-center text-lg font-bold caret-transparent text-slate-900 outline-none transition-all duration-150',
-                digit ? 'border-[#0D3B24]/50 shadow-[0_0_0_3px_rgba(13,59,36,0.08)]' : 'border-slate-200',
-                error ? '!border-rose-400' : '',
-                'focus:border-[#0D3B24]/60 focus:shadow-[0_0_0_3px_rgba(13,59,36,0.10)]',
-              ].join(' ')}
-            />
-          ))}
-        </div>
-
-        {error && <p className="mt-4 text-center text-sm font-medium text-rose-500">Incorrect PIN — try again</p>}
-        <p className="mt-8 text-center text-xs text-slate-400">TruCycle · Internal tools · Not indexed</p>
-      </div>
-      <style>{`
-        @keyframes shake {
-          0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)}
-          40%{transform:translateX(8px)}   60%{transform:translateX(-5px)}
-          80%{transform:translateX(5px)}
-        }
-      `}</style>
-    </div>
-  )
 }
 
 // ── Types & constants ──────────────────────────────────────────────────────────
@@ -177,7 +87,6 @@ function conditionStyle(c: string) {
 function VisionTool() {
   const { success: toastSuccess, error: toastError, info: toastInfo } = useToast()
 
-  const [workerUrl, setWorkerUrl] = useState(DEFAULT_WORKER)
   const [rawFile, setRawFile]     = useState<File | null>(null)
   const [blob, setBlob]           = useState<Blob | null>(null)
   const [preview, setPreview]     = useState<string | null>(null)
@@ -229,7 +138,6 @@ function VisionTool() {
 
   const handleSubmit = useCallback(async () => {
     if (!blob)             { toastError('No image',            'Upload an image first.'); return }
-    if (!workerUrl.trim()) { toastError('Worker URL missing',  'Enter your Cloudflare Worker URL.'); return }
 
     setLoading(true); setStatus('running'); setResponse(null)
     const t0 = performance.now()
@@ -239,8 +147,7 @@ function VisionTool() {
     fd.append('prompt', prompt || 'Analyze this item for TruCycle.')
 
     try {
-      const res  = await fetch(workerUrl.trim(), { method: 'POST', body: fd })
-      const data = await res.json() as WorkerResponse
+      const data = unwrapApiData<WorkerResponse>(await apiRequest<WorkerResponse, FormData>('/found-items/vision', { method: 'POST', body: fd, timeoutMs: 25_000 }))
       const ms   = ((performance.now() - t0) / 1000).toFixed(2)
       setLatency(`${ms}s`)
       setResponse(data)
@@ -262,7 +169,7 @@ function VisionTool() {
       setLoading(false)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [blob, workerUrl, prompt])
+  }, [blob, prompt])
 
   const copyJson = useCallback(() => {
     const text = response ? JSON.stringify(response, null, 2) : '{}'
@@ -300,16 +207,6 @@ function VisionTool() {
             </div>
           </div>
 
-          {/* Worker URL input */}
-          <div className="flex w-full max-w-md items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Worker</span>
-            <input
-              value={workerUrl}
-              onChange={(e) => setWorkerUrl(e.target.value)}
-              className="w-full bg-transparent text-xs font-semibold text-[#0D3B24] outline-none placeholder:text-slate-400"
-              placeholder="https://your-worker.workers.dev/"
-            />
-          </div>
         </div>
       </header>
 
@@ -588,13 +485,18 @@ function VisionTool() {
 // ── Page root ──────────────────────────────────────────────────────────────────
 
 export default function InternalVisionPage() {
-  const [unlocked, setUnlocked] = useState(
-    () => sessionStorage.getItem(SESSION_KEY) === '1'
-  )
+  const { user, isBootstrapping } = useAuthSession()
+  if (isBootstrapping) return <LoadingState variant="page" label="Checking access" />
+  if (!user) return <Navigate to="/login" state={{ from: { pathname: '/internal/vision' } }} replace />
+
   return (
     <>
       <NoIndex />
-      {unlocked ? <VisionTool /> : <PinGate onUnlock={() => setUnlocked(true)} />}
+      {user.roles?.includes('admin') ? <VisionTool key={user.id} /> : (
+        <main className="p-8">
+          <h1 className="text-xl font-semibold">Administrator access required</h1>
+        </main>
+      )}
     </>
   )
 }

@@ -1,7 +1,8 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useSyncExternalStore } from 'react'
 import {
   getTrackingConsentStatus,
   setTrackingConsentStatus,
+  subscribeTrackingConsent,
   type TrackingConsentStatus,
 } from '@/shared/lib/analytics/trackingConsent'
 
@@ -12,16 +13,14 @@ type UseTrackingConsentResult = {
 }
 
 export function useTrackingConsent(): UseTrackingConsentResult {
-  const [status, setStatus] = useState<TrackingConsentStatus>(() => getTrackingConsentStatus())
+  const status = useSyncExternalStore<TrackingConsentStatus>(subscribeTrackingConsent, getTrackingConsentStatus, () => 'unknown')
 
   const accept = useCallback(() => {
     setTrackingConsentStatus('accepted')
-    setStatus('accepted')
   }, [])
 
   const reject = useCallback(() => {
     setTrackingConsentStatus('rejected')
-    setStatus('rejected')
   }, [])
 
   return {

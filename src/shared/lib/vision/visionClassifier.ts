@@ -6,6 +6,8 @@
 // analysis. We map that onto a CatalogHint the Post flow already understands.
 
 import { env } from '@/shared/lib/config/env'
+import { apiRequest } from '@/shared/lib/api/client'
+import { unwrapApiData } from '@/shared/lib/api/envelope'
 
 export interface CatalogHint {
   readonly category: (typeof CATEGORY_MAP)[keyof typeof CATEGORY_MAP]
@@ -44,7 +46,7 @@ const CATEGORY_MAP = {
 } as const
 
 function isVisionConfigured(): boolean {
-  return env.visionWorkerUrl.trim().length > 0
+  return env.enableSmartSpot
 }
 
 function toTitleCase(value: string): string {
@@ -103,22 +105,14 @@ export async function classifyImageWithWorker(file: File, context: 'spot' | 'lis
   const compressed = await compressImage(file)
   const formData = new FormData()
   formData.append('image', compressed, 'spot.jpg')
-  // Listings use the worker's default prompt and its structured analysis contract.
-  if (context === 'spot') {
-    formData.append('prompt', 'Analyze this item spotted on a UK street for TruCycle.')
-  }
-
-  const response = await fetch(env.visionWorkerUrl.trim(), {
+  // The API chooses the prompt for each context; only admins may send a custom prompt.
+  formData.append('context', context)
+  const response = await apiRequest<WorkerResponse, FormData>('/found-items/vision', {
     method: 'POST',
     body: formData,
-    signal: AbortSignal.timeout(10_000),
+    timeoutMs: 25_000,
   })
-
-  if (!response.ok) {
-    throw new Error(`Vision worker responded ${response.status}`)
-  }
-
-  const payload = (await response.json()) as WorkerResponse
+  const payload = unwrapApiData<WorkerResponse>(response)
   const data = payload.data
   if (!payload.success || !data) {
     return null

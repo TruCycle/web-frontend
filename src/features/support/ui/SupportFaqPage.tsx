@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronDown, Mail, MessageCircle, Phone, Search } from 'lucide-react'
+import { ChevronDown, Mail, Search } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useAuthSession } from '@/shared/context/useAuthSession'
 import { classNames } from '@/shared/utils/classNames'
 import { usePageMeta } from '@/shared/hooks/usePageMeta'
 
@@ -204,7 +205,7 @@ const supportContent: SupportContent = {
             id: 'delete-account',
             question: 'How can I request account deletion?',
             answer:
-              'Contact support from this page using email or phone and we will guide you through verification and deletion.',
+              'Use the email address below to ask about account deletion.',
           },
         ],
       },
@@ -212,6 +213,8 @@ const supportContent: SupportContent = {
 }
 
 export default function SupportFaqPage() {
+  const { user } = useAuthSession()
+  const firstName = user?.firstName?.trim()
   usePageMeta({
     title: 'Support & FAQ — TruCycle',
     description:
@@ -270,7 +273,7 @@ export default function SupportFaqPage() {
     <div className="w-full">
       <header className="mb-[1.1rem]">
         <h1 className="m-0 text-[2.1rem] font-extrabold leading-[1.1] tracking-[-0.02em] text-slate-900 max-[1024px]:text-[1.8rem] max-md:text-[1.5rem]">
-          Welcome back, Pearl!
+          {firstName ? `Welcome back, ${firstName}!` : 'Welcome back!'}
         </h1>
         <p className="mt-[0.45rem] text-base text-slate-500 max-md:text-[0.92rem]">
           Track your impact and manage your listings
@@ -369,31 +372,14 @@ export default function SupportFaqPage() {
         </div>
 
         <section className="mt-[2rem] rounded-xl border border-[#64748B40] bg-white shadow-[0px_3px_3.75px_0px_#64748B1A] p-[2rem] max-md:p-4">
-          <h3 className="m-0 text-[0.95rem] font-bold text-slate-900">Other ways to reach us</h3>
-          <div className="mt-5 grid grid-cols-3 gap-4 max-[1024px]:grid-cols-2 max-md:grid-cols-1 max-md:gap-[0.9rem]">
+          <h3 className="m-0 text-[0.95rem] font-bold text-slate-900">General questions</h3>
+          <div className="mt-5">
             <article>
               <p className="mb-[0.45rem] inline-flex items-center gap-1.5 text-[0.86rem] font-bold text-slate-900">
                 <Mail aria-hidden size={14} className="shrink-0" />
-                Email
+                Email TruCycle
               </p>
-              <p className="m-0 text-[0.86rem] leading-[1.45] text-[#121212BF]">support@trucycle.com</p>
-              <p className="mt-1 text-[0.86rem] leading-[1.45] text-[#12121299]">Response time: 24 hours</p>
-            </article>
-            <article>
-              <p className="mb-[0.45rem] inline-flex items-center gap-1.5 text-[0.86rem] font-bold text-slate-900">
-                <Phone aria-hidden size={14} className="shrink-0" />
-                Phone
-              </p>
-              <p className="m-0 text-[0.86rem] leading-[1.45] text-[#121212BF]">+44 (0)20 1234 5678</p>
-              <p className="mt-1 text-[0.86rem] leading-[1.45] text-[#12121299]">Mon-Fri 9am-6pm GMT</p>
-            </article>
-            <article>
-              <p className="mb-[0.45rem] inline-flex items-center gap-1.5 text-[0.86rem] font-bold text-slate-900">
-                <MessageCircle aria-hidden size={14} className="shrink-0" />
-                Live Chat
-              </p>
-              <p className="m-0 text-[0.86rem] leading-[1.45] text-[#121212BF]">Available during business hours</p>
-              <p className="mt-1 text-[0.86rem] leading-[1.45] text-[#12121299]">Mon-Fri 9am-6pm GMT</p>
+              <a href="mailto:hello@trucycle.co.uk" className="text-[0.86rem] leading-[1.45] underline">hello@trucycle.co.uk</a>
             </article>
           </div>
         </section>

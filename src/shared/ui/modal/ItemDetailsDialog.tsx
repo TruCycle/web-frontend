@@ -49,7 +49,7 @@ export const ItemDetailsDialog: React.FC<ItemDetailsDialogProps> = ({ isOpen, on
                 </div>
 
                 <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                    <h4 className="mb-3 text-xs font-semibold tracking-wide text-slate-500">ITEM OVERVIEW</h4>
+                        <h3 className="mb-3 text-xs font-semibold tracking-wide text-slate-500">ITEM OVERVIEW</h3>
                     <div className="space-y-3">
                         <div className="flex items-start justify-between gap-4 text-sm">
                             <span className="text-slate-500">Category:</span>
@@ -57,15 +57,11 @@ export const ItemDetailsDialog: React.FC<ItemDetailsDialogProps> = ({ isOpen, on
                         </div>
                         <div className="flex items-start justify-between gap-4 text-sm">
                             <span className="text-slate-500">Condition:</span>
-                            <span className="text-right font-semibold text-slate-800">{item.condition || 'Excellent'}</span>
+                            <span className="text-right font-semibold text-slate-800">{item.condition?.trim() || 'Not provided'}</span>
                         </div>
                         <div className="flex items-start justify-between gap-4 text-sm">
-                            <span className="text-slate-500">Drop-off Location:</span>
-                            <span className="text-right font-semibold text-slate-800">{item.location || 'Fixars Shop 50 Abbey Road'}</span>
-                        </div>
-                        <div className="flex items-start justify-between gap-4 text-sm">
-                            <span className="text-slate-500">Pick-up Location:</span>
-                            <span className="text-right font-semibold text-slate-800">{item.location || 'Fixars Shop 50 Abbey Road'}</span>
+                            <span className="text-slate-500">Location:</span>
+                            <span className="text-right font-semibold text-slate-800">{item.location?.trim() || 'Location unavailable'}</span>
                         </div>
                     </div>
                 </div>

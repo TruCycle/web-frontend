@@ -1,5 +1,4 @@
 import { forwardRef } from 'react'
-import { Leaf, Award } from 'lucide-react'
 
 export interface RescueShareCardData {
   readonly title: string
@@ -33,7 +32,7 @@ export const RescueShareCard = forwardRef<HTMLDivElement, RescueShareCardProps>(
           <div className="flex items-center justify-between">
             <span className="text-3xl font-bold tracking-[-0.02em]">TruCycle</span>
             <span className="rounded-full bg-white/15 px-5 py-2 text-sm font-semibold uppercase tracking-[0.25em]">
-              Rescue
+              Spot
             </span>
           </div>
 
@@ -47,7 +46,7 @@ export const RescueShareCard = forwardRef<HTMLDivElement, RescueShareCardProps>(
               />
             ) : (
               <div className="flex h-[480px] w-full items-center justify-center rounded-[24px] bg-[#1F3A12] text-2xl text-white/60">
-                Rescued item
+                Spotted item
               </div>
             )}
 
@@ -55,33 +54,14 @@ export const RescueShareCard = forwardRef<HTMLDivElement, RescueShareCardProps>(
               {data.title}
             </h2>
             <p className="mt-3 text-2xl text-white/70">
-              Saved in {data.postcode} by {data.rescuerName}
+              Spotted in {data.postcode} by {data.rescuerName}
             </p>
           </div>
 
-          <div className="mt-10 grid grid-cols-2 gap-5">
-            <div className="flex items-center gap-4 rounded-[28px] bg-white/12 px-6 py-5">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#A4F5A6]/30">
-                <Leaf size={32} className="text-[#A4F5A6]" />
-              </div>
-              <div>
-                <p className="text-sm uppercase tracking-[0.2em] text-white/60">CO2e saved</p>
-                <p className="text-4xl font-bold tracking-[-0.03em]">{data.co2eKg.toFixed(1)} kg</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 rounded-[28px] bg-white/12 px-6 py-5">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#FFE7A1]/30">
-                <Award size={32} className="text-[#FFE7A1]" />
-              </div>
-              <div>
-                <p className="text-sm uppercase tracking-[0.2em] text-white/60">Impact</p>
-                <p className="text-4xl font-bold tracking-[-0.03em]">{data.impactPoints} pts</p>
-              </div>
-            </div>
-          </div>
+          <p className="mt-10 rounded-[28px] bg-white/12 px-6 py-5 text-2xl leading-relaxed">Check availability, condition and owner permission before arranging a handover.</p>
 
           <p className="mt-8 text-center text-base text-white/55">
-            trucycle.app &middot; give more, waste less
+            trucycle.co.uk &middot; keep useful items in use
           </p>
         </div>
       </div>

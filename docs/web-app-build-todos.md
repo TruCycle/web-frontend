@@ -6,8 +6,8 @@ Source: "Web app build.docx" (comment-only shared doc)
 
 | # | Item | State |
 |---|------|-------|
-| 1 | Image recognition on Cloudflare | **Done (needs env)** — Spot calls the Vision Worker via `visionClassifier.ts`; TensorFlow removed. Deploy the worker + set `VITE_VISION_WORKER_URL`. See "Cloudflare Vision Worker" below. |
-| 2 | Login session → 2 months | **Done** — backend JWT access 60d / refresh 90d; "keep me logged in" defaults on. Set `JWT_EXPIRES_IN` / `JWT_REFRESH_EXPIRES_IN` in prod (defaults already 60d/90d). |
+| 1 | Image recognition on Cloudflare | Smart Spot and the administrator tool use the authenticated API. Worker rollout and verification remain open. |
+| 2 | Login session → 2 months | Source defaults are 15 minutes for access and 90 days for refresh. Verify the effective lifetimes per environment. |
 | 3 | Social login — Google | **Done (needs env)** — `POST /auth/google` + "Sign in with Google" button on login/signup. Facebook not done. Set `GOOGLE_CLIENT_ID` (backend) and `VITE_GOOGLE_CLIENT_ID` (frontend). See "Google Cloud setup" below. |
 | 4 | Landing page crawlable / SEO | **Done** — `<noscript>` fallback + WebSite/Organization JSON-LD + full OG/Twitter meta, **and** an opt-in build-time prerender (`npm run build:prerender`) that writes real HTML for `/`, `/browse`, `/privacy`, `/terms`, `/cookies`. See "Prerender & hosting" below. |
 | 5 | Discoverability without signup | **Done** — public `/browse` catalogue for logged-out visitors (live items, search, filters, detail modal). Claiming prompts signup. `robots.txt` + `sitemap.xml` updated. |
@@ -25,7 +25,7 @@ Source: "Web app build.docx" (comment-only shared doc)
 ### Features & Enhancements
 
 - [x] **Image recognition** — Cloudflare Vision Worker wired into Spot.
-- [x] **Login session** — access 60d / refresh 90d, stays signed in.
+- [x] **Login session** — short-lived access token with refresh. Verify the effective deployment settings.
 - [x] **Social login** — Google done; Facebook deferred.
 - [x] **SEO / crawlability** — meta + JSON-LD + opt-in prerender. Landing + a few static pages.
 - [x] **Discoverability** — public `/browse` without signup.
@@ -53,29 +53,9 @@ Source: "Web app build.docx" (comment-only shared doc)
   and returns `{ success, data: { item_type, condition, reusable, suggested_category, notes } }`.
 - `workers/imgrc/wrangler.toml` — deploy config. The `[ai]` binding gives the worker
   the AI model access.
-- `src/features/found-items/lib/visionClassifier.ts` — frontend. Compresses the photo
-  to ≤ 1000 px / q0.85, POSTs to the worker, maps `suggested_category` → our
-  `FoundItemCategory`, returns a smart-prefill hint for the Spot form.
-- `src/shared/lib/config/env.ts` — reads `VITE_VISION_WORKER_URL`. **Empty ⇒ the
-  classifier is a no-op** (Spot still works, just no auto-fill).
-
-**Current state**
-
-- ✅ Worker is deployed and live at `https://imgrc.trucycle01.workers.dev/`.
-- ✅ Frontend code calls it.
-- ✅ Internal test tool: `/internal/vision` (PIN-gated) — has the URL hardcoded, works today.
-- ❌ `VITE_VISION_WORKER_URL` is **not set** in `.env` / Railway ⇒ Spot auto-fill is off in prod.
-- ❌ The worker's CORS allow-list was updated in the repo (localhost added) but **not redeployed**.
-
-**To finish connecting it**
-
-1. Set on Railway (and local `.env`):
-   `VITE_VISION_WORKER_URL=https://imgrc.trucycle01.workers.dev/`
-2. Redeploy the worker so the updated CORS list applies:
-   `cd workers/imgrc && npx wrangler deploy`
-   (needs `wrangler login` once, with access to the `trucycle01` Cloudflare account).
-3. Make sure the production origin (`https://trucycle.co.uk`) is in `ALLOWED_ORIGINS`
-   in `worker.js` — it already is.
+- Smart Spot compresses the photo and posts it to `/found-items/vision` using the current app session. The API supplies a fixed prompt. The internal tool uses the same endpoint and requires a current administrator role for custom prompts.
+- Configure `VISION_WORKER_URL` on the API with the matching environment’s HTTPS Worker endpoint. Set `VISION_WORKER_SECRET` on the API and as a Worker secret with the same dedicated 32-byte lowercase hexadecimal value. Use a distinct Worker and secret for staging.
+- Coordinate the Worker and API releases before enabling `VITE_ENABLE_SMART_SPOT` in the frontend. The default staging build keeps Smart Spot disabled. Manual posting remains available.
 
 ---
 
@@ -112,10 +92,11 @@ One OAuth **Web** client ID is shared by both sides.
 5. Redeploy both. The button appears automatically once `VITE_GOOGLE_CLIENT_ID` is set.
 
 **Behaviour**
-- First Google sign-in with a new email ⇒ creates an **active** customer account.
-- Email already exists (password account) ⇒ links `google_id` to it, no duplicate.
-- Unverified Google email ⇒ rejected.
-- New DB column: `user.google_id` (migration `1700000000027`) — run migrations on deploy.
+- Google sign-in requires a verified email claim. A new account or link also requires a Gmail address or a signed Google Workspace hosted-domain claim.
+- An active password account with the eligible email can link to the Google subject. Pending or suspended accounts and accounts linked to a different subject are rejected.
+- An existing Google identity is matched by its linked subject. Account status is checked at sign-in.
+- The default staging frontend build clears `VITE_GOOGLE_CLIENT_ID`. Enable Google in a reviewed staging build with a matching backend audience and the verified staging origin.
+- `user.google_id` is managed by migration `1700000000027`. Check the target migration ledger and use the normal release migration process.
 
 ---
 

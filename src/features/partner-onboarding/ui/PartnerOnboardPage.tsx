@@ -4,6 +4,7 @@ import { ApiError } from '@/shared/types/network'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { useToast } from '@/shared/ui/toast/useToast'
 import { classNames } from '@/shared/utils/classNames'
+import { normalizeFullUkPostcode } from '@/shared/utils/fullUkPostcode'
 import {
   AuthPageFrame,
   authFieldClassName,
@@ -58,10 +59,14 @@ export default function PartnerOnboardPage() {
 
     const name = formValues.name.trim()
     const addressLine = formValues.addressLine.trim()
-    const postcode = formValues.postcode.trim()
+    const postcode = normalizeFullUkPostcode(formValues.postcode)
 
-    if (!name || !addressLine || !postcode) {
+    if (!name || !addressLine || !formValues.postcode.trim()) {
       error('Missing details', 'Shop name, address and postcode are required.')
+      return
+    }
+    if (name.length < 2 || !postcode) {
+      error('Check shop details', 'Enter a shop name of at least 2 characters and a full UK postcode, for example SW1A 1AA.')
       return
     }
 
@@ -95,16 +100,15 @@ export default function PartnerOnboardPage() {
         titlePrefix: 'Scale your impact',
         titleAccent: 'with trusted partner shops.',
         benefits: [
-          'Create your first pickup point in under 2 minutes',
+          'Add your shop address and contact details',
           'Manage donor handoffs from one dashboard',
-          'Track shop activity and verified collections',
+          'Review your shop activity',
         ],
-        quote:
-          'Getting onboarded as a partner shop was straightforward. We started receiving quality items the same day.',
-        avatarLabel: 'PK',
-        authorName: 'Pearl, Lagos',
-        authorRole: 'Shop Partner',
-        dateLabel: 'Mar 2026',
+        quote: 'Keep your shop details current so members can plan their handoff.',
+        avatarLabel: 'TC',
+        authorName: 'Partner guidance',
+        authorRole: 'TruCycle',
+        dateLabel: '',
       }}
       footer={
         <p className={authFooterCopyClassName}>
@@ -123,6 +127,8 @@ export default function PartnerOnboardPage() {
             name="name"
             onChange={(event) => onInputChange('name', event)}
             placeholder="Enter your shop name"
+            minLength={2}
+            maxLength={120}
             required
             type="text"
             value={formValues.name}
@@ -136,6 +142,8 @@ export default function PartnerOnboardPage() {
             name="addressLine"
             onChange={(event) => onInputChange('addressLine', event)}
             placeholder="Street address or landmark"
+            autoComplete="street-address"
+            maxLength={255}
             required
             type="text"
             value={formValues.addressLine}
@@ -149,6 +157,8 @@ export default function PartnerOnboardPage() {
             name="postcode"
             onChange={(event) => onInputChange('postcode', event)}
             placeholder="SW1A 1AA"
+            autoComplete="postal-code"
+            maxLength={32}
             required
             type="text"
             value={formValues.postcode}

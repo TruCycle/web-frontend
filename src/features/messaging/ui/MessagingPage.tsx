@@ -6,6 +6,8 @@ import type { ActiveRoom, RoomMessage, RoomParticipant } from '@/features/messag
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { Button } from '@/shared/ui/button/Button'
 import { classNames } from '@/shared/utils/classNames'
+import { MessageImageComposer } from './MessageImageComposer'
+import { PrivateMessageImage } from './PrivateMessageImage'
 
 const IMAGE_GROUP_WINDOW_MS = 30_000
 
@@ -65,7 +67,7 @@ function formatPreview(message: RoomMessage | null): string {
   if (!message) {
     return 'No messages yet'
   }
-  if (message.imageUrl) {
+  if (message.imageUrl || message.hasAttachment) {
     return message.caption ?? 'Image'
   }
   return message.text ?? 'Message'
@@ -178,15 +180,36 @@ export default function MessagingPage() {
     isLoadingMessages,
     isSending,
     error,
-    unreadCountByRoom,
     setActiveRoomId,
     sendMessage,
+    sendImage,
+    historyGap,
+    hasHistoryFailure,
+    hasOlderMessages,
+    loadOlderMessages,
+    resetHistory,
+    reloadMessages,
+    acknowledgeVisibleMessages,
+    hasReadFailure,
+    readRetryVersion,
+    retryReadStatus,
   } = useMessages()
   const consumedRoomIdRef = useRef<string | null>(null)
   const lastScrolledRoomIdRef = useRef<string | null>(null)
   const messageListRef = useRef<HTMLDivElement | null>(null)
+  const nearBottomRef = useRef(true)
+  const olderScrollRef = useRef<{ roomId: string; height: number; top: number } | null>(null)
   const [searchValue, setSearchValue] = useState('')
-  const [inputValue, setInputValue] = useState('')
+  const [drafts, setDrafts] = useState<Record<string, string>>({})
+  const inputValue = activeRoomId ? drafts[activeRoomId] ?? '' : ''
+  const chatCardRef = useRef<HTMLDivElement>(null)
+  // On phones the panels stack. When the user opens a conversation, bring its
+  // newest message and composer into view so it can be read without scrolling.
+  const openRoom = (roomId: string) => {
+    setActiveRoomId(roomId)
+    if (typeof window === 'undefined' || !window.matchMedia('(max-width: 767.98px)').matches) return
+    window.requestAnimationFrame(() => chatCardRef.current?.scrollIntoView({ block: 'end' }))
+  }
   const [previewImage, setPreviewImage] = useState<{ readonly src: string; readonly alt: string } | null>(null)
   const requestedRoomId = searchParams.get('roomId')
 
@@ -225,6 +248,15 @@ export default function MessagingPage() {
 
     const roomChanged = lastScrolledRoomIdRef.current !== activeRoomId
     lastScrolledRoomIdRef.current = activeRoomId
+    const olderScroll = olderScrollRef.current
+    if (olderScroll?.roomId === activeRoomId && !roomChanged) {
+      messageList.scrollTop = olderScroll.top + messageList.scrollHeight - olderScroll.height
+      olderScrollRef.current = null
+      return
+    }
+    olderScrollRef.current = null
+    if (!roomChanged && !nearBottomRef.current) return
+    nearBottomRef.current = true
     const behavior: ScrollBehavior = roomChanged ? 'auto' : 'smooth'
     const animationFrameId = window.requestAnimationFrame(() => {
       messageList.scrollTo({
@@ -237,6 +269,34 @@ export default function MessagingPage() {
       window.cancelAnimationFrame(animationFrameId)
     }
   }, [activeRoomId, isLoadingMessages, messages.length])
+
+  useEffect(() => {
+    const root = messageListRef.current
+    if (!root || !activeRoomId || isLoadingMessages || hasHistoryFailure) return
+    // The implicit viewport root also clips scrolling ancestors. An explicit
+    // list root could count rows while the whole panel is offscreen on mobile.
+    const visible = new Set<string>()
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        const id = (entry.target as HTMLElement).dataset.readMessageId
+        if (!id) continue
+        if (entry.isIntersecting && entry.intersectionRatio > 0) visible.add(id)
+        else visible.delete(id)
+      }
+      clearTimeout(timer)
+      if (document.visibilityState === 'visible' && visible.size) timer = setTimeout(() => {
+        if (document.visibilityState === 'visible') void acknowledgeVisibleMessages(activeRoomId, [...visible])
+      }, 100)
+    }, { threshold: [0, 0.5] })
+    const observe = () => {
+      observer.disconnect(); visible.clear(); clearTimeout(timer)
+      if (document.visibilityState === 'visible') root.querySelectorAll('[data-read-message-id]').forEach(node => observer.observe(node))
+    }
+    observe()
+    document.addEventListener('visibilitychange', observe)
+    return () => { observer.disconnect(); clearTimeout(timer); document.removeEventListener('visibilitychange', observe) }
+  }, [activeRoomId, messages, isLoadingMessages, hasHistoryFailure, acknowledgeVisibleMessages, readRetryVersion])
 
   const filteredRooms = useMemo(() => {
     const query = searchValue.trim().toLowerCase()
@@ -332,8 +392,11 @@ export default function MessagingPage() {
       return
     }
 
-    await sendMessage(messageText)
-    setInputValue('')
+    const roomId = activeRoomId
+    const draft = inputValue
+    if (await sendMessage(messageText)) {
+      if (roomId) setDrafts(current => current[roomId] === draft ? { ...current, [roomId]: '' } : current)
+    }
   }
 
   return (
@@ -343,8 +406,8 @@ export default function MessagingPage() {
         <p className="text-slate-500">Coordinate collections in real time.</p>
       </div>
 
-      <div className="grid h-[calc(100vh-10rem)] min-h-[700px] flex-1 gap-4 rounded-2xl p-4 md:h-[calc(100vh-14rem)] md:min-h-[560px] xl:grid-cols-[400px_1fr]">
-        <div className="flex h-full min-h-0 flex-col rounded-xl bg-white p-7">
+      <div className="grid h-[calc(100vh-10rem)] min-h-[700px] flex-1 grid-rows-[minmax(0,2fr)_minmax(0,3fr)] gap-4 rounded-2xl p-4 md:h-[calc(100vh-14rem)] md:min-h-[560px] xl:grid-cols-[400px_1fr] xl:grid-rows-1">
+        <div className="flex h-full min-h-0 min-w-0 flex-col rounded-xl bg-white p-7">
           <div className="pb-5">
             <h2 className="text-lg text-black">Conversations</h2>
             <div className="relative mt-5">
@@ -377,9 +440,9 @@ export default function MessagingPage() {
 
             {!isLoadingRooms &&
               filteredRooms.map((room) => {
-                const unreadCount = unreadCountByRoom[room.id] ?? 0
+                const unreadCount = room.unreadCount
                 const isActiveRoom = activeRoomId === room.id
-                const isUnread = unreadCount > 0 && !isActiveRoom
+                const isUnread = unreadCount > 0
 
                 return (
                   <button
@@ -392,7 +455,7 @@ export default function MessagingPage() {
                           ? 'border-[#86EFAC] bg-[#F0FDF4] hover:bg-[#ECFDF3]'
                           : 'border-transparent hover:bg-slate-50',
                     )}
-                    onClick={() => setActiveRoomId(room.id)}
+                    onClick={() => openRoom(room.id)}
                   >
                     <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#15A1191A] text-xs font-semibold text-slate-700">
                       {getRoomInitials(room, user?.id)}
@@ -435,7 +498,7 @@ export default function MessagingPage() {
           </div>
         </div>
 
-        <div className="flex h-full min-h-0 flex-col rounded-xl bg-white">
+        <div ref={chatCardRef} className="flex h-full min-h-0 min-w-0 scroll-mb-4 flex-col rounded-xl bg-white">
           <div className="flex items-center gap-3 border-b border-slate-200 p-5">
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#15A1191A] text-xs font-semibold text-slate-700">
               {activeRoom ? getRoomInitials(activeRoom, user?.id) : '--'}
@@ -449,15 +512,41 @@ export default function MessagingPage() {
 
           <div
             ref={messageListRef}
-            className="min-h-[520px] flex-1 space-y-3 overflow-y-auto p-4 md:min-h-0 md:p-7"
+            onScroll={(event) => {
+              const list = event.currentTarget
+              nearBottomRef.current = list.scrollHeight - list.scrollTop - list.clientHeight < 80
+            }}
+            className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 md:p-7"
           >
+            {historyGap && <div role="status" className="space-y-2 rounded-xl border border-amber-300 p-3 text-sm">
+              <p>{historyGap === 'changed' ? 'The saved conversation has changed. Reload it to check the current history.' : 'Some missed messages have not loaded yet. Continue to check the gap.'}</p>
+              <button className="min-h-11 underline" disabled={isLoadingMessages} onClick={() => void (historyGap === 'changed' ? resetHistory() : reloadMessages())}>{historyGap === 'changed' ? 'Reload conversation' : 'Continue loading missed messages'}</button>
+            </div>}
+            {hasHistoryFailure && !historyGap && <p role="status">Conversation history is unavailable. <button className="min-h-11 underline" disabled={isLoadingMessages} onClick={() => void reloadMessages()}>Refresh conversation</button></p>}
+            {hasReadFailure ? (
+              <p role="status">
+                Read status could not be saved.{' '}
+                <button type="button" className="min-h-11 underline" disabled={isLoadingMessages} onClick={retryReadStatus}>
+                  Retry read status
+                </button>
+              </p>
+            ) : null}
+            {hasOlderMessages && !historyGap ? (
+              <button type="button" className="min-h-11 underline" disabled={isLoadingMessages} onClick={() => {
+                const list = messageListRef.current
+                if (list && activeRoomId) {
+                  olderScrollRef.current = { roomId: activeRoomId, height: list.scrollHeight, top: list.scrollTop }
+                }
+                void loadOlderMessages()
+              }}>Load older messages</button>
+            ) : null}
             {isLoadingMessages ? (
               <p className="rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-500">
                 Loading messages...
               </p>
             ) : null}
 
-            {!isLoadingMessages && messages.length === 0 ? (
+            {!isLoadingMessages && !hasHistoryFailure && messages.length === 0 ? (
               <p className="rounded-xl border border-dashed border-slate-300 bg-white p-3 text-sm text-slate-500">
                 No messages yet in this room.
               </p>
@@ -522,7 +611,7 @@ export default function MessagingPage() {
                           )}
                         >
                           {row.messages.map((message) => (
-                            <div key={message.id} className="rounded-xl bg-white/80 p-1">
+                            <div key={message.id} data-read-message-id={message.category === 'direct' && message.sender && message.sender.id !== user?.id ? message.id : undefined} className="rounded-xl bg-white/80 p-1">
                               <button
                                 type="button"
                                 className="block w-full overflow-hidden rounded-lg"
@@ -572,6 +661,7 @@ export default function MessagingPage() {
               return (
                 <div
                   key={row.key}
+                  data-read-message-id={message.category === 'direct' && message.sender && message.sender.id !== user?.id ? message.id : undefined}
                   className={classNames('flex', isOutgoing ? 'justify-end' : 'justify-start')}
                 >
                   <div className={classNames('flex items-start', isOutgoing ? '' : 'gap-2')}>
@@ -588,7 +678,14 @@ export default function MessagingPage() {
                           isOutgoing ? 'bg-[#A4F5A6]' : 'bg-[#F8FAFC]',
                         )}
                       >
-                        {message.imageUrl ? (
+                        {message.hasAttachment && user ? (
+                          <PrivateMessageImage
+                            key={`${user.id}:${message.roomId}:${message.id}`}
+                            roomId={message.roomId}
+                            messageId={message.id}
+                            alt={message.caption ?? 'Message attachment'}
+                          />
+                        ) : message.imageUrl ? (
                           <button
                             type="button"
                             className="mb-2 block w-full overflow-hidden rounded-lg"
@@ -619,21 +716,23 @@ export default function MessagingPage() {
           </div>
 
           <div className="flex items-center gap-2 border-t border-[#F8FAFC] bg-white p-3">
-            <button
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-[#121212] hover:bg-slate-100"
-              disabled
-              title="Image upload endpoint is available; attachment UI will be wired next."
-            >
-              <Paperclip size={20} />
-            </button>
+            {import.meta.env.VITE_MESSAGE_ATTACHMENTS_ENABLED === 'true' && activeRoomId && user ? (
+              <MessageImageComposer key={`${user.id}:${activeRoomId}`} disabled={isSending} send={sendImage} />
+            ) : (
+              <button type="button" aria-label="Attach image" className="inline-flex h-10 w-10 items-center justify-center rounded-full" disabled title="Image attachments are unavailable">
+                <Paperclip size={20} />
+              </button>
+            )}
             <div className="flex flex-1 items-center rounded-xl border border-[#E2E8F0] px-3">
               <input
                 type="text"
                 className="h-11 w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
                 placeholder="Type your message..."
+                aria-label="Message"
+                maxLength={4000}
                 value={inputValue}
                 disabled={!activeRoomId || isSending}
-                onChange={(event) => setInputValue(event.target.value)}
+                onChange={(event) => { const value = event.target.value; if (activeRoomId) setDrafts(current => ({ ...current, [activeRoomId]: value })) }}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
                     void handleSendMessage()
@@ -642,6 +741,7 @@ export default function MessagingPage() {
               />
             </div>
             <Button
+              aria-label="Send message"
               className="h-11 w-11 rounded-xl p-0 bg-[#15A119] hover:bg-[#15A119E0]"
               onClick={() => {
                 void handleSendMessage()

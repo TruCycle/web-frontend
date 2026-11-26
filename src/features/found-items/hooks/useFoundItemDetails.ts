@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { fetchFoundItemById } from '../api/foundItemsApi'
 import type { FoundItem, FoundItemClaim } from '../types'
 
@@ -20,37 +20,52 @@ export function useFoundItemDetails(
   const [viewerClaim, setViewerClaim] = useState<FoundItemClaim | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const activeRequest = useRef<AbortController | null>(null)
+  const [loadedKey, setLoadedKey] = useState<string | null>(null)
+  const currentKey = JSON.stringify([itemId, viewerId])
 
   const refresh = useCallback(async () => {
+    activeRequest.current?.abort()
+    activeRequest.current = null
+    setItem(null)
+    setClaims([])
+    setViewerClaim(null)
+    setError(null)
     if (!itemId) {
-      setItem(null)
-      setClaims([])
-      setViewerClaim(null)
+      setIsLoading(false)
       return
     }
 
+    const request = new AbortController()
+    activeRequest.current = request
     try {
       setIsLoading(true)
-      setError(null)
-      const response = await fetchFoundItemById(itemId, viewerId)
+      const response = await fetchFoundItemById(itemId, viewerId, request.signal)
+      if (request.signal.aborted) return
+      setLoadedKey(JSON.stringify([itemId, viewerId]))
       setItem(response.item)
       setClaims(response.claims)
       setViewerClaim(response.viewerClaim)
     } catch {
+      if (request.signal.aborted) return
       setError('Unable to load that item right now.')
     } finally {
-      setIsLoading(false)
+      if (activeRequest.current === request) {
+        activeRequest.current = null
+        if (!request.signal.aborted) setIsLoading(false)
+      }
     }
   }, [itemId, viewerId])
 
   useEffect(() => {
     void refresh()
+    return () => { activeRequest.current?.abort() }
   }, [refresh])
 
   return {
-    item,
-    claims,
-    viewerClaim,
+    item: loadedKey === currentKey ? item : null,
+    claims: loadedKey === currentKey ? claims : [],
+    viewerClaim: loadedKey === currentKey ? viewerClaim : null,
     isLoading,
     error,
     refresh,

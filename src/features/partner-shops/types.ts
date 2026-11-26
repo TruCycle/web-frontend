@@ -9,4 +9,5 @@ export interface Shop {
   readonly amenities: readonly string[]
   readonly latitude: number | null
   readonly longitude: number | null
+  readonly directionsUrl: string | null
 }

@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from 'react'
+import { useCallback, useMemo, useSyncExternalStore } from 'react'
 
 function getMediaQuery(query: string): MediaQueryList | null {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -8,15 +8,12 @@ function getMediaQuery(query: string): MediaQueryList | null {
   return window.matchMedia(query)
 }
 
-const getServerSnapshot = () => false
-
 export function useMediaQuery(query: string): boolean {
+  const mediaQuery = useMemo(() => getMediaQuery(query), [query])
   const subscribe = useCallback((onChange: () => void) => {
-    const mediaQuery = getMediaQuery(query)
     mediaQuery?.addEventListener('change', onChange)
     return () => mediaQuery?.removeEventListener('change', onChange)
-  }, [query])
-  const getSnapshot = useCallback(() => getMediaQuery(query)?.matches ?? false, [query])
-
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+  }, [mediaQuery])
+  const getSnapshot = useCallback(() => mediaQuery?.matches ?? false, [mediaQuery])
+  return useSyncExternalStore(subscribe, getSnapshot, () => false)
 }

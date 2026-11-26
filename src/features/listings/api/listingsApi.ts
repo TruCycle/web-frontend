@@ -188,10 +188,10 @@ function mapMeta(item: Record<string, unknown>, claimStatus: string | null): str
     return 'Claim request pending approval'
   }
   if (normalizedClaimStatus === 'complete' || normalizedClaimStatus === 'completed') {
-    return co2Saved !== null ? `${co2Saved.toFixed(1)}kg CO2 saved` : 'Collection completed'
+    return co2Saved !== null ? `${co2Saved.toFixed(1)}kg CO2e estimate` : 'Collection completed'
   }
   if (co2Saved !== null) {
-    return `${co2Saved.toFixed(1)}kg CO2 potential impact`
+    return `${co2Saved.toFixed(1)}kg CO2e potential estimate`
   }
 
   return 'Waiting for collectors'

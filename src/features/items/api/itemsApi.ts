@@ -1,7 +1,8 @@
 import { apiRequest } from '@/shared/lib/api/client'
 import { unwrapApiData } from '@/shared/lib/api/envelope'
 import { clampLimit, toQueryString } from '@/shared/lib/api/query'
-import { env } from '@/shared/lib/config/env'
+import { outwardPostcode } from '@/shared/utils/outwardPostcode'
+import { ApiError } from '@/shared/types/network'
 import type {
   BrowseItem,
   CollectedItemsResponse,
@@ -19,12 +20,14 @@ interface FetchBrowseItemsParams {
   readonly page?: number
   readonly limit?: number
   readonly includeAuth?: boolean
+  readonly signal?: AbortSignal
 }
 
 interface FetchCollectedItemsParams {
   readonly page?: number
   readonly limit?: number
   readonly claimStatus?: string
+  readonly signal?: AbortSignal
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -80,16 +83,12 @@ function formatLocationLabel(item: Record<string, unknown> | null): string {
   }
 
   const location = asRecord(item.location)
-  const postcode = readString(location?.postcode)
-  const addressLine = readString(location?.address_line) ?? readString(location?.addressLine)
+  const postcode = outwardPostcode(location?.postcode)
+  // Public list labels never inherit exact owner fields or legacy addresses.
+  const base = postcode ? `Area ${postcode}` : 'Location unavailable'
   const distanceKm = readNumber(item.distance_km)
-
-  const base = addressLine ?? postcode ?? 'Unknown location'
-  if (distanceKm === null) {
-    return base
-  }
-
-  return `${base} - ${distanceKm.toFixed(1)} km`
+  if (location?.precision !== 'approximate' || distanceKm === null || distanceKm < 0) return base
+  return `${base} - ${distanceKm < 1 ? 'Less than 1 km away (approx.)' : `About ${Math.round(distanceKm)} km away`}`
 }
 
 function mapBrowseItem(value: unknown): BrowseItem | null {
@@ -118,7 +117,8 @@ function mapBrowseItem(value: unknown): BrowseItem | null {
     condition: readString(item.condition) ?? 'Unknown',
     status: readString(item.status) ?? 'unknown',
     pickupOption: readString(item.pickup_option) ?? 'exchange',
-    distanceKm: readNumber(item.distance_km),
+    locationPrecision: asRecord(item.location)?.precision === 'approximate' ? 'approximate' : 'unavailable',
+    distanceKm: asRecord(item.location)?.precision === 'approximate' && (readNumber(item.distance_km) ?? -1) >= 0 ? readNumber(item.distance_km) : null,
     locationLabel: formatLocationLabel(item),
     image: firstImage ?? null,
     estimatedCo2SavedKg: readNumber(item.estimated_co2_saved_kg),
@@ -172,58 +172,46 @@ function mapCollectedItem(value: unknown): CollectedItem | null {
   }
 }
 
-function matchesSearch(item: BrowseItem, search: string): boolean {
-  const searchText = search.trim().toLowerCase()
-  if (!searchText) {
-    return true
-  }
-
-  return (
-    item.title.toLowerCase().includes(searchText) ||
-    item.category.toLowerCase().includes(searchText) ||
-    item.locationLabel.toLowerCase().includes(searchText) ||
-    item.ownerName.toLowerCase().includes(searchText)
-  )
-}
-
-function resolveSearchPostcode(postcode?: string): string {
-  const normalizedPostcode = postcode?.trim()
-  if (normalizedPostcode) {
-    return normalizedPostcode
-  }
-
-  return env.defaultSearchPostcode
-}
-
 export async function fetchBrowseItems(
   params: FetchBrowseItemsParams = {},
 ): Promise<BrowseItem[]> {
   const safeLimit = clampLimit(params.limit, 24)
   const query = toQueryString({
     status: 'active',
+    search: params.search?.trim() || undefined,
     category:
       params.category && params.category.toLowerCase() !== 'all items'
         ? params.category.toLowerCase()
         : undefined,
-    postcode: resolveSearchPostcode(params.postcode),
+    postcode: params.postcode?.trim() || undefined,
     page: params.page ?? 1,
     limit: safeLimit,
   })
 
   const response = await apiRequest<unknown>(`/items${query}`, {
     includeAuth: params.includeAuth,
+    signal: params.signal,
   })
   const data = unwrapApiData<unknown>(response)
   const collection = Array.isArray(data)
     ? data
     : Array.isArray(asRecord(data)?.items)
       ? (asRecord(data)?.items as unknown[])
-      : []
+      : null
+  if (!collection) throw new Error('The item catalogue could not be confirmed.')
+  const items = collection.map((entry) => mapBrowseItem(entry))
+  if (items.some((item) => item === null)) throw new Error('The item catalogue could not be confirmed.')
+  return items.filter((item): item is BrowseItem => item !== null)
+}
 
-  return collection
-    .map((entry) => mapBrowseItem(entry))
-    .filter((entry): entry is BrowseItem => entry !== null)
-    .filter((entry) => matchesSearch(entry, params.search ?? ''))
+/** Public deep links always use the guest projection, even in a signed-in tab. */
+export async function fetchPublicItem(itemId: string, signal?: AbortSignal): Promise<BrowseItem> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(itemId)) throw new ApiError('Item unavailable', 404)
+  const normalizedId = itemId.toLowerCase()
+  const response = await apiRequest<unknown>(`/items/${normalizedId}`, { includeAuth: false, skipSessionRecovery: true, signal })
+  const item = mapBrowseItem(unwrapApiData<unknown>(response))
+  if (!item || item.id.toLowerCase() !== normalizedId) throw new ApiError('Item unavailable', 404)
+  return item
 }
 
 export async function createItemClaim(itemId: string): Promise<void> {
@@ -244,7 +232,7 @@ export async function fetchCollectedItems(
     claim_status: params.claimStatus,
   })
 
-  const response = await apiRequest<unknown>(`/items/me/collected${query}`)
+  const response = await apiRequest<unknown>(`/items/me/collected${query}`, { signal: params.signal })
   const data = unwrapApiData<unknown>(response)
   const payloadRecord = asRecord(data)
   const items = Array.isArray(payloadRecord?.items)
@@ -285,11 +273,11 @@ export async function fetchImpactMetrics(): Promise<ImpactMetrics> {
   const data = asRecord(unwrapApiData<unknown>(response))
 
   return {
-    totalCo2SavedKg: readNumber(data?.total_co2_saved_kg) ?? 0,
+    totalCo2SavedKg: readNumber(data?.total_co2_saved_kg),
     itemsExchanged: readNumber(data?.items_exchanged) ?? 0,
     itemsDonated: readNumber(data?.items_donated) ?? 0,
     monthlyGoalProgressPercent:
-      readNumber(asRecord(data?.monthly_goal)?.progress_percent) ?? 0,
+      readNumber(asRecord(data?.monthly_goal)?.progress_percent),
   }
 }
 
@@ -338,8 +326,12 @@ export async function scanQrCode(payload: {
 }
 
 export async function collectItem(itemId: string, shopId?: string): Promise<void> {
-  await apiRequest<unknown, { shop_id?: string }>(`/items/${itemId}/collect`, {
+  const response = await apiRequest<unknown, { shop_id?: string }>(`/items/${encodeURIComponent(itemId)}/collect`, {
     method: 'POST',
     body: shopId ? { shop_id: shopId } : {},
   })
+  const data = unwrapApiData<unknown>(response)
+  if (!data || typeof data !== 'object' || !('status' in data) || data.status !== 'complete') {
+    throw new Error('Collection could not be confirmed')
+  }
 }

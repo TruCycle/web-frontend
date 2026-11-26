@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Search, ChevronRight, SlidersHorizontal, X } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
@@ -21,7 +21,8 @@ import { ListingRow } from '@/features/listings/ui/components/ListingRow'
 import { ListingOffcanvas } from '@/features/listings/ui/components/ListingOffcanvas'
 import { useToast } from '@/shared/ui/toast/useToast'
 import { useAuthSession } from '@/shared/context/useAuthSession'
-import type { BrowseItem } from '@/features/items/types'
+import { fetchImpactMetrics } from '@/features/items/api/itemsApi'
+import type { BrowseItem, ImpactMetrics } from '@/features/items/types'
 import type { DonorListingItem } from '@/features/listings/types'
 import { NewItemButton } from '@/shared/ui/button/NewItemButton'
 import { useUserProgress } from '@/features/gamification/hooks/useUserProgress'
@@ -77,7 +78,7 @@ export default function Dashboard() {
   } = useCollectorDashboard(!isDonorMode, user?.postcode)
   const {
     listings: donorListings,
-    summary: donorSummary,
+    pagination: donorPagination,
     isLoading: isLoadingDonorListings,
     error: donorError,
     removingId,
@@ -106,21 +107,26 @@ export default function Dashboard() {
     }
   }
 
-  const donorCo2Saved = useMemo(
-    () =>
-      donorListings.reduce((total, listing) => total + (listing.co2SavedKg ?? 0), 0),
-    [donorListings],
-  )
+  // Account-wide donor totals. The listings page only holds the first page of items.
+  // undefined while loading, null when the request failed.
+  const [donorImpact, setDonorImpact] = useState<ImpactMetrics | null | undefined>(undefined)
+  useEffect(() => {
+    if (!isDonorMode) return
+    let active = true
+    fetchImpactMetrics()
+      .then(metrics => { if (active) setDonorImpact(metrics) })
+      .catch(() => { if (active) setDonorImpact(null) })
+    return () => { active = false }
+  }, [isDonorMode])
+  const isLoadingDonorImpact = donorImpact === undefined
   const dashboardStats = isDonorMode
     ? {
-      itemsCollected: donorListings.length,
-      itemsExchanged: donorSummary.completed,
-      totalCo2SavedKg: donorCo2Saved,
-      rewardsEarned: donorSummary.claimed,
-      rewardsCurrency: '£',
+      itemsCollected: donorPagination.total,
+      itemsExchanged: donorImpact ? donorImpact.itemsExchanged + donorImpact.itemsDonated : null,
+      totalCo2SavedKg: donorImpact ? donorImpact.totalCo2SavedKg : null,
     }
     : stats
-  const shouldShowStatsLoading = isDonorMode ? isLoadingDonorListings : isLoadingStats
+  const shouldShowStatsLoading = isDonorMode ? isLoadingDonorListings || isLoadingDonorImpact : isLoadingStats
   const categoryFilterOptions = useMemo(
     () => [
       { value: 'All Items', label: 'All categories' },
@@ -189,26 +195,26 @@ export default function Dashboard() {
           {[
             {
               value: shouldShowStatsLoading ? '-' : String(dashboardStats.itemsCollected),
-              label: isDonorMode ? 'Items Listed' : 'Items Collected',
+              label: isDonorMode ? 'Items listed' : 'Completed collections',
               icon: collectedItemsIcon,
             },
             {
-              value: shouldShowStatsLoading ? '-' : String(dashboardStats.itemsExchanged),
-              label: 'Exchanged',
+              value: shouldShowStatsLoading ? '-' : dashboardStats.itemsExchanged === null ? 'Unavailable' : String(dashboardStats.itemsExchanged),
+              label: isDonorMode ? 'Completed' : 'Completed exchanges',
               icon: exchangeIcon,
             },
             {
               value: shouldShowStatsLoading
                 ? '-'
-                : `${dashboardStats.totalCo2SavedKg.toFixed(1)}kg`,
-              label: 'CO2 Saved',
+                : dashboardStats.totalCo2SavedKg === null ? 'Unavailable' : `${dashboardStats.totalCo2SavedKg.toFixed(1)}kg`,
+              label: 'Est. CO2e (completed)',
               icon: sizeIcon,
             },
             {
               value: shouldShowStatsLoading
                 ? '-'
-                : `${dashboardStats.rewardsCurrency} ${dashboardStats.rewardsEarned.toFixed(0)}`,
-              label: 'Rewards Earned',
+                : isLoadingProgress ? '-' : userProgress ? `${userProgress.totalPoints} pts` : 'Unavailable',
+              label: 'Earned activity points',
               icon: rewardIcon,
             },
           ].map((item, index) => (

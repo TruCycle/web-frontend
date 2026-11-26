@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PaginationMeta } from '@/shared/types/pagination'
 import { fetchFoundItems } from '../api/foundItemsApi'
 import type { FoundItem, FoundItemsFilter } from '../types'
@@ -16,23 +16,41 @@ interface UseFoundItemsResult {
 
 export function useFoundItems(initialFilters: FoundItemsFilter = {}): UseFoundItemsResult {
   const [items, setItems] = useState<FoundItem[]>([])
+  const [loadedKey, setLoadedKey] = useState<string | null>(null)
   const [pagination, setPagination] = useState<PaginationMeta | null>(null)
-  const [filters, setFilters] = useState<FoundItemsFilter>(initialFilters)
+  const [filterState, setFilterState] = useState(() => ({ initialKey: JSON.stringify(initialFilters), value: initialFilters }))
+  const initialKey = JSON.stringify(initialFilters)
+  const filters = filterState.initialKey === initialKey ? filterState.value : initialFilters
+  if (filterState.initialKey !== initialKey) {
+    setFilterState({ initialKey, value: initialFilters })
+  }
+  const activeRequest = useRef<AbortController | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const loadItems = useCallback(
     async (page: number = 1, append: boolean = false) => {
+      activeRequest.current?.abort()
+      const request = new AbortController()
+      activeRequest.current = request
       try {
         setIsLoading(true)
         setError(null)
-        const response = await fetchFoundItems(filters, page)
+        const response = await fetchFoundItems(filters, page, undefined, request.signal)
+        if (request.signal.aborted) return
+        setLoadedKey(JSON.stringify(filters))
         setItems((currentItems) => (append ? [...currentItems, ...response.items] : response.items))
         setPagination(response.pagination)
       } catch {
+        if (request.signal.aborted) return
+        setItems([])
+        setPagination(null)
         setError('Unable to load the board right now.')
       } finally {
-        setIsLoading(false)
+        if (activeRequest.current === request) {
+          activeRequest.current = null
+          if (!request.signal.aborted) setIsLoading(false)
+        }
       }
     },
     [filters],
@@ -40,30 +58,28 @@ export function useFoundItems(initialFilters: FoundItemsFilter = {}): UseFoundIt
 
   useEffect(() => {
     void loadItems()
+    return () => { activeRequest.current?.abort() }
   }, [loadItems])
 
   const updateFilters = useCallback((updates: Partial<FoundItemsFilter>) => {
-    setFilters((currentFilters) => ({
-      ...currentFilters,
-      ...updates,
-    }))
+    setFilterState((current) => ({ ...current, value: { ...current.value, ...updates } }))
   }, [])
 
   const loadMore = useCallback(async () => {
-    if (!pagination || pagination.page >= pagination.totalPages) {
+    if (activeRequest.current || loadedKey !== JSON.stringify(filters) || !pagination || pagination.page >= pagination.totalPages) {
       return
     }
 
     await loadItems(pagination.page + 1, true)
-  }, [loadItems, pagination])
+  }, [filters, loadedKey, loadItems, pagination])
 
   const refresh = useCallback(async () => {
     await loadItems()
   }, [loadItems])
 
   return {
-    items,
-    pagination,
+    items: loadedKey === JSON.stringify(filters) ? items : [],
+    pagination: loadedKey === JSON.stringify(filters) ? pagination : null,
     isLoading,
     error,
     filters,

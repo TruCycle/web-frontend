@@ -3,6 +3,8 @@ import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { AppShell } from '@/app/shell/AppShell'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { LoadingState } from '@/shared/ui/loading/LoadingState'
+import { SessionUnavailable } from '@/shared/ui/auth/SessionUnavailable'
+import { internalVisionRoute } from './internalVisionRoute'
 
 const SignupPage = lazy(() => import('@/features/auth/ui/SignupPage'))
 const VerifyEmailPage = lazy(() => import('@/features/auth/ui/VerifyEmailPage'))
@@ -12,6 +14,7 @@ const PasswordResetPage = lazy(
 )
 const HomePage = lazy(() => import('@/features/home/ui/HomePage'))
 const PublicBrowsePage = lazy(() => import('@/features/browse/ui/PublicBrowsePage'))
+const PublicItemPage = lazy(() => import('@/features/items/ui/PublicItemPage'))
 const CookiesPage = lazy(() => import('@/features/legal/ui/CookiesPage'))
 const PrivacyPage = lazy(() => import('@/features/legal/ui/PrivacyPage'))
 const TermsPage = lazy(() => import('@/features/legal/ui/TermsPage'))
@@ -37,13 +40,13 @@ const FoundItemsPage = lazy(() => import('@/features/found-items/ui/FoundItemsPa
 const FoundItemsMapPage = lazy(() => import('@/features/found-items/ui/FoundItemsMapPage'))
 const PostFoundItemPage = lazy(() => import('@/features/found-items/ui/PostFoundItemPage'))
 const MyFoundPostsPage = lazy(() => import('@/features/found-items/ui/MyFoundPostsPage'))
-const InternalVisionPage = lazy(() => import('@/features/internal/ui/InternalVisionPage'))
 const NotFoundPage = lazy(() => import('@/features/home/ui/NotFoundPage'))
 
 function ShellLayout() {
+  const location = useLocation()
   return (
     <AppShell>
-      <Suspense fallback={<LoadingState label="Loading page" />}>
+      <Suspense key={location.pathname} fallback={<LoadingState label="Loading page" />}>
         <Outlet />
       </Suspense>
     </AppShell>
@@ -51,15 +54,17 @@ function ShellLayout() {
 }
 
 function ProtectedShellRoute() {
-  const { isAuthenticated, isBootstrapping } = useAuthSession()
+  const { isAuthenticated, isBootstrapping, isSessionUnavailable } = useAuthSession()
   const location = useLocation()
 
   if (isBootstrapping) {
     return <LoadingState variant="page" label="Checking session" />
   }
 
+  if (isSessionUnavailable) return <SessionUnavailable />
+
   if (!isAuthenticated) {
-    return <Navigate replace to="/login" state={{ from: location }} />
+    return <Navigate replace to="/login" state={{ from: location, reason: 'sign-in-required' }} />
   }
 
   return <Outlet />
@@ -70,11 +75,13 @@ function ProtectedShellRoute() {
  * signed-in users get their in-app browse dashboard.
  */
 function BrowseRoute() {
-  const { isAuthenticated, isBootstrapping } = useAuthSession()
+  const { isAuthenticated, isBootstrapping, isSessionUnavailable } = useAuthSession()
 
   if (isBootstrapping) {
     return <LoadingState variant="page" label="Loading" />
   }
+
+  if (isSessionUnavailable) return <SessionUnavailable />
 
   if (!isAuthenticated) {
     return (
@@ -126,14 +133,8 @@ export function AppRoutes() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/browse" element={<BrowseRoute />} />
-      <Route
-        path="/internal/vision"
-        element={
-          <Suspense fallback={<LoadingState variant="page" label="" />}>
-            <InternalVisionPage />
-          </Suspense>
-        }
-      />
+      <Route path="/items/:id" element={<Suspense fallback={<LoadingState variant="page" label="Loading item" />}><PublicItemPage /></Suspense>} />
+      {internalVisionRoute}
       <Route path="/cookies" element={<CookiesPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
@@ -176,6 +177,7 @@ export function AppRoutes() {
             <Route path="/partner/support" element={<SupportFaqPage />} />
           </Route>
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/profile" element={<Navigate replace to="/settings" />} />
           <Route path="/support" element={<SupportFaqPage />} />
           <Route path="/support/:viewRole" element={<Navigate replace to="/support" />} />
         </Route>

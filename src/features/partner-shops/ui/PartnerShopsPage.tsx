@@ -19,6 +19,7 @@ export default function PartnerShopsPage() {
     searchByPostcode,
     isLoading,
     error,
+    needsLocation,
   } = useNearbyShops(user?.postcode)
   const [selectedShopId, setSelectedShopId] = useState<string>('')
   const [isListItemDialogOpen, setIsListItemDialogOpen] = useState(false)
@@ -77,6 +78,11 @@ export default function PartnerShopsPage() {
         </div>
       </div>
 
+      {needsLocation ? (
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600" role="status">
+          Enter a postcode and select Search to find nearby partner shops.
+        </div>
+      ) : (
       <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
         <div className="grid gap-4 lg:grid-cols-2">
           <ShopList
@@ -112,7 +118,8 @@ export default function PartnerShopsPage() {
               src={`https://www.google.com/maps?q=${selectedShop.latitude},${selectedShop.longitude}&z=14&output=embed`}
               width="100%"
               height="100%"
-              style={{ border: 0, minHeight: '620px' }}
+              style={{ border: 0 }}
+              className="min-h-[320px] md:min-h-[620px]"
               allowFullScreen={false}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
@@ -125,6 +132,7 @@ export default function PartnerShopsPage() {
           )}
         </div>
       </div>
+      )}
 
       <ListItemDialog
         isOpen={isListItemDialogOpen}

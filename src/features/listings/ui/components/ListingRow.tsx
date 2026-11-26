@@ -2,6 +2,7 @@ import { QrCode } from 'lucide-react'
 import { Button } from '@/shared/ui/button/Button'
 import { ItemRowCard } from '@/shared/ui/item/ItemRowCard'
 import type { DonorListingItem, ListingStatus } from '@/features/listings/types'
+import { donorListingStatusLabel } from '@/features/listings/ui/listingStatus'
 
 function statusTone(status: ListingStatus): 'active' | 'claimed' | 'collected' {
   if (status === 'Active') return 'active'
@@ -65,7 +66,7 @@ export function ListingRow({
     <ItemRowCard
       title={item.title}
       subtitle={`${item.category} - Condition: ${item.condition} - ${item.meta}`}
-      statusLabel={item.status}
+      statusLabel={donorListingStatusLabel(item)}
       statusTone={statusTone(item.status)}
       imageUrl={item.imageUrl}
       imageAlt={item.title}

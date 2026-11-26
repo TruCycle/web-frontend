@@ -1,10 +1,23 @@
-import { apiRequest } from '@/shared/lib/api/client'
+import { apiRequest, apiRequestBlob } from '@/shared/lib/api/client'
 import { unwrapApiData } from '@/shared/lib/api/envelope'
 import type { ActiveRoom, RoomMessage, RoomParticipant } from '@/features/messaging/types'
 
 interface RoomMessagesResponse {
   readonly messages: RoomMessage[]
   readonly nextCursor: string | null
+}
+
+export async function acknowledgeRoomMessages(roomId: string, messageIds: readonly string[]) {
+  const response = await apiRequest<unknown, { messageIds: readonly string[] }>(`/messages/rooms/${encodeURIComponent(roomId)}/read`, {
+    method: 'POST', body: { messageIds },
+  })
+  const data = asRecord(unwrapApiData<unknown>(response))
+  const count = readCount(data?.unreadCount)
+  if (!data || count === null || count !== data.unreadCount || !Array.isArray(data.readMessageIds) ||
+      data.readMessageIds.some(id => typeof id !== 'string' || !messageIds.includes(id))) {
+    throw new Error('Invalid message read confirmation')
+  }
+  return { readMessageIds: data.readMessageIds as string[], unreadCount: count }
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -57,6 +70,7 @@ function mapMessage(value: unknown): RoomMessage | null {
     direction: (readString(message.direction) ?? 'incoming') as RoomMessage['direction'],
     category: (readString(message.category) ?? 'direct') as RoomMessage['category'],
     imageUrl: readString(message.imageUrl),
+    hasAttachment: message.hasAttachment === true,
     caption: readString(message.caption),
     text: readString(message.text),
     createdAt: readString(message.createdAt) ?? new Date().toISOString(),
@@ -99,24 +113,29 @@ function mapRoom(value: unknown): ActiveRoom | null {
   }
 }
 
-export async function fetchActiveRooms(): Promise<ActiveRoom[]> {
-  const response = await apiRequest<unknown>('/messages/rooms/active')
+export async function fetchActiveRooms(signal?: AbortSignal): Promise<ActiveRoom[]> {
+  const response = await apiRequest<unknown>('/messages/rooms/active', { signal })
   const data = unwrapApiData<unknown>(response)
   if (!Array.isArray(data)) {
-    return []
+    throw new Error('The conversation list could not be confirmed.')
   }
 
-  return data.map((entry) => mapRoom(entry)).filter((entry): entry is ActiveRoom => entry !== null)
+  const rooms = data.map((entry) => mapRoom(entry))
+  if (rooms.some((room) => room === null)) throw new Error('The conversation list could not be confirmed.')
+  return rooms.filter((room): room is ActiveRoom => room !== null)
 }
 
-export async function fetchRoomMessages(roomId: string): Promise<RoomMessagesResponse> {
-  const response = await apiRequest<unknown>(`/messages/rooms/${roomId}/messages`)
+export async function fetchRoomMessages(roomId: string, cursor?: string, signal?: AbortSignal): Promise<RoomMessagesResponse> {
+  const response = await apiRequest<unknown>(`/messages/rooms/${encodeURIComponent(roomId)}/messages${cursor ? '?cursor=' + encodeURIComponent(cursor) : ''}`, { signal })
   const data = asRecord(unwrapApiData<unknown>(response))
   const messages = Array.isArray(data?.messages)
     ? data.messages
         .map((entry) => mapMessage(entry))
         .filter((entry): entry is RoomMessage => entry !== null)
     : []
+  if (!Array.isArray(data?.messages) || messages.length !== data.messages.length || messages.some(message => message.roomId !== roomId) ||
+      data.messages.some(entry => { const timestamp = asRecord(entry)?.createdAt; return typeof timestamp !== 'string' || !Number.isFinite(Date.parse(timestamp)) }) ||
+      (data.nextCursor !== null && (typeof data.nextCursor !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.nextCursor)))) throw new Error('Conversation history could not be confirmed')
 
   return {
     messages,
@@ -160,4 +179,46 @@ export async function sendGeneralMessage(
   }
 
   return message
+}
+
+/** A successful response confirms storage only, not recipient delivery/read. */
+export async function sendDirectTextMessage(roomId: string, payload: { readonly clientMessageId: string; readonly text: string }): Promise<RoomMessage> {
+  const response = await apiRequest<unknown, { clientMessageId: string; text: string }>(`/messages/rooms/${encodeURIComponent(roomId)}/messages/text`, {
+    method: 'POST', body: payload,
+  })
+  const data = asRecord(unwrapApiData<unknown>(response))
+  const message = mapMessage(data)
+  if (typeof data?.createdAt !== 'string' || !message || message.id !== payload.clientMessageId || message.roomId !== roomId || message.text !== payload.text ||
+      message.category !== 'direct' || message.direction !== 'outgoing' || !Number.isFinite(Date.parse(message.createdAt))) {
+    throw new Error('The saved message could not be confirmed.')
+  }
+  return message
+}
+
+export const MAX_MESSAGE_IMAGE_BYTES = 512 * 1024
+
+export async function uploadMessageImage(roomId: string, clientMessageId: string, file: File): Promise<RoomMessage> {
+  const body = new FormData()
+  body.append('clientMessageId', clientMessageId)
+  body.append('image', file)
+  const response = await apiRequest<unknown, FormData>(`/messages/rooms/${encodeURIComponent(roomId)}/messages/image`, { method: 'POST', body })
+  const message = mapMessage(unwrapApiData<unknown>(response))
+  if (!message || message.id !== clientMessageId || message.roomId !== roomId ||
+      !message.hasAttachment || message.imageUrl || message.direction !== 'outgoing') {
+    throw new Error('The saved image could not be confirmed.')
+  }
+  return message
+}
+
+export async function fetchMessageImage(roomId: string, messageId: string, signal: AbortSignal): Promise<Blob> {
+  const image = await apiRequestBlob(
+    `/messages/rooms/${encodeURIComponent(roomId)}/messages/${encodeURIComponent(messageId)}/image`,
+    signal,
+    MAX_MESSAGE_IMAGE_BYTES,
+  )
+  if (!image || !['image/jpeg', 'image/png', 'image/webp'].includes(image.type) ||
+      !image.size || image.size > MAX_MESSAGE_IMAGE_BYTES) {
+    throw new Error('Image attachment unavailable.')
+  }
+  return image
 }

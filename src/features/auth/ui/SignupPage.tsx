@@ -1,6 +1,7 @@
 import { type ChangeEvent, type FormEvent, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Mail, RefreshCw } from 'lucide-react'
+import type { VerificationDeliveryStatus } from '@/features/auth/types'
 import { resendVerificationEmail } from '@/features/auth/api/authApi'
 import { useAuthSession } from '@/shared/context/useAuthSession'
 import { useGoogleOneTap } from '@/shared/hooks/useGoogleOneTap'
@@ -25,7 +26,6 @@ interface SignupFormValues {
   readonly fullName: string
   readonly email: string
   readonly password: string
-  readonly postcode: string
   readonly referralCode: string
 }
 
@@ -33,13 +33,18 @@ const initialFormValues: SignupFormValues = {
   fullName: '',
   email: '',
   password: '',
-  postcode: '',
   referralCode: '',
 }
 
 interface SignupPageProps {
   readonly className?: string
   readonly onSubmitSuccess?: () => void
+}
+
+function verificationDeliveryMessage(status: VerificationDeliveryStatus): string {
+  if (status === 'queued') return 'Your verification email is queued. Check your inbox and spam folder in a few minutes.'
+  if (status === 'accepted') return 'The email provider accepted your verification request. Check your inbox and spam folder.'
+  return 'Your account was created, but email delivery could not be confirmed. Request another email below in a few minutes.'
 }
 
 export default function SignupPage({
@@ -52,7 +57,7 @@ export default function SignupPage({
   const [isRegistering, setIsRegistering] = useState(false)
   const [isResendingVerification, setIsResendingVerification] = useState(false)
   const [verificationEmail, setVerificationEmail] = useState<string | null>(null)
-  const [verificationAccepted, setVerificationAccepted] = useState(false)
+  const [deliveryStatus, setDeliveryStatus] = useState<VerificationDeliveryStatus>('unknown')
   const { register } = useAuthSession()
   const { success, error } = useToast()
 
@@ -95,16 +100,16 @@ export default function SignupPage({
 
     setIsRegistering(true)
     try {
-      const accepted = await register({
+      const registration = await register({
         firstName: splitName.firstName,
         lastName: splitName.lastName,
         email: formValues.email.trim(),
         password: formValues.password,
       })
+      setDeliveryStatus(registration.verificationDelivery.status)
       onSubmitSuccess?.()
       setVerificationEmail(formValues.email.trim())
-      setVerificationAccepted(accepted)
-      success('Account created', 'Verify your email to finish setting up your account.')
+      success('Account created', verificationDeliveryMessage(registration.verificationDelivery.status))
     } catch (caughtError) {
       const message =
         caughtError instanceof ApiError
@@ -124,7 +129,7 @@ export default function SignupPage({
     setIsResendingVerification(true)
     try {
       await resendVerificationEmail(verificationEmail)
-      success('Verification requested', 'If your account needs verification, check your inbox or spam folder for a fresh link.')
+      success('Verification requested', 'If your account needs verification, an email has been requested. Check your inbox and spam folder; delivery can take a few minutes.')
     } catch (caughtError) {
       const message =
         caughtError instanceof ApiError
@@ -169,12 +174,8 @@ export default function SignupPage({
             </div>
           </div>
 
+          <p role="status" className="m-0 text-sm leading-7 text-tc-auth-formText">{verificationDeliveryMessage(deliveryStatus)}</p>
           <div className="grid gap-3 rounded-[0.9rem] border border-tc-auth-inputBorder bg-white p-5 text-sm leading-7 text-tc-auth-formText">
-            <p role="status" className="m-0">
-              {verificationAccepted
-                ? 'Our email provider accepted the request. Check your inbox or spam folder for the verification link.'
-                : 'Email delivery could not be confirmed. Check your inbox or spam folder, then resend the link if needed.'}
-            </p>
             <p className="m-0">1. Open your inbox and look for the TruCycle verification email.</p>
             <p className="m-0">2. Click the verification link in that email.</p>
             <p className="m-0">3. Once verified, return here and log in to continue.</p>
@@ -272,20 +273,6 @@ export default function SignupPage({
                 <PasswordVisibilityIcon isVisible={isPasswordVisible} />
               </button>
             </div>
-          </label>
-
-          <label className={authFieldClassName}>
-            <span className={authLabelClassName}>Postcode</span>
-            <input
-              autoComplete="postal-code"
-              className={authInputClassName}
-              name="postcode"
-              onChange={(event) => onInputChange('postcode', event)}
-              placeholder="SW1A 1AA"
-              required
-              type="text"
-              value={formValues.postcode}
-            />
           </label>
 
           <label className={authFieldClassName}>

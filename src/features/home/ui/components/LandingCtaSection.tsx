@@ -7,7 +7,7 @@ type LandingCtaSectionProps = {
   readonly spotTo: string
 }
 
-const ticker = 'Just rescued: Washing machine in E3 — 12 kg saved'
+const reminder = 'Check ownership and permission before collecting a spotted item.'
 
 export function LandingCtaSection({ browseTo, postItemTo, spotTo }: LandingCtaSectionProps) {
   return (
@@ -20,7 +20,7 @@ export function LandingCtaSection({ browseTo, postItemTo, spotTo }: LandingCtaSe
                 Spot it. Rescue it. Rehome it.
               </h2>
               <p className="mx-auto max-w-[34rem] text-base leading-7 text-[#0B3322]/75 sm:text-[1.05rem] sm:leading-8">
-                Every rescued item keeps a neighbour happy and a skip empty.
+                Help useful things find another home through an agreed handoff.
               </p>
             </div>
 
@@ -31,7 +31,7 @@ export function LandingCtaSection({ browseTo, postItemTo, spotTo }: LandingCtaSe
                 </div>
                 <div className="space-y-1 text-center">
                   <p className="text-lg font-semibold text-[#0B3322]">Spot something</p>
-                  <p className="text-sm leading-6 text-[#0B3322]/65">See an item going to waste? Snap it and put it on the map for a neighbour.</p>
+                  <p className="text-sm leading-6 text-[#0B3322]/65">Report a useful item you have seen. A spot is not permission to take it.</p>
                 </div>
                 <Link
                   className="mt-auto inline-flex w-full items-center justify-center rounded-full bg-[#0D3B24] px-5 py-2.5 text-sm font-bold text-white no-underline transition-transform duration-200 hover:-translate-y-0.5"
@@ -47,7 +47,7 @@ export function LandingCtaSection({ browseTo, postItemTo, spotTo }: LandingCtaSe
                 </div>
                 <div className="space-y-1 text-center">
                   <p className="text-lg font-semibold text-[#0B3322]">Rescue something</p>
-                  <p className="text-sm leading-6 text-[#0B3322]/65">Browse items near you and claim one before it ends up in landfill.</p>
+                  <p className="text-sm leading-6 text-[#0B3322]/65">Browse current offers and check the details before arranging collection.</p>
                 </div>
                 <Link
                   className="mt-auto inline-flex w-full items-center justify-center rounded-full bg-[#0D3B24] px-5 py-2.5 text-sm font-bold text-white no-underline transition-transform duration-200 hover:-translate-y-0.5"
@@ -63,7 +63,7 @@ export function LandingCtaSection({ browseTo, postItemTo, spotTo }: LandingCtaSe
                 </div>
                 <div className="space-y-1 text-center">
                   <p className="text-lg font-semibold text-[#0B3322]">Rehome something</p>
-                  <p className="text-sm leading-6 text-[#0B3322]/65">Two minutes. One photo. A neighbour gets what they needed.</p>
+                  <p className="text-sm leading-6 text-[#0B3322]/65">Add a clear photo, describe the condition, and arrange a handoff.</p>
                 </div>
                 <Link
                   className="mt-auto inline-flex w-full items-center justify-center rounded-full bg-[#0D3B24] px-5 py-2.5 text-sm font-bold text-white no-underline transition-transform duration-200 hover:-translate-y-0.5"
@@ -74,9 +74,9 @@ export function LandingCtaSection({ browseTo, postItemTo, spotTo }: LandingCtaSe
               </div>
             </div>
 
-            <div className="flex items-center gap-2 rounded-full border border-[#0D3B24]/15 bg-white/70 px-5 py-2.5 text-sm text-[#0B3322]/70">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-[#0D3B24]" />
-              {ticker}
+            <div className="flex items-center gap-2 rounded-2xl border border-[#0D3B24]/15 bg-white/70 px-5 py-2.5 text-sm text-[#0B3322]/70">
+              <span className="h-2 w-2 shrink-0 rounded-full bg-[#0D3B24]" />
+              {reminder}
             </div>
           </div>
         </div>

@@ -1,11 +1,18 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import {
+  acknowledgeRoomMessages,
   fetchActiveRooms,
   fetchRoomMessages,
-  sendGeneralMessage,
+  sendDirectTextMessage,
+  uploadMessageImage,
 } from '@/features/messaging/api/messagingApi'
-import type { ActiveRoom, RoomMessage } from '@/features/messaging/types'
+import type { RoomMessage } from '@/features/messaging/types'
 import { WebSocketClient } from '@/shared/lib/websocket/client'
+import { captureStoredSession, isSameSessionIdentity } from '@/shared/lib/auth/session'
+import { initialRoomState, roomReducer } from '@/features/messaging/lib/roomState'
+import { notifyUnreadChanged, unreadChangedEvent } from '@/features/messaging/lib/unreadEvents'
+import { recoverHistory } from '@/features/messaging/lib/historyRecovery'
+import { eligibleReadIds } from '@/features/messaging/lib/readEligibility'
 
 interface MessagingServerEvents extends Record<string, (...args: never[]) => void> {
   'message:new': (message: RoomMessage) => void
@@ -13,19 +20,10 @@ interface MessagingServerEvents extends Record<string, (...args: never[]) => voi
   'room:cleared': (payload: { roomId: string }) => void
   'room:deleted': (payload: { roomId: string }) => void
   'presence:update': (payload: { userId: string; online: boolean }) => void
+  'auth:ready': () => void
+  'messages:read': () => void
 }
-
-interface MessagingClientEvents extends Record<string, (...args: never[]) => void> {
-  'message:send': (payload: { roomId: string; text: string }) => void
-}
-
-function sortRoomsByRecentActivity(rooms: readonly ActiveRoom[]): ActiveRoom[] {
-  return [...rooms].sort((a, b) => {
-    const aTime = new Date(a.updatedAt).getTime()
-    const bTime = new Date(b.updatedAt).getTime()
-    return bTime - aTime
-  })
-}
+interface GapAnchor { ids: Set<string>; cursor?: string; scanToEnd?: boolean; head?: RoomMessage; epoch?: number }
 
 function mergeMessageIntoRoom(messages: readonly RoomMessage[], next: RoomMessage): RoomMessage[] {
   if (messages.some((message) => message.id === next.id)) {
@@ -34,110 +32,206 @@ function mergeMessageIntoRoom(messages: readonly RoomMessage[], next: RoomMessag
 
   return [...messages, next].sort(
     (first, second) =>
-      new Date(first.createdAt).getTime() - new Date(second.createdAt).getTime(),
+      new Date(first.createdAt).getTime() - new Date(second.createdAt).getTime() || first.id.localeCompare(second.id),
   )
 }
 
 export function useMessages() {
-  const [rooms, setRooms] = useState<ActiveRoom[]>([])
+  const [roomState, dispatchRoom] = useReducer(roomReducer, initialRoomState)
+  const rooms = roomState.rooms
   const [activeRoomId, setActiveRoomIdState] = useState<string | null>(null)
   const [roomMessages, setRoomMessages] = useState<Record<string, RoomMessage[]>>({})
-  const [unreadCountByRoom, setUnreadCountByRoom] = useState<Record<string, number>>({})
   const [isLoadingRooms, setIsLoadingRooms] = useState(true)
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false)
+  const [loadingHistory, setLoadingHistory] = useState<Record<string, boolean>>({})
+  const isLoadingMessages = activeRoomId ? Boolean(loadingHistory[activeRoomId]) : false
+  const [olderCursors, setOlderCursors] = useState<Record<string, string | null>>({})
+  const [historyGaps, setHistoryGaps] = useState<Record<string, 'partial' | 'changed' | null>>({})
+  const [historyFailures, setHistoryFailures] = useState<Record<string, boolean>>({})
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [sendError, setSendError] = useState<string | null>(null)
+  const [readFailures, setReadFailures] = useState<Record<string, boolean>>({})
+  const [readRetryVersion, setReadRetryVersion] = useState(0)
   const activeRoomIdRef = useRef<string | null>(null)
-  const isPageVisibleRef = useRef<boolean>(true)
+  const sendingRef = useRef(false)
+  const pendingSends = useRef(new Map<string, { text: string; id: string; userId: string }>())
+  const seenMessageIds = useRef(new Set<string>())
+  const roomRevisions = useRef(new Map<string, number>())
+  const roomListRequest = useRef(0)
+  const roomListController = useRef<AbortController | null>(null)
+  const messageCache = useRef<Record<string, RoomMessage[]>>({})
+  const historyOperations = useRef(new Map<string, AbortController>())
+  const historyLoadedRooms = useRef(new Set<string>())
+  const gapAnchors = useRef(new Map<string, GapAnchor>())
+  const confirmedAnchors = useRef(new Map<string, Set<string>>())
+  const historyEpoch = useRef(0)
+  const attemptedHistoryEpoch = useRef(new Map<string, number>())
+  const deletedRoomIds = useRef(new Set<string>())
+  const clearedRoomIds = useRef(new Set<string>())
+  const pendingHistoryResets = useRef(new Set<string>())
+  const unknownRoomTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const cacheMessages = useCallback((roomId: string, update: (messages: RoomMessage[]) => RoomMessage[]) => {
+    const next = { ...messageCache.current, [roomId]: update(messageCache.current[roomId] ?? []) }
+    messageCache.current = next; setRoomMessages(next)
+  }, [])
 
   const websocketClient = useMemo(
     () =>
-      new WebSocketClient<MessagingServerEvents, MessagingClientEvents>({
+      new WebSocketClient<MessagingServerEvents>({
         namespace: '/messages',
       }),
     [],
   )
 
   const loadRooms = useCallback(async () => {
+    let capture: ReturnType<typeof captureStoredSession>
+    try { capture = captureStoredSession() } catch { return }
+    if (!capture) return
+    const request = ++roomListRequest.current
+    roomListController.current?.abort()
+    const controller = new AbortController()
+    roomListController.current = controller
+    dispatchRoom({ type: 'start', id: request })
     try {
       setIsLoadingRooms(true)
       setError(null)
-      const nextRooms = sortRoomsByRecentActivity(await fetchActiveRooms())
-      setRooms(nextRooms)
-      setUnreadCountByRoom((currentCounts) => {
-        const nextCounts = { ...currentCounts }
-        nextRooms.forEach((room) => {
-          const existingCount = currentCounts[room.id] ?? 0
-          nextCounts[room.id] = Math.max(existingCount, room.unreadCount)
-        })
-        Object.keys(nextCounts).forEach((roomId) => {
-          if (!nextRooms.some((room) => room.id === roomId)) {
-            delete nextCounts[roomId]
-          }
-        })
-        return nextCounts
-      })
-      setActiveRoomIdState((current) => current ?? nextRooms[0]?.id ?? null)
+      const nextRooms = await fetchActiveRooms(controller.signal)
+      if (controller.signal.aborted || !isSameSessionIdentity(capture)) return
+      dispatchRoom({ type: 'snapshot', id: request, rooms: nextRooms })
     } catch {
-      setError('Unable to load conversations right now.')
+      if (!controller.signal.aborted && isSameSessionIdentity(capture)) setError('Unable to load conversations right now.')
     } finally {
-      setIsLoadingRooms(false)
+      if (roomListController.current === controller) {
+        roomListController.current = null
+        if (!controller.signal.aborted) setIsLoadingRooms(false)
+      }
     }
   }, [])
 
-  const clearUnreadForRoom = useCallback((roomId: string | null) => {
-    if (!roomId) {
-      return
-    }
-
-    setUnreadCountByRoom((currentCounts) => {
-      if (!currentCounts[roomId]) {
-        return currentCounts
-      }
-
-      return {
-        ...currentCounts,
-        [roomId]: 0,
-      }
-    })
+  const setActiveRoomId = useCallback((roomId: string | null) => {
+    activeRoomIdRef.current = roomId
+    setActiveRoomIdState(roomId)
   }, [])
-
-  const setActiveRoomId = useCallback(
-    (roomId: string | null) => {
-      setActiveRoomIdState(roomId)
-      if (roomId && document.visibilityState === 'visible') {
-        clearUnreadForRoom(roomId)
-      }
-    },
-    [clearUnreadForRoom],
-  )
-
-  const loadMessagesForRoom = useCallback(async (roomId: string) => {
+  const readConfirmed = useRef(new Set<string>())
+  const readInFlight = useRef(new Set<string>())
+  const acknowledgeVisibleMessages = useCallback(async (roomId: string, ids: readonly string[]) => {
+    if (activeRoomIdRef.current !== roomId || document.visibilityState !== 'visible' ||
+        !historyLoadedRooms.current.has(roomId)) return
+    let capture: ReturnType<typeof captureStoredSession>
+    try { capture = captureStoredSession() } catch { return }
+    if (!capture) return
+    const eligible = eligibleReadIds(messageCache.current[roomId] ?? [], ids, capture.session.user.id,
+      roomId, activeRoomIdRef.current, document.visibilityState === 'visible', historyLoadedRooms.current.has(roomId))
+      .filter(id => !readConfirmed.current.has(id) && !readInFlight.current.has(id)).slice(0, 100)
+    if (!eligible.length) return
+    const revision = roomRevisions.current.get(roomId) ?? 0
+    eligible.forEach(id => readInFlight.current.add(id))
     try {
-      setIsLoadingMessages(true)
-      setError(null)
-      const response = await fetchRoomMessages(roomId)
-      setRoomMessages((currentMessages) => ({
-        ...currentMessages,
-        [roomId]: response.messages,
-      }))
+      const result = await acknowledgeRoomMessages(roomId, eligible)
+      if (!isSameSessionIdentity(capture) || (roomRevisions.current.get(roomId) ?? 0) !== revision) return
+      result.readMessageIds.forEach(id => readConfirmed.current.add(id))
+      setReadFailures(values => ({ ...values, [roomId]: false }))
+      notifyUnreadChanged()
+      await loadRooms()
     } catch {
-      setError('Unable to load room history right now.')
-    } finally {
-      setIsLoadingMessages(false)
+      if (isSameSessionIdentity(capture) && (roomRevisions.current.get(roomId) ?? 0) === revision) {
+        setReadFailures(values => ({ ...values, [roomId]: true }))
+      }
+    } finally { eligible.forEach(id => readInFlight.current.delete(id)) }
+  }, [loadRooms])
+
+  const loadMessagesForRoom = useCallback(async (roomId: string, mode: 'recent' | 'older' | 'reset' = 'recent', olderCursor?: string) => {
+    if (mode === 'older' && (!olderCursor || historyOperations.current.has(roomId))) return
+    const revision = roomRevisions.current.get(roomId) ?? 0
+    const hadHistory = historyLoadedRooms.current.has(roomId)
+    const epoch = historyEpoch.current
+    if (mode !== 'older') attemptedHistoryEpoch.current.set(roomId, epoch)
+    historyOperations.current.get(roomId)?.abort()
+    const controller = new AbortController(); historyOperations.current.set(roomId, controller)
+    const timer = setTimeout(() => controller.abort(), 15_000)
+    const current = () => historyOperations.current.get(roomId) === controller && (roomRevisions.current.get(roomId) ?? 0) === revision
+    if (mode === 'reset') {
+      gapAnchors.current.delete(roomId)
+      confirmedAnchors.current.delete(roomId)
+      historyLoadedRooms.current.delete(roomId)
     }
+    try {
+      setLoadingHistory(values => ({ ...values, [roomId]: true }))
+      setHistoryFailures(values => ({ ...values, [roomId]: false }))
+      setError(null)
+      let anchor: GapAnchor | undefined = mode === 'older' ? { ids: new Set<string>(), cursor: olderCursor } : gapAnchors.current.get(roomId)
+      if (!anchor) {
+        const ids = new Set(confirmedAnchors.current.get(roomId) ?? [])
+        anchor = { ids, scanToEnd: mode !== 'reset' && hadHistory && !ids.size }
+      }
+      if (mode === 'recent' && anchor.epoch !== epoch) {
+        // Another disconnect may have added messages above the saved cursor.
+        anchor = { ids: anchor.ids, scanToEnd: anchor.scanToEnd, epoch }
+      }
+      if (mode !== 'older' && (anchor.ids.size || anchor.scanToEnd)) gapAnchors.current.set(roomId, anchor)
+      const fetchPage = (cursor?: string) => fetchRoomMessages(roomId, cursor, controller.signal)
+      let response = await recoverHistory(fetchPage, anchor.ids, anchor.cursor, 5, anchor.scanToEnd)
+      if (!current() || controller.signal.aborted) return
+      const historyWasCleared = mode === 'recent' && response.status === 'changed'
+      if (historyWasCleared) {
+        // A clear can happen while this socket is offline. A missing retained
+        // anchor means the previous cache cannot be merged into current history.
+        response = await recoverHistory(fetchPage, new Set())
+        if (!current() || controller.signal.aborted) return
+        anchor = { ids: new Set() }
+        clearedRoomIds.current.add(roomId)
+        dispatchRoom({ type: 'clear', roomId })
+        void loadRooms()
+      }
+      historyLoadedRooms.current.add(roomId)
+      const replaceHistory = historyWasCleared || mode === 'reset'
+      cacheMessages(roomId, previous => response.messages.reduce((merged, message) => mergeMessageIntoRoom(merged, message), replaceHistory ? [] : previous))
+      if (mode !== 'older') {
+        let head = anchor.head
+        for (const message of response.messages) if (!head || Date.parse(message.createdAt) > Date.parse(head.createdAt) ||
+            (message.createdAt === head.createdAt && message.id.localeCompare(head.id) > 0)) head = message
+        setHistoryGaps(values => ({ ...values, [roomId]: response.status === 'complete' ? null : response.status }))
+        if (response.status === 'partial') gapAnchors.current.set(roomId, { ...anchor, head, cursor: response.nextCursor ?? undefined })
+        else {
+          gapAnchors.current.delete(roomId)
+          if (response.status === 'complete') confirmedAnchors.current.set(roomId, new Set(head ? [head.id] : []))
+        }
+      }
+      if (mode === 'older' || !hadHistory || !anchor.ids.size) setOlderCursors(values => ({ ...values, [roomId]: response.nextCursor }))
+    } catch {
+      if (current()) {
+        setError('Unable to load room history right now. Try refreshing the conversation.')
+        setHistoryFailures(values => ({ ...values, [roomId]: true }))
+        const anchor = gapAnchors.current.get(roomId)
+        if (anchor?.ids.size || anchor?.scanToEnd) setHistoryGaps(values => ({ ...values, [roomId]: 'partial' }))
+      }
+    } finally {
+      clearTimeout(timer)
+      if (historyOperations.current.get(roomId) === controller) {
+        historyOperations.current.delete(roomId)
+        setLoadingHistory(values => ({ ...values, [roomId]: false }))
+      }
+    }
+  }, [cacheMessages, loadRooms])
+  useEffect(() => {
+    const operations = historyOperations.current
+    return () => { for (const controller of operations.values()) controller.abort(); operations.clear() }
   }, [])
 
   useEffect(() => {
     void loadRooms()
+    return () => { roomListController.current?.abort() }
   }, [loadRooms])
+  useEffect(() => {
+    setActiveRoomIdState(current => current && rooms.some(room => room.id === current) ? current : rooms[0]?.id ?? null)
+  }, [rooms])
 
   useEffect(() => {
-    if (!activeRoomId || roomMessages[activeRoomId]) {
+    if (!activeRoomId || attemptedHistoryEpoch.current.get(activeRoomId) === historyEpoch.current || historyOperations.current.has(activeRoomId)) {
       return
     }
 
-    void loadMessagesForRoom(activeRoomId)
+    void loadMessagesForRoom(activeRoomId, clearedRoomIds.current.has(activeRoomId) ? 'reset' : 'recent')
   }, [activeRoomId, loadMessagesForRoom, roomMessages])
 
   useEffect(() => {
@@ -145,195 +239,200 @@ export function useMessages() {
   }, [activeRoomId])
 
   useEffect(() => {
-    if (!activeRoomId || document.visibilityState !== 'visible') {
-      return
+    const refresh = () => {
+      if (document.visibilityState === 'visible') void loadRooms()
     }
-
-    clearUnreadForRoom(activeRoomId)
-  }, [activeRoomId, clearUnreadForRoom])
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      const isVisible = document.visibilityState === 'visible'
-      isPageVisibleRef.current = isVisible
-      if (isVisible) {
-        clearUnreadForRoom(activeRoomIdRef.current)
-      }
-    }
-
-    handleVisibilityChange()
-    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener(unreadChangedEvent, refresh)
+    document.addEventListener('visibilitychange', refresh)
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener(unreadChangedEvent, refresh)
+      document.removeEventListener('visibilitychange', refresh)
     }
-  }, [clearUnreadForRoom])
+  }, [loadRooms])
 
   useEffect(() => {
-    const handleNewMessage = (message: RoomMessage) => {
-      const isIncomingMessage = message.direction === 'incoming'
-      const isActiveRoomVisible =
-        activeRoomIdRef.current === message.roomId && isPageVisibleRef.current
-
-      setRoomMessages((currentMessages) => ({
-        ...currentMessages,
-        [message.roomId]: mergeMessageIntoRoom(
-          currentMessages[message.roomId] ?? [],
-          message,
-        ),
-      }))
-      setRooms((currentRooms) =>
-        sortRoomsByRecentActivity(
-          currentRooms.map((room) =>
-            room.id === message.roomId
-              ? { ...room, lastMessage: message, updatedAt: message.createdAt }
-              : room,
-          ),
-        ),
-      )
-
-      if (!isIncomingMessage) {
-        return
+    const historyResets = pendingHistoryResets.current
+    const reconcile = (roomId?: string) => {
+      if (roomId) {
+        // Invalidate in-flight history before a delayed payload can merge it.
+        historyOperations.current.get(roomId)?.abort()
+        historyLoadedRooms.current.delete(roomId)
+        historyResets.add(roomId)
+        attemptedHistoryEpoch.current.delete(roomId)
       }
-
-      setUnreadCountByRoom((currentCounts) => {
-        if (isActiveRoomVisible) {
-          if (!currentCounts[message.roomId]) {
-            return currentCounts
-          }
-
-          return {
-            ...currentCounts,
-            [message.roomId]: 0,
-          }
+      if (unknownRoomTimer.current === null) unknownRoomTimer.current = setTimeout(() => {
+        unknownRoomTimer.current = null
+        void loadRooms()
+        const pending = [...historyResets]
+        historyResets.clear()
+        for (const id of pending) if (id === activeRoomIdRef.current && !deletedRoomIds.current.has(id)) {
+          void loadMessagesForRoom(id, 'reset')
         }
+      }, 100)
+    }
+    const handleNewMessage = (message: RoomMessage) => {
+      if (deletedRoomIds.current.has(message.roomId)) return
+      // Post-commit clear/send broadcasts can be reordered, including an old
+      // message that this client never saw. Reconcile against stored history.
+      if (clearedRoomIds.current.has(message.roomId)) { reconcile(message.roomId); return }
+      if (seenMessageIds.current.has(message.id)) return
+      seenMessageIds.current.add(message.id)
+      if (seenMessageIds.current.size > 2000) seenMessageIds.current.delete(seenMessageIds.current.values().next().value!)
 
-        return {
-          ...currentCounts,
-          [message.roomId]: (currentCounts[message.roomId] ?? 0) + 1,
-        }
-      })
+      cacheMessages(message.roomId, messages => mergeMessageIntoRoom(messages, message))
+      dispatchRoom({ type: 'message', message })
+      reconcile()
+
 
     }
 
     const handleRoomActivity = (payload: { roomId: string; updatedAt: string }) => {
-      setRooms((currentRooms) =>
-        sortRoomsByRecentActivity(
-          currentRooms.map((room) =>
-            room.id === payload.roomId ? { ...room, updatedAt: payload.updatedAt } : room,
-          ),
-        ),
-      )
+      dispatchRoom({ type: 'activity', ...payload })
     }
 
     const handleRoomCleared = (payload: { roomId: string }) => {
-      setRoomMessages((currentMessages) => ({
-        ...currentMessages,
-        [payload.roomId]: [],
-      }))
-      setRooms((currentRooms) =>
-        currentRooms.map((room) =>
-          room.id === payload.roomId ? { ...room, lastMessage: null } : room,
-        ),
-      )
+      if (deletedRoomIds.current.has(payload.roomId)) return
+      roomListController.current?.abort()
+      clearedRoomIds.current.add(payload.roomId)
+      setReadFailures(values => ({ ...values, [payload.roomId]: false }))
+      roomRevisions.current.set(payload.roomId, (roomRevisions.current.get(payload.roomId) ?? 0) + 1)
+      // Do not tombstone cached IDs: a delayed clear event may arrive after a
+      // genuinely newer send. Stored history decides which messages survived.
+      confirmedAnchors.current.set(payload.roomId, new Set()); attemptedHistoryEpoch.current.set(payload.roomId, historyEpoch.current)
+      gapAnchors.current.delete(payload.roomId)
+      setHistoryGaps(values => ({ ...values, [payload.roomId]: null })); setOlderCursors(values => ({ ...values, [payload.roomId]: null }))
+      cacheMessages(payload.roomId, () => [])
+      dispatchRoom({ type: 'clear', roomId: payload.roomId })
+      reconcile(payload.roomId)
     }
 
     const handleRoomDeleted = (payload: { roomId: string }) => {
-      setRoomMessages((currentMessages) => {
-        const remaining = { ...currentMessages }
-        delete remaining[payload.roomId]
-        return remaining
-      })
-      setUnreadCountByRoom((currentCounts) => {
-        if (!(payload.roomId in currentCounts)) {
-          return currentCounts
-        }
-        const nextCounts = { ...currentCounts }
-        delete nextCounts[payload.roomId]
-        return nextCounts
-      })
-      setRooms((currentRooms) =>
-        currentRooms.filter((room) => room.id !== payload.roomId),
-      )
+      roomListController.current?.abort()
+      deletedRoomIds.current.add(payload.roomId)
+      setReadFailures(values => ({ ...values, [payload.roomId]: false }))
+      historyLoadedRooms.current.delete(payload.roomId)
+      confirmedAnchors.current.delete(payload.roomId); attemptedHistoryEpoch.current.delete(payload.roomId)
+      roomRevisions.current.set(payload.roomId, (roomRevisions.current.get(payload.roomId) ?? 0) + 1)
+      pendingSends.current.delete(payload.roomId)
+      historyOperations.current.get(payload.roomId)?.abort(); gapAnchors.current.delete(payload.roomId)
+      const remaining = { ...messageCache.current }; delete remaining[payload.roomId]
+      messageCache.current = remaining; setRoomMessages(remaining)
+      dispatchRoom({ type: 'delete', roomId: payload.roomId })
       setActiveRoomIdState((currentId) => (currentId === payload.roomId ? null : currentId))
+      reconcile()
     }
 
     const handlePresenceUpdate = (payload: { userId: string; online: boolean }) => {
-      setRooms((currentRooms) =>
-        currentRooms.map((room) => ({
-          ...room,
-          participants: room.participants.map((participant) =>
-            participant.id === payload.userId
-              ? { ...participant, online: payload.online }
-              : participant,
-          ),
-        })),
-      )
+      dispatchRoom({ type: 'presence', ...payload })
     }
 
+    const handleReady = () => {
+      historyEpoch.current++
+      void loadRooms()
+      const roomId = activeRoomIdRef.current
+      if (roomId) void loadMessagesForRoom(roomId, clearedRoomIds.current.has(roomId) ? 'reset' : 'recent')
+    }
     websocketClient.connect()
+    websocketClient.on('auth:ready', handleReady)
+    websocketClient.on('messages:read', loadRooms)
     websocketClient.on('message:new', handleNewMessage)
     websocketClient.on('room:activity', handleRoomActivity)
     websocketClient.on('room:cleared', handleRoomCleared)
     websocketClient.on('room:deleted', handleRoomDeleted)
     websocketClient.on('presence:update', handlePresenceUpdate)
+    // HTTP can recover without a fresh socket handshake. Retry authoritative
+    // history even if a lifecycle event arrived while requests were failing.
+    window.addEventListener('online', handleReady)
 
     return () => {
+      if (unknownRoomTimer.current !== null) clearTimeout(unknownRoomTimer.current)
+      unknownRoomTimer.current = null
+      historyResets.clear()
+      websocketClient.off('auth:ready', handleReady)
+      websocketClient.off('messages:read', loadRooms)
       websocketClient.off('message:new', handleNewMessage)
       websocketClient.off('room:activity', handleRoomActivity)
       websocketClient.off('room:cleared', handleRoomCleared)
       websocketClient.off('room:deleted', handleRoomDeleted)
       websocketClient.off('presence:update', handlePresenceUpdate)
+      window.removeEventListener('online', handleReady)
       websocketClient.disconnect()
     }
-  }, [websocketClient])
+  }, [websocketClient, loadRooms, loadMessagesForRoom, cacheMessages])
 
   const sendMessage = useCallback(
     async (text: string) => {
-      const roomId = activeRoomId
+      const roomId = activeRoomIdRef.current
       const message = text.trim()
-      if (!roomId || !message) {
-        return
-      }
-
+      if (!roomId || !message || message.length > 4000 || sendingRef.current) return false
+      const revision = roomRevisions.current.get(roomId) ?? 0
+      sendingRef.current = true
       setIsSending(true)
-      setError(null)
+      setSendError(null)
 
       try {
-        if (websocketClient.isConnected) {
-          websocketClient.emit('message:send', { roomId, text: message })
-        } else {
-          const fallbackMessage = await sendGeneralMessage(roomId, { text: message })
-          setRoomMessages((currentMessages) => ({
-            ...currentMessages,
-            [roomId]: mergeMessageIntoRoom(
-              currentMessages[roomId] ?? [],
-              fallbackMessage,
-            ),
-          }))
-          setRooms((currentRooms) =>
-            sortRoomsByRecentActivity(
-              currentRooms.map((room) =>
-                room.id === roomId
-                  ? {
-                      ...room,
-                      lastMessage: fallbackMessage,
-                      updatedAt: fallbackMessage.createdAt,
-                    }
-                  : room,
-              ),
-            ),
-          )
+        const capture = captureStoredSession()
+        if (!capture) throw new Error('Sign in is required')
+        let pending = pendingSends.current.get(roomId)
+        if (!pending || pending.text !== message || pending.userId !== capture.session.user.id) {
+          pending = { text: message, id: crypto.randomUUID(), userId: capture.session.user.id }
+          pendingSends.current.set(roomId, pending)
         }
+        const saved = await sendDirectTextMessage(roomId, { clientMessageId: pending.id, text: message })
+        if (!isSameSessionIdentity(capture)) return false
+        pendingSends.current.delete(roomId)
+        // An accepted send clears its draft even when a concurrent clear or
+        // delete invalidated the local cache. Never merge that stale response.
+        if ((roomRevisions.current.get(roomId) ?? 0) !== revision) return true
+        cacheMessages(roomId, messages => mergeMessageIntoRoom(messages, saved))
+        dispatchRoom({ type: 'message', message: saved })
+        if (clearedRoomIds.current.has(roomId)) {
+          void loadRooms()
+          void loadMessagesForRoom(roomId, 'reset')
+        }
+        return true
       } catch {
-        setError('Unable to send the message right now.')
+        setSendError('The message could not be confirmed. Your draft is kept. Check the conversation before retrying.')
+        return false
       } finally {
+        sendingRef.current = false
         setIsSending(false)
       }
     },
-    [activeRoomId, websocketClient],
+    [cacheMessages, loadRooms, loadMessagesForRoom],
   )
 
   const activeRoom = rooms.find((room) => room.id === activeRoomId) ?? null
+  const sendImage = async (file: File, id: string) => {
+    const roomId = activeRoomIdRef.current
+    const capture = captureStoredSession()
+    if (!roomId || !capture || sendingRef.current) return false
+    const revision = roomRevisions.current.get(roomId) ?? 0
+    sendingRef.current = true
+    setIsSending(true)
+    setSendError(null)
+    try {
+      const saved = await uploadMessageImage(roomId, id, file)
+      if (!isSameSessionIdentity(capture)) return false
+      if ((roomRevisions.current.get(roomId) ?? 0) === revision) {
+        cacheMessages(roomId, messages => mergeMessageIntoRoom(messages, saved))
+        dispatchRoom({ type: 'message', message: saved })
+      }
+      if (clearedRoomIds.current.has(roomId)) {
+        void loadRooms()
+        void loadMessagesForRoom(roomId, 'reset')
+      }
+      return true
+    } catch {
+      if (isSameSessionIdentity(capture)) {
+        setSendError('The image could not be confirmed. Check the conversation before retrying.')
+      }
+      return false
+    } finally {
+      sendingRef.current = false
+      setIsSending(false)
+    }
+  }
   const messages = activeRoomId ? roomMessages[activeRoomId] ?? [] : []
 
   return {
@@ -344,11 +443,20 @@ export function useMessages() {
     isLoadingRooms,
     isLoadingMessages,
     isSending,
-    error,
-    unreadCountByRoom,
+    error: sendError ?? error,
     setActiveRoomId,
+    acknowledgeVisibleMessages,
+    hasReadFailure: Boolean(activeRoomId && readFailures[activeRoomId]),
+    readRetryVersion,
+    retryReadStatus: () => setReadRetryVersion(value => value + 1),
     sendMessage,
+    sendImage,
     reloadRooms: loadRooms,
+    historyGap: activeRoomId ? historyGaps[activeRoomId] ?? null : null,
+    hasHistoryFailure: Boolean(activeRoomId && historyFailures[activeRoomId]),
+    hasOlderMessages: Boolean(activeRoomId && olderCursors[activeRoomId]),
+    loadOlderMessages: () => activeRoomId ? loadMessagesForRoom(activeRoomId, 'older', olderCursors[activeRoomId] ?? undefined) : Promise.resolve(),
+    resetHistory: () => activeRoomId ? loadMessagesForRoom(activeRoomId, 'reset') : Promise.resolve(),
     reloadMessages: () => (activeRoomId ? loadMessagesForRoom(activeRoomId) : Promise.resolve()),
   }
 }

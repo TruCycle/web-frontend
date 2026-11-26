@@ -76,7 +76,7 @@ export function LandingFooter() {
             </Link>
 
             <p className="max-w-[19rem] text-base leading-7 text-[#E8F6EE]">
-              Neighbour-to-neighbour reuse for London homes, studios, flats, and
+              Neighbour-to-neighbour reuse for homes, studios, flats, and
               families.
             </p>
 
@@ -117,7 +117,7 @@ export function LandingFooter() {
                 Terms
               </Link>
               <a className="text-[#E8F6EE] no-underline" href="mailto:hello@trucycle.co.uk?subject=Accessibility">
-                Accessibility
+                Email us about accessibility
               </a>
             </div>
           </div>

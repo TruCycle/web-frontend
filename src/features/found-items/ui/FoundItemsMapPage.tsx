@@ -12,9 +12,12 @@ import {
   fetchFoundItems,
   reportFoundItem,
 } from '../api/foundItemsApi'
-import type { FoundItem, FoundItemCategory, FoundItemStatus } from '../types'
+import type { FoundItem, FoundItemCategory, FoundItemStatus, FoundItemsFilter } from '../types'
 import { foundItemCategories } from '../types'
 import { useFoundItemDetails } from '../hooks/useFoundItemDetails'
+import { foundItemMapPoint, formatApproximateDistance, outwardPostcode } from '../lib/foundItemLocation'
+import { FoundItemLifecycleActions } from './components/FoundItemLifecycleActions'
+import type { FoundItemClaim } from '../types'
 import { FoundItemStatusBadge } from './components/FoundItemStatusBadge'
 import {
   formatFoundItemAttribution,
@@ -51,23 +54,12 @@ const fallbackCenter: GeoPoint = {
   longitude: 0.0812,
 }
 
-function hasMapLocation(item: FoundItem): boolean {
-  return (
-    Number.isFinite(item.location.latitude) &&
-    Number.isFinite(item.location.longitude) &&
-    !(item.location.latitude === 0 && item.location.longitude === 0)
-  )
-}
-
 function isVisibleMapStatus(status: FoundItemStatus): boolean {
-  return status === 'available' || status === 'claimed' || status === 'picked_up'
+  return status === 'available' || status === 'claimed' || status === 'picked_up' || status === 'gone' || status === 'expired'
 }
 
-function toGeoPoint(item: FoundItem): GeoPoint {
-  return {
-    latitude: item.location.latitude,
-    longitude: item.location.longitude,
-  }
+function toGeoPoint(item: FoundItem): GeoPoint | null {
+  return foundItemMapPoint(item.location)
 }
 
 function distanceBetweenPoints(from: GeoPoint, to: GeoPoint): number {
@@ -91,27 +83,16 @@ function distanceBetweenPoints(from: GeoPoint, to: GeoPoint): number {
 }
 
 function readDistanceKm(item: FoundItem, liveLocation: GeoPoint | null): number | null {
-  if (liveLocation && hasMapLocation(item)) {
-    return distanceBetweenPoints(liveLocation, toGeoPoint(item))
+  const point = toGeoPoint(item)
+  if (liveLocation && point) {
+    return distanceBetweenPoints(liveLocation, point)
   }
 
   return item.location.approximateDistance
 }
 
 function formatDistance(distanceKm: number | null): string {
-  if (distanceKm === null || !Number.isFinite(distanceKm)) {
-    return '—'
-  }
-
-  if (distanceKm < 1) {
-    return `${Math.max(50, Math.round(distanceKm * 1000))} m`
-  }
-
-  if (distanceKm < 10) {
-    return `${distanceKm.toFixed(1)} km`
-  }
-
-  return `${Math.round(distanceKm)} km`
+  return formatApproximateDistance(distanceKm)
 }
 
 function markerPalette(status: FoundItemStatus): {
@@ -216,6 +197,9 @@ function FilterChip({
 interface SelectedItemDetailsProps {
   readonly item: FoundItem | null
   readonly distanceKm: number | null
+  readonly currentUserId?: string
+  readonly viewerClaim?: FoundItemClaim | null
+  readonly onLifecycleChange?: () => void
   readonly isOwnPost: boolean
   readonly isLocating: boolean
   readonly isClaiming: boolean
@@ -233,6 +217,9 @@ function SelectedItemDetails({
   item,
   distanceKm,
   isOwnPost,
+  currentUserId,
+  viewerClaim,
+  onLifecycleChange,
   isLocating,
   isClaiming,
   isLoadingDetails,
@@ -312,6 +299,7 @@ function SelectedItemDetails({
       {isLoadingDetails ? <p className="text-xs text-slate-400">Loading request status…</p> : null}
       {detailsError ? <p className="text-xs text-rose-600">{detailsError}</p> : null}
 
+      <FoundItemLifecycleActions item={item} currentUserId={currentUserId} viewerClaim={viewerClaim} onChanged={onLifecycleChange} />
       {isOwnPost ? (
         <Link
           to="/found-items/my-posts"
@@ -355,7 +343,7 @@ function SelectedItemDetails({
             <button
               type="button"
               className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400"
-              disabled={isCancelling || item.status === 'picked_up' || item.status === 'reported'}
+              disabled={isCancelling || (item.status !== 'available' && item.status !== 'claimed')}
               onClick={onCancelClaim}
             >
               {isCancelling ? 'Cancelling...' : 'Cancel request'}
@@ -367,16 +355,21 @@ function SelectedItemDetails({
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">Report this spot</h3>
                 <p className="mt-1 text-xs leading-5 text-slate-500">
-                  Flag misleading, unsafe or duplicate posts for review.
+                  Report what you observed. Reports do not confirm pickup or award pickup points.
                 </p>
               </div>
 
-              <input
-                value={reportReason}
-                onChange={(event) => setReportReason(event.target.value)}
-                className="h-11 w-full rounded-[14px] border border-slate-200 px-3 text-sm text-slate-900 outline-none transition focus:border-[#87C15F] focus:ring-4 focus:ring-[#EAF6DA]"
-                placeholder="Reason for reporting"
-              />
+              <label className="block text-sm font-medium text-slate-700">Report reason
+                <select aria-label="Report reason" value={reportReason} onChange={(event) => setReportReason(event.target.value)} className="mt-1 h-11 w-full rounded-[14px] border border-slate-200 px-3 text-sm text-slate-900">
+                  <option value="">Choose a reason</option>
+                  <option value="already_gone">Already gone</option>
+                  {viewerHasActiveClaim ? <option value="not_there">Not there when I arrived</option> : null}
+                  <option value="unsafe">Unsafe</option>
+                  <option value="misleading">Misleading</option>
+                  <option value="duplicate">Duplicate</option>
+                  <option value="other">Other</option>
+                </select>
+              </label>
 
               <textarea
                 value={reportDetails}
@@ -419,18 +412,13 @@ export default function FoundItemsMapPage() {
   const [isCancellingId, setIsCancellingId] = useState<string | null>(null)
   const [isReportingId, setIsReportingId] = useState<string | null>(null)
   const [liveLocation, setLiveLocation] = useState<GeoPoint | null>(null)
-  const [isLocating, setIsLocating] = useState(true)
+  const [isLocating, setIsLocating] = useState(false)
   const [locationError, setLocationError] = useState<string | null>(null)
+  const locationWatch = useRef<number | null>(null)
   const [focusMode, setFocusMode] = useState<FocusMode>(highlightId ? 'selected' : 'me')
   const [focusRequestKey, setFocusRequestKey] = useState(0)
-  const [isMobileItemModalOpen, setIsMobileItemModalOpen] = useState(Boolean(highlightId))
-  const {
-    item: detailedSelectedItem,
-    viewerClaim,
-    isLoading: isLoadingDetails,
-    error: detailsError,
-    refresh: refreshDetails,
-  } = useFoundItemDetails(selectedItemId, user?.id)
+  const [isMobileItemModalOpen, setIsMobileItemModalOpen] = useState(false)
+  const appliedHighlight = useRef('')
 
   const actor = {
     id: user?.id ?? 'current-user',
@@ -438,54 +426,96 @@ export default function FoundItemsMapPage() {
     avatarUrl: null,
   }
 
+  const boardRequest = useRef<AbortController | null>(null)
   const loadBoard = useCallback(async () => {
+    boardRequest.current?.abort()
+    const request = new AbortController()
+    boardRequest.current = request
     setIsLoading(true)
     setItemsError(null)
 
     try {
-      const response = await fetchFoundItems(
-        {
-          postcode: user?.postcode?.trim() || undefined,
-          sortBy: user?.postcode ? 'nearest' : 'newest',
-          category: categoryFilter === 'all' ? undefined : categoryFilter,
-        },
-        1,
-        50,
-      )
+      const postcode = user?.postcode?.trim() || undefined
+      const filters: FoundItemsFilter = {
+        postcode,
+        sortBy: postcode ? 'nearest' : 'newest',
+        maxDistance: postcode ? 5 : undefined,
+        includeRecentClosed: true,
+        category: categoryFilter === 'all' ? undefined : categoryFilter,
+      }
+      const response = await fetchFoundItems(filters, 1, 50, request.signal)
 
-      let nextItems = response.items.filter((item) => hasMapLocation(item) && isVisibleMapStatus(item.status))
+      const allItems = [...response.items]
+      for (let page = 2; page <= response.pagination.totalPages; page += 1) {
+        if (request.signal.aborted) return
+        const next = await fetchFoundItems(filters, page, 50, request.signal)
+        allItems.push(...next.items)
+      }
+      let nextItems = allItems.filter((item) => isVisibleMapStatus(item.status))
 
-      if (highlightId) {
+      if (highlightId && !nextItems.some((item) => item.id === highlightId)) {
         try {
-          const highlightResponse = await fetchFoundItemById(highlightId, user?.id)
-          if (!nextItems.some((item) => item.id === highlightResponse.item.id) && hasMapLocation(highlightResponse.item)) {
-            nextItems = [highlightResponse.item, ...nextItems]
-          }
+          const highlightResponse = await fetchFoundItemById(highlightId, user?.id, request.signal)
+          nextItems = [highlightResponse.item, ...nextItems]
         } catch {
           // Keep the main board responsive even if the highlighted item can no longer be fetched.
         }
       }
 
+      if (request.signal.aborted) return
       setItems(nextItems)
+      if (highlightId && appliedHighlight.current !== highlightId && nextItems.some((item) => item.id === highlightId)) {
+        appliedHighlight.current = highlightId
+        setMapFilter('all')
+        setSelectedItemId(highlightId)
+        setFocusMode('selected')
+        setFocusRequestKey((current) => current + 1)
+        setIsMobileItemModalOpen(true)
+      }
     } catch {
+      if (request.signal.aborted) return
+      setItems([])
       setItemsError('Unable to load the live map right now.')
     } finally {
-      setIsLoading(false)
+      if (boardRequest.current === request) {
+        boardRequest.current = null
+        if (!request.signal.aborted) setIsLoading(false)
+      }
     }
   }, [highlightId, user?.id, user?.postcode, categoryFilter])
 
   useEffect(() => {
+    if (!highlightId) appliedHighlight.current = ''
     void loadBoard()
-  }, [loadBoard])
+    return () => { boardRequest.current?.abort() }
+  }, [highlightId, loadBoard])
 
-  useEffect(() => {
+  const stopLocationWatch = useCallback(() => {
+    if (locationWatch.current !== null) {
+      navigator.geolocation.clearWatch(locationWatch.current)
+      locationWatch.current = null
+    }
+  }, [])
+
+  useEffect(() => stopLocationWatch, [stopLocationWatch])
+
+  const centreOnMe = () => {
+    if (liveLocation && locationWatch.current !== null) {
+      setFocusMode('me')
+      setFocusRequestKey((current) => current + 1)
+      return
+    }
+    if (locationWatch.current !== null) return
     if (!navigator.geolocation) {
-      setIsLocating(false)
-      setLocationError('Live location is not available in this browser.')
+      setLocationError('Live location is unavailable in this browser. You can still use the map.')
       return
     }
 
-    const watchId = navigator.geolocation.watchPosition(
+    setLocationError(null)
+    setIsLocating(true)
+    setFocusMode('me')
+    setFocusRequestKey((current) => current + 1)
+    locationWatch.current = navigator.geolocation.watchPosition(
       (position) => {
         setLiveLocation({
           latitude: position.coords.latitude,
@@ -494,8 +524,12 @@ export default function FoundItemsMapPage() {
         setLocationError(null)
         setIsLocating(false)
       },
-      () => {
-        setLocationError('Allow location access to keep nearby spots updated as you move.')
+      (locationFailure) => {
+        stopLocationWatch()
+        setLiveLocation(null)
+        setLocationError(locationFailure.code === 1
+          ? 'Location access was blocked. You can still use the map and menu.'
+          : 'Could not get your location. You can still use the map and menu.')
         setIsLocating(false)
       },
       {
@@ -505,10 +539,7 @@ export default function FoundItemsMapPage() {
       },
     )
 
-    return () => {
-      navigator.geolocation.clearWatch(watchId)
-    }
-  }, [])
+  }
 
   useEffect(() => {
     const nextFilteredIds = items
@@ -568,6 +599,13 @@ export default function FoundItemsMapPage() {
 
   const selectedItem =
     nearbyItems.find((entry) => entry.item.id === selectedItemId)?.item ?? nearbyItems[0]?.item ?? null
+  const {
+    item: detailedSelectedItem,
+    viewerClaim,
+    isLoading: isLoadingDetails,
+    error: detailsError,
+    refresh: refreshDetails,
+  } = useFoundItemDetails(selectedItem?.id ?? null, user?.id)
   const selectedItemForPanel = detailedSelectedItem ?? selectedItem
   const selectedDistanceKm = selectedItem ? readDistanceKm(selectedItem, liveLocation) : null
   const selectedItemOwnPost = selectedItem ? selectedItem.poster.id === user?.id : false
@@ -579,10 +617,11 @@ export default function FoundItemsMapPage() {
     focusMode === 'selected' && selectedPoint
       ? selectedPoint
       : liveLocation ?? selectedPoint ?? fallbackCenter
-  const mapZoom = focusMode === 'selected' && selectedPoint ? 16 : liveLocation ? 15 : 13
-  const locationLabel = user?.postcode?.trim()
-    ? `Live spots around ${user.postcode.trim().toUpperCase()} · tap a pin to rescue`
-    : 'Live spots around you · tap a pin to rescue'
+  const mapZoom = focusMode === 'selected' && selectedPoint ? selectedItem?.location.precision === 'exact' ? 16 : 14 : liveLocation ? 15 : 13
+  const userArea = outwardPostcode(user?.postcode)
+  const locationLabel = userArea
+    ? `Spot map around ${userArea} · pins show approximate areas`
+    : 'Spot map · pins show approximate areas'
 
   useEffect(() => {
     if (!selectedItem) {
@@ -643,13 +682,24 @@ export default function FoundItemsMapPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-3xl font-bold tracking-[-0.03em] text-slate-950">Map</h1>
-        <p className="mt-1 text-sm text-slate-500">{locationLabel}</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-bold tracking-[-0.03em] text-slate-950">Map</h1>
+          <p className="mt-1 text-sm text-slate-500">{locationLabel}</p>
+        </div>
+        <button
+          type="button"
+          onClick={centreOnMe}
+          disabled={isLocating}
+          className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm ring-1 ring-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-60"
+        >
+          <LocateFixed aria-hidden="true" size={16} />
+          {isLocating ? 'Finding your location…' : 'Centre on me'}
+        </button>
       </div>
 
       {itemsError ? <p className="text-sm text-rose-600">{itemsError}</p> : null}
-      {locationError ? <p className="text-sm text-amber-700">{locationError}</p> : null}
+      {locationError ? <p role="status" className="text-sm text-amber-700">{locationError}</p> : null}
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.38fr)_340px] 2xl:grid-cols-[minmax(0,1.26fr)_360px]">
         <div className="min-w-0 space-y-2">
@@ -726,10 +776,13 @@ export default function FoundItemsMapPage() {
                 </>
               ) : null}
 
-              {nearbyItems.map(({ item }) => (
+              {nearbyItems.flatMap(({ item }) => {
+                const point = toGeoPoint(item)
+                return point ? [{ item, point }] : []
+              }).map(({ item, point }) => (
                 <Marker
                   key={item.id}
-                  position={[item.location.latitude, item.location.longitude]}
+                  position={[point.latitude, point.longitude]}
                   icon={buildMarkerIcon(item, selectedItem?.id === item.id)}
                   eventHandlers={{
                     click: () => {
@@ -761,33 +814,35 @@ export default function FoundItemsMapPage() {
                 </span>
               </div>
 
-              <button
-                type="button"
-                className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-3 text-sm font-semibold text-slate-800 shadow-[0_12px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:text-slate-950"
-                onClick={() => {
-                  if (!liveLocation) {
-                    error('Location unavailable', 'Allow location access to centre the map on you.')
-                    return
-                  }
-
-                  setFocusMode('me')
-                  setFocusRequestKey((current) => current + 1)
-                }}
-              >
-                <LocateFixed size={16} />
-                Centre on me
-              </button>
             </div>
           </div>
 
           <p className="text-xs text-slate-400">Map data © OpenStreetMap contributors</p>
+          {nearbyItems.some(({ item }) => !toGeoPoint(item)) ? (
+            <section className="rounded-2xl border border-slate-200 bg-white p-4">
+              <h2 className="font-semibold text-slate-900">Spots without a map location</h2>
+              <p className="mt-1 text-sm text-slate-500">These spots are still available to view. A map location isn't available for them yet.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {nearbyItems.filter(({ item }) => !toGeoPoint(item)).map(({ item }) => (
+                  <button key={item.id} type="button" className="rounded-lg border border-slate-200 px-3 py-2 text-sm underline"
+                    onClick={() => {
+                      setSelectedItemId(item.id)
+                      if (isMobileViewport) setIsMobileItemModalOpen(true)
+                    }}>{item.title}</button>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </div>
 
         <aside className="relative z-10 hidden rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm md:block lg:p-5">
           <SelectedItemDetails
-            key={selectedItemForPanel?.id}
+            key={selectedItemForPanel?.id ?? 'no-item'}
             item={selectedItemForPanel}
             distanceKm={selectedDistanceKm}
+            currentUserId={user?.id}
+            viewerClaim={viewerClaim}
+            onLifecycleChange={() => { void Promise.all([loadBoard(), refreshDetails()]) }}
             isOwnPost={selectedItemOwnPost}
             isLocating={isLocating}
             isClaiming={Boolean(selectedItem && isClaimingId === selectedItem.id)}
@@ -816,9 +871,12 @@ export default function FoundItemsMapPage() {
         contentClassName="max-h-[calc(100vh-3.5rem)] overflow-y-auto p-4"
       >
         <SelectedItemDetails
-          key={selectedItemForPanel?.id}
+          key={selectedItemForPanel?.id ?? 'no-item'}
           item={selectedItemForPanel}
           distanceKm={selectedDistanceKm}
+          currentUserId={user?.id}
+          viewerClaim={viewerClaim}
+          onLifecycleChange={() => { void Promise.all([loadBoard(), refreshDetails()]) }}
           isOwnPost={selectedItemOwnPost}
           isLocating={isLocating}
           isClaiming={Boolean(selectedItem && isClaimingId === selectedItem.id)}

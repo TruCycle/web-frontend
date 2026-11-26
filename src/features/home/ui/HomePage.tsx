@@ -1,5 +1,9 @@
+import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
+
 import { LandingCtaSection } from '@/features/home/ui/components/LandingCtaSection'
 import { LandingFaqSection } from '@/features/home/ui/components/LandingFaqSection'
+import { LandingFeaturedItemsSection } from '@/features/home/ui/components/LandingFeaturedItemsSection'
 import { LandingFooter } from '@/features/home/ui/components/LandingFooter'
 import { LandingHero } from '@/features/home/ui/components/LandingHero'
 import { LandingHowItWorks } from '@/features/home/ui/components/LandingHowItWorks'
@@ -12,35 +16,40 @@ import { useGoogleOneTap } from '@/shared/hooks/useGoogleOneTap'
 import { usePageMeta } from '@/shared/hooks/usePageMeta'
 
 export default function HomePage() {
-  usePageMeta({ canonicalPath: '/' })
+  const { hash } = useLocation()
+  useEffect(() => {
+    if (hash) document.getElementById(hash.slice(1))?.scrollIntoView()
+  }, [hash])
+
+  usePageMeta({
+    canonicalPath: '/',
+    description: 'Offer useful items free to another neighbour. Browse current offers, check the details, and arrange collection directly with the giver.',
+  })
   const { isAuthenticated } = useAuthSession()
   useGoogleOneTap({ redirectTo: '/dashboard', disabled: isAuthenticated })
   const browseTo = '/browse'
   const dashboardTo = isAuthenticated ? '/dashboard' : '/login'
-  const impactTo = isAuthenticated ? '/impact' : '/signup'
-  const partnerTo = isAuthenticated ? '/partner/onboard' : '/signup'
   const postItemTo = isAuthenticated ? '/listings' : '/signup?intent=donor'
   const spotTo = isAuthenticated ? '/found-items/post' : '/signup?intent=spotter'
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#F7FBF4] text-tc-app-text">
+    <div className="min-h-screen overflow-x-hidden bg-[#F7FBF4] text-tc-app-text">
       <LandingNavbar
         dashboardTo={dashboardTo}
         isAuthenticated={isAuthenticated}
         postItemTo={postItemTo}
       />
-      <LandingHero browseTo={browseTo} postItemTo={postItemTo} />
-      <LandingHowItWorks />
-      <LandingWhatWeTakeSection />
-      <LandingImpactSection
-        browseTo={browseTo}
-        impactTo={impactTo}
-        partnerTo={partnerTo}
-      />
-      <LandingTestimonialsSection />
-      <LandingCtaSection browseTo={browseTo} postItemTo={postItemTo} spotTo={spotTo} />
-      <LandingFaqSection />
+      <main className="[&>section[id]]:scroll-mt-24">
+        <LandingHero browseTo={browseTo} postItemTo={postItemTo} />
+        <LandingFeaturedItemsSection />
+        <LandingHowItWorks />
+        <LandingWhatWeTakeSection />
+        <LandingImpactSection browseTo={browseTo} />
+        <LandingTestimonialsSection />
+        <LandingCtaSection browseTo={browseTo} postItemTo={postItemTo} spotTo={spotTo} />
+        <LandingFaqSection />
+      </main>
       <LandingFooter />
-    </main>
+    </div>
   )
 }

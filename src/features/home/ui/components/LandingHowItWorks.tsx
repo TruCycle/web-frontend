@@ -4,20 +4,20 @@ const heroImg = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=
 
 const steps = [
   {
-    badge: '2 min list',
+    badge: 'Clear details',
     description: 'Post a clear photo and one honest note about condition.',
     number: '01',
     title: 'Offer',
   },
   {
-    badge: 'Local only',
+    badge: 'Agree together',
     description: 'Choose a nearby neighbour and agree a simple pickup window.',
     number: '02',
     title: 'Match',
   },
   {
-    badge: 'Zero waste',
-    description: 'Leave it on the porch, meet at the lobby, or pass it on in person.',
+    badge: 'Agreed collection',
+    description: 'Agree a suitable place and time, then pass the item on.',
     number: '03',
     title: 'Handoff',
   },
@@ -50,7 +50,7 @@ export function LandingHowItWorks() {
         <div className="space-y-[1.125rem]">
           <div className="relative overflow-hidden rounded-[1rem] shadow-[0_18px_54px_rgba(11,51,34,0.08)]">
             <img
-              alt="Items arranged and ready to pass on"
+              alt="Illustrative home interior"
               className="h-56 w-full object-cover"
               loading="lazy"
               src={heroImg}

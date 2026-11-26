@@ -3,6 +3,7 @@ import { unwrapApiData } from '@/shared/lib/api/envelope'
 import { clampLimit, toQueryString } from '@/shared/lib/api/query'
 import { env } from '@/shared/lib/config/env'
 import type { PaginationMeta } from '@/shared/types/pagination'
+import { decodeFoundItemLocation } from '../lib/foundItemLocation'
 import {
   foundItemCategories,
   foundItemStatuses,
@@ -123,18 +124,7 @@ function normalizeActorSummary(value: unknown): FoundItem['poster'] {
   }
 }
 
-function normalizeLocation(value: unknown): FoundItem['location'] {
-  const record = asRecord(value)
-
-  return {
-    latitude: readNumber(record?.latitude) ?? 0,
-    longitude: readNumber(record?.longitude) ?? 0,
-    address: readString(record?.address),
-    neighborhood: readString(record?.neighborhood),
-    postcode: readString(record?.postcode) ?? '',
-    approximateDistance: readNumber(record?.approximateDistance),
-  }
-}
+const normalizeLocation = decodeFoundItemLocation
 
 function normalizeFoundItem(value: unknown): FoundItem | null {
   const record = asRecord(value)
@@ -170,6 +160,8 @@ function normalizeFoundItem(value: unknown): FoundItem | null {
     poster: normalizeActorSummary(record.poster),
     postedAt: readString(record.postedAt) ?? new Date().toISOString(),
     expiresAt: readString(record.expiresAt),
+    lastSeenAt: readString(record.lastSeenAt),
+    closedAt: readString(record.closedAt),
     claimCount: readNumber(record.claimCount) ?? 0,
     viewCount: readNumber(record.viewCount) ?? 0,
   }
@@ -259,10 +251,12 @@ export async function fetchFoundItems(
   filters: FoundItemsFilter = {},
   page: number = 1,
   limit: number = 9,
+  signal?: AbortSignal,
 ): Promise<FoundItemsResponse> {
   const safeLimit = clampLimit(limit, 9)
   const query = toQueryString({
     category: filters.category,
+    includeRecentClosed: filters.includeRecentClosed,
     status: filters.status,
     maxDistance: filters.maxDistance,
     postcode: filters.postcode?.trim() || undefined,
@@ -271,17 +265,18 @@ export async function fetchFoundItems(
     limit: safeLimit,
   })
 
-  const response = await apiRequest<unknown>(`/found-items${query}`)
+  const response = await apiRequest<unknown>(`/found-items${query}`, { signal })
   return unwrapFoundItemsResponse(unwrapApiData<unknown>(response), page, safeLimit)
 }
 
 export async function fetchFoundItemById(
   id: string,
   _viewerId?: string,
+  signal?: AbortSignal,
 ): Promise<{ item: FoundItem; claims: FoundItemClaim[]; viewerClaim: FoundItemClaim | null }> {
-  // The authenticated server session determines the viewer.
+  // The authenticated server session determines the viewer; retain the call signature.
   void _viewerId
-  const response = await apiRequest<unknown>(`/found-items/${encodeURIComponent(id.trim())}`)
+  const response = await apiRequest<unknown>(`/found-items/${encodeURIComponent(id.trim())}`, { signal })
   const record = asRecord(unwrapApiData<unknown>(response))
 
   return {
@@ -300,6 +295,7 @@ export async function fetchMyFoundPosts(
   status?: FoundItemStatus,
   page: number = 1,
   limit: number = 12,
+  signal?: AbortSignal,
 ): Promise<FoundItemsResponse> {
   const safeLimit = clampLimit(limit, 12)
   const query = toQueryString({
@@ -308,7 +304,7 @@ export async function fetchMyFoundPosts(
     limit: safeLimit,
   })
 
-  const response = await apiRequest<unknown>(`/found-items/my-posts${query}`)
+  const response = await apiRequest<unknown>(`/found-items/my-posts${query}`, { signal })
   return unwrapFoundItemsResponse(unwrapApiData<unknown>(response), page, safeLimit)
 }
 
@@ -341,7 +337,7 @@ export async function createFoundItem(
   payload: CreateFoundItemPayload,
   _poster?: ActorSummary,
 ): Promise<FoundItem> {
-  // The server attributes the post to the authenticated account.
+  // Attribution is resolved by the server rather than trusting a client-supplied actor.
   void _poster
   const response = await apiRequest<unknown, Record<string, unknown>>('/found-items', {
     method: 'POST',
@@ -412,7 +408,7 @@ export async function cancelFoundItemClaim(
   id: string,
   _claimerId: string = 'current-user',
 ): Promise<void> {
-  // The server cancels the authenticated account's claim.
+  // The authenticated server session determines which claim can be cancelled.
   void _claimerId
   await apiRequest<void>(`/found-items/${encodeURIComponent(id.trim())}/claim`, {
     method: 'DELETE',
@@ -474,4 +470,14 @@ export async function uploadFoundItemImage(file: File): Promise<{
     url,
     thumbnailUrl: url,
   }
+}
+
+export async function observeFoundItem(id: string, kind: 'still_there' | 'gone', origin?: {latitude:number;longitude:number}): Promise<void> {
+  await apiRequest(`/found-items/${id}/observations`, { method: 'POST', body: {kind,...origin} })
+}
+export async function reconfirmFoundItem(id: string): Promise<void> {
+  await apiRequest(`/found-items/${id}/reconfirm`, {method:'POST'})
+}
+export async function acknowledgeFoundItemClaim(id: string, claimId: string): Promise<void> {
+  await apiRequest(`/found-items/${id}/claims/${claimId}/acknowledge`, {method:'PATCH'})
 }

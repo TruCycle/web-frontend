@@ -89,7 +89,7 @@ export default function CommunityBoardPage() {
           <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-xl font-semibold text-slate-900">Top postcodes</h2>
-              <p className="text-sm text-slate-500">Ranked by impact score {activeDescriptor}</p>
+              <p className="text-sm text-slate-500">Ranked by catalog score {activeDescriptor}</p>
             </div>
           </div>
 
@@ -97,7 +97,7 @@ export default function CommunityBoardPage() {
             <div className="grid grid-cols-[46px_minmax(0,1fr)_110px_82px] gap-4 px-4 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
               <span>#</span>
               <span>Postcode Activity</span>
-              <span className="text-right">CO2e</span>
+              <span className="text-right">Est. CO2e</span>
               <span className="text-right">Score</span>
             </div>
 
@@ -112,7 +112,7 @@ export default function CommunityBoardPage() {
         <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-5">
             <h2 className="text-xl font-semibold text-slate-900">Top spotters in {localArea}</h2>
-            <p className="text-sm text-slate-500">Impact score {activeDescriptor}</p>
+            <p className="text-sm text-slate-500">Catalog score {activeDescriptor}</p>
           </div>
 
           <div className="space-y-1.5">

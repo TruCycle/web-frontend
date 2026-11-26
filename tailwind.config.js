@@ -59,7 +59,7 @@ export default {
             quote: '#E8EFE8',
             meta: '#A9BAAB',
             formTitle: sharedColors.neutral900,
-            formText: '#22222299',
+            formText: '#4B5563',
             label: sharedColors.neutral900,
             inputBorder: '#CBD5E1',
             inputPlaceholder: sharedColors.slate500,
@@ -70,7 +70,7 @@ export default {
             submitText: sharedColors.neutral900,
             submitFocus: '#50505080',
             row: sharedColors.neutral900,
-            link: '#15A119',
+            link: '#126C16',
             muted: sharedColors.slate500,
           },
           action: {

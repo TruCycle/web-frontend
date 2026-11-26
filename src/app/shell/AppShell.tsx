@@ -1,4 +1,5 @@
-import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { classNames } from '@/shared/utils/classNames'
 import { Link, NavLink, type NavLinkRenderProps, useLocation, useNavigate } from 'react-router-dom'
 import {
@@ -23,6 +24,7 @@ import { useAuthSession } from '@/shared/context/useAuthSession'
 import logo from '@/assets/logo.svg'
 import { useUserRole } from '@/shared/context/useUserRole'
 import { IntentFab } from '@/shared/ui/fab/IntentFab'
+import { manageModal } from '@/shared/ui/modal/modalFocus'
 
 const DashboardIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -57,6 +59,11 @@ function navLinkClassName({ isActive }: NavLinkRenderProps): string {
 }
 
 export function AppShell({ children }: AppShellProps) {
+  const { user } = useAuthSession()
+  return <AccountShell key={user?.id ?? 'anonymous'}>{children}</AccountShell>
+}
+
+function AccountShell({ children }: AppShellProps) {
   const { unreadCount, isLoading } = useNotifications()
   const { unreadMessagesCount } = useMessageAlerts()
   const { user, logout } = useAuthSession()
@@ -66,6 +73,10 @@ export function AppShell({ children }: AppShellProps) {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement | null>(null)
+  const profileMenuTriggerRef = useRef<HTMLButtonElement>(null)
+  const mobileSidebarOverlayRef = useRef<HTMLDivElement>(null)
+  const mobileSidebarRef = useRef<HTMLDivElement>(null)
+  const mainContentRef = useRef<HTMLElement>(null)
 
   function onRoleChange(nextRole: 'spotter' | 'collector' | 'donor') {
     if (role === nextRole) {
@@ -92,32 +103,31 @@ export function AppShell({ children }: AppShellProps) {
       }
     }
 
-    function handleEscape(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setIsProfileMenuOpen(false)
-        setIsMobileSidebarOpen(false)
-      }
-    }
-
     document.addEventListener('mousedown', handleOutsideClick)
-    document.addEventListener('keydown', handleEscape)
 
     return () => {
       document.removeEventListener('mousedown', handleOutsideClick)
-      document.removeEventListener('keydown', handleEscape)
     }
   }, [])
 
-  useEffect(() => {
-    if (!isMobileSidebarOpen) {
+  useLayoutEffect(() => {
+    const overlay = mobileSidebarOverlayRef.current
+    const dialog = mobileSidebarRef.current
+    if (!isMobileSidebarOpen || !overlay || !dialog) return
+    const desktop = window.matchMedia('(min-width: 768px)')
+    const close = () => setIsMobileSidebarOpen(false)
+    if (desktop.matches) {
+      close()
       return
     }
-
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-
+    const releaseModal = manageModal({ overlay, dialog, close })
+    const closeOnDesktop = (event: MediaQueryListEvent) => {
+      if (event.matches) close()
+    }
+    desktop.addEventListener('change', closeOnDesktop)
     return () => {
-      document.body.style.overflow = previousOverflow
+      desktop.removeEventListener('change', closeOnDesktop)
+      releaseModal()
     }
   }, [isMobileSidebarOpen])
 
@@ -319,10 +329,12 @@ export function AppShell({ children }: AppShellProps) {
       </div>
 
       <div className="mt-auto flex justify-center pb-2 pt-3">
-        <div className="flex h-[50px] w-fit items-center gap-1 rounded-[10px] border border-tc-shell-accent bg-tc-shell-toggle p-1">
+        <div role="group" aria-label="Dashboard mode" className="flex min-h-[52px] w-fit items-center gap-1 rounded-[10px] border border-tc-shell-accent bg-tc-shell-toggle p-1">
           <button
+            type="button"
+            aria-pressed={role === 'spotter'}
             className={classNames(
-              'h-full flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
+              'min-h-11 flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
               role === 'spotter'
                 ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
                 : 'bg-transparent text-tc-shell-roleText',
@@ -335,8 +347,10 @@ export function AppShell({ children }: AppShellProps) {
             Spotter
           </button>
           <button
+            type="button"
+            aria-pressed={role === 'collector'}
             className={classNames(
-              'h-full flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
+              'min-h-11 flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
               role === 'collector'
                 ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
                 : 'bg-transparent text-tc-shell-roleText',
@@ -349,8 +363,10 @@ export function AppShell({ children }: AppShellProps) {
             Collector
           </button>
           <button
+            type="button"
+            aria-pressed={role === 'donor'}
             className={classNames(
-              'h-full flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
+              'min-h-11 flex-1 rounded-[5px] px-3 text-[0.78rem] font-bold transition',
               role === 'donor'
                 ? 'bg-tc-shell-accent text-tc-shell-roleActiveText shadow-tc-role-active'
                 : 'bg-transparent text-tc-shell-roleText',
@@ -374,6 +390,17 @@ export function AppShell({ children }: AppShellProps) {
         isFoundItemsPostRoute ? 'max-md:p-0' : 'max-md:p-2',
       )}
     >
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[120] focus:rounded-lg focus:bg-white focus:px-4 focus:py-3 focus:font-semibold focus:text-slate-900"
+        onClick={(event) => {
+          if (!mainContentRef.current) return
+          event.preventDefault()
+          mainContentRef.current.focus()
+        }}
+      >
+        Skip to main content
+      </a>
       <aside className="sticky top-4 z-10 my-4 ml-4 mr-0 flex h-[calc(100vh-2rem)] w-[250px] shrink-0 flex-col rounded-[25px] bg-tc-shell-bg px-4 py-5 max-[1024px]:w-[220px] max-md:hidden">
         <div className="px-3 pb-4 pt-2">
           <Link className="flex items-center gap-3 no-underline" to="/">
@@ -387,16 +414,24 @@ export function AppShell({ children }: AppShellProps) {
         {sidebarNavigation}
       </aside>
 
-      {isMobileSidebarOpen ? (
-        <>
-          <button
-            type="button"
-            className="fixed inset-0 z-[130] bg-slate-900/40 md:hidden"
-            onClick={() => setIsMobileSidebarOpen(false)}
-            aria-label="Close sidebar overlay"
-          />
-          <aside id="mobile-sidebar" className="fixed inset-y-0 left-0 z-[131] flex w-[min(85vw,320px)] flex-col bg-tc-shell-bg px-4 py-5 shadow-2xl md:hidden">
+      {isMobileSidebarOpen ? createPortal(
+        <div
+          ref={mobileSidebarOverlayRef}
+          className="fixed inset-0 bg-slate-900/40 md:hidden"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) setIsMobileSidebarOpen(false)
+          }}
+        >
+          <div ref={mobileSidebarRef} id="mobile-sidebar" role="dialog" aria-modal="true" aria-label="Sidebar menu" tabIndex={-1} className="flex h-full w-[min(85vw,320px)] flex-col overflow-y-auto overscroll-contain bg-tc-shell-bg px-4 py-5 shadow-2xl">
             <div className="flex items-center justify-between px-3 pb-4 pt-2">
+              <button
+                type="button"
+                className="order-last inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
+                onClick={() => setIsMobileSidebarOpen(false)}
+                aria-label="Close sidebar"
+              >
+                <X size={20} />
+              </button>
               <Link
                 className="flex items-center gap-3 no-underline"
                 to="/"
@@ -405,63 +440,72 @@ export function AppShell({ children }: AppShellProps) {
                 <img src={logo} alt="TruCycle Logo" width="34" height="34" />
                 <span className="text-2xl font-bold tracking-[-0.01em] text-white">TruCycle</span>
               </Link>
-              <button
-                type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
-                onClick={() => setIsMobileSidebarOpen(false)}
-                aria-label="Close sidebar"
-              >
-                <X size={20} />
-              </button>
             </div>
             {sidebarNavigation}
-          </aside>
-        </>
+          </div>
+        </div>,
+        document.body,
       ) : null}
 
-      <main
+      <div
         className={classNames(
-          'flex h-screen flex-1 flex-col overflow-x-hidden bg-transparent max-md:h-auto max-md:rounded-2xl',
-          isFoundItemsPostRoute && 'max-md:h-[100dvh] max-md:rounded-none',
+          'flex h-screen min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden bg-transparent max-md:flex-none',
+          isFoundItemsPostRoute ? 'max-md:h-[100dvh] max-md:rounded-none' : 'max-md:h-[calc(100dvh-1rem)] max-md:rounded-2xl',
         )}
       >
         <header
           className={classNames(
-            'sticky top-0 z-[100] flex h-[72px] w-full items-center justify-end border-b border-tc-header-border bg-[#FFFFFF] px-6 shadow-none max-md:justify-between max-md:px-4',
+            'sticky top-0 z-[100] flex h-[72px] w-full shrink-0 items-center justify-end border-b border-tc-header-border bg-[#FFFFFF] px-6 shadow-none max-md:justify-between max-md:px-4',
             isFoundItemsPostRoute && 'max-md:hidden',
           )}
         >
           <div className="hidden items-center gap-2 max-md:flex">
             <button
               type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-tc-header-border text-[#334155] transition hover:bg-slate-100"
-              onClick={() => {
+              className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-tc-header-border text-[#334155] transition hover:bg-slate-100"
+              onClick={(event) => {
+                event.currentTarget.focus()
                 setIsProfileMenuOpen(false)
                 setIsMobileSidebarOpen(true)
               }}
               aria-label="Open sidebar menu"
+              aria-haspopup="dialog"
               aria-expanded={isMobileSidebarOpen}
-              aria-controls="mobile-sidebar"
+              aria-controls={isMobileSidebarOpen ? 'mobile-sidebar' : undefined}
             >
               <Menu size={20} />
             </button>
             <span className="text-sm font-semibold text-slate-700">Menu</span>
           </div>
           <div className="flex items-center gap-4">
-            <button className="relative flex items-center justify-center p-2 text-tc-app-text opacity-80 transition hover:opacity-100">
+            <Link to="/notifications" aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'} className="relative flex h-11 w-11 items-center justify-center text-tc-app-text opacity-80 transition hover:opacity-100">
               <BellIcon />
               {!isLoading && unreadCount > 0 && (
                 <span className="absolute right-[3px] top-[6px] inline-block h-2 w-2 rounded-full border-[1.5px] border-white bg-tc-shell-notify" />
               )}
-            </button>
+            </Link>
             <div className="mx-1 h-6 w-px bg-tc-header-divider" />
-            <div className="relative" ref={profileMenuRef}>
+            <div
+              className="relative"
+              ref={profileMenuRef}
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) setIsProfileMenuOpen(false)
+              }}
+              onKeyDown={(event) => {
+                if (isProfileMenuOpen && event.key === 'Escape') {
+                  event.stopPropagation()
+                  setIsProfileMenuOpen(false)
+                  profileMenuTriggerRef.current?.focus()
+                }
+              }}
+            >
               <button
+                ref={profileMenuTriggerRef}
                 type="button"
-                className="inline-flex items-center gap-2 rounded-full px-1 py-1 text-tc-app-text transition hover:bg-slate-100"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full px-1 py-1 text-tc-app-text transition hover:bg-slate-100"
                 onClick={() => setIsProfileMenuOpen((current) => !current)}
-                aria-haspopup="menu"
                 aria-expanded={isProfileMenuOpen}
+                aria-controls={isProfileMenuOpen ? 'profile-actions' : undefined}
                 aria-label="Open profile menu"
               >
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-tc-header-avatar text-[0.85rem] font-bold text-white">
@@ -472,12 +516,11 @@ export function AppShell({ children }: AppShellProps) {
 
               {isProfileMenuOpen ? (
                 <div
-                  role="menu"
+                  id="profile-actions"
                   className="absolute right-0 top-[calc(100%+0.5rem)] z-[110] min-w-[220px] rounded-2xl border border-slate-200 bg-white p-2 shadow-lg"
                 >
                   <button
                     type="button"
-                    role="menuitem"
                     className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[0.9rem] font-medium text-slate-700 hover:bg-slate-100"
                     onClick={() => {
                       setIsProfileMenuOpen(false)
@@ -489,7 +532,6 @@ export function AppShell({ children }: AppShellProps) {
                   </button>
                   <button
                     type="button"
-                    role="menuitem"
                     className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[0.9rem] font-medium text-slate-700 hover:bg-slate-100"
                     onClick={() => {
                       setIsProfileMenuOpen(false)
@@ -501,12 +543,11 @@ export function AppShell({ children }: AppShellProps) {
                   </button>
                   <button
                     type="button"
-                    role="menuitem"
                     className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[0.9rem] font-medium text-rose-600 hover:bg-rose-50"
-                    onClick={async () => {
+                    onClick={() => {
                       setIsProfileMenuOpen(false)
                       setRole('collector')
-                      await logout()
+                      void logout()
                       navigate('/login')
                     }}
                   >
@@ -518,16 +559,19 @@ export function AppShell({ children }: AppShellProps) {
             </div>
           </div>
         </header>
-        <div
+        <main
+          ref={mainContentRef}
+          id="main-content"
+          tabIndex={-1}
           className={classNames(
-            'flex-1 overflow-y-auto px-8 pb-8 pt-6 max-md:px-4 max-md:pb-6',
+            'min-h-0 flex-1 overflow-y-auto px-8 pb-8 pt-6 max-md:px-4 max-md:pb-6',
             isFoundItemsPostRoute && 'max-md:px-0 max-md:pb-0 max-md:pt-0',
           )}
         >
           {children}
-        </div>
-      </main>
-      {!isFoundItemsPostRoute && <IntentFab />}
+        </main>
+        {!isFoundItemsPostRoute && !isPartnerArea && <IntentFab />}
+      </div>
     </div>
   )
 }

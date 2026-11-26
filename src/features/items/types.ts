@@ -12,6 +12,7 @@ export interface BrowseItem {
   readonly condition: string
   readonly status: string
   readonly pickupOption: string
+  readonly locationPrecision: 'approximate' | 'unavailable'
   readonly distanceKm: number | null
   readonly locationLabel: string
   readonly image: ItemImage | null
@@ -21,10 +22,10 @@ export interface BrowseItem {
 }
 
 export interface ImpactMetrics {
-  readonly totalCo2SavedKg: number
+  readonly totalCo2SavedKg: number | null
   readonly itemsExchanged: number
   readonly itemsDonated: number
-  readonly monthlyGoalProgressPercent: number
+  readonly monthlyGoalProgressPercent: number | null
 }
 
 export interface WalletBalance {

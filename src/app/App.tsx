@@ -1,8 +1,11 @@
 import { Suspense, useEffect } from 'react'
 import { BrowserRouter, useLocation } from 'react-router-dom'
 import { AppRoutes } from '@/app/routes/AppRoutes'
-import { initGoogleAnalytics, trackPageView } from '@/shared/lib/analytics/googleAnalytics'
-import { initMetaPixel, trackMetaPageView } from '@/shared/lib/analytics/metaPixel'
+import { isAuthenticationPath } from '@/shared/lib/analytics/authenticationPath'
+import { initGoogleAnalytics, syncGoogleAnalyticsConsent, trackPageView } from '@/shared/lib/analytics/googleAnalytics'
+import { initMetaPixel, syncMetaPixelConsent, trackMetaPageView } from '@/shared/lib/analytics/metaPixel'
+import { syncPostHogConsent, trackPostHogPageview } from '@/shared/lib/analytics/posthogAnalytics'
+import { subscribeTrackingConsent } from '@/shared/lib/analytics/trackingConsent'
 import { AuthSessionProvider } from '@/shared/context/AuthSessionContext'
 import { useTrackingConsent } from '@/shared/hooks/useTrackingConsent'
 import { UserRoleProvider } from '@/shared/context/UserRoleContext'
@@ -15,18 +18,31 @@ type AnalyticsTrackerProps = {
 }
 
 function AnalyticsTracker({ trackingConsentStatus }: AnalyticsTrackerProps) {
-  const location = useLocation()
+  const { pathname } = useLocation()
+  const isAuthenticationPage = isAuthenticationPath(pathname)
 
   useEffect(() => {
-    if (trackingConsentStatus !== 'accepted') {
+    const synchronize = () => {
+      syncPostHogConsent()
+      syncGoogleAnalyticsConsent()
+      syncMetaPixelConsent()
+    }
+    const unsubscribe = subscribeTrackingConsent(synchronize)
+    synchronize()
+    return unsubscribe
+  }, [isAuthenticationPage])
+
+  useEffect(() => {
+    if (trackingConsentStatus !== 'accepted' || isAuthenticationPage) {
       return
     }
 
     initGoogleAnalytics()
     initMetaPixel()
-    trackPageView(`${location.pathname}${location.search}${location.hash}`)
+    trackPageView(pathname)
     trackMetaPageView()
-  }, [location.hash, location.pathname, location.search, trackingConsentStatus])
+    trackPostHogPageview(pathname)
+  }, [pathname, trackingConsentStatus, isAuthenticationPage])
 
   return null
 }
